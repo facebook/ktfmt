@@ -1,0 +1,15 @@
+.idea/
+*.ims
+*.iml
+
+.classpath
+.project
+.factorypath
+.settings/
+.apt_generated/
+
+target/
+
+bin/
+out/
+eclipse_plugin/lib/

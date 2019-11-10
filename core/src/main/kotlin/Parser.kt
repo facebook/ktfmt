@@ -1,4 +1,4 @@
-package com.google.googlejavaformat.kotlin
+package com.facebook.ktfmt
 
 import com.intellij.openapi.util.Disposer
 import com.intellij.psi.PsiManager

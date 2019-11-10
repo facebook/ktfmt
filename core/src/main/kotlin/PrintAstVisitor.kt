@@ -1,7 +1,6 @@
-package com.google.googlejavaformat.kotlin
+package com.facebook.ktfmt
 
 import com.intellij.psi.PsiElement
-import com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 
 class PrintAstVisitor : KtTreeVisitorVoid() {

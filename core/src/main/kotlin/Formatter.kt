@@ -1,4 +1,4 @@
-package com.google.googlejavaformat.kotlin
+package com.facebook.ktfmt
 
 import com.google.googlejavaformat.Doc
 import com.google.googlejavaformat.DocBuilder
