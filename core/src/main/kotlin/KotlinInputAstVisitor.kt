@@ -1143,6 +1143,21 @@ class KotlinInputAstVisitor(val builder: OpsBuilder, indentMultiplier: Int) : Kt
   }
 
   /**
+   * If the next token matched the guessed token, consume it without expecting it to be in the
+   * output
+   */
+  private fun OpsBuilder.ignoreOptionalToken(tokenToIgnore: String) {
+    val field = this::class.java.getDeclaredField("tokenI")
+    field.isAccessible = true
+
+    val nextToken = peekToken()
+    if (nextToken.isPresent && nextToken.get() == tokenToIgnore) {
+      val tokenI = field.getInt(this)
+      field.setInt(this, tokenI+1)
+    }
+  }
+
+  /**
    * Throws a formatting error
    *
    * This is used as `expr ?: fail()` to avoid using the !! operator and provide better error messages.
