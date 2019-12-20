@@ -610,7 +610,7 @@ class FormatterKtTest {
   }
 
   @Test
-  fun `formatting kdoc doesn't add p HTML tags`()  = assertFormatted(
+  fun `formatting kdoc doesn't add p HTML tags`() = assertFormatted(
       """
       |/**
       | * Bla bla bla bla
@@ -1342,6 +1342,20 @@ class FormatterKtTest {
       |  }
       |}
       |""".trimMargin())
+
+  @Test
+  fun `properly break fully qualified nested user types`() = assertFormatted(
+      """
+      |val complicated
+      |    : com.example.interesting.SomeType<
+      |    com.example.interesting.SomeType<Int, Nothing>,
+      |    com.example.interesting.SomeType<
+      |        com.example.interesting.SomeType<
+      |            Int,
+      |            Nothing>,
+      |        Nothing>> =
+      |    DUMMY
+      |""".trimMargin(), 53)
 
   @Test
   fun `handle multi line lambdas with explicit args`() = assertFormatted(

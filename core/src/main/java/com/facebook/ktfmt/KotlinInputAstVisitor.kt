@@ -121,8 +121,6 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /** Standard indentation for a long expression or function call, it is different than block indentation on purpose */
   private val expressionBreakIndent: Indent.Const = Indent.Const.make(+4, 1)
 
-  private val userTypeRecursiveQualifiedStructure = RecursiveQualifiedStructure()
-
   private val qualifiedExpressionRecursiveQualifiedStructure = RecursiveQualifiedStructure()
 
   /** Example: `fun foo(n: Int) { println(n) }` */
@@ -177,23 +175,24 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /** Example: `String` or `List<Int>`, */
   override fun visitUserType(type: KtUserType) {
     builder.sync(type)
-    userTypeRecursiveQualifiedStructure.visit(
-        beforeSeparator = type.qualifier,
-        separator = ".",
-        afterSeparator = listOfNotNull(type.referenceExpression, type.typeArgumentList))
+
+    if (type.qualifier != null) {
+      type.qualifier?.accept(this)
+      builder.token(".")
+    }
+    type.referenceExpression?.accept(this)
+    type.typeArgumentList?.accept(this)
   }
 
   /** Example `<Int, String>` in `List<Int, String>` */
   override fun visitTypeArgumentList(typeArgumentList: KtTypeArgumentList) {
     builder.sync(typeArgumentList)
     builder.token("<")
-    val arguments = typeArgumentList.arguments
-    if (arguments.isNotEmpty()) {
-      // Break before args.
-      builder.breakToFill("")
-    }
-    forEachCommaSeparated(arguments) {
-      it.accept(this)
+    builder.block(expressionBreakIndent) {
+      val arguments = typeArgumentList.arguments
+      forEachCommaSeparated(arguments) {
+        it.accept(this)
+      }
     }
     builder.token(">")
   }
