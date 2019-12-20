@@ -965,7 +965,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
    */
   private fun visitAnnotationBeforeModifiers(list: KtModifierList) {
     for (child in list.node.children()) {
-      if (child.elementType is PsiWhiteSpace) {
+      if (child.psi is PsiWhiteSpace) {
         continue
       }
       if (child.elementType !is KtAnnotationEntryElementType) {
@@ -986,7 +986,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   private fun visitKeywordModifiers(list: KtModifierList) {
     var onlyAnnotationsSoFar = true
     for (child in list.node.children()) {
-      if (child.elementType is PsiWhiteSpace) {
+      if (child.psi is PsiWhiteSpace) {
         continue
       }
       if (onlyAnnotationsSoFar && child.elementType is KtAnnotationEntryElementType) {

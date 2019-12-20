@@ -1541,6 +1541,16 @@ class FormatterKtTest {
       |public final class Foo
       |""".trimMargin())
 
+  @Test
+  fun `handle annotations more`() = assertFormatted(
+      """
+      |@Anno1
+      |@Anno2(param = Param1::class)
+      |@Anno3
+      |@Anno4(param = Param2::class)
+      |class MyClass {}
+      |""".trimMargin())
+
   /** Verifies the given code passes through formatting, and stays the same at the end */
   private fun assertFormatted(code: String, maxWidth: Int = DEFAULT_MAX_WIDTH) {
     assertThatFormatting(code, maxWidth).isEqualTo(code)
