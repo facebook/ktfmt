@@ -109,6 +109,7 @@ import org.jetbrains.kotlin.psi.psiUtil.isSingleQuoted
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import org.jetbrains.kotlin.psi.stubs.elements.KtAnnotationEntryElementType
 import org.jetbrains.kotlin.types.Variance
+import java.util.ArrayDeque
 
 /**
  * An AST visitor that builds a stream of {@link Op}s to format.
@@ -120,8 +121,6 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
 
   /** Standard indentation for a long expression or function call, it is different than block indentation on purpose */
   private val expressionBreakIndent: Indent.Const = Indent.Const.make(+4, 1)
-
-  private val qualifiedExpressionRecursiveQualifiedStructure = RecursiveQualifiedStructure()
 
   /** Example: `fun foo(n: Int) { println(n) }` */
   override fun visitNamedFunction(function: KtNamedFunction) {
@@ -390,7 +389,13 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /** Tracks whether we are handling an import directive */
   private var inImport = false
 
-  /** Example: "com.facebook.bla.bla" in imports or "a.b.c.d" in expressions. */
+  /**
+   * Example: "com.facebook.bla.bla" in imports or "a.b.c.d" in expressions.
+   *
+   * There's a few cases that are different. We deal with imports by keeping them on the same line. For regular chained
+   * expressions we go the left most descendant so we can start indentation only before the first break (a `.` or `?.`),
+   * and keep the seem indentation for this chain of calls.
+   */
   override fun visitQualifiedExpression(expression: KtQualifiedExpression) {
     builder.sync(expression)
     if (inImport) {
@@ -403,14 +408,27 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       return
     }
 
-    val shouldBreakBeforeSeparator =
-        expression.receiverExpression !is KtQualifiedExpression && expression.receiverExpression !is KtCallExpression
+    val parts = ArrayDeque<KtQualifiedExpression>()
+        .apply {
+          var current: KtExpression = expression
+          while (current is KtQualifiedExpression) {
+            addFirst(current)
+            current = current.receiverExpression
+          }
+        }
 
-    qualifiedExpressionRecursiveQualifiedStructure.visit(
-        beforeSeparator = expression.receiverExpression,
-        separator = expression.operationSign.value,
-        afterSeparator = listOfNotNull(expression.selectorExpression),
-        shouldBreakBeforeSeparator = shouldBreakBeforeSeparator)
+    val leftMostExpression = parts.first()
+    leftMostExpression.receiverExpression.accept(this)
+    for (receiver in parts) {
+      val isFirst = receiver === leftMostExpression
+      if (!isFirst || receiver.receiverExpression is KtCallExpression) {
+        builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
+      }
+      builder.token(receiver.operationSign.value)
+      builder.block(if (isFirst) ZERO else expressionBreakIndent) {
+        receiver.selectorExpression?.accept(this)
+      }
+    }
   }
 
   override fun visitCallExpression(callExpression: KtCallExpression) {
@@ -481,10 +499,10 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
           }
           builder.space()
           builder.token("->")
-          builder.breakOp(Doc.FillMode.INDEPENDENT, "", ZERO)
+          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
         }
         if (statements.isNotEmpty()) {
-          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
           builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
           if (statements.size == 1 && statements[0] !is KtReturnExpression) {
             statements[0].accept(this)
@@ -493,7 +511,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
           }
         }
       }
-      builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+      builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
       builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
     }
     builder.token("}")
@@ -1575,54 +1593,5 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
    */
   private fun fail(message: String = "Unexpected"): Nothing {
     throw FormattingError(builder.diagnostic(message))
-  }
-
-  /**
-   * RecursiveQualifiedStructure handles selector-like constructs: foo.bar.baz.etc.
-   *
-   * <p>These come up in dotted expressions: "this.builder.token()" as well as nested types: "Indent.Const".
-   *
-   * <p>It maintains an internal depth state which is used to create blocks.
-   */
-  inner class RecursiveQualifiedStructure {
-    private var depth = 0
-
-    /**
-     * @param shouldBreakBeforeSeparator when true, break before the separator.
-     *    This allows keeping the first selector on the same line.
-     *    See `first selector stays on same line` test case in FormatterKtTest.
-     */
-    fun visit(
-        beforeSeparator: KtElement?,
-        separator: String,
-        afterSeparator: List<KtElement>,
-        shouldBreakBeforeSeparator: Boolean = true
-    ) {
-      depth++
-
-      if (depth == 1) {
-        builder.open(if (shouldBreakBeforeSeparator) ZERO else expressionBreakIndent)
-      }
-
-      if (beforeSeparator != null) {
-        beforeSeparator.accept(this@KotlinInputAstVisitor)
-        if (!shouldBreakBeforeSeparator) {
-          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-        }
-        builder.token(separator)
-      }
-
-      afterSeparator.forEach {
-        builder.block(ZERO) {
-          it.accept(this@KotlinInputAstVisitor)
-        }
-      }
-
-      if (depth == 1) {
-        builder.close()
-      }
-
-      depth--
-    }
   }
 }

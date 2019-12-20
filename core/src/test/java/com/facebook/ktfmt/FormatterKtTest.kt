@@ -523,7 +523,7 @@ class FormatterKtTest {
       |          ACTION_DOWN ->
       |              Toast.makeText(
       |                  it.view.context, "Down!", Toast.LENGTH_SHORT, blablabla, blablabl, blabla)
-      |              .show()
+      |                  .show()
       |        }
       |      }
       |      .build()
@@ -1356,6 +1356,27 @@ class FormatterKtTest {
       |        Nothing>> =
       |    DUMMY
       |""".trimMargin(), 53)
+
+  @Test
+  fun `handle multi-line lambdas within lambdas and calling chains`() = assertFormatted(
+      """
+      |fun f() {
+      |  builder.block(ZERO) {
+      |    builder.token("when")
+      |    expression1.let { subjectExp ->
+      |      builder.token(")")
+      |      return
+      |    }
+      |  }
+      |  builder.block(ZERO) {
+      |    expression2.subjectExpression
+      |        .let { subjectExp ->
+      |          builder.token(")")
+      |          return
+      |        }
+      |  }
+      |}
+      |""".trimMargin())
 
   @Test
   fun `handle multi line lambdas with explicit args`() = assertFormatted(
