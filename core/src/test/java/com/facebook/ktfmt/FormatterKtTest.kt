@@ -1607,7 +1607,7 @@ class FormatterKtTest {
     fun isEqualTo(expectedFormatting: String) {
       val code = actual()
       if (expectedFormatting.lines().any { it.endsWith(" ") }) {
-        fail(
+        throw RuntimeException(
             "Expected code contains trailing whitespace, which the formatter will never output:\n" +
                 expectedFormatting.lines().map { if (it.endsWith(" ")) "[$it]" else it }.joinToString("\n"))
       }
