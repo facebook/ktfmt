@@ -36,6 +36,8 @@ private fun declareOne(
 }
 ```
 
+**Note** that `ktfmt` still has some rough edges which we're constantly working on fixing.
+
 # Using on the command-line
 
 * Make sure the `vendor/google-java/format` submodule is populated. Either clone with submodules (`git pull --recurse-submodules https://github.com/facebookincubator/ktfmt.git`) or populate the submodule after cloning (`git submodule update --init`)
