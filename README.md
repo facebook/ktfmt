@@ -28,6 +28,18 @@ For comparison, this is how the same code is formatted by [`ktlint`](https://git
 
 # FAQ
 
+## `ktfmt` vs `ktlint` vs IntelliJ
+
+`ktfmt` uses google-java-format's underlying engine, and as such, many items on [google-java-format's FAQ](https://github.com/google/google-java-format/wiki/FAQ) apply to `ktfmt` as well.
+
+In particular,
+1. `ktfmt` ignores most existing formatting. It respects existing newlines in some places, but in general, its output is determinstic and is independent of the input code.
+2. `ktfmt` exposes no configuration options that govern formatting behavior. See https://github.com/google/google-java-format/wiki/FAQ#i-just-need-to-configure-it-a-bit-differently-how for the rationale.
+
+These two properties make `ktfmt` a good fit in large Kotlin code bases, where consistency is very important.
+
+We created `ktfmt` because `ktlint` and IntelliJ sometime fail to produce nice-looking code that fits in 100 columns, as can be seen in the [Demo](README.md#Demo) section.
+
 ## `ktfmt` uses a 2-space indent; why not 4?
 
 Two reasons -
