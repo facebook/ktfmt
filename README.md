@@ -4,39 +4,21 @@
 
 `ktfmt` is a program that pretty-prints (formats) Kotlin code, based on [google-java-format](https://github.com/google/google-java-format).
 
-## Before
-```kotlin
-  private fun declareOne(      kind: DeclarationKind,      modifiers: KtModifierList? = null,      valOrVarKeyword: String? = null,      typeParameters: KtTypeParameterList? = null,
-      receiver: KtTypeReference? = null,     name: String? = "",      type: KtTypeReference? = null,      op: String = "",      equals: String = "=",
-      typeConstraintList: KtTypeConstraintList? = null,      initializer: PsiElement? = null,
-      delegate: KtPropertyDelegate? = null,      trailing: String? = null
-  ): Int {
-//
-}
-```
-
-## After
-```kotlin
-private fun declareOne(
-    kind: DeclarationKind,
-    modifiers: KtModifierList? = null,
-    valOrVarKeyword: String? = null,
-    typeParameters: KtTypeParameterList? = null,
-    receiver: KtTypeReference? = null,
-    name: String? = "",
-    type: KtTypeReference? = null,
-    op: String = "",
-    equals: String = "=",
-    typeConstraintList: KtTypeConstraintList? = null,
-    initializer: PsiElement? = null,
-    delegate: KtPropertyDelegate? = null,
-    trailing: String? = null
-): Int {
-  //
-}
-```
-
 **Note** that `ktfmt` still has some rough edges which we're constantly working on fixing.
+
+## Demo
+
+|Before Formatting| Formatted by `ktfmt`| 
+| ---- | ---- |
+| ![Original](docs/images/before.png) | ![ktfmt](docs/images/ktfmt.png) |
+
+For comparison, this is how the same code is formatted by [`ktlint`](https://github.com/pinterest/ktlint) and IntelliJ:
+
+| Formatted by `ktlint`|Formatted by IntelliJ|
+| ------ | --------|
+| ![ktlint](docs/images/ktlint.png) | ![IntelliJ](docs/images/intellij.png) |
+
+
 
 # Using on the command-line
 
