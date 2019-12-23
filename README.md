@@ -4,47 +4,41 @@
 
 `ktfmt` is a program that pretty-prints (formats) Kotlin code, based on [google-java-format](https://github.com/google/google-java-format).
 
-## Before
-```kotlin
-  private fun declareOne(      kind: DeclarationKind,      modifiers: KtModifierList? = null,      valOrVarKeyword: String? = null,      typeParameters: KtTypeParameterList? = null,
-      receiver: KtTypeReference? = null,     name: String? = "",      type: KtTypeReference? = null,      op: String = "",      equals: String = "=",
-      typeConstraintList: KtTypeConstraintList? = null,      initializer: PsiElement? = null,
-      delegate: KtPropertyDelegate? = null,      trailing: String? = null
-  ): Int {
-//
-}
-```
-
-## After
-```kotlin
-private fun declareOne(
-    kind: DeclarationKind,
-    modifiers: KtModifierList? = null,
-    valOrVarKeyword: String? = null,
-    typeParameters: KtTypeParameterList? = null,
-    receiver: KtTypeReference? = null,
-    name: String? = "",
-    type: KtTypeReference? = null,
-    op: String = "",
-    equals: String = "=",
-    typeConstraintList: KtTypeConstraintList? = null,
-    initializer: PsiElement? = null,
-    delegate: KtPropertyDelegate? = null,
-    trailing: String? = null
-): Int {
-  //
-}
-```
-
 **Note** that `ktfmt` still has some rough edges which we're constantly working on fixing.
 
-# Using on the command-line
+## Demo
+
+|Before Formatting| Formatted by `ktfmt`| 
+| ---- | ---- |
+| ![Original](docs/images/before.png) | ![ktfmt](docs/images/ktfmt.png) |
+
+For comparison, the same code formatted by [`ktlint`](https://github.com/pinterest/ktlint) and IntelliJ:
+
+| Formatted by `ktlint`|Formatted by IntelliJ|
+| ------ | --------|
+| ![ktlint](docs/images/ktlint.png) | ![IntelliJ](docs/images/intellij.png) |
+
+
+
+# Using from the command-line
 
 * Make sure the `vendor/google-java/format` submodule is populated. Either clone with submodules (`git pull --recurse-submodules https://github.com/facebookincubator/ktfmt.git`) or populate the submodule after cloning (`git submodule update --init`)
 * Run `mvn install`
 * Run `java -jar core/target/ktfmt-0.1-SNAPSHOT-jar-with-dependencies.jar`
 
 # FAQ
+
+## `ktfmt` vs `ktlint` vs IntelliJ
+
+`ktfmt` uses google-java-format's underlying engine, and as such, many items on [google-java-format's FAQ](https://github.com/google/google-java-format/wiki/FAQ) apply to `ktfmt` as well.
+
+In particular,
+1. `ktfmt` ignores most existing formatting. It respects existing newlines in some places, but in general, its output is determinstic and is independent of the input code.
+2. `ktfmt` exposes no configuration options that govern formatting behavior. See https://github.com/google/google-java-format/wiki/FAQ#i-just-need-to-configure-it-a-bit-differently-how for the rationale.
+
+These two properties make `ktfmt` a good fit in large Kotlin code bases, where consistency is very important.
+
+We created `ktfmt` because `ktlint` and IntelliJ sometime fail to produce nice-looking code that fits in 100 columns, as can be seen in the [Demo](README.md#Demo) section.
 
 ## `ktfmt` uses a 2-space indent; why not 4?
 
