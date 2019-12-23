@@ -12,7 +12,7 @@
 | ---- | ---- |
 | ![Original](docs/images/before.png) | ![ktfmt](docs/images/ktfmt.png) |
 
-For comparison, this is how the same code is formatted by [`ktlint`](https://github.com/pinterest/ktlint) and IntelliJ:
+For comparison, the same code formatted by [`ktlint`](https://github.com/pinterest/ktlint) and IntelliJ:
 
 | Formatted by `ktlint`|Formatted by IntelliJ|
 | ------ | --------|
@@ -20,7 +20,7 @@ For comparison, this is how the same code is formatted by [`ktlint`](https://git
 
 
 
-# Using on the command-line
+# Using from the command-line
 
 * Make sure the `vendor/google-java/format` submodule is populated. Either clone with submodules (`git pull --recurse-submodules https://github.com/facebookincubator/ktfmt.git`) or populate the submodule after cloning (`git submodule update --init`)
 * Run `mvn install`
