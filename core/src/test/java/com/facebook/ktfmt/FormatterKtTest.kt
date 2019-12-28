@@ -540,9 +540,29 @@ class FormatterKtTest {
   @Test
   fun `multi line function without a block body`() = assertFormatted(
       """
-      |fun longFunctionNoBlock(): Int =
+      |fun longFunctionNoBlock():
+      |    Int =
+      |    1234567 + 1234567
+      |fun shortFun(): Int =
       |    1234567 + 1234567
       |""".trimMargin(), 25)
+
+  @Test
+  fun `return type doesn't fit in one line`() = assertFormatted(
+  """
+      |interface X {
+      |  fun f(arg1: Arg1Type, arg2: Arg2Type):
+      |      Map<String, Map<String, Double>>? {
+      |    //
+      |  }
+      |
+      |  fun functionWithGenericReturnType(
+      |      arg1: Arg1Type, arg2: Arg2Type
+      |  ): Map<String, Map<String, Double>>? {
+      |    //
+      |  }
+      |}
+      |""".trimMargin(), 50)
 
   @Test
   fun `list of superclasses`() = assertFormatted(
