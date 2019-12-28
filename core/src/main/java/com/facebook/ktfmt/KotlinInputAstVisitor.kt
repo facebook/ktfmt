@@ -273,8 +273,10 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       if (type != null) {
         builder.block(ZERO) {
           builder.token(":")
-          builder.space()
-          type.accept(this)
+          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+          builder.block(expressionBreakIndent) {
+            type.accept(this)
+          }
         }
       }
       builder.space()
