@@ -22,6 +22,7 @@ import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.Output
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
+import java.util.ArrayDeque
 import java.util.Optional
 import org.jetbrains.kotlin.lexer.KtModifierKeywordToken
 import org.jetbrains.kotlin.lexer.KtTokens
@@ -109,7 +110,6 @@ import org.jetbrains.kotlin.psi.psiUtil.isSingleQuoted
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import org.jetbrains.kotlin.psi.stubs.elements.KtAnnotationEntryElementType
 import org.jetbrains.kotlin.types.Variance
-import java.util.ArrayDeque
 
 /**
  * An AST visitor that builds a stream of {@link Op}s to format.
