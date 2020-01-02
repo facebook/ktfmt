@@ -17,22 +17,27 @@ package com.facebook.ktfmt
 import com.intellij.openapi.util.Disposer
 import com.intellij.psi.PsiManager
 import com.intellij.testFramework.LightVirtualFile
+import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
+import org.jetbrains.kotlin.cli.common.messages.MessageRenderer.PLAIN_RELATIVE_PATHS
+import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtFile
 
-/**
- * Parser parses a Kotlin file given as a string and returns its parse tree.
- */
+/** Parser parses a Kotlin file given as a string and returns its parse tree. */
 open class Parser {
   fun parse(code: String): KtFile {
     val disposable = Disposer.newDisposable()
     try {
-      val env = KotlinCoreEnvironment.createForProduction(
-          disposable, CompilerConfiguration(), EnvironmentConfigFiles.JVM_CONFIG_FILES
-      )
+      val configuration = CompilerConfiguration()
+      configuration.put(
+          CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
+          PrintingMessageCollector(System.err, PLAIN_RELATIVE_PATHS, false))
+      val env =
+          KotlinCoreEnvironment.createForProduction(
+              disposable, configuration, EnvironmentConfigFiles.JVM_CONFIG_FILES)
       val file = LightVirtualFile("temp.kt", KotlinFileType.INSTANCE, code)
       return PsiManager.getInstance(env.project).findFile(file) as KtFile
     } finally {
