@@ -16,6 +16,7 @@
  * This was copied from https://github.com/google/google-java-format
  * Modifications:
  * 1. The package name and imports were changed to com.facebook.ktfmt.kdoc to compile more easily.
+ * 2. Specifically delineated areas in the code.
  */
 
 package com.facebook.ktfmt.kdoc;
@@ -104,6 +105,8 @@ final class JavadocLexer {
   private final NestingCounter codeDepth = new NestingCounter();
   private final NestingCounter tableDepth = new NestingCounter();
   private boolean somethingSinceNewline;
+  private boolean inKDocList = false;
+  private boolean needsExtraForcedNewLine = false;
 
   private JavadocLexer(CharStream input) {
     this.input = checkNotNull(input);
@@ -150,6 +153,27 @@ final class JavadocLexer {
       // Returning LITERAL here prevent us from breaking a <pre> line. For more info, see LITERAL.
       return preserveExistingFormatting ? LITERAL : WHITESPACE;
     }
+
+    // Beginning of KDoc handling
+    // This behavior is forked in this class until we get a proper KDoc parser
+    if (needsExtraForcedNewLine) {
+      needsExtraForcedNewLine = false;
+      return FORCED_NEWLINE;
+    }
+
+    if (!somethingSinceNewline) {
+      if (input.tryConsume("- ")) {
+        inKDocList = true;
+        checkMatchingTags();
+        somethingSinceNewline = true;
+        return LIST_ITEM_OPEN_TAG;
+      } else if (inKDocList) {
+        inKDocList = false;
+        needsExtraForcedNewLine = true;
+        return FORCED_NEWLINE;
+      }
+    }
+    // End of KDoc handling and resuming original Java-Doc code
 
     /*
      * TODO(cpovirk): Maybe try to detect things like "{@code\n@GwtCompatible}" that aren't intended

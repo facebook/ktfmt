@@ -643,6 +643,18 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `formatting kdoc preserves lists`() = assertFormatted(
+      """
+      |/**
+      | * Here are some fruit I like:
+      | * - Banana
+      | * - Apple
+      | *
+      | * This is another paragraph
+      | */
+      |""".trimMargin())
+
+  @Test
   fun `return statement with value`() = assertFormatted(
       """
       |fun random(): Int {
