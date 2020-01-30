@@ -21,15 +21,12 @@
 
 package com.facebook.ktfmt.kdoc;
 
-import static com.facebook.ktfmt.kdoc.Token.Type.BEGIN_JAVADOC;
-import static com.facebook.ktfmt.kdoc.Token.Type.BR_TAG;
-import static com.facebook.ktfmt.kdoc.Token.Type.END_JAVADOC;
+import static com.facebook.ktfmt.kdoc.Token.Type.BEGIN_KDOC;
+import static com.facebook.ktfmt.kdoc.Token.Type.END_KDOC;
 import static com.facebook.ktfmt.kdoc.Token.Type.FORCED_NEWLINE;
 import static com.facebook.ktfmt.kdoc.Token.Type.LIST_ITEM_OPEN_TAG;
 import static com.facebook.ktfmt.kdoc.Token.Type.LITERAL;
-import static com.facebook.ktfmt.kdoc.Token.Type.PARAGRAPH_OPEN_TAG;
 import static com.facebook.ktfmt.kdoc.Token.Type.WHITESPACE;
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.compile;
 import static org.jetbrains.kotlin.lexer.KtTokens.WHITE_SPACE;
 
@@ -76,14 +73,14 @@ public final class KDocFormatter {
         asterisksSinceLastRealToken = 0;
       }
       if (tokenType == KDocTokens.START) {
-        newTokensBuilder.add(new Token(BEGIN_JAVADOC, tokenText));
+        newTokensBuilder.add(new Token(BEGIN_KDOC, tokenText));
       } else if (tokenType == KDocTokens.LEADING_ASTERISK) {
         asterisksSinceLastRealToken++;
         if (asterisksSinceLastRealToken >= 2) {
           needToAddNewLineOnNextRealToken = true;
         }
       } else if (tokenType == KDocTokens.END) {
-        newTokensBuilder.add(new Token(END_JAVADOC, tokenText));
+        newTokensBuilder.add(new Token(END_KDOC, tokenText));
       } else if (tokenType == KDocTokens.TEXT) {
         String[] words = tokenText.trim().split(" +");
         boolean first = true;
@@ -112,15 +109,12 @@ public final class KDocFormatter {
     JavadocWriter output = new JavadocWriter(blockIndent);
     for (Token token : input) {
       switch (token.getType()) {
-        case BEGIN_JAVADOC:
+        case BEGIN_KDOC:
           output.writeBeginJavadoc();
           break;
-        case END_JAVADOC:
+        case END_KDOC:
           output.writeEndJavadoc();
           return output.toString();
-        case FOOTER_JAVADOC_TAG_START:
-          output.writeFooterJavadocTagStart(token);
-          break;
         case LIST_OPEN_TAG:
           output.writeListOpen(token);
           break;
@@ -129,15 +123,6 @@ public final class KDocFormatter {
           break;
         case LIST_ITEM_OPEN_TAG:
           output.writeListItemOpen(token);
-          break;
-        case HEADER_OPEN_TAG:
-          output.writeHeaderOpen(token);
-          break;
-        case HEADER_CLOSE_TAG:
-          output.writeHeaderClose(token);
-          break;
-        case PARAGRAPH_OPEN_TAG:
-          output.writeParagraphOpen(standardizePToken(token));
           break;
         case BLOCKQUOTE_OPEN_TAG:
         case BLOCKQUOTE_CLOSE_TAG:
@@ -161,18 +146,6 @@ public final class KDocFormatter {
         case TABLE_CLOSE_TAG:
           output.writeTableClose(token);
           break;
-        case MOE_BEGIN_STRIP_COMMENT:
-          output.requestMoeBeginStripComment(token);
-          break;
-        case MOE_END_STRIP_COMMENT:
-          output.writeMoeEndStripComment(token);
-          break;
-        case HTML_COMMENT:
-          output.writeHtmlComment(token);
-          break;
-        case BR_TAG:
-          output.writeBr(standardizeBrToken(token));
-          break;
         case WHITESPACE:
           output.requestWhitespace();
           break;
@@ -182,37 +155,12 @@ public final class KDocFormatter {
         case LITERAL:
           output.writeLiteral(token);
           break;
-        case PARAGRAPH_CLOSE_TAG:
-        case LIST_ITEM_CLOSE_TAG:
-        case OPTIONAL_LINE_BREAK:
-          break;
         default:
           throw new AssertionError(token.getType());
       }
     }
     throw new AssertionError();
   }
-
-  /*
-   * TODO(cpovirk): Is this really the right location for the standardize* methods? Maybe the lexer
-   * should include them as part of its own postprocessing? Or even the writer could make sense.
-   */
-
-  private static Token standardizeBrToken(Token token) {
-    return standardize(token, STANDARD_BR_TOKEN);
-  }
-
-  private static Token standardizePToken(Token token) {
-    return standardize(token, STANDARD_P_TOKEN);
-  }
-
-  private static Token standardize(Token token, Token standardToken) {
-    return SIMPLE_TAG_PATTERN.matcher(token.getValue()).matches() ? standardToken : token;
-  }
-
-  private static final Token STANDARD_BR_TOKEN = new Token(BR_TAG, "<br>");
-  private static final Token STANDARD_P_TOKEN = new Token(PARAGRAPH_OPEN_TAG, "<p>");
-  private static final Pattern SIMPLE_TAG_PATTERN = compile("^<\\w+\\s*/?\\s*>", CASE_INSENSITIVE);
 
   private static final Pattern ONE_CONTENT_LINE_PATTERN = compile(" */[*][*]\n *[*] (.*)\n *[*]/");
 

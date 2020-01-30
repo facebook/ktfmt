@@ -23,7 +23,6 @@ import static com.facebook.ktfmt.kdoc.JavadocWriter.RequestedWhitespace.WHITESPA
 import static com.facebook.ktfmt.kdoc.Token.Type.HEADER_OPEN_TAG;
 import static com.facebook.ktfmt.kdoc.Token.Type.LIST_ITEM_OPEN_TAG;
 import static com.facebook.ktfmt.kdoc.Token.Type.PARAGRAPH_OPEN_TAG;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.immutableEnumSet;
 
 import com.facebook.ktfmt.kdoc.Token.Type;
@@ -35,6 +34,7 @@ import com.google.common.collect.Ordering;
  * This was copied from https://github.com/google/google-java-format
  * Modifications:
  * 1. The package name and imports were changed to com.facebook.ktfmt.kdoc to compile more easily.
+ * 2. Multiple removals of no longer called methods
  */
 
 /**
@@ -54,16 +54,12 @@ final class JavadocWriter {
    */
   private boolean continuingListItemOfInnermostList;
 
-  private boolean continuingFooterTag;
   private final NestingCounter continuingListItemCount = new NestingCounter();
   private final NestingCounter continuingListCount = new NestingCounter();
   private final NestingCounter postWriteModifiedContinuingListCount = new NestingCounter();
   private int remainingOnLine;
   private boolean atStartOfLine;
   private RequestedWhitespace requestedWhitespace = NONE;
-  private Token requestedMoeBeginStripComment;
-  private int indentForMoeEndStripComment;
-  private boolean wroteAnythingSignificant;
 
   JavadocWriter(int blockIndent) {
     this.blockIndent = blockIndent;
@@ -76,11 +72,6 @@ final class JavadocWriter {
    */
   void requestWhitespace() {
     requestWhitespace(WHITESPACE);
-  }
-
-  void requestMoeBeginStripComment(Token token) {
-    // We queue this up so that we can put it after any requested whitespace.
-    requestedMoeBeginStripComment = checkNotNull(token);
   }
 
   void writeBeginJavadoc() {
@@ -96,38 +87,6 @@ final class JavadocWriter {
     output.append("\n");
     appendSpaces(blockIndent + 1);
     output.append("*/");
-  }
-
-  void writeFooterJavadocTagStart(Token token) {
-    // Close any unclosed lists (e.g., <li> without <ul>).
-    // TODO(cpovirk): Actually generate </ul>, etc.?
-    /*
-     * TODO(cpovirk): Also generate </pre> and </table> if appropriate. This is necessary for
-     * idempotency in broken Javadoc. (We don't necessarily need that, but full idempotency may be a
-     * nice goal, especially if it helps us use a fuzzer to test.) Unfortunately, the writer doesn't
-     * currently know which of those tags are open.
-     */
-    continuingListItemOfInnermostList = false;
-    continuingListItemCount.reset();
-    continuingListCount.reset();
-    /*
-     * There's probably no need for this, since its only effect is to disable blank lines in some
-     * cases -- and we're doing that already in the footer.
-     */
-    postWriteModifiedContinuingListCount.reset();
-
-    if (!wroteAnythingSignificant) {
-      // Javadoc consists solely of tags. This is frowned upon in general but OK for @Overrides.
-    } else if (!continuingFooterTag) {
-      // First footer tag after a body tag.
-      requestBlankLine();
-    } else {
-      // Subsequent footer tag.
-      continuingFooterTag = false;
-      requestNewline();
-    }
-    writeToken(token);
-    continuingFooterTag = true;
   }
 
   void writeListOpen(Token token) {
@@ -162,32 +121,6 @@ final class JavadocWriter {
     writeToken(token);
     continuingListItemOfInnermostList = true;
     continuingListItemCount.increment();
-  }
-
-  void writeHeaderOpen(Token token) {
-    requestBlankLine();
-
-    writeToken(token);
-  }
-
-  void writeHeaderClose(Token token) {
-    writeToken(token);
-
-    requestBlankLine();
-  }
-
-  void writeParagraphOpen(Token token) {
-    if (!wroteAnythingSignificant) {
-      /*
-       * The user included an initial <p> tag. Ignore it, and don't request a blank line before the
-       * next token.
-       */
-      return;
-    }
-
-    requestBlankLine();
-
-    writeToken(token);
   }
 
   void writeBlockquoteOpenOrClose(Token token) {
@@ -228,30 +161,6 @@ final class JavadocWriter {
     writeToken(token);
 
     requestBlankLine();
-  }
-
-  void writeMoeEndStripComment(Token token) {
-    writeLineBreakNoAutoIndent();
-    appendSpaces(indentForMoeEndStripComment);
-
-    // Or maybe just "output.append(token.getValue())?" I'm kind of surprised this is so easy.
-    writeToken(token);
-
-    requestNewline();
-  }
-
-  void writeHtmlComment(Token token) {
-    requestNewline();
-
-    writeToken(token);
-
-    requestNewline();
-  }
-
-  void writeBr(Token token) {
-    writeToken(token);
-
-    requestNewline();
   }
 
   void writeLineBreakNoAutoIndent() {
@@ -295,12 +204,7 @@ final class JavadocWriter {
   }
 
   private void writeToken(Token token) {
-    if (requestedMoeBeginStripComment != null) {
-      requestNewline();
-    }
-
-    if (requestedWhitespace == BLANK_LINE
-        && (postWriteModifiedContinuingListCount.isPositive() || continuingFooterTag)) {
+    if (requestedWhitespace == BLANK_LINE && (postWriteModifiedContinuingListCount.isPositive())) {
       /*
        * We don't write blank lines inside lists or footer tags, even in cases where we otherwise
        * would (e.g., before a <p> tag). Justification: We don't write blank lines _between_ list
@@ -333,15 +237,6 @@ final class JavadocWriter {
       remainingOnLine--;
     }
 
-    if (requestedMoeBeginStripComment != null) {
-      output.append(requestedMoeBeginStripComment.getValue());
-      requestedMoeBeginStripComment = null;
-      indentForMoeEndStripComment = innerIndent();
-      requestNewline();
-      writeToken(token);
-      return;
-    }
-
     output.append(token.getValue());
 
     if (!START_OF_LINE_TOKENS.contains(token.getType())) {
@@ -360,7 +255,6 @@ final class JavadocWriter {
      */
     remainingOnLine -= token.length();
     requestedWhitespace = NONE;
-    wroteAnythingSignificant = true;
   }
 
   private void writeBlankLine() {
@@ -393,11 +287,7 @@ final class JavadocWriter {
   }
 
   private int innerIndent() {
-    int innerIndent = continuingListItemCount.value() * 4 + continuingListCount.value() * 2;
-    if (continuingFooterTag) {
-      innerIndent += 4;
-    }
-    return innerIndent;
+    return continuingListItemCount.value() * 4 + continuingListCount.value() * 2;
   }
 
   // If this is a hotspot, keep a String of many spaces around, and call append(string, start, end).
