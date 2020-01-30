@@ -21,18 +21,25 @@
 
 package com.facebook.ktfmt.kdoc;
 
-import static com.facebook.ktfmt.kdoc.JavadocLexer.lex;
+import static com.facebook.ktfmt.kdoc.Token.Type.BEGIN_JAVADOC;
 import static com.facebook.ktfmt.kdoc.Token.Type.BR_TAG;
-import static com.facebook.ktfmt.kdoc.Token.Type.OPTIONAL_LINE_BREAK;
+import static com.facebook.ktfmt.kdoc.Token.Type.END_JAVADOC;
+import static com.facebook.ktfmt.kdoc.Token.Type.FORCED_NEWLINE;
+import static com.facebook.ktfmt.kdoc.Token.Type.LIST_ITEM_OPEN_TAG;
+import static com.facebook.ktfmt.kdoc.Token.Type.LITERAL;
 import static com.facebook.ktfmt.kdoc.Token.Type.PARAGRAPH_OPEN_TAG;
+import static com.facebook.ktfmt.kdoc.Token.Type.WHITESPACE;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.compile;
+import static org.jetbrains.kotlin.lexer.KtTokens.WHITE_SPACE;
 
-import com.facebook.ktfmt.kdoc.JavadocLexer.LexException;
 import com.google.common.collect.ImmutableList;
+import com.intellij.psi.tree.IElementType;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jetbrains.kotlin.kdoc.lexer.KDocLexer;
+import org.jetbrains.kotlin.kdoc.lexer.KDocTokens;
 
 /**
  * Entry point for formatting KDoc.
@@ -51,13 +58,53 @@ public final class KDocFormatter {
    * start and end with the same characters.
    */
   public static String formatKDoc(String input, int blockIndent) {
-    ImmutableList<Token> tokens;
-    try {
-      tokens = lex(input);
-    } catch (LexException e) {
-      return input;
+    KDocLexer kDocLexer = new KDocLexer();
+    kDocLexer.start(input);
+    ImmutableList.Builder<Token> newTokensBuilder = new ImmutableList.Builder<>();
+    int asterisksSinceLastRealToken = 0;
+    boolean needToAddNewLineOnNextRealToken = false;
+    while (kDocLexer.getTokenType() != null) {
+      IElementType tokenType = kDocLexer.getTokenType();
+      String tokenText = kDocLexer.getTokenText();
+
+      if (tokenType != KDocTokens.LEADING_ASTERISK && tokenType != WHITE_SPACE) {
+        if (needToAddNewLineOnNextRealToken) {
+          newTokensBuilder.add(new Token(FORCED_NEWLINE, ""));
+          newTokensBuilder.add(new Token(FORCED_NEWLINE, ""));
+        }
+        needToAddNewLineOnNextRealToken = false;
+        asterisksSinceLastRealToken = 0;
+      }
+      if (tokenType == KDocTokens.START) {
+        newTokensBuilder.add(new Token(BEGIN_JAVADOC, tokenText));
+      } else if (tokenType == KDocTokens.LEADING_ASTERISK) {
+        asterisksSinceLastRealToken++;
+        if (asterisksSinceLastRealToken >= 2) {
+          needToAddNewLineOnNextRealToken = true;
+        }
+      } else if (tokenType == KDocTokens.END) {
+        newTokensBuilder.add(new Token(END_JAVADOC, tokenText));
+      } else if (tokenType == KDocTokens.TEXT) {
+        String[] words = tokenText.trim().split(" +");
+        boolean first = true;
+        for (String word : words) {
+          if (first) {
+            if (word.equals("-")) {
+              newTokensBuilder.add(new Token(LIST_ITEM_OPEN_TAG, ""));
+            }
+            first = false;
+          }
+          newTokensBuilder.add(new Token(LITERAL, word));
+          newTokensBuilder.add(new Token(WHITESPACE, " "));
+        }
+      } else if (tokenType == WHITE_SPACE) {
+        // Nothing
+      } else {
+        // TODO: Handle these cases as well
+      }
+      kDocLexer.advance();
     }
-    String result = render(tokens, blockIndent);
+    String result = render(newTokensBuilder.build(), blockIndent);
     return makeSingleLineIfPossible(blockIndent, result);
   }
 

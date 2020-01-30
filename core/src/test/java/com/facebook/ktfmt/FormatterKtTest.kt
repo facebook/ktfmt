@@ -1618,6 +1618,24 @@ class FormatterKtTest {
       |class MyClass {}
       |""".trimMargin())
 
+  @Test
+  fun `handle one line KDoc`() = assertFormatted(
+      """
+      |/** Hi, I am a one line kdoc */
+      |class MyClass {}
+      |""".trimMargin())
+
+  @Test
+  fun `handle KDoc with paragraphs`() = assertFormatted(
+      """
+      |/**
+      | * Hi, I am a two paragraphs kdoc
+      | *
+      | * There's a space line to preserve between them
+      | */
+      |class MyClass {}
+      |""".trimMargin())
+
   /** Verifies the given code passes through formatting, and stays the same at the end */
   private fun assertFormatted(code: String, maxWidth: Int = DEFAULT_MAX_WIDTH) {
     assertThatFormatting(code, maxWidth).isEqualTo(code)
