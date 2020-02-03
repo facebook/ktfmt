@@ -37,11 +37,10 @@ final class Token {
    * Javadoc token type.
    *
    * <p>The general idea is that every token that requires special handling (extra line breaks,
-   * indentation, forcing or forbidding whitespace) from {@link JavadocWriter} gets its own type.
-   * But I haven't been super careful about it, so I'd imagine that we could merge or remove some of
-   * these if we wanted. (For example, PARAGRAPH_CLOSE_TAG and LIST_ITEM_CLOSE_TAG could share a
-   * common IGNORABLE token type. But their corresponding OPEN tags exist, so I've kept the CLOSE
-   * tags.)
+   * indentation, forcing or forbidding whitespace) from {@link KDocWriter} gets its own type. But I
+   * haven't been super careful about it, so I'd imagine that we could merge or remove some of these
+   * if we wanted. (For example, PARAGRAPH_CLOSE_TAG and LIST_ITEM_CLOSE_TAG could share a common
+   * IGNORABLE token type. But their corresponding OPEN tags exist, so I've kept the CLOSE tags.)
    *
    * <p>Note, though, that tokens of the same type may still have been handled differently by {@link
    * KDocFormatter} when it created them. For example, LITERAL is used for both plain text and
@@ -52,30 +51,22 @@ final class Token {
     BEGIN_KDOC,
     /** ✱∕ */
     END_KDOC,
-    LIST_OPEN_TAG,
-    LIST_CLOSE_TAG,
     LIST_ITEM_OPEN_TAG,
     HEADER_OPEN_TAG,
     PARAGRAPH_OPEN_TAG,
-    BLOCKQUOTE_OPEN_TAG,
-    BLOCKQUOTE_CLOSE_TAG,
     PRE_OPEN_TAG,
     PRE_CLOSE_TAG,
     CODE_OPEN_TAG,
     CODE_CLOSE_TAG,
     TABLE_OPEN_TAG,
     TABLE_CLOSE_TAG,
+    BLANK_LINE,
     /**
      * Whitespace that is not in a {@code <pre>} or {@code <table>} section. Whitespace includes
      * leading newlines, asterisks, and tabs and spaces. In the output, it is translated to newlines
      * (with leading spaces and asterisks) or spaces.
      */
     WHITESPACE,
-    /**
-     * A newline in a {@code <pre>} or {@code <table>} section. We preserve user formatting in these
-     * sections, including newlines.
-     */
-    FORCED_NEWLINE,
     /**
      * Anything else: {@code foo}, {@code <b>}, {@code {@code foo}} etc. {@link KDocFormatter}
      * sometimes creates adjacent literal tokens, which it then merges into a single, larger literal

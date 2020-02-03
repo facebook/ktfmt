@@ -14,12 +14,12 @@
 
 package com.facebook.ktfmt.kdoc;
 
-import static com.facebook.ktfmt.kdoc.JavadocWriter.AutoIndent.AUTO_INDENT;
-import static com.facebook.ktfmt.kdoc.JavadocWriter.AutoIndent.NO_AUTO_INDENT;
-import static com.facebook.ktfmt.kdoc.JavadocWriter.RequestedWhitespace.BLANK_LINE;
-import static com.facebook.ktfmt.kdoc.JavadocWriter.RequestedWhitespace.NEWLINE;
-import static com.facebook.ktfmt.kdoc.JavadocWriter.RequestedWhitespace.NONE;
-import static com.facebook.ktfmt.kdoc.JavadocWriter.RequestedWhitespace.WHITESPACE;
+import static com.facebook.ktfmt.kdoc.KDocWriter.AutoIndent.AUTO_INDENT;
+import static com.facebook.ktfmt.kdoc.KDocWriter.AutoIndent.NO_AUTO_INDENT;
+import static com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.BLANK_LINE;
+import static com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.NEWLINE;
+import static com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.NONE;
+import static com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.WHITESPACE;
 import static com.facebook.ktfmt.kdoc.Token.Type.HEADER_OPEN_TAG;
 import static com.facebook.ktfmt.kdoc.Token.Type.LIST_ITEM_OPEN_TAG;
 import static com.facebook.ktfmt.kdoc.Token.Type.PARAGRAPH_OPEN_TAG;
@@ -35,6 +35,7 @@ import com.google.common.collect.Ordering;
  * Modifications:
  * 1. The package name and imports were changed to com.facebook.ktfmt.kdoc to compile more easily.
  * 2. Multiple removals of no longer called methods
+ * 3. Renamed to KDocWriter, and adjust write commands and logic
  */
 
 /**
@@ -44,7 +45,7 @@ import com.google.common.collect.Ordering;
  * writer must compute and store the answer to questions like "How many levels of nested HTML list
  * are we inside?"
  */
-final class JavadocWriter {
+final class KDocWriter {
   private final int blockIndent;
   private final StringBuilder output = new StringBuilder();
   /**
@@ -56,12 +57,11 @@ final class JavadocWriter {
 
   private final NestingCounter continuingListItemCount = new NestingCounter();
   private final NestingCounter continuingListCount = new NestingCounter();
-  private final NestingCounter postWriteModifiedContinuingListCount = new NestingCounter();
   private int remainingOnLine;
   private boolean atStartOfLine;
   private RequestedWhitespace requestedWhitespace = NONE;
 
-  JavadocWriter(int blockIndent) {
+  KDocWriter(int blockIndent) {
     this.blockIndent = blockIndent;
   }
 
@@ -74,41 +74,26 @@ final class JavadocWriter {
     requestWhitespace(WHITESPACE);
   }
 
+  void writeKDocWhitespace() {
+    if (requestedWhitespace == NEWLINE) {
+      requestedWhitespace = BLANK_LINE;
+    } else {
+      requestedWhitespace = NEWLINE;
+    }
+  }
+
   void writeBeginJavadoc() {
     /*
      * JavaCommentsHelper will make sure this is indented right. But it seems sensible enough that,
      * if our input starts with ∕✱✱, so too does our output.
      */
     output.append("/**");
-    writeNewline();
   }
 
   void writeEndJavadoc() {
     output.append("\n");
     appendSpaces(blockIndent + 1);
     output.append("*/");
-  }
-
-  void writeListOpen(Token token) {
-    requestBlankLine();
-
-    writeToken(token);
-    continuingListItemOfInnermostList = false;
-    continuingListCount.increment();
-    postWriteModifiedContinuingListCount.increment();
-
-    requestNewline();
-  }
-
-  void writeListClose(Token token) {
-    requestNewline();
-
-    continuingListItemCount.decrementIfPositive();
-    continuingListCount.decrementIfPositive();
-    writeToken(token);
-    postWriteModifiedContinuingListCount.decrementIfPositive();
-
-    requestBlankLine();
   }
 
   void writeListItemOpen(Token token) {
@@ -180,7 +165,7 @@ final class JavadocWriter {
     requestWhitespace(BLANK_LINE);
   }
 
-  private void requestNewline() {
+  public void requestNewline() {
     requestWhitespace(NEWLINE);
   }
 
@@ -204,15 +189,12 @@ final class JavadocWriter {
   }
 
   private void writeToken(Token token) {
-    if (requestedWhitespace == BLANK_LINE && (postWriteModifiedContinuingListCount.isPositive())) {
-      /*
-       * We don't write blank lines inside lists or footer tags, even in cases where we otherwise
-       * would (e.g., before a <p> tag). Justification: We don't write blank lines _between_ list
-       * items or footer tags, so it would be strange to write blank lines _within_ one. Of course,
-       * an alternative approach would be to go ahead and write blank lines between items/tags,
-       * either always or only in the case that an item contains a blank line.
-       */
-      requestedWhitespace = NEWLINE;
+    if (requestedWhitespace == BLANK_LINE) {
+      // A blank line means all lists are terminated
+      if (continuingListItemCount.isPositive()) {
+        continuingListCount.reset();
+        continuingListItemCount.reset();
+      }
     }
 
     if (requestedWhitespace == BLANK_LINE) {

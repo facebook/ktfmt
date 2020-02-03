@@ -22,8 +22,8 @@
 package com.facebook.ktfmt.kdoc;
 
 import static com.facebook.ktfmt.kdoc.Token.Type.BEGIN_KDOC;
+import static com.facebook.ktfmt.kdoc.Token.Type.BLANK_LINE;
 import static com.facebook.ktfmt.kdoc.Token.Type.END_KDOC;
-import static com.facebook.ktfmt.kdoc.Token.Type.FORCED_NEWLINE;
 import static com.facebook.ktfmt.kdoc.Token.Type.LIST_ITEM_OPEN_TAG;
 import static com.facebook.ktfmt.kdoc.Token.Type.LITERAL;
 import static com.facebook.ktfmt.kdoc.Token.Type.WHITESPACE;
@@ -58,27 +58,13 @@ public final class KDocFormatter {
     KDocLexer kDocLexer = new KDocLexer();
     kDocLexer.start(input);
     ImmutableList.Builder<Token> newTokensBuilder = new ImmutableList.Builder<>();
-    int asterisksSinceLastRealToken = 0;
-    boolean needToAddNewLineOnNextRealToken = false;
     while (kDocLexer.getTokenType() != null) {
       IElementType tokenType = kDocLexer.getTokenType();
       String tokenText = kDocLexer.getTokenText();
-
-      if (tokenType != KDocTokens.LEADING_ASTERISK && tokenType != WHITE_SPACE) {
-        if (needToAddNewLineOnNextRealToken) {
-          newTokensBuilder.add(new Token(FORCED_NEWLINE, ""));
-          newTokensBuilder.add(new Token(FORCED_NEWLINE, ""));
-        }
-        needToAddNewLineOnNextRealToken = false;
-        asterisksSinceLastRealToken = 0;
-      }
       if (tokenType == KDocTokens.START) {
         newTokensBuilder.add(new Token(BEGIN_KDOC, tokenText));
       } else if (tokenType == KDocTokens.LEADING_ASTERISK) {
-        asterisksSinceLastRealToken++;
-        if (asterisksSinceLastRealToken >= 2) {
-          needToAddNewLineOnNextRealToken = true;
-        }
+        // ignore
       } else if (tokenType == KDocTokens.END) {
         newTokensBuilder.add(new Token(END_KDOC, tokenText));
       } else if (tokenType == KDocTokens.TEXT) {
@@ -94,11 +80,20 @@ public final class KDocFormatter {
           newTokensBuilder.add(new Token(LITERAL, word));
           newTokensBuilder.add(new Token(WHITESPACE, " "));
         }
+      } else if (tokenType == KDocTokens.TAG_NAME) {
+        newTokensBuilder.add(new Token(LITERAL, tokenText));
+      } else if (tokenType == KDocTokens.CODE_BLOCK_TEXT) {
+        newTokensBuilder.add(new Token(LITERAL, tokenText));
+      } else if (tokenType == KDocTokens.MARKDOWN_INLINE_LINK) {
+        newTokensBuilder.add(new Token(LITERAL, tokenText));
+      } else if (tokenType == KDocTokens.MARKDOWN_LINK) {
+        newTokensBuilder.add(new Token(LITERAL, tokenText));
       } else if (tokenType == WHITE_SPACE) {
-        // Nothing
+        newTokensBuilder.add(new Token(BLANK_LINE, ""));
       } else {
-        // TODO: Handle these cases as well
+        throw new RuntimeException("Unexpected: " + tokenType);
       }
+
       kDocLexer.advance();
     }
     String result = render(newTokensBuilder.build(), blockIndent);
@@ -106,7 +101,7 @@ public final class KDocFormatter {
   }
 
   private static String render(List<Token> input, int blockIndent) {
-    JavadocWriter output = new JavadocWriter(blockIndent);
+    KDocWriter output = new KDocWriter(blockIndent);
     for (Token token : input) {
       switch (token.getType()) {
         case BEGIN_KDOC:
@@ -115,18 +110,8 @@ public final class KDocFormatter {
         case END_KDOC:
           output.writeEndJavadoc();
           return output.toString();
-        case LIST_OPEN_TAG:
-          output.writeListOpen(token);
-          break;
-        case LIST_CLOSE_TAG:
-          output.writeListClose(token);
-          break;
         case LIST_ITEM_OPEN_TAG:
           output.writeListItemOpen(token);
-          break;
-        case BLOCKQUOTE_OPEN_TAG:
-        case BLOCKQUOTE_CLOSE_TAG:
-          output.writeBlockquoteOpenOrClose(token);
           break;
         case PRE_OPEN_TAG:
           output.writePreOpen(token);
@@ -146,11 +131,11 @@ public final class KDocFormatter {
         case TABLE_CLOSE_TAG:
           output.writeTableClose(token);
           break;
+        case BLANK_LINE:
+          output.writeKDocWhitespace();
+          break;
         case WHITESPACE:
           output.requestWhitespace();
-          break;
-        case FORCED_NEWLINE:
-          output.writeLineBreakNoAutoIndent();
           break;
         case LITERAL:
           output.writeLiteral(token);
