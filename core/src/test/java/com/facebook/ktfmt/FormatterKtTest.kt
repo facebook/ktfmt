@@ -94,7 +94,8 @@ class FormatterKtTest {
       |fun print(
       |    code: String,
       |    maxWidth: Int =
-      |        DEFAULT_MAX_WIDTH_VERY_LONG) {
+      |        DEFAULT_MAX_WIDTH_VERY_LONG
+      |) {
       |  val a = 0
       |}
       |""".trimMargin(), 40)

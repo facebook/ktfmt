@@ -264,7 +264,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
           }
         }
         if (emitParenthesis) {
-          if (type != null && parameters != null && parameters.isNotEmpty()) {
+          if (parameters != null && parameters.isNotEmpty()) {
             builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
           }
           builder.token(")")
