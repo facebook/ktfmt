@@ -1627,6 +1627,13 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `handle KDoc with Link`() = assertFormatted(
+      """
+      |/** This links to [AnotherClass] */
+      |class MyClass {}
+      |""".trimMargin())
+
+  @Test
   fun `handle KDoc with paragraphs`() = assertFormatted(
       """
       |/**
