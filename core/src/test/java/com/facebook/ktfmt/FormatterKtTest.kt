@@ -1695,6 +1695,23 @@ class FormatterKtTest {
       |class MyClass {}
       |""".trimMargin())
 
+  @Test
+  fun `handle KDoc with code examples`() = assertFormatted(
+      """
+      |/**
+      | * This is how you write a simple hello world in Kotlin:
+      | *
+      | * ```
+      | * fun main(args: Array<String>) {
+      | *   println("Hello World!")
+      | * }
+      | * ```
+      | *
+      | * Amazing ah?
+      | */
+      |class MyClass {}
+      |""".trimMargin())
+
   /** Verifies the given code passes through formatting, and stays the same at the end */
   private fun assertFormatted(code: String, maxWidth: Int = DEFAULT_MAX_WIDTH) {
     assertThatFormatting(code, maxWidth).isEqualTo(code)

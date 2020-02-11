@@ -30,8 +30,6 @@ import org.jetbrains.kotlin.lexer.KtTokens.WHITE_SPACE
 
 import com.google.common.collect.ImmutableList
 import com.intellij.psi.tree.IElementType
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 import org.jetbrains.kotlin.kdoc.lexer.KDocLexer
 import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 
@@ -86,7 +84,8 @@ object KDocFormatter {
       } else if (tokenType === KDocTokens.TAG_NAME) {
         newTokensBuilder.add(Token(LITERAL, tokenText.trim { it <= ' ' }))
       } else if (tokenType === KDocTokens.CODE_BLOCK_TEXT) {
-        newTokensBuilder.add(Token(LITERAL, tokenText))
+        val trimmedFirstSpaceText = if (tokenText.first() == ' ') tokenText.substring(1) else tokenText
+        newTokensBuilder.add(Token(LITERAL, trimmedFirstSpaceText))
       } else if (tokenType === KDocTokens.MARKDOWN_INLINE_LINK) {
         newTokensBuilder.add(Token(LITERAL, tokenText))
       } else if (tokenType === KDocTokens.MARKDOWN_LINK) {
