@@ -252,6 +252,36 @@ class FormatterKtTest {
       |}
       |""".trimMargin(), 20)
 
+    @Test
+    fun `once a binary expression is broken, split on every line`() = assertFormatted(
+        """
+        |fun foo() {
+        |  val sentence =
+        |      "The" +
+        |          "quick" +
+        |          ("brown" + "fox") +
+        |          "jumps" +
+        |          "over" +
+        |          "the" +
+        |          "lazy" +
+        |          "dog"
+        |}
+        |""".trimMargin(), 40)
+
+    @Test
+    fun `long binary expressions with ranges in the middle`() = assertFormatted(
+        """
+        |fun foo() {
+        |  val sentence =
+        |      "The" +
+        |          "quick" +
+        |          ("brown".."fox") +
+        |          "jumps" +
+        |          "over" +
+        |          "the".."lazy" + "dog"
+        |}
+        |""".trimMargin(), 40)
+
   @Test
   fun `properties with accessors`() = assertFormatted(
       """

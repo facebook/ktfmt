@@ -601,23 +601,44 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     builder.guessToken(";")
   }
 
+  /**
+   * For example `a + b`, `a + b + c` or `a..b`
+   *
+   * The extra handling here drills to the left most expression and handles it for
+   * long chains of binary expressions that are formatted not accordingly to the associative values
+   * That is, we want to think of `a + b + c` as `(a + b) + c`, whereas the AST parses it as
+   * `a + (b + c)`
+   */
   override fun visitBinaryExpression(expression: KtBinaryExpression) {
     builder.sync(expression)
-    val surroundWithSpace = expression.operationToken != KtTokens.RANGE
 
-    builder.block(ZERO) {
-      expression.left?.accept(this)
+    val parts = ArrayDeque<KtBinaryExpression>()
+        .apply {
+          var current: KtExpression? = expression
+          while (current is KtBinaryExpression) {
+            addFirst(current)
+            current = current.left
+          }
+        }
+
+    val leftMostExpression = parts.first()
+    leftMostExpression.left?.accept(this)
+    for (leftExpression in parts) {
+      val surroundWithSpace = leftExpression.operationToken != KtTokens.RANGE
       if (surroundWithSpace) {
         builder.space()
       }
-      builder.token(expression.operationReference.text)
-      builder.block(expressionBreakIndent) {
-        if (surroundWithSpace) {
-          builder.breakToFill(" ")
-        }
-        expression.right?.accept(this)
+      builder.token(leftExpression.operationReference.text)
+      val isFirst = leftExpression === leftMostExpression
+      if (isFirst) {
+        builder.open(expressionBreakIndent)
       }
+      if (surroundWithSpace) {
+        builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+      }
+      leftExpression.right?.accept(this)
     }
+    builder.close()
   }
 
   override fun visitUnaryExpression(expression: KtUnaryExpression) {
