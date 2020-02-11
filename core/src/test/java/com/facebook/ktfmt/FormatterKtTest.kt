@@ -1644,6 +1644,18 @@ class FormatterKtTest {
       |class MyClass {}
       |""".trimMargin())
 
+  @Test
+  fun `handle KDoc with blocks`() = assertFormatted(
+      """
+      |/**
+      | * Hi, I am a two paragraphs kdoc
+      | *
+      | * @param param1 this is param1
+      | * @param[param2] this is param2
+      | */
+      |class MyClass {}
+      |""".trimMargin())
+
   /** Verifies the given code passes through formatting, and stays the same at the end */
   private fun assertFormatted(code: String, maxWidth: Int = DEFAULT_MAX_WIDTH) {
     assertThatFormatting(code, maxWidth).isEqualTo(code)

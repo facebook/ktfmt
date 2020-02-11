@@ -58,6 +58,7 @@ public final class KDocFormatter {
     KDocLexer kDocLexer = new KDocLexer();
     kDocLexer.start(input);
     ImmutableList.Builder<Token> newTokensBuilder = new ImmutableList.Builder<>();
+    IElementType previousType = null;
     while (kDocLexer.getTokenType() != null) {
       IElementType tokenType = kDocLexer.getTokenType();
       String tokenText = kDocLexer.getTokenText();
@@ -68,20 +69,23 @@ public final class KDocFormatter {
       } else if (tokenType == KDocTokens.END) {
         newTokensBuilder.add(new Token(END_KDOC, tokenText));
       } else if (tokenType == KDocTokens.TEXT) {
-        String[] words = tokenText.trim().split(" +");
-        boolean first = true;
-        for (String word : words) {
-          if (first) {
-            if (word.equals("-")) {
-              newTokensBuilder.add(new Token(LIST_ITEM_OPEN_TAG, ""));
+        String trimmedText = tokenText.trim();
+        if (!trimmedText.isEmpty()) {
+          String[] words = trimmedText.split(" +");
+          boolean first = true;
+          for (String word : words) {
+            if (first) {
+              if (word.equals("-")) {
+                newTokensBuilder.add(new Token(LIST_ITEM_OPEN_TAG, ""));
+              }
+              first = false;
             }
-            first = false;
+            newTokensBuilder.add(new Token(LITERAL, word));
+            newTokensBuilder.add(new Token(WHITESPACE, " "));
           }
-          newTokensBuilder.add(new Token(LITERAL, word));
-          newTokensBuilder.add(new Token(WHITESPACE, " "));
         }
       } else if (tokenType == KDocTokens.TAG_NAME) {
-        newTokensBuilder.add(new Token(LITERAL, tokenText));
+        newTokensBuilder.add(new Token(LITERAL, tokenText.trim()));
       } else if (tokenType == KDocTokens.CODE_BLOCK_TEXT) {
         newTokensBuilder.add(new Token(LITERAL, tokenText));
       } else if (tokenType == KDocTokens.MARKDOWN_INLINE_LINK) {
@@ -89,11 +93,16 @@ public final class KDocFormatter {
       } else if (tokenType == KDocTokens.MARKDOWN_LINK) {
         newTokensBuilder.add(new Token(LITERAL, tokenText));
       } else if (tokenType == WHITE_SPACE) {
-        newTokensBuilder.add(new Token(BLANK_LINE, ""));
+        if (previousType == KDocTokens.TAG_NAME || previousType == KDocTokens.MARKDOWN_LINK) {
+          newTokensBuilder.add(new Token(WHITESPACE, " "));
+        } else {
+          newTokensBuilder.add(new Token(BLANK_LINE, ""));
+        }
       } else {
         throw new RuntimeException("Unexpected: " + tokenType);
       }
 
+      previousType = tokenType;
       kDocLexer.advance();
     }
     String result = render(newTokensBuilder.build(), blockIndent);
