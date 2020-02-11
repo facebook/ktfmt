@@ -50,6 +50,7 @@ import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtEnumEntry
 import org.jetbrains.kotlin.psi.KtEscapeStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtExpression
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFileAnnotationList
 import org.jetbrains.kotlin.psi.KtFinallySection
 import org.jetbrains.kotlin.psi.KtForExpression
@@ -139,6 +140,9 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
           function.bodyExpression,
           function.typeReference,
           function.bodyBlockExpression?.lBrace != null)
+    }
+    if (function.parent is KtFile) {
+      builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
     }
   }
 

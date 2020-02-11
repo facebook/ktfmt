@@ -91,6 +91,7 @@ class FormatterKtTest {
       |): String {
       |  val a = 0
       |}
+      |
       |fun print(
       |    code: String,
       |    maxWidth: Int =
@@ -565,6 +566,7 @@ class FormatterKtTest {
   fun `function return types`() = assertFormatted(
       """
       |fun f1(): Int = 0
+      |
       |fun f2(): Int {}
       |""".trimMargin())
 
@@ -574,6 +576,7 @@ class FormatterKtTest {
       |fun longFunctionNoBlock():
       |    Int =
       |    1234567 + 1234567
+      |
       |fun shortFun(): Int =
       |    1234567 + 1234567
       |""".trimMargin(), 25)
@@ -891,6 +894,7 @@ class FormatterKtTest {
       |fun doItWithNullReturns(a: String, b: String): Int? {
       |  return 5
       |}
+      |
       |fun doItWithNulls(a: String, b: String?) {}
       |""".trimMargin())
 
@@ -948,6 +952,7 @@ class FormatterKtTest {
       |  val b: List<Int> = convert<Int>(listOf(5, 4))
       |  return b
       |}
+      |
       |class Foo<T>
       |""".trimMargin())
 
@@ -999,6 +1004,7 @@ class FormatterKtTest {
       |  val (`do not`, `ever write`) = SERIOUSLY
       |  val `a a`: Int
       |}
+      |
       |class `more spaces`
       |""".trimMargin())
 
@@ -1006,8 +1012,10 @@ class FormatterKtTest {
   fun `handle annotations with arguments`() = assertFormatted(
       """
       |@Px fun f(): Int = 5
+      |
       |@Dimenstion(unit = DP)
       |fun g(): Int = 5
+      |
       |@RunWith(MagicRunner::class)
       |class Test
       |""".trimMargin())
@@ -1479,6 +1487,7 @@ class FormatterKtTest {
       |inline fun <reified T> foo(t: T) {
       |  println(t)
       |}
+      |
       |inline fun <reified in T> foo2(t: T) {
       |  println(t)
       |}
