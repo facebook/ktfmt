@@ -13,43 +13,37 @@
  */
 
 /*
- * This was copied from https://github.com/google/google-java-format
- * Modifications:
- * 1. The package name and imports were changed to com.facebook.ktfmt.kdoc to compile more easily.
+ * This was copied from https://github.com/google/google-java-format and modified extensively to
+ * work for Kotlin formatting
  */
 
-package com.facebook.ktfmt.kdoc;
-
-/*
- * This was copied from https://github.com/google/google-java-format
- * Modifications:
- * 1. Removal of unused tokens
- * 2. Update documentations links to KDocFormatter instead of old JavaDocLexer
- */
+package com.facebook.ktfmt.kdoc
 
 /**
- * Javadoc token. Our idea of what constitutes a token is often larger or smaller than what you'd
+ * KDoc token. Our idea of what constitutes a token is often larger or smaller than what you'd
  * naturally expect. The decision is usually pragmatic rather than theoretical. Most of the details
- * are in {@link KDocFormatter}.
+ * are in [KDocFormatter].
  */
-final class Token {
+internal class Token(val type: Type, val value: String) {
   /**
-   * Javadoc token type.
+   * KDoc token type.
    *
-   * <p>The general idea is that every token that requires special handling (extra line breaks,
-   * indentation, forcing or forbidding whitespace) from {@link KDocWriter} gets its own type. But I
+   *
+   * The general idea is that every token that requires special handling (extra line breaks,
+   * indentation, forcing or forbidding whitespace) from [KDocWriter] gets its own type. But I
    * haven't been super careful about it, so I'd imagine that we could merge or remove some of these
    * if we wanted. (For example, PARAGRAPH_CLOSE_TAG and LIST_ITEM_CLOSE_TAG could share a common
    * IGNORABLE token type. But their corresponding OPEN tags exist, so I've kept the CLOSE tags.)
    *
-   * <p>Note, though, that tokens of the same type may still have been handled differently by {@link
-   * KDocFormatter} when it created them. For example, LITERAL is used for both plain text and
+   *
+   * Note, though, that tokens of the same type may still have been handled differently by [ ] when
+   * it created them. For example, LITERAL is used for both plain text and
    * inline tags, even though the two affect the lexer's state differently.
    */
-  enum Type {
-    /** ∕✱✱ */
+  internal enum class Type {
+    /** ∕✱✱  */
     BEGIN_KDOC,
-    /** ✱∕ */
+    /** ✱∕  */
     END_KDOC,
     LIST_ITEM_OPEN_TAG,
     HEADER_OPEN_TAG,
@@ -62,17 +56,18 @@ final class Token {
     TABLE_CLOSE_TAG,
     BLANK_LINE,
     /**
-     * Whitespace that is not in a {@code <pre>} or {@code <table>} section. Whitespace includes
+     * Whitespace that is not in a `<pre>` or `<table>` section. Whitespace includes
      * leading newlines, asterisks, and tabs and spaces. In the output, it is translated to newlines
      * (with leading spaces and asterisks) or spaces.
      */
     WHITESPACE,
     /**
-     * Anything else: {@code foo}, {@code <b>}, {@code {@code foo}} etc. {@link KDocFormatter}
+     * Anything else: `foo`, `<b>`, `{ foo}` etc. [KDocFormatter]
      * sometimes creates adjacent literal tokens, which it then merges into a single, larger literal
      * token before returning its output.
      *
-     * <p>This also includes whitespace in a {@code <pre>} or {@code <table>} section. We preserve
+     *
+     * This also includes whitespace in a `<pre>` or `<table>` section. We preserve
      * user formatting in these sections, including arbitrary numbers of spaces. By treating such
      * whitespace as a literal, we can merge it with adjacent literals, preventing us from
      * autowrapping inside these sections -- and doing so naively, to boot. The wrapped line would
@@ -81,32 +76,10 @@ final class Token {
      * creating lines of more than 100 characters. But it seems fair to call in the humans to
      * resolve such problems.
      */
-    LITERAL,
-    ;
+    LITERAL
   }
 
-  private final Type type;
-  private final String value;
+  fun length(): Int = value.length
 
-  Token(Type type, String value) {
-    this.type = type;
-    this.value = value;
-  }
-
-  Type getType() {
-    return type;
-  }
-
-  String getValue() {
-    return value;
-  }
-
-  int length() {
-    return value.length();
-  }
-
-  @Override
-  public String toString() {
-    return "\n" + getType() + ": " + getValue();
-  }
+  override fun toString(): String = "Token{$type: \"$value\"}"
 }

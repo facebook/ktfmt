@@ -13,42 +13,40 @@
  */
 
 /*
- * This was copied from https://github.com/google/google-java-format
- * Modifications:
- * 1. The package name and imports were changed to com.facebook.ktfmt.kdoc to compile more easily.
+ * This was copied from https://github.com/google/google-java-format and modified extensively to
+ * work for Kotlin formatting
  */
 
-package com.facebook.ktfmt.kdoc;
+package com.facebook.ktfmt.kdoc
 
 /** Mutable integer for tracking the level of nesting. */
-final class NestingCounter {
-  private int value;
+internal class NestingCounter {
+  private var value: Int = 0
 
-  int value() {
-    return value;
+  val isPositive: Boolean
+    get() = value > 0
+
+  fun value(): Int {
+    return value
   }
 
-  void increment() {
-    value++;
+  fun increment() {
+    value++
   }
 
-  void incrementIfPositive() {
+  fun incrementIfPositive() {
     if (value > 0) {
-      value++;
+      value++
     }
   }
 
-  void decrementIfPositive() {
+  fun decrementIfPositive() {
     if (value > 0) {
-      value--;
+      value--
     }
   }
 
-  boolean isPositive() {
-    return value > 0;
-  }
-
-  void reset() {
-    value = 0;
+  fun reset() {
+    value = 0
   }
 }
