@@ -75,14 +75,6 @@ internal class KDocWriter(private val blockIndent: Int) {
     requestWhitespace(WHITESPACE)
   }
 
-  fun writeKDocWhitespace() {
-    if (requestedWhitespace == NEWLINE) {
-      requestedWhitespace = BLANK_LINE
-    } else {
-      requestedWhitespace = NEWLINE
-    }
-  }
-
   fun writeBeginJavadoc() {
     /*
      * JavaCommentsHelper will make sure this is indented right. But it seems sensible enough that,
@@ -153,6 +145,16 @@ internal class KDocWriter(private val blockIndent: Int) {
     writeNewline(NO_AUTO_INDENT)
   }
 
+  fun writeTag(token: Token) {
+    requestNewline()
+    writeToken(token)
+  }
+
+  fun writeCodeLine(token: Token) {
+    requestNewline()
+    writeToken(token)
+  }
+
   fun writeLiteral(token: Token) {
     writeToken(token)
   }
@@ -161,7 +163,7 @@ internal class KDocWriter(private val blockIndent: Int) {
     return output.toString()
   }
 
-  private fun requestBlankLine() {
+  fun requestBlankLine() {
     requestWhitespace(BLANK_LINE)
   }
 

@@ -1751,6 +1751,47 @@ class FormatterKtTest {
     assertThatFormatting(code).isEqualTo(expected)
   }
 
+  @Test
+  fun `handle KDoc with multiple separated param tags, breaking and merging lines and missing asterisk`() {
+    val code = """
+      |/**
+      | * Trims leading whitespace characters followed by [marginPrefix] from every line of a source string and removes
+      | * the first and the last lines if they are blank (notice difference blank vs empty).
+      | 
+      | * Doesn't affect a line if it doesn't contain [marginPrefix] except the first and the last blank lines.
+      | *
+      | * Doesn't preserve the original line endings.
+      | *
+      | * @param marginPrefix non-blank string, which is used as a margin delimiter. Default is `|` (pipe character).
+      | *
+      | * @sample samples.text.Strings.trimMargin
+      | * @see trimIndent
+      | * @see kotlin.text.isWhitespace
+      | */
+      |class ThisWasCopiedFromTheTrimMarginMethod {}
+      |""".trimMargin()
+    val expected = """
+      |/**
+      | * Trims leading whitespace characters followed by [marginPrefix] from every line of a source string
+      | * and removes the first and the last lines if they are blank (notice difference blank vs empty).
+      | *
+      | * Doesn't affect a line if it doesn't contain [marginPrefix] except the first and the last blank
+      | * lines.
+      | *
+      | * Doesn't preserve the original line endings.
+      | *
+      | * @param marginPrefix non-blank string, which is used as a margin delimiter. Default is `|` (pipe
+      | * character).
+      | *
+      | * @sample samples.text.Strings.trimMargin
+      | * @see trimIndent
+      | * @see kotlin.text.isWhitespace
+      | */
+      |class ThisWasCopiedFromTheTrimMarginMethod {}
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
   /** Verifies the given code passes through formatting, and stays the same at the end */
   private fun assertFormatted(code: String, maxWidth: Int = DEFAULT_MAX_WIDTH) {
     assertThatFormatting(code, maxWidth).isEqualTo(code)

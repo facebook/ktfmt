@@ -54,6 +54,9 @@ internal class Token(val type: Type, val value: String) {
     CODE_CLOSE_TAG,
     TABLE_OPEN_TAG,
     TABLE_CLOSE_TAG,
+    /** Things such as `@param` or `@see` */
+    TAG,
+    CODE,
     BLANK_LINE,
     /**
      * Whitespace that is not in a `<pre>` or `<table>` section. Whitespace includes

@@ -21,6 +21,7 @@ package com.facebook.ktfmt.kdoc
 
 import com.facebook.ktfmt.kdoc.Token.Type.BEGIN_KDOC
 import com.facebook.ktfmt.kdoc.Token.Type.BLANK_LINE
+import com.facebook.ktfmt.kdoc.Token.Type.CODE
 import com.facebook.ktfmt.kdoc.Token.Type.CODE_CLOSE_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.CODE_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.END_KDOC
@@ -30,6 +31,7 @@ import com.facebook.ktfmt.kdoc.Token.Type.PRE_CLOSE_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.PRE_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.TABLE_CLOSE_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.TABLE_OPEN_TAG
+import com.facebook.ktfmt.kdoc.Token.Type.TAG
 import com.facebook.ktfmt.kdoc.Token.Type.WHITESPACE
 import com.intellij.psi.tree.IElementType
 import java.util.regex.Pattern.compile
@@ -71,8 +73,8 @@ object KDocFormatter {
         KDocTokens.START -> tokens.add(Token(BEGIN_KDOC, tokenText))
         KDocTokens.END -> tokens.add(Token(END_KDOC, tokenText))
         KDocTokens.LEADING_ASTERISK -> Unit // Ignore, no need to output anything
-        KDocTokens.TAG_NAME -> tokens.add(Token(LITERAL, tokenText))
-        KDocTokens.CODE_BLOCK_TEXT -> tokens.add(Token(LITERAL, tokenText))
+        KDocTokens.TAG_NAME -> tokens.add(Token(TAG, tokenText))
+        KDocTokens.CODE_BLOCK_TEXT -> tokens.add(Token(CODE, tokenText))
         KDocTokens.MARKDOWN_INLINE_LINK, KDocTokens.MARKDOWN_LINK -> {
           tokens.add(Token(LITERAL, tokenText))
           tokens.add(Token(WHITESPACE, " "))
@@ -98,7 +100,7 @@ object KDocFormatter {
         WHITE_SPACE -> {
           if (previousType === KDocTokens.TAG_NAME || previousType === KDocTokens.MARKDOWN_LINK) {
             tokens.add(Token(WHITESPACE, " "))
-          } else {
+          } else if (previousType == KDocTokens.LEADING_ASTERISK || tokenText.count { it == '\n' } >= 2) {
             tokens.add(Token(BLANK_LINE, ""))
           }
         }
@@ -128,7 +130,9 @@ object KDocFormatter {
         CODE_CLOSE_TAG -> output.writeCodeClose(token)
         TABLE_OPEN_TAG -> output.writeTableOpen(token)
         TABLE_CLOSE_TAG -> output.writeTableClose(token)
-        BLANK_LINE -> output.writeKDocWhitespace()
+        TAG -> output.writeTag(token)
+        CODE -> output.writeCodeLine(token)
+        BLANK_LINE -> output.requestBlankLine()
         WHITESPACE -> output.requestWhitespace()
         LITERAL -> output.writeLiteral(token)
         else -> throw AssertionError(token.type)
