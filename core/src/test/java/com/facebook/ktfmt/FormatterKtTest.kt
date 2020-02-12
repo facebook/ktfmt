@@ -1726,6 +1726,19 @@ class FormatterKtTest {
       |class MyClass {}
       |""".trimMargin())
 
+  @Test
+  fun `add spaces after links in Kdoc`() {
+    val code = """
+      |/** Here are some links [AnotherClass][AnotherClass2]hello */
+      |class MyClass {}
+      |""".trimMargin()
+    val expected = """
+      |/** Here are some links [AnotherClass] [AnotherClass2] hello */
+      |class MyClass {}
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
   /** Verifies the given code passes through formatting, and stays the same at the end */
   private fun assertFormatted(code: String, maxWidth: Int = DEFAULT_MAX_WIDTH) {
     assertThatFormatting(code, maxWidth).isEqualTo(code)

@@ -74,7 +74,7 @@ object KDocFormatter {
           if (tokenText.isBlank()) {
             tokens.add(Token(WHITESPACE, " "))
           } else {
-            val words = tokenText.split(" +".toRegex()).dropLastWhile { it.isEmpty() }
+            val words = tokenText.trim().split(" +".toRegex())
             var first = true
             for (word in words) {
               if (first) {
@@ -90,8 +90,14 @@ object KDocFormatter {
         }
         tokenType === KDocTokens.TAG_NAME -> tokens.add(Token(LITERAL, tokenText))
         tokenType === KDocTokens.CODE_BLOCK_TEXT -> tokens.add(Token(LITERAL, tokenText))
-        tokenType === KDocTokens.MARKDOWN_INLINE_LINK -> tokens.add(Token(LITERAL, tokenText))
-        tokenType === KDocTokens.MARKDOWN_LINK -> tokens.add(Token(LITERAL, tokenText))
+        tokenType === KDocTokens.MARKDOWN_INLINE_LINK -> {
+          tokens.add(Token(LITERAL, tokenText))
+          tokens.add(Token(WHITESPACE, " "))
+        }
+        tokenType === KDocTokens.MARKDOWN_LINK -> {
+          tokens.add(Token(LITERAL, tokenText))
+          tokens.add(Token(WHITESPACE, " "))
+        }
         tokenType === WHITE_SPACE -> {
           if (previousType === KDocTokens.TAG_NAME || previousType === KDocTokens.MARKDOWN_LINK) {
             tokens.add(Token(WHITESPACE, " "))
