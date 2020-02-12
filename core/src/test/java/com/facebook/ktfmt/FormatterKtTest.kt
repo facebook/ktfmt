@@ -1712,6 +1712,13 @@ class FormatterKtTest {
       |class MyClass {}
       |""".trimMargin())
 
+  @Test
+  fun `handle KDoc with link reference`() = assertFormatted(
+      """
+      |/** Doc line with a reference to [AnotherClass] in the middle of a sentence */
+      |class MyClass {}
+      |""".trimMargin())
+
   /** Verifies the given code passes through formatting, and stays the same at the end */
   private fun assertFormatted(code: String, maxWidth: Int = DEFAULT_MAX_WIDTH) {
     assertThatFormatting(code, maxWidth).isEqualTo(code)

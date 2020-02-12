@@ -58,17 +58,19 @@ object KDocFormatter {
     var previousType: IElementType? = null
     while (kDocLexer.tokenType != null) {
       val tokenType = kDocLexer.tokenType
-      val tokenText = kDocLexer.tokenText
+      val tokenText = with(kDocLexer.tokenText) {
+        if (previousType == KDocTokens.LEADING_ASTERISK && first() == ' ') substring(1) else this
+      }
+
       if (tokenType === KDocTokens.START) {
         newTokensBuilder.add(Token(BEGIN_KDOC, tokenText))
       } else if (tokenType === KDocTokens.LEADING_ASTERISK) {
-        // ignore
+        // Ignore, no need to output anything
       } else if (tokenType === KDocTokens.END) {
         newTokensBuilder.add(Token(END_KDOC, tokenText))
       } else if (tokenType === KDocTokens.TEXT) {
-        val trimmedText = tokenText.trim { it <= ' ' }
-        if (!trimmedText.isEmpty()) {
-          val words = trimmedText.split(" +".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        if (!tokenText.isEmpty()) {
+          val words = tokenText.split(" +".toRegex()).dropLastWhile { it.isEmpty() }
           var first = true
           for (word in words) {
             if (first) {
@@ -82,10 +84,9 @@ object KDocFormatter {
           }
         }
       } else if (tokenType === KDocTokens.TAG_NAME) {
-        newTokensBuilder.add(Token(LITERAL, tokenText.trim { it <= ' ' }))
+        newTokensBuilder.add(Token(LITERAL, tokenText))
       } else if (tokenType === KDocTokens.CODE_BLOCK_TEXT) {
-        val trimmedFirstSpaceText = if (tokenText.first() == ' ') tokenText.substring(1) else tokenText
-        newTokensBuilder.add(Token(LITERAL, trimmedFirstSpaceText))
+        newTokensBuilder.add(Token(LITERAL, tokenText))
       } else if (tokenType === KDocTokens.MARKDOWN_INLINE_LINK) {
         newTokensBuilder.add(Token(LITERAL, tokenText))
       } else if (tokenType === KDocTokens.MARKDOWN_LINK) {
