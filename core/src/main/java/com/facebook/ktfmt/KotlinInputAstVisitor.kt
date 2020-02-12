@@ -1191,7 +1191,11 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       builder.space()
       expression.then?.accept(this)
       if (expression.elseKeyword != null) {
-        builder.space()
+        if (expression.then?.text?.last() == '}') {
+          builder.space()
+        } else {
+          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+        }
         builder.token("else")
         builder.space()
         expression.`else`?.accept(this)

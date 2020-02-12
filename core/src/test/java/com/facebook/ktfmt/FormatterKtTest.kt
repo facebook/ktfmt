@@ -742,6 +742,18 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `if expression with break before else`() = assertFormatted(
+      """
+      |fun compute(b: Boolean) {
+      |  val c =
+      |      if (a + b < 20) a + b
+      |      else a
+      |  return if (a + b < 20) a + b
+      |  else c
+      |}
+      |""".trimMargin(), 30)
+
+  @Test
   fun `assignment expression on multiple lines`() = assertFormatted(
       """
       |fun f() {
