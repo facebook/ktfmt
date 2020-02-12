@@ -37,7 +37,7 @@ fun format(code: String, maxWidth: Int): String {
 
   val javaInput = KotlinInput(code, file)
   val options = JavaFormatterOptions.defaultOptions()
-  val javaOutput = JavaOutput("\n", javaInput, KDocCommentsHelper("\n", options))
+  val javaOutput = JavaOutput("\n", javaInput, KDocCommentsHelper("\n"))
   val builder = OpsBuilder(javaInput, javaOutput)
   file.accept(KotlinInputAstVisitor(builder))
   builder.sync(javaInput.text.length)

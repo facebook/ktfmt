@@ -28,12 +28,9 @@ import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.WHITESPACE
 import com.facebook.ktfmt.kdoc.Token.Type.HEADER_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.LIST_ITEM_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.PARAGRAPH_OPEN_TAG
-import com.google.common.collect.Sets.immutableEnumSet
-
-import com.facebook.ktfmt.kdoc.Token.Type
 import com.google.common.base.Strings
-import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Ordering
+import com.google.common.collect.Sets.immutableEnumSet
 
 /**
  * Stateful object that accepts "requests" and "writes," producing formatted Javadoc.
@@ -43,6 +40,18 @@ import com.google.common.collect.Ordering
  * are we inside?"
  */
 internal class KDocWriter(private val blockIndent: Int) {
+
+  /**
+   * Tokens that are always pinned to the following token. For example, `<p>` in `<p>Foo
+   * bar` (never `<p> Foo bar` or `<p>\nFoo bar`).
+   *
+   *
+   * This is not the only kind of "pinning" that we do: See also the joining of LITERAL tokens
+   * done by the lexer. The special pinning here is necessary because these tokens are not of type
+   * LITERAL (because they require other special handling).
+   */
+  private val START_OF_LINE_TOKENS = immutableEnumSet(LIST_ITEM_OPEN_TAG, PARAGRAPH_OPEN_TAG, HEADER_OPEN_TAG)
+
   private val output = StringBuilder()
   /**
    * Whether we are inside an `<li>` element, excluding the case in which the `<li>`
@@ -259,19 +268,5 @@ internal class KDocWriter(private val blockIndent: Int) {
   // If this is a hotspot, keep a String of many spaces around, and call append(string, start, end).
   private fun appendSpaces(count: Int) {
     output.append(Strings.repeat(" ", count))
-  }
-
-  companion object {
-
-    /**
-     * Tokens that are always pinned to the following token. For example, `<p>` in `<p>Foo
-     * bar` (never `<p> Foo bar` or `<p>\nFoo bar`).
-     *
-     *
-     * This is not the only kind of "pinning" that we do: See also the joining of LITERAL tokens
-     * done by the lexer. The special pinning here is necessary because these tokens are not of type
-     * LITERAL (because they require other special handling).
-     */
-    private val START_OF_LINE_TOKENS = immutableEnumSet(LIST_ITEM_OPEN_TAG, PARAGRAPH_OPEN_TAG, HEADER_OPEN_TAG)
   }
 }

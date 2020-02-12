@@ -25,15 +25,13 @@ import com.google.googlejavaformat.CommentsHelper
 import com.google.googlejavaformat.Input.Tok
 import com.google.googlejavaformat.Newlines
 import com.google.googlejavaformat.java.Formatter
-import com.google.googlejavaformat.java.JavaFormatterOptions
 import java.util.ArrayList
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 /**
  * `KDocCommentsHelper` extends [CommentsHelper] to rewrite KDoc comments.
  */
-class KDocCommentsHelper(private val lineSeparator: String, options: JavaFormatterOptions) : CommentsHelper {
+class KDocCommentsHelper(private val lineSeparator: String) : CommentsHelper {
 
   override fun rewrite(tok: Tok, maxWidth: Int, column0: Int): String {
     if (!tok.isComment) {
@@ -92,10 +90,10 @@ class KDocCommentsHelper(private val lineSeparator: String, options: JavaFormatt
     var lines = lines
     lines = wrapLineComments(lines, column0)
     val builder = StringBuilder()
-    builder.append(lines[0].trim { it <= ' ' })
+    builder.append(lines[0].trim())
     val indentString = Strings.repeat(" ", column0)
     for (i in 1 until lines.size) {
-      builder.append(lineSeparator).append(indentString).append(lines[i].trim { it <= ' ' })
+      builder.append(lineSeparator).append(indentString).append(lines[i].trim())
     }
     return builder.toString()
   }
@@ -136,12 +134,12 @@ class KDocCommentsHelper(private val lineSeparator: String, options: JavaFormatt
   // Add a +1 indent before '*', and add the '*' if necessary.
   private fun indentJavadoc(lines: List<String>, column0: Int): String {
     val builder = StringBuilder()
-    builder.append(lines[0].trim { it <= ' ' })
+    builder.append(lines[0].trim())
     val indent = column0 + 1
     val indentString = Strings.repeat(" ", indent)
     for (i in 1 until lines.size) {
       builder.append(lineSeparator).append(indentString)
-      val line = lines[i].trim { it <= ' ' }
+      val line = lines[i].trim()
       if (!line.startsWith("*")) {
         builder.append("* ")
       }
@@ -160,7 +158,7 @@ class KDocCommentsHelper(private val lineSeparator: String, options: JavaFormatt
     if (!it.hasNext()) {
       return false
     }
-    val first = it.next().trim { it <= ' ' }
+    val first = it.next().trim()
     // if it's actually javadoc, we're done
     if (first.startsWith("/**")) {
       return true
@@ -170,7 +168,7 @@ class KDocCommentsHelper(private val lineSeparator: String, options: JavaFormatt
       return false
     }
     while (it.hasNext()) {
-      if (!it.next().trim { it <= ' ' }.startsWith("*")) {
+      if (!it.next().trim().startsWith("*")) {
         return false
       }
     }

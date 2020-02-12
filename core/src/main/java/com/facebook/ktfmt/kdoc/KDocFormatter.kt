@@ -21,17 +21,21 @@ package com.facebook.ktfmt.kdoc
 
 import com.facebook.ktfmt.kdoc.Token.Type.BEGIN_KDOC
 import com.facebook.ktfmt.kdoc.Token.Type.BLANK_LINE
+import com.facebook.ktfmt.kdoc.Token.Type.CODE_CLOSE_TAG
+import com.facebook.ktfmt.kdoc.Token.Type.CODE_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.END_KDOC
 import com.facebook.ktfmt.kdoc.Token.Type.LIST_ITEM_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.LITERAL
+import com.facebook.ktfmt.kdoc.Token.Type.PRE_CLOSE_TAG
+import com.facebook.ktfmt.kdoc.Token.Type.PRE_OPEN_TAG
+import com.facebook.ktfmt.kdoc.Token.Type.TABLE_CLOSE_TAG
+import com.facebook.ktfmt.kdoc.Token.Type.TABLE_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.WHITESPACE
-import java.util.regex.Pattern.compile
-import org.jetbrains.kotlin.lexer.KtTokens.WHITE_SPACE
-
-import com.google.common.collect.ImmutableList
 import com.intellij.psi.tree.IElementType
+import java.util.regex.Pattern.compile
 import org.jetbrains.kotlin.kdoc.lexer.KDocLexer
 import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
+import org.jetbrains.kotlin.lexer.KtTokens.WHITE_SPACE
 
 /**
  * Entry point for formatting KDoc.
@@ -54,7 +58,7 @@ object KDocFormatter {
   fun formatKDoc(input: String, blockIndent: Int): String {
     val kDocLexer = KDocLexer()
     kDocLexer.start(input)
-    val newTokensBuilder = ImmutableList.Builder<Token>()
+    val tokens = mutableListOf<Token>()
     var previousType: IElementType? = null
     while (kDocLexer.tokenType != null) {
       val tokenType = kDocLexer.tokenType
@@ -62,49 +66,44 @@ object KDocFormatter {
         if (previousType == KDocTokens.LEADING_ASTERISK && first() == ' ') substring(1) else this
       }
 
-      if (tokenType === KDocTokens.START) {
-        newTokensBuilder.add(Token(BEGIN_KDOC, tokenText))
-      } else if (tokenType === KDocTokens.LEADING_ASTERISK) {
-        // Ignore, no need to output anything
-      } else if (tokenType === KDocTokens.END) {
-        newTokensBuilder.add(Token(END_KDOC, tokenText))
-      } else if (tokenType === KDocTokens.TEXT) {
-        if (!tokenText.isEmpty()) {
-          val words = tokenText.split(" +".toRegex()).dropLastWhile { it.isEmpty() }
-          var first = true
-          for (word in words) {
-            if (first) {
-              if (word == "-") {
-                newTokensBuilder.add(Token(LIST_ITEM_OPEN_TAG, ""))
+      when {
+        tokenType === KDocTokens.START -> tokens.add(Token(BEGIN_KDOC, tokenText))
+        tokenType === KDocTokens.LEADING_ASTERISK -> Unit // Ignore, no need to output anything
+        tokenType === KDocTokens.END -> tokens.add(Token(END_KDOC, tokenText))
+        tokenType === KDocTokens.TEXT -> {
+          if (!tokenText.isEmpty()) {
+            val words = tokenText.split(" +".toRegex()).dropLastWhile { it.isEmpty() }
+            var first = true
+            for (word in words) {
+              if (first) {
+                if (word == "-") {
+                  tokens.add(Token(LIST_ITEM_OPEN_TAG, ""))
+                }
+                first = false
               }
-              first = false
+              tokens.add(Token(LITERAL, word))
+              tokens.add(Token(WHITESPACE, " "))
             }
-            newTokensBuilder.add(Token(LITERAL, word))
-            newTokensBuilder.add(Token(WHITESPACE, " "))
           }
         }
-      } else if (tokenType === KDocTokens.TAG_NAME) {
-        newTokensBuilder.add(Token(LITERAL, tokenText))
-      } else if (tokenType === KDocTokens.CODE_BLOCK_TEXT) {
-        newTokensBuilder.add(Token(LITERAL, tokenText))
-      } else if (tokenType === KDocTokens.MARKDOWN_INLINE_LINK) {
-        newTokensBuilder.add(Token(LITERAL, tokenText))
-      } else if (tokenType === KDocTokens.MARKDOWN_LINK) {
-        newTokensBuilder.add(Token(LITERAL, tokenText))
-      } else if (tokenType === WHITE_SPACE) {
-        if (previousType === KDocTokens.TAG_NAME || previousType === KDocTokens.MARKDOWN_LINK) {
-          newTokensBuilder.add(Token(WHITESPACE, " "))
-        } else {
-          newTokensBuilder.add(Token(BLANK_LINE, ""))
+        tokenType === KDocTokens.TAG_NAME -> tokens.add(Token(LITERAL, tokenText))
+        tokenType === KDocTokens.CODE_BLOCK_TEXT -> tokens.add(Token(LITERAL, tokenText))
+        tokenType === KDocTokens.MARKDOWN_INLINE_LINK -> tokens.add(Token(LITERAL, tokenText))
+        tokenType === KDocTokens.MARKDOWN_LINK -> tokens.add(Token(LITERAL, tokenText))
+        tokenType === WHITE_SPACE -> {
+          if (previousType === KDocTokens.TAG_NAME || previousType === KDocTokens.MARKDOWN_LINK) {
+            tokens.add(Token(WHITESPACE, " "))
+          } else {
+            tokens.add(Token(BLANK_LINE, ""))
+          }
         }
-      } else {
-        throw RuntimeException("Unexpected: " + tokenType!!)
+        else -> throw RuntimeException("Unexpected: $tokenType")
       }
 
       previousType = tokenType
       kDocLexer.advance()
     }
-    val result = render(newTokensBuilder.build(), blockIndent)
+    val result = render(tokens, blockIndent)
     return makeSingleLineIfPossible(blockIndent, result)
   }
 
@@ -118,12 +117,12 @@ object KDocFormatter {
           return output.toString()
         }
         LIST_ITEM_OPEN_TAG -> output.writeListItemOpen(token)
-        Token.Type.PRE_OPEN_TAG -> output.writePreOpen(token)
-        Token.Type.PRE_CLOSE_TAG -> output.writePreClose(token)
-        Token.Type.CODE_OPEN_TAG -> output.writeCodeOpen(token)
-        Token.Type.CODE_CLOSE_TAG -> output.writeCodeClose(token)
-        Token.Type.TABLE_OPEN_TAG -> output.writeTableOpen(token)
-        Token.Type.TABLE_CLOSE_TAG -> output.writeTableClose(token)
+        PRE_OPEN_TAG -> output.writePreOpen(token)
+        PRE_CLOSE_TAG -> output.writePreClose(token)
+        CODE_OPEN_TAG -> output.writeCodeOpen(token)
+        CODE_CLOSE_TAG -> output.writeCodeClose(token)
+        TABLE_OPEN_TAG -> output.writeTableOpen(token)
+        TABLE_CLOSE_TAG -> output.writeTableClose(token)
         BLANK_LINE -> output.writeKDocWhitespace()
         WHITESPACE -> output.requestWhitespace()
         LITERAL -> output.writeLiteral(token)
