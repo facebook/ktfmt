@@ -62,15 +62,22 @@ object KDocFormatter {
     var previousType: IElementType? = null
     while (kDocLexer.tokenType != null) {
       val tokenType = kDocLexer.tokenType
-      val tokenText = with(kDocLexer.tokenText) {
-        if (previousType == KDocTokens.LEADING_ASTERISK && first() == ' ') substring(1) else this
-      }
+      val tokenText =
+          with(kDocLexer.tokenText) {
+            if (previousType == KDocTokens.LEADING_ASTERISK && first() == ' ') substring(1) else this
+          }
 
-      when {
-        tokenType === KDocTokens.START -> tokens.add(Token(BEGIN_KDOC, tokenText))
-        tokenType === KDocTokens.LEADING_ASTERISK -> Unit // Ignore, no need to output anything
-        tokenType === KDocTokens.END -> tokens.add(Token(END_KDOC, tokenText))
-        tokenType === KDocTokens.TEXT -> {
+      when (tokenType) {
+        KDocTokens.START -> tokens.add(Token(BEGIN_KDOC, tokenText))
+        KDocTokens.END -> tokens.add(Token(END_KDOC, tokenText))
+        KDocTokens.LEADING_ASTERISK -> Unit // Ignore, no need to output anything
+        KDocTokens.TAG_NAME -> tokens.add(Token(LITERAL, tokenText))
+        KDocTokens.CODE_BLOCK_TEXT -> tokens.add(Token(LITERAL, tokenText))
+        KDocTokens.MARKDOWN_INLINE_LINK, KDocTokens.MARKDOWN_LINK -> {
+          tokens.add(Token(LITERAL, tokenText))
+          tokens.add(Token(WHITESPACE, " "))
+        }
+        KDocTokens.TEXT -> {
           if (tokenText.isBlank()) {
             tokens.add(Token(WHITESPACE, " "))
           } else {
@@ -88,17 +95,7 @@ object KDocFormatter {
             }
           }
         }
-        tokenType === KDocTokens.TAG_NAME -> tokens.add(Token(LITERAL, tokenText))
-        tokenType === KDocTokens.CODE_BLOCK_TEXT -> tokens.add(Token(LITERAL, tokenText))
-        tokenType === KDocTokens.MARKDOWN_INLINE_LINK -> {
-          tokens.add(Token(LITERAL, tokenText))
-          tokens.add(Token(WHITESPACE, " "))
-        }
-        tokenType === KDocTokens.MARKDOWN_LINK -> {
-          tokens.add(Token(LITERAL, tokenText))
-          tokens.add(Token(WHITESPACE, " "))
-        }
-        tokenType === WHITE_SPACE -> {
+        WHITE_SPACE -> {
           if (previousType === KDocTokens.TAG_NAME || previousType === KDocTokens.MARKDOWN_LINK) {
             tokens.add(Token(WHITESPACE, " "))
           } else {
