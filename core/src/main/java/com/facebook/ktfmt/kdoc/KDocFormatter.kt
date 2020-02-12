@@ -71,7 +71,9 @@ object KDocFormatter {
         tokenType === KDocTokens.LEADING_ASTERISK -> Unit // Ignore, no need to output anything
         tokenType === KDocTokens.END -> tokens.add(Token(END_KDOC, tokenText))
         tokenType === KDocTokens.TEXT -> {
-          if (!tokenText.isEmpty()) {
+          if (tokenText.isBlank()) {
+            tokens.add(Token(WHITESPACE, " "))
+          } else {
             val words = tokenText.split(" +".toRegex()).dropLastWhile { it.isEmpty() }
             var first = true
             for (word in words) {
