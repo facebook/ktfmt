@@ -240,7 +240,8 @@ class KotlinTok(
     private val position: Int,
     private val columnI: Int,
     val isToken: Boolean,
-    private val kind: KtToken) : Input.Tok {
+    private val kind: KtToken
+) : Input.Tok {
 
   override fun getIndex(): Int = index
 
@@ -279,7 +280,8 @@ class KotlinTok(
 class KotlinToken(
     private val toksBefore: ImmutableList<KotlinTok>,
     private val kotlinTok: KotlinTok,
-    private val toksAfter: ImmutableList<KotlinTok>) : Input.Token {
+    private val toksAfter: ImmutableList<KotlinTok>
+) : Input.Token {
 
   override fun getTok(): KotlinTok = kotlinTok
 

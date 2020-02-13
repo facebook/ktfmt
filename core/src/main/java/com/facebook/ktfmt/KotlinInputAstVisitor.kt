@@ -540,7 +540,9 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   }
 
   private fun <T> forEachCommaSeparated(
-      list: Iterable<T>, delimiter: (() -> Unit)? = null, function: (T) -> Unit
+      list: Iterable<T>,
+      delimiter: (() -> Unit)? = null,
+      function: (T) -> Unit
   ) {
     builder.block(ZERO) {
       var first = true
@@ -1331,17 +1333,23 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /** Example `for (i in items) { ... }` */
   override fun visitForExpression(expression: KtForExpression) {
     builder.sync(expression)
-    builder.token("for")
-    builder.space()
-    builder.token("(")
-    expression.loopParameter?.accept(this)
-    builder.space()
-    builder.token("in")
-    builder.space()
-    expression.loopRange?.accept(this)
-    builder.token(")")
-    builder.space()
-    expression.body?.accept(this)
+    builder.block(ZERO) {
+      builder.token("for")
+      builder.space()
+      builder.token("(")
+      expression.loopParameter?.accept(this)
+      builder.space()
+      builder.token("in")
+      builder.block(ZERO) {
+        builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+        builder.block(expressionBreakIndent) {
+          expression.loopRange?.accept(this)
+        }
+      }
+      builder.token(")")
+      builder.space()
+      expression.body?.accept(this)
+    }
   }
 
   /** Example `while (a < b) { ... }` */
@@ -1465,7 +1473,8 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   }
 
   override fun visitCollectionLiteralExpression(
-      expression: KtCollectionLiteralExpression, data: Void?
+      expression: KtCollectionLiteralExpression,
+      data: Void?
   ): Void? {
     builder.sync(expression)
     builder.token("[")

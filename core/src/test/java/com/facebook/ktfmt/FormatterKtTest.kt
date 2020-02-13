@@ -1071,6 +1071,29 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `handle for loops with long dot chains`() =
+      assertFormatted(
+          """
+      |fun f(a: Node<Int>) {
+      |  for (child in node.next.data()) {
+      |    println(child)
+      |  }
+      |  for (child in
+      |      node.next.next.data()) {
+      |    println(child)
+      |  }
+      |  for (child in
+      |      node.next
+      |          .next
+      |          .next
+      |          .next
+      |          .data()) {
+      |    println(child)
+      |  }
+      |}
+      |""".trimMargin(), 35)
+
+  @Test
   fun `Qualified type`() =
       assertFormatted(
           """
