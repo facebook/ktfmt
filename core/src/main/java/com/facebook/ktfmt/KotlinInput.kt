@@ -15,12 +15,17 @@
 package com.facebook.ktfmt
 
 import com.google.common.base.MoreObjects
+import com.google.common.collect.DiscreteDomain
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableRangeMap
+import com.google.common.collect.Iterables.getLast
 import com.google.common.collect.Range
+import com.google.common.collect.RangeSet
+import com.google.common.collect.TreeRangeSet
 import com.google.googlejavaformat.Input
 import com.google.googlejavaformat.Newlines
+import com.google.googlejavaformat.java.FormatterException
 import com.google.googlejavaformat.java.JavaOutput
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiComment
@@ -84,6 +89,52 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
         kToToken[tok.index] = token
       }
     }
+  }
+
+  @Throws(FormatterException::class)
+  fun characterRangesToTokenRanges(characterRanges: Collection<Range<Int>>): RangeSet<Int> {
+    val tokenRangeSet = TreeRangeSet.create<Int>()
+    for (characterRange0 in characterRanges) {
+      val characterRange = characterRange0.canonical(DiscreteDomain.integers())
+      tokenRangeSet.add(
+          characterRangeToTokenRange(
+              characterRange.lowerEndpoint(),
+              characterRange.upperEndpoint() - characterRange.lowerEndpoint()))
+    }
+    return tokenRangeSet
+  }
+
+  /**
+   * Convert from an offset and length flag pair to a token range.
+   *
+   * @param offset the `0`-based offset in characters
+   * @param length the length in characters
+   * @return the `0`-based [Range] of tokens
+   * @throws FormatterException
+   */
+  @Throws(FormatterException::class)
+  internal fun characterRangeToTokenRange(offset: Int, length: Int): Range<Int> {
+    var length = length
+    val requiredLength = offset + length
+    if (requiredLength > text.length) {
+      throw FormatterException(
+          String.format(
+              "error: invalid length %d, offset + length (%d) is outside the file",
+              length, requiredLength))
+    }
+    when {
+      length < 0 -> return EMPTY_RANGE
+      length == 0 -> // 0 stands for "format the line under the cursor"
+        length = 1
+    }
+    val enclosed = getPositionTokenMap()
+        .subRangeMap(Range.closedOpen(offset, offset + length))
+        .asMapOfRanges()
+        .values
+    return if (enclosed.isEmpty()) {
+      EMPTY_RANGE
+    } else Range.closedOpen(
+        enclosed.iterator().next().tok.index, getLast(enclosed).getTok().getIndex() + 1)
   }
 
   private fun makePositionToColumnMap(toks: List<KotlinTok>): ImmutableMap<Int, Int> {

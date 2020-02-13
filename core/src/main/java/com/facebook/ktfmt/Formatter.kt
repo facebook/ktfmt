@@ -15,6 +15,8 @@
 package com.facebook.ktfmt
 
 import com.facebook.ktfmt.kdoc.KDocCommentsHelper
+import com.google.common.collect.ImmutableList
+import com.google.common.collect.Range
 import com.google.googlejavaformat.Doc
 import com.google.googlejavaformat.DocBuilder
 import com.google.googlejavaformat.OpsBuilder
@@ -35,22 +37,19 @@ fun format(code: String): String = format(code, DEFAULT_MAX_WIDTH)
 fun format(code: String, maxWidth: Int): String {
   val file = Parser.parse(code)
 
-  val javaInput = KotlinInput(code, file)
+  val kotlinInput = KotlinInput(code, file)
   val options = JavaFormatterOptions.defaultOptions()
-  val javaOutput = JavaOutput("\n", javaInput, KDocCommentsHelper("\n"))
-  val builder = OpsBuilder(javaInput, javaOutput)
+  val javaOutput = JavaOutput("\n", kotlinInput, KDocCommentsHelper("\n"))
+  val builder = OpsBuilder(kotlinInput, javaOutput)
   file.accept(KotlinInputAstVisitor(builder))
-  builder.sync(javaInput.text.length)
+  builder.sync(kotlinInput.text.length)
   builder.drain()
   val doc = DocBuilder().withOps(builder.build()).build()
   doc.computeBreaks(javaOutput.commentsHelper, maxWidth, Doc.State(+0, 0))
   doc.write(javaOutput)
   javaOutput.flush()
 
-  val stringBuilder = StringBuilder()
-  (0 until javaOutput.lineCount).forEach {
-    stringBuilder.append(javaOutput.getLine(it))
-    stringBuilder.append('\n')
-  }
-  return stringBuilder.toString()
+  val tokenRangeSet =
+      kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
+  return JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet))
 }

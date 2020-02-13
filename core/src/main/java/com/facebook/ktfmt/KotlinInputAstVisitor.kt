@@ -14,6 +14,8 @@
 
 package com.facebook.ktfmt
 
+import com.google.common.base.Throwables
+import com.google.common.collect.ImmutableList
 import com.google.googlejavaformat.Doc
 import com.google.googlejavaformat.FormattingError
 import com.google.googlejavaformat.Indent
@@ -122,6 +124,9 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
 
   /** Standard indentation for a long expression or function call, it is different than block indentation on purpose */
   private val expressionBreakIndent: Indent.Const = Indent.Const.make(+4, 1)
+
+  /** A record of whether we have visited into an expression.  */
+  private val inExpression = ArrayDeque(ImmutableList.of(false))
 
   /** Example: `fun foo(n: Int) { println(n) }` */
   override fun visitNamedFunction(function: KtNamedFunction) {
@@ -1587,6 +1592,47 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
         }
       }
       builder.forcedBreak()
+    }
+  }
+
+  /**
+   * visitElement is called for almost all types of AST nodes.
+   * We use it to keep track of whether we're currently inside an expression or not.
+   */
+  override fun visitElement(element: PsiElement) {
+    inExpression.addLast(element is KtExpression || inExpression.peekLast())
+    val previous = builder.depth()
+    try {
+      super.visitElement(element)
+    } catch (e: FormattingError) {
+      throw e
+    } catch (t: Throwable) {
+      throw FormattingError(builder.diagnostic(Throwables.getStackTraceAsString(t)))
+    } finally {
+      inExpression.removeLast()
+    }
+    builder.checkClosed(previous)
+  }
+
+  override fun visitKtFile(file: KtFile) {
+    markForPartialFormat()
+    super.visitKtFile(file)
+    markForPartialFormat()
+  }
+
+  private fun inExpression(): Boolean {
+    return inExpression.peekLast()
+  }
+
+  /**
+   * markForPartialFormat is used to delineate the smallest areas of code that must be formatted together.
+   *
+   * When only parts of the code are being formatted, the requested area is expanded until it's
+   * covered by an area marked by this method.
+   */
+  private fun markForPartialFormat() {
+    if (!inExpression()) {
+      builder.markForPartialFormat()
     }
   }
 
