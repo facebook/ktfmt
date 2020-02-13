@@ -21,11 +21,11 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.PrintStream
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
   if (args.isEmpty()) {
-    println("Usage: ktfmt File1.kt File2.kt ...")
-    return
+    fatal("Usage: ktfmt File1.kt File2.kt ...")
   }
 
   if (args.size == 1 && args[0] == "-") {
@@ -37,17 +37,18 @@ fun main(args: Array<String>) {
   try {
     fileNames = expandArgsToFileNames(args)
   } catch (e: java.lang.IllegalStateException) {
-    println(e.message)
-    return
+    fatal(e.message)
   }
 
   if (fileNames.isEmpty()) {
-    println("Error: no .kt files found")
-    return
+    fatal("Error: no .kt files found")
   }
 
   val printStack = fileNames.size == 1
-  fileNames.parallelStream().forEach { formatFile(it, printStack) }
+  val success = fileNames.parallelStream().allMatch { formatFile(it, printStack) }
+  if (!success) {
+    exitProcess(1)
+  }
 }
 
 fun formatStdin(inputStream: InputStream, printStream: PrintStream) {
@@ -76,17 +77,27 @@ fun expandArgsToFileNames(args: Array<String>): List<File> {
   return result
 }
 
-private fun formatFile(file: File, printStack: Boolean) {
-  try {
+/** 'formatFile' formats 'file' in place, and return whether it was successful. */
+private fun formatFile(file: File, printStack: Boolean): Boolean {
+  return try {
     val code = file.readText()
     file.writeText(format(code))
-    println("Done formatting $file")
+    System.err.println("Done formatting $file")
+    true
   } catch (e: IOException) {
-    println("Error formatting $file: ${e.message}; skipping.")
+    System.err.println("Error formatting $file: ${e.message}; skipping.")
+    false
   } catch (e: FormattingError) {
-    println("Formatting Error when processing $file: ${e.message}; skipping.")
+    System.err.println("Formatting Error when processing $file: ${e.message}; skipping.")
     if (printStack) {
       e.printStackTrace()
     }
+    false
   }
+}
+
+/** 'fatal' prints 'message' to stderr, and exits with a revalue of 1. */
+private fun fatal(message: String?): Nothing {
+  System.err.println(message)
+  exitProcess(1)
 }
