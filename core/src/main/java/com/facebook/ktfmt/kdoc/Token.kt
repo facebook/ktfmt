@@ -22,12 +22,11 @@ package com.facebook.ktfmt.kdoc
 /**
  * KDoc token. Our idea of what constitutes a token is often larger or smaller than what you'd
  * naturally expect. The decision is usually pragmatic rather than theoretical. Most of the details
- * are in [KDocFormatter].
+ * are in [KDocFormatter] .
  */
 internal class Token(val type: Type, val value: String) {
   /**
    * KDoc token type.
-   *
    *
    * The general idea is that every token that requires special handling (extra line breaks,
    * indentation, forcing or forbidding whitespace) from [KDocWriter] gets its own type. But I
@@ -35,15 +34,14 @@ internal class Token(val type: Type, val value: String) {
    * if we wanted. (For example, PARAGRAPH_CLOSE_TAG and LIST_ITEM_CLOSE_TAG could share a common
    * IGNORABLE token type. But their corresponding OPEN tags exist, so I've kept the CLOSE tags.)
    *
-   *
    * Note, though, that tokens of the same type may still have been handled differently by [ ] when
-   * it created them. For example, LITERAL is used for both plain text and
-   * inline tags, even though the two affect the lexer's state differently.
+   * it created them. For example, LITERAL is used for both plain text and inline tags, even though
+   * the two affect the lexer's state differently.
    */
   internal enum class Type {
-    /** ∕✱✱  */
+    /** ∕✱✱ */
     BEGIN_KDOC,
-    /** ✱∕  */
+    /** ✱∕ */
     END_KDOC,
     LIST_ITEM_OPEN_TAG,
     HEADER_OPEN_TAG,
@@ -59,25 +57,22 @@ internal class Token(val type: Type, val value: String) {
     CODE,
     BLANK_LINE,
     /**
-     * Whitespace that is not in a `<pre>` or `<table>` section. Whitespace includes
-     * leading newlines, asterisks, and tabs and spaces. In the output, it is translated to newlines
-     * (with leading spaces and asterisks) or spaces.
+     * Whitespace that is not in a `<pre>` or `<table>` section. Whitespace includes leading
+     * newlines, asterisks, and tabs and spaces. In the output, it is translated to newlines (with
+     * leading spaces and asterisks) or spaces.
      */
     WHITESPACE,
     /**
-     * Anything else: `foo`, `<b>`, `{ foo}` etc. [KDocFormatter]
-     * sometimes creates adjacent literal tokens, which it then merges into a single, larger literal
-     * token before returning its output.
+     * Anything else: `foo`, `<b>`, `{ foo}` etc. [KDocFormatter] sometimes creates adjacent literal
+     * tokens, which it then merges into a single, larger literal token before returning its output.
      *
-     *
-     * This also includes whitespace in a `<pre>` or `<table>` section. We preserve
-     * user formatting in these sections, including arbitrary numbers of spaces. By treating such
-     * whitespace as a literal, we can merge it with adjacent literals, preventing us from
-     * autowrapping inside these sections -- and doing so naively, to boot. The wrapped line would
-     * have no indentation after "* " or, possibly worse, it might begin with an arbitrary amount of
-     * whitespace that didn't fit on the previous line. Of course, by doing this, we're potentially
-     * creating lines of more than 100 characters. But it seems fair to call in the humans to
-     * resolve such problems.
+     * This also includes whitespace in a `<pre>` or `<table>` section. We preserve user formatting
+     * in these sections, including arbitrary numbers of spaces. By treating such whitespace as a
+     * literal, we can merge it with adjacent literals, preventing us from autowrapping inside these
+     * sections -- and doing so naively, to boot. The wrapped line would have no indentation after
+     * "* " or, possibly worse, it might begin with an arbitrary amount of whitespace that didn't
+     * fit on the previous line. Of course, by doing this, we're potentially creating lines of more
+     * than 100 characters. But it seems fair to call in the humans to resolve such problems.
      */
     LITERAL
   }

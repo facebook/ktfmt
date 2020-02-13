@@ -87,10 +87,7 @@ class MainKtTest {
   @Test
   fun `expandArgsToFileNames - a dash is an error`() {
     try {
-      expandArgsToFileNames(
-          arrayOf(
-              root.resolve("foo.bar").toString(),
-              File("-").toString()))
+      expandArgsToFileNames(arrayOf(root.resolve("foo.bar").toString(), File("-").toString()))
       fail("expected exception, but nothing was thrown")
     } catch (e: IllegalStateException) {
       assertThat(e.message).contains("Error")

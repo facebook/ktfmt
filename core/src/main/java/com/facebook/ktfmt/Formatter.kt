@@ -26,8 +26,8 @@ import com.google.googlejavaformat.java.JavaOutput
 const val DEFAULT_MAX_WIDTH: Int = 100
 
 /**
- * format formats the Kotlin code given in 'code' and returns it as a string.
- * This method is accessed through Reflection.
+ * format formats the Kotlin code given in 'code' and returns it as a string. This method is
+ * accessed through Reflection.
  */
 fun format(code: String): String = format(code, DEFAULT_MAX_WIDTH)
 

@@ -114,15 +114,16 @@ import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import org.jetbrains.kotlin.psi.stubs.elements.KtAnnotationEntryElementType
 import org.jetbrains.kotlin.types.Variance
 
-/**
- * An AST visitor that builds a stream of {@link Op}s to format.
- */
+/** An AST visitor that builds a stream of {@link Op}s to format. */
 class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
 
   /** Standard indentation for a block */
   private val blockIndent: Indent.Const = Indent.Const.make(+2, 1)
 
-  /** Standard indentation for a long expression or function call, it is different than block indentation on purpose */
+  /**
+   * Standard indentation for a long expression or function call, it is different than block
+   * indentation on purpose
+   */
   private val expressionBreakIndent: Indent.Const = Indent.Const.make(+4, 1)
 
   /** A record of whether we have visited into an expression.  */
@@ -198,9 +199,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     builder.token("<")
     builder.block(expressionBreakIndent) {
       val arguments = typeArgumentList.arguments
-      forEachCommaSeparated(arguments) {
-        it.accept(this)
-      }
+      forEachCommaSeparated(arguments) { it.accept(this) }
     }
     builder.token(">")
   }
@@ -247,9 +246,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       builder.token(keyword)
       if (typeParameters != null) {
         builder.space()
-        builder.block(ZERO) {
-          typeParameters.accept(this)
-        }
+        builder.block(ZERO) { typeParameters.accept(this) }
       }
 
       if (name != null || receiverTypeReference != null) {
@@ -268,9 +265,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       builder.block(ZERO) {
         if (parameters != null && parameters.isNotEmpty()) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-          builder.block(expressionBreakIndent) {
-            visitFormals(parameters)
-          }
+          builder.block(expressionBreakIndent) { visitFormals(parameters) }
         }
         if (emitParenthesis) {
           if (parameters != null && parameters.isNotEmpty()) {
@@ -286,9 +281,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
             } else {
               builder.space()
             }
-            builder.block(expressionBreakIndent) {
-              type.accept(this)
-            }
+            builder.block(expressionBreakIndent) { type.accept(this) }
           }
         }
       }
@@ -304,9 +297,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
           builder.token("=")
           builder.block(expressionBreakIndent) {
             builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
-            builder.block(ZERO) {
-              nonBlockBodyExpressions.accept(this)
-            }
+            builder.block(ZERO) { nonBlockBodyExpressions.accept(this) }
           }
         }
       }
@@ -317,15 +308,11 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     }
   }
 
-  private fun visitFormals(
-      parameters: List<KtParameter>
-  ) {
+  private fun visitFormals(parameters: List<KtParameter>) {
     if (parameters.isEmpty()) {
       return
     }
-    forEachCommaSeparated(parameters) {
-      it.accept(this)
-    }
+    forEachCommaSeparated(parameters) { it.accept(this) }
   }
 
   private fun genSym(): Output.BreakTag {
@@ -360,9 +347,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
       }
       first = false
-      builder.block(ZERO) {
-        statement.accept(this)
-      }
+      builder.block(ZERO) { statement.accept(this) }
     }
   }
 
@@ -409,9 +394,9 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /**
    * Example: "com.facebook.bla.bla" in imports or "a.b.c.d" in expressions.
    *
-   * There's a few cases that are different. We deal with imports by keeping them on the same line. For regular chained
-   * expressions we go the left most descendant so we can start indentation only before the first break (a `.` or `?.`),
-   * and keep the seem indentation for this chain of calls.
+   * There's a few cases that are different. We deal with imports by keeping them on the same line.
+   * For regular chained expressions we go the left most descendant so we can start indentation only
+   * before the first break (a `.` or `?.`), and keep the seem indentation for this chain of calls.
    */
   override fun visitQualifiedExpression(expression: KtQualifiedExpression) {
     builder.sync(expression)
@@ -425,8 +410,9 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       return
     }
 
-    val parts = ArrayDeque<KtQualifiedExpression>()
-        .apply {
+    val parts =
+        ArrayDeque<KtQualifiedExpression>()
+            .apply {
           var current: KtExpression = expression
           while (current is KtQualifiedExpression) {
             addFirst(current)
@@ -443,7 +429,8 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       }
       builder.token(receiver.operationSign.value)
       builder.block(if (isFirst) ZERO else expressionBreakIndent) {
-        receiver.selectorExpression?.accept(this)
+        receiver.selectorExpression
+            ?.accept(this)
       }
     }
   }
@@ -473,18 +460,13 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       typeArgumentList?.accept(this)
       builder.guessToken("(")
       if (argumentsSize > 0) {
-        builder.block(ZERO) {
-          argumentList?.accept(this)
-        }
+        builder.block(ZERO) { argumentList?.accept(this) }
       }
       builder.guessToken(")")
       if (lambdaArguments.isNotEmpty()) {
-        if (argumentsSize == 0) {
-        }
+        if (argumentsSize == 0) {}
         builder.space()
-        lambdaArguments.forEach {
-          it.accept(this)
-        }
+        lambdaArguments.forEach { it.accept(this) }
       }
     }
   }
@@ -494,10 +476,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     builder.sync(list)
     // Break before args.
     builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-    builder.block(expressionBreakIndent) {
-      forEachCommaSeparated(list.arguments) {
-        it.accept(this)
-      }
+    builder.block(expressionBreakIndent) { forEachCommaSeparated(list.arguments) { it.accept(this) }
     }
   }
 
@@ -511,9 +490,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       builder.block(blockIndent) {
         if (valueParameters.isNotEmpty()) {
           builder.space()
-          forEachCommaSeparated(valueParameters) {
-            it.accept(this)
-          }
+          forEachCommaSeparated(valueParameters) { it.accept(this) }
           builder.space()
           builder.token("->")
           builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
@@ -562,7 +539,9 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     }
   }
 
-  private fun <T> forEachCommaSeparated(list: Iterable<T>, delimiter: (() -> Unit)? = null, function: (T) -> Unit) {
+  private fun <T> forEachCommaSeparated(
+      list: Iterable<T>, delimiter: (() -> Unit)? = null, function: (T) -> Unit
+  ) {
     builder.block(ZERO) {
       var first = true
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
@@ -591,7 +570,8 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
         argument.getArgumentName()?.accept(this)
         builder.space()
         builder.token("=")
-        builder.breakOp(Doc.FillMode.INDEPENDENT, if (hasArgName) " " else "", expressionBreakIndent)
+        builder.breakOp(
+            Doc.FillMode.INDEPENDENT, if (hasArgName) " " else "", expressionBreakIndent)
       }
       builder.block(ZERO) {
         if (argument.isSpread) {
@@ -619,16 +599,16 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /**
    * For example `a + b`, `a + b + c` or `a..b`
    *
-   * The extra handling here drills to the left most expression and handles it for
-   * long chains of binary expressions that are formatted not accordingly to the associative values
-   * That is, we want to think of `a + b + c` as `(a + b) + c`, whereas the AST parses it as
-   * `a + (b + c)`
+   * The extra handling here drills to the left most expression and handles it for long chains of
+   * binary expressions that are formatted not accordingly to the associative values That is, we
+   * want to think of `a + b + c` as `(a + b) + c`, whereas the AST parses it as `a + (b + c)`
    */
   override fun visitBinaryExpression(expression: KtBinaryExpression) {
     builder.sync(expression)
 
-    val parts = ArrayDeque<KtBinaryExpression>()
-        .apply {
+    val parts =
+        ArrayDeque<KtBinaryExpression>()
+            .apply {
           var current: KtExpression? = expression
           while (current is KtBinaryExpression) {
             addFirst(current)
@@ -687,12 +667,12 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   }
 
   /**
-   *  Declare one variable or variable-like thing.
+   * Declare one variable or variable-like thing.
    *
-   *  Examples:
-   *  - `var a: Int = 5`
-   *  - `a: Int`
-   *  - `private val b:
+   * Examples:
+   * - `var a: Int = 5`
+   * - `a: Int`
+   * - `private val b:
    */
   private fun declareOne(
       kind: DeclarationKind,
@@ -776,9 +756,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     }
     if (initializer != null) {
       builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-      builder.block(expressionBreakIndent) {
-        initializer.accept(this)
-      }
+      builder.block(expressionBreakIndent) { initializer.accept(this) }
     }
 
     if (isField) {
@@ -837,8 +815,8 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     builder.open(ZERO)
     builder.block(blockIndent) {
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      val (enumEntries, nonEnumEntryStatements) =
-          body?.children?.partition { it is KtEnumEntry } ?: fail()
+      val (enumEntries, nonEnumEntryStatements) = body?.children
+          ?.partition { it is KtEnumEntry } ?: fail()
       visitEnumEntries(enumEntries)
 
       builder.forcedBreak()
@@ -852,17 +830,14 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   }
 
   /** Example `RED, GREEN, BLUE,` in an enum class, or `RED, GREEN;` */
-  private fun visitEnumEntries(
-      enumEntries: List<PsiElement>
-  ) {
+  private fun visitEnumEntries(enumEntries: List<PsiElement>) {
     forEachCommaSeparated(
         enumEntries,
-        delimiter = {
+        delimiter =
+            {
           builder.token(",")
           builder.forcedBreak()
-        }) {
-      it.accept(this)
-    }
+        }) { it.accept(this) }
     builder.guessToken(",")
     builder.guessToken(";")
   }
@@ -879,9 +854,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       builder.token("(")
       if (constructor.valueParameters.isNotEmpty()) {
         builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-        builder.block(expressionBreakIndent) {
-          visitFormals(constructor.valueParameters)
-        }
+        builder.block(expressionBreakIndent) { visitFormals(constructor.valueParameters) }
       }
       if (constructor.hasConstructorKeyword()) {
         builder.close()
@@ -968,9 +941,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /** Example `import com.foo.A; import com.bar.B` */
   override fun visitImportList(importList: KtImportList) {
     builder.sync(importList)
-    importList.imports.forEach {
-      it.accept(this)
-    }
+    importList.imports.forEach { it.accept(this) }
     builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
   }
 
@@ -1015,11 +986,13 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /**
    * For example `@Magic @Fred(1, 5)`
    *
-   * This visits only annotations that appear before keyword modifiers (such as `public`) since we can break after
-   * annotations, but only if they appear before keywords. We avoid breaking in the middle of the modifier keywords list
+   * This visits only annotations that appear before keyword modifiers (such as `public`) since we
+   * can break after annotations, but only if they appear before keywords. We avoid breaking in the
+   * middle of the modifier keywords list
    */
   private fun visitAnnotationBeforeModifiers(list: KtModifierList) {
-    for (child in list.node.children()) {
+    for (child in list.node
+        .children()) {
       if (child.psi is PsiWhiteSpace) {
         continue
       }
@@ -1033,14 +1006,15 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /**
    * For example `private final inline`
    *
-   * This visits keywords and annotations that appear after the first keyword. For example `public @Inject constructor`.
-   * Ideally, you should user `@Inject public constructor` but since we cannot reorder those without making possible
-   * mistakes with tokens right now, we just treat annotations before the keywords differently and visit them in
-   * [visitAnnotationBeforeModifiers] instead.
+   * This visits keywords and annotations that appear after the first keyword. For example `public
+   * @Inject constructor`. Ideally, you should user `@Inject public constructor` but since we cannot
+   * reorder those without making possible mistakes with tokens right now, we just treat annotations
+   * before the keywords differently and visit them in [visitAnnotationBeforeModifiers] instead.
    */
   private fun visitKeywordModifiers(list: KtModifierList) {
     var onlyAnnotationsSoFar = true
-    for (child in list.node.children()) {
+    for (child in list.node
+        .children()) {
       if (child.psi is PsiWhiteSpace) {
         continue
       }
@@ -1049,7 +1023,8 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       }
       onlyAnnotationsSoFar = false
       when (child.elementType) {
-        is KtAnnotationEntryElementType -> visitAnnotationEntry(child.psi as KtAnnotationEntry, canBreak = false)
+        is KtAnnotationEntryElementType ->
+            visitAnnotationEntry(child.psi as KtAnnotationEntry, canBreak = false)
         is KtModifierKeywordToken -> {
           builder.token(child.text)
           builder.space()
@@ -1066,7 +1041,8 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /**
    * For example `@Magic` or `@Fred(1, 5)`
    *
-   * @param canBreak whether we are currently visiting annotations after which we can break the line. An example of
+   * @param canBreak whether we are currently visiting annotations after which we can break the
+   * line. An example of
    *    an annotation where we can't is one mixed with keywords such as in `public @Inject final`
    */
   private fun visitAnnotationEntry(annotationEntry: KtAnnotationEntry, canBreak: Boolean) {
@@ -1085,7 +1061,9 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
 
     if (!canBreak) {
       builder.breakToFill(" ")
-    } else if (annotationEntry.parent is KtFileAnnotationList || annotationEntry.valueArguments.isNotEmpty()) {
+    } else if (annotationEntry.parent is KtFileAnnotationList ||
+        annotationEntry.valueArguments
+            .isNotEmpty()) {
       builder.forcedBreak()
     } else {
       builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
@@ -1094,11 +1072,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
 
   override fun visitSuperTypeList(list: KtSuperTypeList) {
     builder.sync(list)
-    builder.block(expressionBreakIndent) {
-      forEachCommaSeparated(list.entries) {
-        it.accept(this)
-      }
-    }
+    builder.block(expressionBreakIndent) { forEachCommaSeparated(list.entries) { it.accept(this) } }
   }
 
   override fun visitSuperTypeCallEntry(call: KtSuperTypeCallEntry) {
@@ -1106,7 +1080,9 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     visitCallElement(call.calleeExpression, null, call.valueArgumentList, call.lambdaArguments)
   }
 
-  /** Example `Collection<Int> by list` in `class MyList(list: List<Int>) : Collection<Int> by list` */
+  /**
+   * Example `Collection<Int> by list` in `class MyList(list: List<Int>) : Collection<Int> by list`
+   */
   override fun visitDelegatedSuperTypeEntry(specifier: KtDelegatedSuperTypeEntry) {
     builder.sync(specifier)
     specifier.typeReference?.accept(this)
@@ -1120,44 +1096,40 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     builder.sync(expression)
     builder.block(ZERO) {
       builder.token("when")
-      expression.subjectExpression?.let { subjectExp ->
-        builder.space()
-        builder.token("(")
-        builder.block(ZERO) {
-          subjectExp.accept(this)
-        }
-        builder.token(")")
-      }
+      expression.subjectExpression
+          ?.let { subjectExp ->
+            builder.space()
+            builder.token("(")
+            builder.block(ZERO) { subjectExp.accept(this) }
+            builder.token(")")
+          }
       builder.space()
       builder.token("{", Doc.Token.RealOrImaginary.REAL, blockIndent, Optional.of(blockIndent))
 
-      expression.entries.forEach { whenEntry ->
-        builder.block(blockIndent) {
-          builder.forcedBreak()
-          if (whenEntry.isElse) {
-            builder.token("else")
-          } else {
-            builder.block(ZERO) {
-              forEachCommaSeparated(whenEntry.conditions.asIterable()) {
-                it.accept(this)
+      expression.entries
+          .forEach { whenEntry ->
+            builder.block(blockIndent) {
+              builder.forcedBreak()
+              if (whenEntry.isElse) {
+                builder.token("else")
+              } else {
+                builder.block(ZERO) {
+                  forEachCommaSeparated(whenEntry.conditions.asIterable()) { it.accept(this) }
+                }
+              }
+              val whenExpression = whenEntry.expression
+              builder.space()
+              builder.token("->")
+              if (whenExpression is KtBlockExpression) {
+                builder.space()
+                whenExpression?.accept(this)
+              } else {
+                builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+                builder.block(expressionBreakIndent) { whenExpression?.accept(this) }
               }
             }
+            builder.forcedBreak()
           }
-          val whenExpression = whenEntry.expression
-          builder.space()
-          builder.token("->")
-          if (whenExpression is KtBlockExpression) {
-            builder.space()
-            whenExpression?.accept(this)
-          } else {
-            builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-            builder.block(expressionBreakIndent) {
-              whenExpression?.accept(this)
-            }
-          }
-        }
-        builder.forcedBreak()
-      }
       builder.token("}")
     }
   }
@@ -1182,7 +1154,8 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /** Example `in 1..2` as part of a when expression */
   override fun visitWhenConditionInRange(condition: KtWhenConditionInRange) {
     builder.sync(condition)
-    // TODO: replace with 'condition.isNegated' once https://youtrack.jetbrains.com/issue/KT-34395 is fixed.
+    // TODO: replace with 'condition.isNegated' once https://youtrack.jetbrains.com/issue/KT-34395
+    // is fixed.
     val isNegated = condition.firstChild?.node?.findChildByType(KtTokens.NOT_IN) != null
     builder.token(if (isNegated) "!in" else "in")
     builder.space()
@@ -1195,9 +1168,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       builder.token("if")
       builder.space()
       builder.token("(")
-      builder.block(ZERO) {
-        expression.condition?.accept(this)
-      }
+      builder.block(ZERO) { expression.condition?.accept(this) }
       builder.token(")")
       builder.space()
       expression.then?.accept(this)
@@ -1219,9 +1190,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     builder.sync(expression)
     expression.arrayExpression?.accept(this)
     builder.token("[")
-    forEachCommaSeparated(expression.indexExpressions) {
-      it.accept(this)
-    }
+    forEachCommaSeparated(expression.indexExpressions) { it.accept(this) }
     builder.token("]")
   }
 
@@ -1234,9 +1203,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       builder.space()
     }
     builder.token("(")
-    forEachCommaSeparated(destructuringDeclaration.entries) {
-      it.accept(this)
-    }
+    forEachCommaSeparated(destructuringDeclaration.entries) { it.accept(this) }
     builder.token(")")
     val initializer = destructuringDeclaration.initializer
     if (initializer != null) {
@@ -1248,7 +1215,9 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   }
 
   /** Example `a: String` which is part of `(a: String, b: String)` */
-  override fun visitDestructuringDeclarationEntry(multiDeclarationEntry: KtDestructuringDeclarationEntry) {
+  override fun visitDestructuringDeclarationEntry(
+      multiDeclarationEntry: KtDestructuringDeclarationEntry
+  ) {
     builder.sync(multiDeclarationEntry)
     builder.token(multiDeclarationEntry.nameIdentifier?.text ?: fail())
     val typeReference = multiDeclarationEntry.typeReference
@@ -1285,9 +1254,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   override fun visitStringTemplateEntryWithExpression(entry: KtStringTemplateEntryWithExpression) {
     builder.sync(entry)
     builder.token("$" + "{")
-    builder.block(ZERO) {
-      entry.expression?.accept(this)
-    }
+    builder.block(ZERO) { entry.expression?.accept(this) }
     builder.token("}")
   }
 
@@ -1323,8 +1290,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       builder.space()
     }
     when (parameter.variance) {
-      Variance.INVARIANT -> {
-      }
+      Variance.INVARIANT -> {}
       Variance.IN_VARIANCE -> {
         builder.token("in")
         builder.space()
@@ -1349,9 +1315,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     builder.token("where")
     builder.space()
     builder.sync(list)
-    forEachCommaSeparated(list.constraints) {
-      it.accept(this)
-    }
+    forEachCommaSeparated(list.constraints) { it.accept(this) }
   }
 
   /** Example `T : Foo` */
@@ -1471,17 +1435,13 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     }
     builder.block(expressionBreakIndent) {
       builder.token("(")
-      forEachCommaSeparated(type.parameters) {
-        it.accept(this)
-      }
+      forEachCommaSeparated(type.parameters) { it.accept(this) }
     }
     builder.token(")")
     builder.space()
     builder.token("->")
     builder.space()
-    builder.block(expressionBreakIndent) {
-      type.returnTypeReference?.accept(this)
-    }
+    builder.block(expressionBreakIndent) { type.returnTypeReference?.accept(this) }
   }
 
   /** Example `a is Int` or `b !is Int` */
@@ -1504,12 +1464,12 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     expression.right?.accept(this)
   }
 
-  override fun visitCollectionLiteralExpression(expression: KtCollectionLiteralExpression, data: Void?): Void? {
+  override fun visitCollectionLiteralExpression(
+      expression: KtCollectionLiteralExpression, data: Void?
+  ): Void? {
     builder.sync(expression)
     builder.token("[")
-    forEachCommaSeparated(expression.getInnerExpressions()) {
-      it.accept(this)
-    }
+    forEachCommaSeparated(expression.getInnerExpressions()) { it.accept(this) }
     builder.token("]")
     return null
   }
@@ -1637,7 +1597,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   }
 
   /**
-   * Emit a [Doc.Token].
+   * Emit a [Doc.Token] .
    *
    * @param token the [String] to wrap in a [Doc.Token]
    * @param plusIndentCommentsBefore extra block for comments before this token
@@ -1653,7 +1613,8 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /**
    * Opens a new level, emits into it and closes it.
    *
-   * This is a helper method to make it easier to keep track of [OpsBuilder.open] and [OpsBuilder.close] calls
+   * This is a helper method to make it easier to keep track of [OpsBuilder.open] and
+   * [OpsBuilder.close] calls
    *
    * @param plusIndent the block level to pass to the block
    * @param block a code block to be run in this block level
@@ -1672,7 +1633,8 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   /**
    * Throws a formatting error
    *
-   * This is used as `expr ?: fail()` to avoid using the !! operator and provide better error messages.
+   * This is used as `expr ?: fail()` to avoid using the !! operator and provide better error
+   * messages.
    */
   private fun fail(message: String = "Unexpected"): Nothing {
     throw FormattingError(builder.diagnostic(message))

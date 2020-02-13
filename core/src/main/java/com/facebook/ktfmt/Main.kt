@@ -69,8 +69,7 @@ fun expandArgsToFileNames(args: Array<String>): List<File> {
   val result = mutableListOf<File>()
   for (arg in args) {
     if (arg == "-") {
-      error(
-          "Error: '-', which causes ktfmt to read from stdin, should not be mixed with file name")
+      error("Error: '-', which causes ktfmt to read from stdin, should not be mixed with file name")
     }
     result.addAll(File(arg).walkTopDown().filter { it.isFile && it.extension == "kt" })
   }

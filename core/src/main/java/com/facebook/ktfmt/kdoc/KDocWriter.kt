@@ -35,28 +35,28 @@ import com.google.common.collect.Sets.immutableEnumSet
 /**
  * Stateful object that accepts "requests" and "writes," producing formatted Javadoc.
  *
- * Our Javadoc formatter doesn't ever generate a parse tree, only a stream of tokens, so the
- * writer must compute and store the answer to questions like "How many levels of nested HTML list
- * are we inside?"
+ * Our Javadoc formatter doesn't ever generate a parse tree, only a stream of tokens, so the writer
+ * must compute and store the answer to questions like "How many levels of nested HTML list are we
+ * inside?"
  */
 internal class KDocWriter(private val blockIndent: Int) {
 
   /**
-   * Tokens that are always pinned to the following token. For example, `<p>` in `<p>Foo
-   * bar` (never `<p> Foo bar` or `<p>\nFoo bar`).
+   * Tokens that are always pinned to the following token. For example, `<p>` in `<p>Foo bar` (never
+   * `<p> Foo bar` or `<p>\nFoo bar`).
    *
-   *
-   * This is not the only kind of "pinning" that we do: See also the joining of LITERAL tokens
-   * done by the lexer. The special pinning here is necessary because these tokens are not of type
+   * This is not the only kind of "pinning" that we do: See also the joining of LITERAL tokens done
+   * by the lexer. The special pinning here is necessary because these tokens are not of type
    * LITERAL (because they require other special handling).
    */
-  private val START_OF_LINE_TOKENS = immutableEnumSet(LIST_ITEM_OPEN_TAG, PARAGRAPH_OPEN_TAG, HEADER_OPEN_TAG)
+  private val START_OF_LINE_TOKENS =
+      immutableEnumSet(LIST_ITEM_OPEN_TAG, PARAGRAPH_OPEN_TAG, HEADER_OPEN_TAG)
 
   private val output = StringBuilder()
   /**
-   * Whether we are inside an `<li>` element, excluding the case in which the `<li>`
-   * contains a `<ul>` or `<ol>` that we are also inside -- unless of course we're
-   * inside an `<li>` element in that inner list :)
+   * Whether we are inside an `<li>` element, excluding the case in which the `<li>` contains a
+   * `<ul>` or `<ol>` that we are also inside -- unless of course we're inside an `<li>` element in
+   * that inner list :)
    */
   private var continuingListItemOfInnermostList: Boolean = false
 
@@ -172,13 +172,16 @@ internal class KDocWriter(private val blockIndent: Int) {
   }
 
   private fun requestWhitespace(requestedWhitespace: RequestedWhitespace) {
-    this.requestedWhitespace = Ordering.natural<Comparable<*>>().max(requestedWhitespace, this.requestedWhitespace)
+    this.requestedWhitespace =
+        Ordering.natural<Comparable<*>>()
+            .max(requestedWhitespace, this.requestedWhitespace)
   }
 
   /**
    * The kind of whitespace that has been requested between the previous and next tokens. The order
    * of the values is significant: It goes from lowest priority to highest. For example, if the
-   * previous token requests [.BLANK_LINE] after it but the next token requests only [ ][.NEWLINE] before it, we insert [.BLANK_LINE].
+   * previous token requests [.BLANK_LINE] after it but the next token requests only [ ][.NEWLINE]
+   * before it, we insert [.BLANK_LINE].
    */
   internal enum class RequestedWhitespace {
     NONE,

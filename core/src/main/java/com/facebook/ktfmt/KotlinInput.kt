@@ -44,8 +44,9 @@ import org.jetbrains.kotlin.psi.psiUtil.startOffset
 /**
  * KotlinInput is for Kotlin what JavaInput is for Java.
  *
- * <p>KotlinInput is duplicating most of JavaInput's code, but uses the Kotlin compiler as a lexer instead of Javac.
- * This is required because some valid Kotlin programs are not valid Java programs, e.g., "a..b".
+ * <p>KotlinInput is duplicating most of JavaInput's code, but uses the Kotlin compiler as a lexer
+ * instead of Javac. This is required because some valid Kotlin programs are not valid Java
+ * programs, e.g., "a..b".
  *
  * <p>See javadoc for JavaInput.
  */
@@ -186,7 +187,8 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
         // name comments.
         //
         // TODO(cushon): find a better strategy.
-        if (toks[k].isSlashStarComment && (tok.text == "(" || tok.text == "<" || tok.text == ".")) break@OUTER
+        if (toks[k].isSlashStarComment &&
+            (tok.text == "(" || tok.text == "<" || tok.text == ".")) break@OUTER
         if (toks[k].isJavadocComment && tok.text == ";") break@OUTER
         if (isParamComment(toks[k])) {
           tokens.add(KotlinToken(toksBefore.build(), tok, toksAfter.build()))
@@ -231,7 +233,6 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
   override fun getColumnNumber(inputPosition: Int) =
       StringUtil.offsetToLineColumn(text, inputPosition).column
 }
-
 class KotlinTok(
     private val index: Int,
     private val originalText: String,
@@ -239,8 +240,7 @@ class KotlinTok(
     private val position: Int,
     private val columnI: Int,
     val isToken: Boolean,
-    private val kind: KtToken
-) : Input.Tok {
+    private val kind: KtToken) : Input.Tok {
 
   override fun getIndex(): Int = index
 
@@ -276,12 +276,10 @@ class KotlinTok(
         .toString()
   }
 }
-
 class KotlinToken(
     private val toksBefore: ImmutableList<KotlinTok>,
     private val kotlinTok: KotlinTok,
-    private val toksAfter: ImmutableList<KotlinTok>
-) : Input.Token {
+    private val toksAfter: ImmutableList<KotlinTok>) : Input.Token {
 
   override fun getTok(): KotlinTok = kotlinTok
 
@@ -301,12 +299,12 @@ class KotlinToken(
 internal val WHITESPACE_NEWLINE_REGEX: Pattern = Pattern.compile("\\R|( )+")
 
 /**
- * Tokenizer traverses a Kotlin parse tree (which blessedly contains whitespaces and comments, unlike Javac) and
- * constructs a list of 'Tok's.
+ * Tokenizer traverses a Kotlin parse tree (which blessedly contains whitespaces and comments,
+ * unlike Javac) and constructs a list of 'Tok's.
  *
- * <p>The google-java-format infra expects newline Toks to be separate from maximal-whitespace Toks, but Kotlin emits
- * them together. So, we split them using Java's \R regex matcher. We don't use 'split' et al. because we want Toks for
- * the newlines themselves.
+ * <p>The google-java-format infra expects newline Toks to be separate from maximal-whitespace Toks,
+ * but Kotlin emits them together. So, we split them using Java's \R regex matcher. We don't use
+ * 'split' et al. because we want Toks for the newlines themselves.
  */
 class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorVoid() {
   val toks = mutableListOf<KotlinTok>()

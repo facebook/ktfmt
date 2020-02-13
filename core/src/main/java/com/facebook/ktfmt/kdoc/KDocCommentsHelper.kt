@@ -28,9 +28,7 @@ import com.google.googlejavaformat.java.Formatter
 import java.util.ArrayList
 import java.util.regex.Pattern
 
-/**
- * `KDocCommentsHelper` extends [CommentsHelper] to rewrite KDoc comments.
- */
+/** `KDocCommentsHelper` extends [CommentsHelper] to rewrite KDoc comments. */
 class KDocCommentsHelper(private val lineSeparator: String) : CommentsHelper {
 
   override fun rewrite(tok: Tok, maxWidth: Int, column0: Int): String {
@@ -150,7 +148,8 @@ class KDocCommentsHelper(private val lineSeparator: String) : CommentsHelper {
 
   // Preserve special `//noinspection` and `//$NON-NLS-x$` comments used by IDEs, which cannot
   // contain leading spaces.
-  private val LINE_COMMENT_MISSING_SPACE_PREFIX = Pattern.compile("^(//+)(?!noinspection|\\\$NON-NLS-\\d+\\$)[^\\s/]")
+  private val LINE_COMMENT_MISSING_SPACE_PREFIX =
+      Pattern.compile("^(//+)(?!noinspection|\\\$NON-NLS-\\d+\\$)[^\\s/]")
 
   // Returns true if the comment looks like javadoc
   private fun javadocShaped(lines: List<String>): Boolean {

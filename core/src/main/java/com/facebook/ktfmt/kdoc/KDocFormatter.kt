@@ -42,8 +42,8 @@ import org.jetbrains.kotlin.lexer.KtTokens.WHITE_SPACE
 /**
  * Entry point for formatting KDoc.
  *
- * This stateless class reads tokens from the stateful lexer and translates them to "requests"
- * and "writes" to the stateful writer. It also munges tokens into "standardized" forms. Finally, it
+ * This stateless class reads tokens from the stateful lexer and translates them to "requests" and
+ * "writes" to the stateful writer. It also munges tokens into "standardized" forms. Finally, it
  * performs postprocessing to convert the written KDoc to a one-liner if possible or to leave a
  * single blank line if it's empty.
  */
@@ -66,7 +66,8 @@ object KDocFormatter {
       val tokenType = kDocLexer.tokenType
       val tokenText =
           with(kDocLexer.tokenText) {
-            if (previousType == KDocTokens.LEADING_ASTERISK && first() == ' ') substring(1) else this
+            if (previousType == KDocTokens.LEADING_ASTERISK && first() == ' ') substring(1)
+            else this
           }
 
       when (tokenType) {
@@ -100,7 +101,9 @@ object KDocFormatter {
         WHITE_SPACE -> {
           if (previousType === KDocTokens.TAG_NAME || previousType === KDocTokens.MARKDOWN_LINK) {
             tokens.add(Token(WHITESPACE, " "))
-          } else if (previousType == KDocTokens.LEADING_ASTERISK || tokenText.count { it == '\n' } >= 2) {
+          } else if (previousType ==
+              KDocTokens.LEADING_ASTERISK ||
+              tokenText.count { it == '\n' } >= 2) {
             tokens.add(Token(BLANK_LINE, ""))
           }
         }
