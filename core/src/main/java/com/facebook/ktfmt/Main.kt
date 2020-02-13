@@ -15,8 +15,12 @@
 package com.facebook.ktfmt
 
 import com.google.googlejavaformat.FormattingError
+import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.PrintStream
 
 fun main(args: Array<String>) {
   if (args.isEmpty()) {
@@ -24,7 +28,18 @@ fun main(args: Array<String>) {
     return
   }
 
-  val fileNames = expandArgsToFileNames(args)
+  if (args.size == 1 && args[0] == "-") {
+    formatStdin(System.`in`, System.out)
+    return
+  }
+
+  val fileNames: List<File>
+  try {
+    fileNames = expandArgsToFileNames(args)
+  } catch (e: java.lang.IllegalStateException) {
+    println(e.message)
+    return
+  }
 
   if (fileNames.isEmpty()) {
     println("Error: no .kt files found")
@@ -33,6 +48,11 @@ fun main(args: Array<String>) {
 
   val printStack = fileNames.size == 1
   fileNames.parallelStream().forEach { formatFile(it, printStack) }
+}
+
+fun formatStdin(inputStream: InputStream, printStream: PrintStream) {
+  val code = BufferedReader(InputStreamReader(inputStream)).readText()
+  printStream.print(format(code))
 }
 
 /**
@@ -47,6 +67,10 @@ fun expandArgsToFileNames(args: Array<String>): List<File> {
   }
   val result = mutableListOf<File>()
   for (arg in args) {
+    if (arg == "-") {
+      error(
+          "Error: '-', which causes ktfmt to read from stdin, should not be mixed with file name")
+    }
     result.addAll(File(arg).walkTopDown().filter { it.isFile && it.extension == "kt" })
   }
   return result

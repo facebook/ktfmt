@@ -15,7 +15,12 @@
 package com.facebook.ktfmt
 
 import com.google.common.truth.Truth.assertThat
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.PrintStream
+import java.lang.IllegalStateException
 import org.junit.After
+import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -77,5 +82,29 @@ class MainKtTest {
 
     assertThat(expandArgsToFileNames(arrayOf(dir1.toString(), dir2.toString())))
         .containsExactly(foo1, bar1, foo2, bar2)
+  }
+
+  @Test
+  fun `expandArgsToFileNames - a dash is an error`() {
+    try {
+      expandArgsToFileNames(
+          arrayOf(
+              root.resolve("foo.bar").toString(),
+              File("-").toString()))
+      fail("expected exception, but nothing was thrown")
+    } catch (e: IllegalStateException) {
+      assertThat(e.message).contains("Error")
+    }
+  }
+
+  @Test
+  fun `formatStdin formats an InputStream`() {
+    val code = "fun    f1 (  ) :    Int =    0"
+    val output = ByteArrayOutputStream()
+    formatStdin(code.byteInputStream(), PrintStream(output))
+
+    val expected = """fun f1(): Int = 0
+      |""".trimMargin()
+    assertThat(output.toString("UTF-8")).isEqualTo(expected)
   }
 }
