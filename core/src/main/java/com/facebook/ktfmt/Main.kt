@@ -24,15 +24,44 @@ fun main(args: Array<String>) {
     return
   }
 
-  for (fileName in args) try {
-    val code = File(fileName).readText()
-    File(fileName).writeText(format(code))
-    println("Done formatting $fileName")
+  val fileNames = expandArgsToFileNames(args)
+
+  if (fileNames.isEmpty()) {
+    println("Error: no .kt files found")
+    return
+  }
+
+  val printStack = fileNames.size == 1
+  fileNames.parallelStream().forEach { formatFile(it, printStack) }
+}
+
+/**
+ * expandArgsToFileNames expands 'args' to a list of .kt files to format.
+ *
+ * Most commonly, 'args' is either a list of .kt files, or a name of a directory whose contents the
+ * user wants to format.
+ */
+fun expandArgsToFileNames(args: Array<String>): List<File> {
+  if (args.size == 1 && File(args[0]).isFile) {
+    return listOf(File(args[0]))
+  }
+  val result = mutableListOf<File>()
+  for (arg in args) {
+    result.addAll(File(arg).walkTopDown().filter { it.isFile && it.extension == "kt" })
+  }
+  return result
+}
+
+private fun formatFile(file: File, printStack: Boolean) {
+  try {
+    val code = file.readText()
+    file.writeText(format(code))
+    println("Done formatting $file")
   } catch (e: IOException) {
-    println("Error formatting $fileName: ${e.message}; skipping.")
+    println("Error formatting $file: ${e.message}; skipping.")
   } catch (e: FormattingError) {
-    println("Formatting Error when processing $fileName: ${e.message}; skipping.")
-    if (args.size == 1) {
+    println("Formatting Error when processing $file: ${e.message}; skipping.")
+    if (printStack) {
       e.printStackTrace()
     }
   }
