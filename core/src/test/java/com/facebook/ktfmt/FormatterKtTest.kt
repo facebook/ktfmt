@@ -359,6 +359,13 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `safe dot operator expression chain in expression function`() = assertFormatted(
+      """
+      |fun f(number: Int) =
+      |    Something.doStuff(number)?.size
+      |""".trimMargin(), 50)
+  
+  @Test
   fun `import list`() {
     val code = """
       | import  com .example.common.reality. FooBar

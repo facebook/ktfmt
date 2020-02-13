@@ -246,6 +246,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
           typeParameters.accept(this)
         }
       }
+
       if (name != null || receiverTypeReference != null) {
         builder.space()
       }
@@ -298,7 +299,9 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
           builder.token("=")
           builder.block(expressionBreakIndent) {
             builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
-            nonBlockBodyExpressions.accept(this)
+            builder.block(ZERO) {
+              nonBlockBodyExpressions.accept(this)
+            }
           }
         }
       }
