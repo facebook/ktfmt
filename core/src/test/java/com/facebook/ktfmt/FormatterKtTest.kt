@@ -253,9 +253,9 @@ class FormatterKtTest {
       |}
       |""".trimMargin(), 20)
 
-    @Test
-    fun `once a binary expression is broken, split on every line`() = assertFormatted(
-        """
+  @Test
+  fun `once a binary expression is broken, split on every line`() = assertFormatted(
+      """
         |fun foo() {
         |  val sentence =
         |      "The" +
@@ -269,9 +269,9 @@ class FormatterKtTest {
         |}
         |""".trimMargin(), 40)
 
-    @Test
-    fun `long binary expressions with ranges in the middle`() = assertFormatted(
-        """
+  @Test
+  fun `long binary expressions with ranges in the middle`() = assertFormatted(
+      """
         |fun foo() {
         |  val sentence =
         |      "The" +
@@ -583,10 +583,11 @@ class FormatterKtTest {
 
   @Test
   fun `return type doesn't fit in one line`() = assertFormatted(
-  """
+      """
       |interface X {
-      |  fun f(arg1: Arg1Type, arg2: Arg2Type):
-      |      Map<String, Map<String, Double>>? {
+      |  fun f(
+      |      arg1: Arg1Type, arg2: Arg2Type
+      |  ): Map<String, Map<String, Double>>? {
       |    //
       |  }
       |
@@ -1065,7 +1066,7 @@ class FormatterKtTest {
       """
       |val p: Pair<in T, out S>
       |""".trimMargin())
-  
+
   @Test
   fun `handle covariant and contravariant type parameters`() = assertFormatted(
       """

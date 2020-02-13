@@ -259,7 +259,6 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       if (emitParenthesis) {
         builder.token("(")
       }
-
       builder.block(ZERO) {
         if (parameters != null && parameters.isNotEmpty()) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
@@ -273,13 +272,17 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
           }
           builder.token(")")
         }
-      }
-      if (type != null) {
-        builder.block(ZERO) {
-          builder.token(":")
-          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-          builder.block(expressionBreakIndent) {
-            type.accept(this)
+        if (type != null) {
+          builder.block(ZERO) {
+            builder.token(":")
+            if (parameters.isNullOrEmpty()) {
+              builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+            } else {
+              builder.space()
+            }
+            builder.block(expressionBreakIndent) {
+              type.accept(this)
+            }
           }
         }
       }
