@@ -15,6 +15,9 @@
 package com.facebook.ktfmt
 
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.util.text.LineColumn
+import com.intellij.openapi.util.text.StringUtil
+import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.PsiManager
 import com.intellij.testFramework.LightVirtualFile
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
@@ -25,6 +28,8 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.psiUtil.collectDescendantsOfType
+import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 /** Parser parses a Kotlin file given as a string and returns its parse tree. */
 open class Parser {
@@ -38,8 +43,12 @@ open class Parser {
       val env =
           KotlinCoreEnvironment.createForProduction(
               disposable, configuration, EnvironmentConfigFiles.JVM_CONFIG_FILES)
-      val file = LightVirtualFile("temp.kt", KotlinFileType.INSTANCE, code)
-      return PsiManager.getInstance(env.project).findFile(file) as KtFile
+      val virtualFile = LightVirtualFile("temp.kt", KotlinFileType.INSTANCE, code)
+      val ktFile = PsiManager.getInstance(env.project).findFile(virtualFile) as KtFile
+      ktFile.collectDescendantsOfType<PsiErrorElement>().let {
+        if (it.isNotEmpty()) throwParseError(code, it[0])
+      }
+      return ktFile
     } finally {
       disposable.dispose()
     }
@@ -52,3 +61,10 @@ open class Parser {
     }
   }
 }
+
+fun throwParseError(fileContents: String, error: PsiErrorElement): Nothing {
+  throw ParseError(error.errorDescription, StringUtil.offsetToLineColumn(fileContents, error.startOffset))
+}
+
+class ParseError(val errorDescription: String, val lineColumn: LineColumn) :
+    IllegalArgumentException("${lineColumn.line + 1}:${lineColumn.column + 1}: error: $errorDescription")

@@ -18,7 +18,6 @@ import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
 import com.google.common.truth.Truth.assertAbout
 import com.google.common.truth.Truth.assertThat
-import com.google.googlejavaformat.FormattingError
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -1783,7 +1782,7 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
-  fun `FormattingError contains correct line and column numbers`() {
+  fun `ParseError contains correct line and column numbers`() {
     val code =
         """
       |// Foo
@@ -1795,9 +1794,9 @@ class FormatterKtTest {
       |""".trimMargin()
     try {
       format(code)
-    } catch (e: FormattingError) {
-      assertThat(e.diagnostics()[0].line()).isEqualTo(6)
-      assertThat(e.diagnostics()[0].column()).isEqualTo(6)
+    } catch (e: ParseError) {
+      assertThat(e.lineColumn.line).isEqualTo(5)
+      assertThat(e.lineColumn.column).isEqualTo(0)
     }
   }
 
@@ -1812,9 +1811,9 @@ class FormatterKtTest {
       |""".trimMargin()
     try {
       format(code)
-    } catch (e: FormattingError) {
-      assertThat(e.diagnostics()[0].line()).isEqualTo(3)
-      assertThat(e.diagnostics()[0].column()).isEqualTo(10)
+    } catch (e: ParseError) {
+      assertThat(e.lineColumn.line).isEqualTo(2)
+      assertThat(e.lineColumn.column).isEqualTo(8)
     }
   }
 

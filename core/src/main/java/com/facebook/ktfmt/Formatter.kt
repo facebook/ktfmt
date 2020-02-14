@@ -20,7 +20,6 @@ import com.google.common.collect.Range
 import com.google.googlejavaformat.Doc
 import com.google.googlejavaformat.DocBuilder
 import com.google.googlejavaformat.OpsBuilder
-import com.google.googlejavaformat.java.JavaFormatterOptions
 import com.google.googlejavaformat.java.JavaOutput
 
 const val DEFAULT_MAX_WIDTH: Int = 100
@@ -38,7 +37,6 @@ fun format(code: String, maxWidth: Int): String {
   val file = Parser.parse(code)
 
   val kotlinInput = KotlinInput(code, file)
-  val options = JavaFormatterOptions.defaultOptions()
   val javaOutput = JavaOutput("\n", kotlinInput, KDocCommentsHelper("\n"))
   val builder = OpsBuilder(kotlinInput, javaOutput)
   file.accept(KotlinInputAstVisitor(builder))

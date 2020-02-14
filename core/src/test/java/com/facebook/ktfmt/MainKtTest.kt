@@ -98,10 +98,33 @@ class MainKtTest {
   fun `formatStdin formats an InputStream`() {
     val code = "fun    f1 (  ) :    Int =    0"
     val output = ByteArrayOutputStream()
-    formatStdin(code.byteInputStream(), PrintStream(output))
+    Main(code.byteInputStream(), PrintStream(output), PrintStream(output)).formatStdin()
 
     val expected = """fun f1(): Int = 0
       |""".trimMargin()
     assertThat(output.toString("UTF-8")).isEqualTo(expected)
+  }
+
+  @Test
+  fun `Parsing errors are reported (stdin)`() {
+    val code = "fun    f1 (  "
+    val err = ByteArrayOutputStream()
+    val returnValue = Main(code.byteInputStream(), PrintStream(ByteArrayOutputStream()), PrintStream(err)).formatStdin()
+
+    assertThat(returnValue).isFalse()
+    assertThat(err.toString("UTF-8")).startsWith("<stdin>:1:14: error: ")
+  }
+
+  @Test
+  fun `Parsing errors are reported (file)`() {
+    val fooBar = root.resolve("foo.kt")
+    fooBar.writeText("fun    f1 (  ")
+    val err = ByteArrayOutputStream()
+    val returnValue = Main("".byteInputStream(), PrintStream(ByteArrayOutputStream()), PrintStream(err)).run(
+        arrayOf(
+            fooBar.toString()))
+
+    assertThat(returnValue).isEqualTo(1)
+    assertThat(err.toString("UTF-8")).contains("foo.kt:1:14: error: ")
   }
 }
