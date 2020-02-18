@@ -572,8 +572,11 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
         argument.getArgumentName()?.accept(this)
         builder.space()
         builder.token("=")
-        builder.breakOp(
-            Doc.FillMode.INDEPENDENT, if (hasArgName) " " else "", expressionBreakIndent)
+        if (argument.getArgumentExpression() is KtLambdaExpression) {
+          builder.space()
+        } else {
+          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+        }
       }
       builder.block(ZERO) {
         if (argument.isSpread) {

@@ -1288,6 +1288,20 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `avoid newline before lambda argument if it is named`() =
+      assertFormatted(
+          """
+      |private fun f(items: List<Int>) {
+      |  doSomethingCool(
+      |      items,
+      |      lambdaArgument = {
+      |        step1()
+      |        step2()
+      |      }) { it.doIt() }
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `handle labeled this pointer`() =
       assertFormatted(
           """
@@ -1588,7 +1602,7 @@ class FormatterKtTest {
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
-
+  
   @Test
   fun `statements are wrapped in blocks`() =
       assertFormatted(
