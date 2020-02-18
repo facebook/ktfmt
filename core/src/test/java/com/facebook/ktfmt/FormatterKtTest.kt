@@ -31,6 +31,7 @@ class FormatterKtTest {
   fun `first selector stays on same line`() =
       assertFormatted(
           """
+      |--------------------------------------------------
       |fun f() {
       |  ImmutableList.newBuilder()
       |      .add(1)
@@ -61,12 +62,13 @@ class FormatterKtTest {
       |      .build()
       |}
       |""".trimMargin(),
-          50)
+          deduceMaxWidth = true)
 
   @Test
   fun `line breaks in function arguments`() =
       assertFormatted(
           """
+      |--------------------------------------------------
       |fun f() {
       |  computeBreaks(
       |      javaOutput.commentsHelper,
@@ -82,12 +84,13 @@ class FormatterKtTest {
       |      output.commentsHelper, maxWidth, State(0))
       |}
       |""".trimMargin(),
-          50)
+          deduceMaxWidth = true)
 
   @Test
   fun `parameters and return type in function definitions`() =
       assertFormatted(
           """
+      |----------------------------------------
       |fun format(
       |    code: String,
       |    maxWidth: Int =
@@ -104,7 +107,7 @@ class FormatterKtTest {
       |  val a = 0
       |}
       |""".trimMargin(),
-          40)
+          deduceMaxWidth = true)
 
   @Test
   fun `kitchen sink of tests`() {
@@ -247,6 +250,7 @@ class FormatterKtTest {
   fun `breaking long binary operations`() =
       assertFormatted(
           """
+      |--------------------
       |fun foo() {
       |  val finalWidth =
       |      value1 +
@@ -262,12 +266,13 @@ class FormatterKtTest {
       |          value9
       |}
       |""".trimMargin(),
-          20)
+          deduceMaxWidth = true)
 
   @Test
   fun `once a binary expression is broken, split on every line`() =
       assertFormatted(
           """
+        |--------------------------------------
         |fun foo() {
         |  val sentence =
         |      "The" +
@@ -280,12 +285,13 @@ class FormatterKtTest {
         |          "dog"
         |}
         |""".trimMargin(),
-          40)
+          deduceMaxWidth = true)
 
   @Test
   fun `long binary expressions with ranges in the middle`() =
       assertFormatted(
           """
+        |--------------------------------------
         |fun foo() {
         |  val sentence =
         |      "The" +
@@ -296,7 +302,7 @@ class FormatterKtTest {
         |          "the".."lazy" + "dog"
         |}
         |""".trimMargin(),
-          40)
+          deduceMaxWidth = true)
 
   @Test
   fun `properties with accessors`() =
@@ -323,6 +329,7 @@ class FormatterKtTest {
   fun `a property with a too long name being broken on multiple lines`() =
       assertFormatted(
           """
+      |--------------------
       |class Foo {
       |  val thisIsALongName
       |      : String =
@@ -330,7 +337,7 @@ class FormatterKtTest {
       |    get() = field
       |}
       |""".trimMargin(),
-          maxWidth = 20)
+          deduceMaxWidth = true)
 
   @Test
   fun `multi-character unary and binary operators such as ==`() =
@@ -383,10 +390,11 @@ class FormatterKtTest {
   fun `safe dot operator expression chain in expression function`() =
       assertFormatted(
           """
+      |--------------------------------------------------
       |fun f(number: Int) =
       |    Something.doStuff(number)?.size
       |""".trimMargin(),
-          50)
+          deduceMaxWidth = true)
 
   @Test
   fun `import list`() {
@@ -456,6 +464,7 @@ class FormatterKtTest {
   fun `Arguments are blocks`() =
       assertFormatted(
           """
+      |--------------------------------------------------
       |override fun visitProperty(property: KtProperty) {
       |  builder.sync(property)
       |  builder.block(ZERO) {
@@ -476,7 +485,7 @@ class FormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          50)
+          deduceMaxWidth = true)
 
   @Test
   fun `anonymous function`() =
@@ -621,6 +630,7 @@ class FormatterKtTest {
   fun `multi line function without a block body`() =
       assertFormatted(
           """
+      |-------------------------
       |fun longFunctionNoBlock():
       |    Int =
       |    1234567 + 1234567
@@ -628,12 +638,13 @@ class FormatterKtTest {
       |fun shortFun(): Int =
       |    1234567 + 1234567
       |""".trimMargin(),
-          25)
+          deduceMaxWidth = true)
 
   @Test
   fun `return type doesn't fit in one line`() =
       assertFormatted(
           """
+      |--------------------------------------------------
       |interface X {
       |  fun f(
       |      arg1: Arg1Type, arg2: Arg2Type
@@ -648,7 +659,7 @@ class FormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          50)
+          deduceMaxWidth = true)
 
   @Test
   fun `list of superclasses`() =
@@ -665,6 +676,7 @@ class FormatterKtTest {
   fun `list of superclasses over multiple lines`() =
       assertFormatted(
           """
+      |--------------------
       |class Derived2 :
       |    Super1,
       |    Super2 {}
@@ -678,7 +690,7 @@ class FormatterKtTest {
       |class Derived5 :
       |    Super3<Int>()
       |""".trimMargin(),
-          20)
+          deduceMaxWidth = true)
 
   @Test
   fun `annotations with parameters`() =
@@ -809,6 +821,7 @@ class FormatterKtTest {
   fun `if expression with break before else`() =
       assertFormatted(
           """
+      |------------------------------
       |fun compute(b: Boolean) {
       |  val c =
       |      if (a + b < 20) a + b
@@ -817,19 +830,20 @@ class FormatterKtTest {
       |  else c
       |}
       |""".trimMargin(),
-          30)
+          deduceMaxWidth = true)
 
   @Test
   fun `assignment expression on multiple lines`() =
       assertFormatted(
           """
+      |--------------------------------------------------
       |fun f() {
       |  var myVariable = 5;
       |  myVariable =
       |      function1(4, 60, 8) + function2(57, 39, 20)
       |}
       |""".trimMargin(),
-          50)
+          deduceMaxWidth = true)
 
   @Test
   fun `A program that tickled a bug in KotlinInput`() =
@@ -872,6 +886,7 @@ class FormatterKtTest {
   fun `a constructor with many arguments over multiple lines`() =
       assertFormatted(
           """
+      |--------------------------------------------------
       |data class Foo
       |    constructor(
       |        val number: Int,
@@ -880,7 +895,7 @@ class FormatterKtTest {
       |        val title: String,
       |        val offspring: List<Foo>)
       |""".trimMargin(),
-          50)
+          deduceMaxWidth = true)
 
   @Test
   fun `handle secondary constructors`() =
@@ -898,6 +913,7 @@ class FormatterKtTest {
   fun `a secondary constructor with many arguments over multiple lines`() =
       assertFormatted(
           """
+      |--------------------------------------------------
       |data class Foo {
       |  constructor(
       |      val number: Int,
@@ -907,12 +923,13 @@ class FormatterKtTest {
       |      val offspring: List<Foo>)
       |}
       |""".trimMargin(),
-          50)
+          deduceMaxWidth = true)
 
   @Test
   fun `a secondary constructor with many arguments passed to delegate`() =
       assertFormatted(
           """
+      |--------------------------------------------------
       |data class Foo {
       |  constructor(
       |      val number: Int,
@@ -929,7 +946,7 @@ class FormatterKtTest {
       |              offspring)
       |}
       |""".trimMargin(),
-          50)
+          deduceMaxWidth = true)
 
   @Test
   fun `handle calling super constructor in secondary constructor`() =
@@ -1073,6 +1090,7 @@ class FormatterKtTest {
   fun `handle for loops with long dot chains`() =
       assertFormatted(
           """
+      |-----------------------------------
       |fun f(a: Node<Int>) {
       |  for (child in node.next.data()) {
       |    println(child)
@@ -1090,7 +1108,8 @@ class FormatterKtTest {
       |    println(child)
       |  }
       |}
-      |""".trimMargin(), 35)
+      |""".trimMargin(),
+          deduceMaxWidth = true)
 
   @Test
   fun `Qualified type`() =
@@ -1561,13 +1580,14 @@ class FormatterKtTest {
   fun `handle multi line one statement lambda`() =
       assertFormatted(
           """
+      |-------------------------
       |fun f() {
       |  a {
       |    println(foo.bar.boom)
       |  }
       |}
       |""".trimMargin(),
-          25)
+          deduceMaxWidth = true)
 
   @Test
   fun `statements are wrapped in blocks`() =
@@ -1585,6 +1605,7 @@ class FormatterKtTest {
   fun `properly break fully qualified nested user types`() =
       assertFormatted(
           """
+      |-----------------------------------------------------
       |val complicated
       |    : com.example.interesting.SomeType<
       |    com.example.interesting.SomeType<Int, Nothing>,
@@ -1595,7 +1616,7 @@ class FormatterKtTest {
       |        Nothing>> =
       |    DUMMY
       |""".trimMargin(),
-          53)
+          deduceMaxWidth = true)
 
   @Test
   fun `handle multi-line lambdas within lambdas and calling chains`() =
@@ -1623,13 +1644,14 @@ class FormatterKtTest {
   fun `handle multi line lambdas with explicit args`() =
       assertFormatted(
           """
+      |--------------------
       |fun f() {
       |  a { (x, y) ->
       |    x + y
       |  }
       |}
       |""".trimMargin(),
-          20)
+          deduceMaxWidth = true)
 
   @Test
   fun `handle parenthesis in lambda calls for now`() =
@@ -1764,13 +1786,14 @@ class FormatterKtTest {
   fun `handle typealias`() =
       assertFormatted(
           """
+      |----------------------------------------------
       |private typealias TextChangedListener =
       |    (string: String) -> Unit
       |typealias PairPair<X, Y> = Pair<Pair<X, Y>, X>
       |
       |class Foo
       |""".trimMargin(),
-          50)
+          deduceMaxWidth = true)
 
   @Test
   fun `handle class expression with generics`() =
@@ -1982,9 +2005,38 @@ class FormatterKtTest {
     assertThatFormatting(code).isEqualTo(expected)
   }
 
-  /** Verifies the given code passes through formatting, and stays the same at the end */
-  private fun assertFormatted(code: String, maxWidth: Int = DEFAULT_MAX_WIDTH) {
-    assertThatFormatting(code, maxWidth).isEqualTo(code)
+  /**
+   * Verifies the given code passes through formatting, and stays the same at the end
+   *
+   * @param code a code string that continas an optional first line made of "---" in the case
+   * [deduceMaxWidth] is true. For example:
+   * ```
+   * --------------------
+   * // exactly 20 `-` above
+   * fun f()
+   * ```
+   * @param deduceMaxWidth if this is true the code string should start with a line of "-----" in
+   * the beginning to indicate the max width to format by
+   */
+  private fun assertFormatted(code: String, deduceMaxWidth: Boolean = false) {
+    val first = code.lines().first()
+    var deducedCode = code
+    var maxWidth = DEFAULT_MAX_WIDTH
+    val isFirstLineAMaxWidthMarker = first.all { it == '-' }
+    if (deduceMaxWidth) {
+      if (!isFirstLineAMaxWidthMarker) {
+        throw RuntimeException(
+            "deduceMaxWidth is false, please remove the first dashes only line from the code (i.e. ---)")
+      }
+      deducedCode = code.substring(code.indexOf('\n') + 1)
+      maxWidth = first.length
+    } else {
+      if (isFirstLineAMaxWidthMarker) {
+        throw RuntimeException(
+            "When deduceMaxWidth is true the first line need to be all dashes only (i.e. ---)")
+      }
+    }
+    assertThatFormatting(deducedCode, maxWidth).isEqualTo(deducedCode)
   }
 
   fun assertThatFormatting(code: String, maxWidth: Int = DEFAULT_MAX_WIDTH): FormattedCodeSubject {
