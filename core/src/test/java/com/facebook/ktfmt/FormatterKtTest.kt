@@ -1955,6 +1955,10 @@ class FormatterKtTest {
       | * ```
       | *
       | * Amazing ah?
+      | * ```
+      | * fun `code can be with a blank line above it` () {}
+      | * ```
+      | * Or after it!
       | */
       |class MyClass {}
       |""".trimMargin())

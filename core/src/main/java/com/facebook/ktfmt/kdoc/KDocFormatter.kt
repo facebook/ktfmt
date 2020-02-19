@@ -22,6 +22,7 @@ package com.facebook.ktfmt.kdoc
 import com.facebook.ktfmt.kdoc.Token.Type.BEGIN_KDOC
 import com.facebook.ktfmt.kdoc.Token.Type.BLANK_LINE
 import com.facebook.ktfmt.kdoc.Token.Type.CODE
+import com.facebook.ktfmt.kdoc.Token.Type.CODE_BLOCK_MARKER
 import com.facebook.ktfmt.kdoc.Token.Type.CODE_CLOSE_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.CODE_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.END_KDOC
@@ -83,6 +84,8 @@ object KDocFormatter {
         KDocTokens.TEXT -> {
           if (tokenText.isBlank()) {
             tokens.add(Token(WHITESPACE, " "))
+          } else if (tokenText == "```") {
+            tokens.add(Token(CODE_BLOCK_MARKER, tokenText))
           } else {
             val words = tokenText.trim().split(" +".toRegex())
             var first = true
@@ -135,6 +138,7 @@ object KDocFormatter {
         TABLE_CLOSE_TAG -> output.writeTableClose(token)
         TAG -> output.writeTag(token)
         CODE -> output.writeCodeLine(token)
+        CODE_BLOCK_MARKER -> output.writeCodeBlockMarker(token)
         BLANK_LINE -> output.requestBlankLine()
         WHITESPACE -> output.requestWhitespace()
         LITERAL -> output.writeLiteral(token)

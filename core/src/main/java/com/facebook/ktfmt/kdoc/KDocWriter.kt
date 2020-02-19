@@ -65,6 +65,7 @@ internal class KDocWriter(private val blockIndent: Int) {
   private var remainingOnLine: Int = 0
   private var atStartOfLine: Boolean = false
   private var requestedWhitespace = NONE
+  private var inCodeBlock = false
 
   /**
    * Requests whitespace between the previously written token and the next written token. The
@@ -153,6 +154,15 @@ internal class KDocWriter(private val blockIndent: Int) {
   fun writeCodeLine(token: Token) {
     requestNewline()
     writeToken(token)
+  }
+
+  fun writeCodeBlockMarker(token: Token) {
+    if (!inCodeBlock) {
+      requestNewline()
+    }
+    writeToken(token)
+    requestNewline()
+    inCodeBlock = !inCodeBlock
   }
 
   fun writeLiteral(token: Token) {
