@@ -25,48 +25,48 @@ import java.io.PrintStream
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-  exitProcess(Main(System.`in`, System.out, System.err).run(args))
+  exitProcess(Main(System.`in`, System.out, System.err, args).run())
 }
 
 class Main(
     private val input: InputStream,
     private val out: PrintStream,
-    private val err: PrintStream
-) {
-  fun run(args: Array<String>): Int {
-    if (args.isEmpty()) {
+    private val err: PrintStream,
+    args: Array<String>) {
+  private val parsedArgs: ParsedArgs = parseOptions(err, args)
+
+  fun run(): Int {
+    if (parsedArgs.fileNames.isEmpty()) {
       err.println("Usage: ktfmt File1.kt File2.kt ...")
       return 1
     }
 
-    val options = parseOptions(err, args)
-
-    if (options.fileNames.size == 1 && options.fileNames[0] == "-") {
+    if (parsedArgs.fileNames.size == 1 && parsedArgs.fileNames[0] == "-") {
       val success = formatStdin()
       return if (success) 0 else 1
     }
 
-    val fileNames: List<File>
+    val files: List<File>
     try {
-      fileNames = expandArgsToFileNames(options.fileNames)
+      files = expandArgsToFileNames(parsedArgs.fileNames)
     } catch (e: java.lang.IllegalStateException) {
       err.println(e.message)
       return 1
     }
 
-    if (fileNames.isEmpty()) {
+    if (files.isEmpty()) {
       err.println("Error: no .kt files found")
       return 1
     }
 
-    return if (fileNames.parallelStream().allMatch { formatFile(it) }) 0 else 1
+    return if (files.parallelStream().allMatch { formatFile(it) }) 0 else 1
   }
 
   @VisibleForTesting
   fun formatStdin(): Boolean {
     val code = BufferedReader(InputStreamReader(input)).readText()
     try {
-      out.print(format(code))
+      out.print(format(parsedArgs.formattingOptions, code))
       return true
     } catch (e: ParseError) {
       handleParseError("<stdin>", e)
@@ -78,7 +78,7 @@ class Main(
   private fun formatFile(file: File): Boolean {
     try {
       val code = file.readText()
-      file.writeText(format(code))
+      file.writeText(format(parsedArgs.formattingOptions, code))
       err.println("Done formatting $file")
       return true
     } catch (e: IOException) {

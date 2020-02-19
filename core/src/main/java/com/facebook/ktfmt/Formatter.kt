@@ -24,26 +24,52 @@ import com.google.googlejavaformat.java.JavaOutput
 
 const val DEFAULT_MAX_WIDTH: Int = 100
 
+class FormattingOptions(
+    /** ktfmt breaks lines longer than maxWidth. */
+    val maxWidth: Int = DEFAULT_MAX_WIDTH,
+
+    /**
+     * blockIndent is the size of the indent used when a new block is opened, in spaces.
+     *
+     * For example, ```
+     * fun f() {
+     *   //
+     * }
+     * ```
+     */
+    val blockIndent: Int = 2,
+
+    /**
+     * continuationIndent is the size of the indent used when a line is broken because it's too
+     * long, in spaces.
+     *
+     * For example, ```
+     * val foo = bar(
+     *     1)
+     * ```
+     */
+    val continuationIndent: Int = 4)
+
 /**
  * format formats the Kotlin code given in 'code' and returns it as a string. This method is
  * accessed through Reflection.
  */
-fun format(code: String): String = format(code, DEFAULT_MAX_WIDTH)
+fun format(code: String): String = format(FormattingOptions(), code)
 
 /**
  * format formats the Kotlin code given in 'code' with the 'maxWidth' and returns it as a string.
  */
-fun format(code: String, maxWidth: Int): String {
+fun format(options: FormattingOptions, code: String): String {
   val file = Parser.parse(code)
 
   val kotlinInput = KotlinInput(code, file)
   val javaOutput = JavaOutput("\n", kotlinInput, KDocCommentsHelper("\n"))
   val builder = OpsBuilder(kotlinInput, javaOutput)
-  file.accept(KotlinInputAstVisitor(builder))
+  file.accept(KotlinInputAstVisitor(options.blockIndent, options.continuationIndent, builder))
   builder.sync(kotlinInput.text.length)
   builder.drain()
   val doc = DocBuilder().withOps(builder.build()).build()
-  doc.computeBreaks(javaOutput.commentsHelper, maxWidth, Doc.State(+0, 0))
+  doc.computeBreaks(javaOutput.commentsHelper, options.maxWidth, Doc.State(+0, 0))
   doc.write(javaOutput)
   javaOutput.flush()
 

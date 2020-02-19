@@ -98,7 +98,7 @@ class MainKtTest {
   fun `formatStdin formats an InputStream`() {
     val code = "fun    f1 (  ) :    Int =    0"
     val output = ByteArrayOutputStream()
-    Main(code.byteInputStream(), PrintStream(output), PrintStream(output)).formatStdin()
+    Main(code.byteInputStream(), PrintStream(output), PrintStream(output), arrayOf()).formatStdin()
 
     val expected = """fun f1(): Int = 0
       |""".trimMargin()
@@ -109,7 +109,13 @@ class MainKtTest {
   fun `Parsing errors are reported (stdin)`() {
     val code = "fun    f1 (  "
     val err = ByteArrayOutputStream()
-    val returnValue = Main(code.byteInputStream(), PrintStream(ByteArrayOutputStream()), PrintStream(err)).formatStdin()
+    val returnValue =
+        Main(
+            code.byteInputStream(),
+            PrintStream(ByteArrayOutputStream()),
+            PrintStream(err),
+            arrayOf())
+            .formatStdin()
 
     assertThat(returnValue).isFalse()
     assertThat(err.toString("UTF-8")).startsWith("<stdin>:1:14: error: ")
@@ -120,11 +126,60 @@ class MainKtTest {
     val fooBar = root.resolve("foo.kt")
     fooBar.writeText("fun    f1 (  ")
     val err = ByteArrayOutputStream()
-    val returnValue = Main("".byteInputStream(), PrintStream(ByteArrayOutputStream()), PrintStream(err)).run(
-        arrayOf(
-            fooBar.toString()))
+    val returnValue =
+        Main(
+            "".byteInputStream(),
+            PrintStream(ByteArrayOutputStream()),
+            PrintStream(err),
+            arrayOf(fooBar.toString()))
+            .run()
 
     assertThat(returnValue).isEqualTo(1)
     assertThat(err.toString("UTF-8")).contains("foo.kt:1:14: error: ")
+  }
+
+  @Test
+  fun `dropbox-style is passed to formatter (file)`() {
+    val code =
+        """fun f() {
+    for (child in
+        node.next.next.next.next.next.next.next.next.next.next.next.next.next.next.data()) {
+        println(child)
+    }
+}
+"""
+    val fooBar = root.resolve("foo.kt")
+    fooBar.writeText(code)
+
+    val output = ByteArrayOutputStream()
+    Main(
+        "".byteInputStream(),
+        PrintStream(output),
+        PrintStream(output),
+        arrayOf("--dropbox-style", fooBar.toString()))
+        .run()
+
+    assertThat(fooBar.readText()).isEqualTo(code)
+  }
+
+  @Test
+  fun `dropbox-style is passed to formatter (stdin)`() {
+    val code =
+        """fun f() {
+    for (child in
+        node.next.next.next.next.next.next.next.next.next.next.next.next.next.next.data()) {
+        println(child)
+    }
+}
+"""
+    val output = ByteArrayOutputStream()
+    Main(
+        code.byteInputStream(),
+        PrintStream(output),
+        PrintStream(output),
+        arrayOf("--dropbox-style", "-"))
+        .run()
+
+    assertThat(output.toString("UTF-8")).isEqualTo(code)
   }
 }

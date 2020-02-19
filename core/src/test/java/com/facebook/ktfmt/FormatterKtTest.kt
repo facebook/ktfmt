@@ -2033,6 +2033,26 @@ class FormatterKtTest {
     assertThatFormatting(code).isEqualTo(expected)
   }
 
+  @Test
+  fun `sanity - block and continuation indents are 4`() {
+    val code =
+        """
+        |fun f() {
+        |    for (child in
+        |        node.next
+        |            .next
+        |            .next
+        |            .next
+        |            .data()) {
+        |        println(child)
+        |    }
+        |}
+        |""".trimMargin()
+    assertThatFormatting(code)
+        .withOptions(FormattingOptions(maxWidth = 35, blockIndent = 4, continuationIndent = 4))
+        .isEqualTo(code)
+  }
+
   /**
    * Verifies the given code passes through formatting, and stays the same at the end
    *
@@ -2063,20 +2083,27 @@ class FormatterKtTest {
             "When deduceMaxWidth is true the first line need to be all dashes only (i.e. ---)")
       }
     }
-    assertThatFormatting(deducedCode, maxWidth).isEqualTo(deducedCode)
+    assertThatFormatting(deducedCode)
+        .withOptions(FormattingOptions(maxWidth))
+        .isEqualTo(deducedCode)
   }
 
-  fun assertThatFormatting(code: String, maxWidth: Int = DEFAULT_MAX_WIDTH): FormattedCodeSubject {
+  fun assertThatFormatting(code: String): FormattedCodeSubject {
     fun codes(): Subject.Factory<FormattedCodeSubject, String> {
-      return Subject.Factory { metadata, subject ->
-        FormattedCodeSubject(metadata, subject, maxWidth)
-      }
+      return Subject.Factory { metadata, subject -> FormattedCodeSubject(metadata, subject) }
     }
     return assertAbout(codes()).that(code)
   }
 
-  class FormattedCodeSubject(metadata: FailureMetadata, subject: String?, val maxWidth: Int) :
+  class FormattedCodeSubject(metadata: FailureMetadata, subject: String?) :
       Subject<FormattedCodeSubject, String>(metadata, subject) {
+    var options: FormattingOptions = FormattingOptions()
+
+    fun withOptions(options: FormattingOptions): FormattedCodeSubject {
+      this.options = options
+      return this
+    }
+
     fun isEqualTo(expectedFormatting: String) {
       val code = actual()
       if (expectedFormatting.lines().any { it.endsWith(" ") }) {
@@ -2088,7 +2115,7 @@ class FormatterKtTest {
       }
       val actualFormatting: String
       try {
-        actualFormatting = format(code, maxWidth)
+        actualFormatting = format(options, code)
         if (actualFormatting != expectedFormatting) {
           reportError(code)
           println("# Output: ")

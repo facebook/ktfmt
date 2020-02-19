@@ -115,16 +115,18 @@ import org.jetbrains.kotlin.psi.stubs.elements.KtAnnotationEntryElementType
 import org.jetbrains.kotlin.types.Variance
 
 /** An AST visitor that builds a stream of {@link Op}s to format. */
-class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
+class KotlinInputAstVisitor(
+    blockIndent: Int, continuationIndent: Int, private val builder: OpsBuilder) :
+    KtTreeVisitorVoid() {
 
   /** Standard indentation for a block */
-  private val blockIndent: Indent.Const = Indent.Const.make(+2, 1)
+  private val blockIndent: Indent.Const = Indent.Const.make(blockIndent, 1)
 
   /**
    * Standard indentation for a long expression or function call, it is different than block
    * indentation on purpose
    */
-  private val expressionBreakIndent: Indent.Const = Indent.Const.make(+4, 1)
+  private val expressionBreakIndent: Indent.Const = Indent.Const.make(continuationIndent, 1)
 
   /** A record of whether we have visited into an expression. */
   private val inExpression = ArrayDeque(ImmutableList.of(false))
