@@ -833,6 +833,25 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `if expression with break before expressions`() =
+      assertFormatted(
+          """
+      |--------------------------
+      |fun compute(b: Boolean) {
+      |  val c =
+      |      if (a + b < 20)
+      |          a + b
+      |      else if (a < 20) a
+      |      else
+      |          a + b + b + 1000
+      |  return if (a + b < 20)
+      |      a + b
+      |  else c
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `assignment expression on multiple lines`() =
       assertFormatted(
           """

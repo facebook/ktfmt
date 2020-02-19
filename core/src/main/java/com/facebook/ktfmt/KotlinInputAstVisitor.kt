@@ -432,7 +432,8 @@ class KotlinInputAstVisitor(
         }
         builder.token(receiver.operationSign.value)
         builder.block(if (isFirst) ZERO else expressionBreakIndent) {
-          receiver.selectorExpression?.accept(this)
+          receiver.selectorExpression
+              ?.accept(this)
         }
       }
     }
@@ -1177,17 +1178,29 @@ class KotlinInputAstVisitor(
       builder.token("(")
       builder.block(ZERO) { expression.condition?.accept(this) }
       builder.token(")")
-      builder.space()
-      expression.then?.accept(this)
+
+      if (expression.then is KtBlockExpression) {
+        builder.space()
+        expression.then?.accept(this)
+      } else {
+        builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+        builder.block(ZERO) { expression.then?.accept(this) }
+      }
+
       if (expression.elseKeyword != null) {
-        if (expression.then?.text?.last() == '}') {
+        if (expression.then is KtBlockExpression) {
           builder.space()
         } else {
-          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
         }
+
         builder.token("else")
-        builder.space()
-        expression.`else`?.accept(this)
+        if (expression.`else` is KtBlockExpression || expression.`else` is KtIfExpression) {
+          builder.space()
+        } else {
+          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+        }
+        builder.block(ZERO) { expression.`else`?.accept(this) }
       }
     }
   }
