@@ -666,9 +666,13 @@ class FormatterKtTest {
       assertFormatted(
           """
       |class Derived2 : Super1, Super2 {}
+      |
       |class Derived1 : Super1, Super2
+      |
       |class Derived3(a: Int) : Super1(a)
+      |
       |class Derived4 : Super1()
+      |
       |class Derived5 : Super3<Int>()
       |""".trimMargin())
 
@@ -680,13 +684,17 @@ class FormatterKtTest {
       |class Derived2 :
       |    Super1,
       |    Super2 {}
+      |
       |class Derived1 :
       |    Super1, Super2
+      |
       |class Derived3(
       |    a: Int) :
       |    Super1(a)
+      |
       |class Derived4 :
       |    Super1()
+      |
       |class Derived5 :
       |    Super3<Int>()
       |""".trimMargin(),
@@ -710,8 +718,11 @@ class FormatterKtTest {
       assertFormatted(
           """
       |abstract class Foo
+      |
       |inner class Foo
+      |
       |final class Foo
+      |
       |open class Foo
       |""".trimMargin())
 
@@ -875,9 +886,13 @@ class FormatterKtTest {
       assertFormatted(
           """
       |class Foo constructor(number: Int) {}
+      |
       |class Foo2 private constructor(number: Int) {}
+      |
       |class Foo3 @Inject constructor(number: Int) {}
+      |
       |class Foo4 @Inject private constructor(number: Int) {}
+      |
       |class Foo5
       |    @Inject
       |    private constructor(
@@ -1040,6 +1055,7 @@ class FormatterKtTest {
       assertFormatted(
           """
       |val a: (Int) = 7
+      |
       |var listener: ((Boolean) -> Unit) = foo
       |""".trimMargin())
 
@@ -1307,6 +1323,7 @@ class FormatterKtTest {
   fun `handle top level constants`() =
       assertFormatted("""
       |val a = 5
+      |
       |const val b = 6
       |""".trimMargin())
 
@@ -1369,6 +1386,7 @@ class FormatterKtTest {
       assertFormatted(
           """
       |@file:JvmName("DifferentName")
+      |
       |package com.somecompany.example
       |
       |import com.somecompany.example2
@@ -1405,8 +1423,11 @@ class FormatterKtTest {
       assertFormatted(
           """
       |val listener1: (Boolean) -> Unit = { b -> !b }
+      |
       |val listener2: () -> Unit = {}
+      |
       |val listener3: (Int, Double) -> Int = { a, b -> a }
+      |
       |val listener4: Int.(Int, Boolean) -> Unit
       |""".trimMargin())
 
@@ -1849,6 +1870,7 @@ class FormatterKtTest {
       |----------------------------------------------
       |private typealias TextChangedListener =
       |    (string: String) -> Unit
+      |
       |typealias PairPair<X, Y> = Pair<Pair<X, Y>, X>
       |
       |class Foo
@@ -1916,7 +1938,9 @@ class FormatterKtTest {
       assertFormatted(
           """
       |public @Magic final class Foo
+      |
       |public @Magic(1) final class Foo
+      |
       |@Magic(1)
       |public final class Foo
       |""".trimMargin())

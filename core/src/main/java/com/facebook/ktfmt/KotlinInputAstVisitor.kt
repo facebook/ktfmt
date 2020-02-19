@@ -149,9 +149,6 @@ class KotlinInputAstVisitor(
           function.typeReference,
           function.bodyBlockExpression?.lBrace != null)
     }
-    if (function.parent is KtFile) {
-      builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
-    }
   }
 
   /** Example `Int`, `(String)` or `() -> Int` */
@@ -945,14 +942,12 @@ class KotlinInputAstVisitor(
 
     builder.guessToken(";")
     builder.forcedBreak()
-    builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
   }
 
   /** Example `import com.foo.A; import com.bar.B` */
   override fun visitImportList(importList: KtImportList) {
     builder.sync(importList)
     importList.imports.forEach { it.accept(this) }
-    builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
   }
 
   /** Example `import com.foo.A` */
@@ -1571,9 +1566,6 @@ class KotlinInputAstVisitor(
         typeAlias.typeConstraintList?.accept(this)
         builder.guessToken(";")
         val peekToken = builder.peekToken()
-        if (peekToken.isPresent && peekToken.get() != "typealias") {
-          builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
-        }
       }
       builder.forcedBreak()
     }
@@ -1600,7 +1592,10 @@ class KotlinInputAstVisitor(
 
   override fun visitKtFile(file: KtFile) {
     markForPartialFormat()
-    super.visitKtFile(file)
+    for (child in file.children) {
+      child.accept(this)
+      builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
+    }
     markForPartialFormat()
   }
 
