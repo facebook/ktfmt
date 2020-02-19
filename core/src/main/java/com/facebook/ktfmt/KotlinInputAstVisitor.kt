@@ -1510,7 +1510,10 @@ class KotlinInputAstVisitor(
     builder.token("catch")
     builder.space()
     builder.token("(")
-    catchClause.catchParameter?.accept(this)
+    builder.block(expressionBreakIndent) {
+      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+      catchClause.catchParameter?.accept(this)
+    }
     builder.token(")")
     builder.space()
     catchClause.catchBody?.accept(this)

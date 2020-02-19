@@ -1226,6 +1226,19 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `annotations on exceptions`() =
+      assertFormatted(
+          """
+      |fun doIt() {
+      |  try {
+      |    doItAgain()
+      |  } catch (
+      |      @Supress("GeneralException")
+      |      e: Exception) {}
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `Unary expressions`() =
       assertFormatted(
           """
