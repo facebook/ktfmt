@@ -39,14 +39,16 @@ class Main(
       return 1
     }
 
-    if (args.size == 1 && args[0] == "-") {
+    val options = parseOptions(err, args)
+
+    if (options.fileNames.size == 1 && options.fileNames[0] == "-") {
       val success = formatStdin()
       return if (success) 0 else 1
     }
 
     val fileNames: List<File>
     try {
-      fileNames = expandArgsToFileNames(args)
+      fileNames = expandArgsToFileNames(options.fileNames)
     } catch (e: java.lang.IllegalStateException) {
       err.println(e.message)
       return 1
@@ -103,7 +105,7 @@ class Main(
  * Most commonly, 'args' is either a list of .kt files, or a name of a directory whose contents the
  * user wants to format.
  */
-fun expandArgsToFileNames(args: Array<String>): List<File> {
+fun expandArgsToFileNames(args: List<String>): List<File> {
   if (args.size == 1 && File(args[0]).isFile) {
     return listOf(File(args[0]))
   }

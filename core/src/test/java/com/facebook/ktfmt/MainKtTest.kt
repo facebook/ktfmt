@@ -44,13 +44,13 @@ class MainKtTest {
   fun `expandArgsToFileNames - single file arg is used as is`() {
     val fooBar = root.resolve("foo.bar")
     fooBar.writeText("hi")
-    assertThat(expandArgsToFileNames(arrayOf(fooBar.toString()))).containsExactly(fooBar)
+    assertThat(expandArgsToFileNames(listOf(fooBar.toString()))).containsExactly(fooBar)
   }
 
   @Test
   fun `expandArgsToFileNames - single arg which is not a file is not returned`() {
     val fooBar = root.resolve("foo.bar")
-    assertThat(expandArgsToFileNames(arrayOf(fooBar.toString()))).isEmpty()
+    assertThat(expandArgsToFileNames(listOf(fooBar.toString()))).isEmpty()
   }
 
   @Test
@@ -61,7 +61,7 @@ class MainKtTest {
     foo.writeText("")
     val bar = dir.resolve("bar.kt")
     bar.writeText("")
-    assertThat(expandArgsToFileNames(arrayOf(dir.toString()))).containsExactly(foo, bar)
+    assertThat(expandArgsToFileNames(listOf(dir.toString()))).containsExactly(foo, bar)
   }
 
   @Test
@@ -80,14 +80,14 @@ class MainKtTest {
     val bar2 = dir1.resolve("bar2.kt")
     bar2.writeText("")
 
-    assertThat(expandArgsToFileNames(arrayOf(dir1.toString(), dir2.toString())))
+    assertThat(expandArgsToFileNames(listOf(dir1.toString(), dir2.toString())))
         .containsExactly(foo1, bar1, foo2, bar2)
   }
 
   @Test
   fun `expandArgsToFileNames - a dash is an error`() {
     try {
-      expandArgsToFileNames(arrayOf(root.resolve("foo.bar").toString(), File("-").toString()))
+      expandArgsToFileNames(listOf(root.resolve("foo.bar").toString(), File("-").toString()))
       fail("expected exception, but nothing was thrown")
     } catch (e: IllegalStateException) {
       assertThat(e.message).contains("Error")
