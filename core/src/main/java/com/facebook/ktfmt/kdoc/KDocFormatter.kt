@@ -96,8 +96,14 @@ object KDocFormatter {
                 }
                 first = false
               }
-              tokens.add(Token(LITERAL, word))
-              tokens.add(Token(WHITESPACE, " "))
+              // If the KDoc is malformed (e.g. unclosed code block) KDocLexer doesn't report an
+              // END_KDOC properly. We want to recover in such cases
+              if (word == "*/") {
+                tokens.add(Token(END_KDOC, word))
+              } else {
+                tokens.add(Token(LITERAL, word))
+                tokens.add(Token(WHITESPACE, " "))
+              }
             }
           }
         }

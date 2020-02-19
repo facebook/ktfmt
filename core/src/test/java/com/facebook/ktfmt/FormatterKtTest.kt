@@ -2008,6 +2008,14 @@ class FormatterKtTest {
   }
 
   @Test
+  fun `do not crash because of malformed KDocs`() =
+      assertFormatted(
+          """
+      |/** Surprise ``` */
+      |class MyClass {}
+      |""".trimMargin())
+
+  @Test
   fun `handle KDoc with multiple separated param tags, breaking and merging lines and missing asterisk`() {
     val code =
         """
@@ -2078,6 +2086,7 @@ class FormatterKtTest {
    * --------------------
    * // exactly 20 `-` above
    * fun f()
+   *
    * ```
    * @param deduceMaxWidth if this is true the code string should start with a line of "-----" in
    * the beginning to indicate the max width to format by
