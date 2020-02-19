@@ -1602,7 +1602,7 @@ class FormatterKtTest {
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
-  
+
   @Test
   fun `statements are wrapped in blocks`() =
       assertFormatted(
@@ -1690,6 +1690,20 @@ class FormatterKtTest {
       |      .sum
       |}
       |""".trimMargin())
+
+  @Test
+  fun `break before Elvis operator`() =
+      assertFormatted(
+          """
+        |--------------------------------------------------
+        |fun f() {
+        |  someObject.someMethodReturningCollection()
+        |      .map { it.someProperty }
+        |      .find { it.contains(someSearchValue) }
+        |      ?: someDefaultValue
+        |}
+        |""".trimMargin(),
+          deduceMaxWidth = true)
 
   @Test
   fun `handle reified types`() =
@@ -2023,8 +2037,7 @@ class FormatterKtTest {
    * Verifies the given code passes through formatting, and stays the same at the end
    *
    * @param code a code string that continas an optional first line made of "---" in the case
-   * [deduceMaxWidth] is true. For example:
-   * ```
+   * [deduceMaxWidth] is true. For example: ```
    * --------------------
    * // exactly 20 `-` above
    * fun f()

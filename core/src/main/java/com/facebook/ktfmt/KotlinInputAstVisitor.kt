@@ -126,7 +126,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
    */
   private val expressionBreakIndent: Indent.Const = Indent.Const.make(+4, 1)
 
-  /** A record of whether we have visited into an expression.  */
+  /** A record of whether we have visited into an expression. */
   private val inExpression = ArrayDeque(ImmutableList.of(false))
 
   /** Example: `fun foo(n: Int) { println(n) }` */
@@ -540,9 +540,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   }
 
   private fun <T> forEachCommaSeparated(
-      list: Iterable<T>,
-      delimiter: (() -> Unit)? = null,
-      function: (T) -> Unit
+      list: Iterable<T>, delimiter: (() -> Unit)? = null, function: (T) -> Unit
   ) {
     builder.block(ZERO) {
       var first = true
@@ -624,17 +622,20 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
     val leftMostExpression = parts.first()
     leftMostExpression.left?.accept(this)
     for (leftExpression in parts) {
-      val surroundWithSpace = leftExpression.operationToken != KtTokens.RANGE
-      if (surroundWithSpace) {
-        builder.space()
+      when (leftExpression.operationToken) {
+        KtTokens.RANGE -> {}
+        KtTokens.ELVIS -> builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+        else -> builder.space()
       }
       builder.token(leftExpression.operationReference.text)
       val isFirst = leftExpression === leftMostExpression
       if (isFirst) {
         builder.open(expressionBreakIndent)
       }
-      if (surroundWithSpace) {
-        builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+      when (leftExpression.operationToken) {
+        KtTokens.RANGE -> {}
+        KtTokens.ELVIS -> builder.space()
+        else -> builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
       }
       leftExpression.right?.accept(this)
     }
@@ -996,8 +997,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
    * middle of the modifier keywords list
    */
   private fun visitAnnotationBeforeModifiers(list: KtModifierList) {
-    for (child in list.node
-        .children()) {
+    for (child in list.node.children()) {
       if (child.psi is PsiWhiteSpace) {
         continue
       }
@@ -1018,8 +1018,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
    */
   private fun visitKeywordModifiers(list: KtModifierList) {
     var onlyAnnotationsSoFar = true
-    for (child in list.node
-        .children()) {
+    for (child in list.node.children()) {
       if (child.psi is PsiWhiteSpace) {
         continue
       }
@@ -1345,9 +1344,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
       builder.token("in")
       builder.block(ZERO) {
         builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
-        builder.block(expressionBreakIndent) {
-          expression.loopRange?.accept(this)
-        }
+        builder.block(expressionBreakIndent) { expression.loopRange?.accept(this) }
       }
       builder.token(")")
       builder.space()
@@ -1476,8 +1473,7 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   }
 
   override fun visitCollectionLiteralExpression(
-      expression: KtCollectionLiteralExpression,
-      data: Void?
+      expression: KtCollectionLiteralExpression, data: Void?
   ): Void? {
     builder.sync(expression)
     builder.token("[")
@@ -1568,8 +1564,8 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   }
 
   /**
-   * visitElement is called for almost all types of AST nodes.
-   * We use it to keep track of whether we're currently inside an expression or not.
+   * visitElement is called for almost all types of AST nodes. We use it to keep track of whether
+   * we're currently inside an expression or not.
    */
   override fun visitElement(element: PsiElement) {
     inExpression.addLast(element is KtExpression || inExpression.peekLast())
@@ -1597,7 +1593,8 @@ class KotlinInputAstVisitor(val builder: OpsBuilder) : KtTreeVisitorVoid() {
   }
 
   /**
-   * markForPartialFormat is used to delineate the smallest areas of code that must be formatted together.
+   * markForPartialFormat is used to delineate the smallest areas of code that must be formatted
+   * together.
    *
    * When only parts of the code are being formatted, the requested area is expanded until it's
    * covered by an area marked by this method.
