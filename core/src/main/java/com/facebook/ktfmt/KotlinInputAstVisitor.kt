@@ -422,17 +422,18 @@ class KotlinInputAstVisitor(
           }
         }
 
-    val leftMostExpression = parts.first()
-    leftMostExpression.receiverExpression.accept(this)
-    for (receiver in parts) {
-      val isFirst = receiver === leftMostExpression
-      if (!isFirst || receiver.receiverExpression is KtCallExpression) {
-        builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-      }
-      builder.token(receiver.operationSign.value)
-      builder.block(if (isFirst) ZERO else expressionBreakIndent) {
-        receiver.selectorExpression
-            ?.accept(this)
+    builder.block(ZERO) {
+      val leftMostExpression = parts.first()
+      leftMostExpression.receiverExpression.accept(this)
+      for (receiver in parts) {
+        val isFirst = receiver === leftMostExpression
+        if (!isFirst || receiver.receiverExpression is KtCallExpression) {
+          builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
+        }
+        builder.token(receiver.operationSign.value)
+        builder.block(if (isFirst) ZERO else expressionBreakIndent) {
+          receiver.selectorExpression?.accept(this)
+        }
       }
     }
   }

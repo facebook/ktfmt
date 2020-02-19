@@ -1112,6 +1112,19 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `properly place lambda arguments into blocks`() =
+      assertFormatted(
+          """
+      |-----------------------
+      |fun f() {
+      |  foo {
+      |    red.orange.yellow()
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `Qualified type`() =
       assertFormatted(
           """
