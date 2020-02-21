@@ -689,8 +689,8 @@ class FormatterKtTest {
       |    Super1, Super2
       |
       |class Derived3(
-      |    a: Int) :
-      |    Super1(a)
+      |    a: Int
+      |) : Super1(a)
       |
       |class Derived4 :
       |    Super1()
@@ -896,7 +896,8 @@ class FormatterKtTest {
       |class Foo5
       |    @Inject
       |    private constructor(
-      |        number: Int, number2: Int, number3: Int, number4: Int, number5: Int, number6: Int) {}
+      |        number: Int, number2: Int, number3: Int, number4: Int, number5: Int, number6: Int
+      |    ) {}
       |""".trimMargin())
 
   @Test
@@ -904,7 +905,8 @@ class FormatterKtTest {
       assertFormatted(
           """
       |data class Foo(
-      |    val number: Int, val name: String, val age: Int, val title: String, val offspring2: List<Foo>)
+      |    val number: Int, val name: String, val age: Int, val title: String, val offspring2: List<Foo>
+      |)
       |""".trimMargin())
 
   @Test
@@ -913,7 +915,8 @@ class FormatterKtTest {
           """
       |data class Foo
       |    constructor(
-      |        val name: String, val age: Int, val title: String, val offspring: List<Foo>)
+      |        val name: String, val age: Int, val title: String, val offspring: List<Foo>
+      |    )
       |""".trimMargin())
 
   @Test
@@ -927,7 +930,8 @@ class FormatterKtTest {
       |        val name: String,
       |        val age: Int,
       |        val title: String,
-      |        val offspring: List<Foo>)
+      |        val offspring: List<Foo>
+      |    )
       |""".trimMargin(),
           deduceMaxWidth = true)
 

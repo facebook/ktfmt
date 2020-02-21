@@ -863,6 +863,7 @@ class KotlinInputAstVisitor(
         builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
         builder.block(expressionBreakIndent) { visitFormals(constructor.valueParameters) }
       }
+      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
       if (constructor.hasConstructorKeyword()) {
         builder.close()
       }
