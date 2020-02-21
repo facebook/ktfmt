@@ -54,6 +54,8 @@ object KDocFormatter {
 
   private val ONE_CONTENT_LINE_PATTERN = compile(" */[*][*]\n *[*] (.*)\n *[*]/")
 
+  private val NUMBERED_LIST_PATTERN = "[0-9]+\\.".toRegex()
+
   /**
    * Formats the given Javadoc comment, which must start with ∕✱✱ and end with ✱∕. The output will
    * start and end with the same characters.
@@ -91,7 +93,7 @@ object KDocFormatter {
             var first = true
             for (word in words) {
               if (first) {
-                if (word == "-") {
+                if (word == "-" || word.matches(NUMBERED_LIST_PATTERN)) {
                   tokens.add(Token(LIST_ITEM_OPEN_TAG, ""))
                 }
                 first = false

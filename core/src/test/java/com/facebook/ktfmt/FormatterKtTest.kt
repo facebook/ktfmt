@@ -771,6 +771,19 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `formatting kdoc preserves numbered`() =
+      assertFormatted(
+          """
+      |/**
+      | * Here are some fruit I like:
+      | * 1. Banana
+      | * 2. Apple
+      | *
+      | * This is another paragraph
+      | */
+      |""".trimMargin())
+
+  @Test
   fun `return statement with value`() =
       assertFormatted(
           """
@@ -2142,11 +2155,11 @@ class FormatterKtTest {
    * Verifies the given code passes through formatting, and stays the same at the end
    *
    * @param code a code string that continas an optional first line made of "---" in the case
-   * [deduceMaxWidth] is true. For example: ```
+   * [deduceMaxWidth] is true. For example:
+   * ```
    * --------------------
    * // exactly 20 `-` above
    * fun f()
-   *
    * ```
    * @param deduceMaxWidth if this is true the code string should start with a line of "-----" in
    * the beginning to indicate the max width to format by
