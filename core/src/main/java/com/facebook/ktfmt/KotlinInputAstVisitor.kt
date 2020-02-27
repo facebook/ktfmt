@@ -429,8 +429,7 @@ class KotlinInputAstVisitor(
         }
         builder.token(receiver.operationSign.value)
         builder.block(if (isFirst) ZERO else expressionBreakIndent) {
-          receiver.selectorExpression
-              ?.accept(this)
+          receiver.selectorExpression?.accept(this)
         }
       }
     }
@@ -613,8 +612,9 @@ class KotlinInputAstVisitor(
     val parts =
         ArrayDeque<KtBinaryExpression>()
             .apply {
+          val op = expression.operationToken
           var current: KtExpression? = expression
-          while (current is KtBinaryExpression) {
+          while (current is KtBinaryExpression && current.operationToken == op) {
             addFirst(current)
             current = current.left
           }
@@ -822,8 +822,8 @@ class KotlinInputAstVisitor(
     builder.open(ZERO)
     builder.block(blockIndent) {
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      val (enumEntries, nonEnumEntryStatements) = body?.children
-          ?.partition { it is KtEnumEntry } ?: fail()
+      val (enumEntries, nonEnumEntryStatements) = body?.children?.partition { it is KtEnumEntry }
+          ?: fail()
       visitEnumEntries(enumEntries)
 
       builder.forcedBreak()
@@ -840,8 +840,7 @@ class KotlinInputAstVisitor(
   private fun visitEnumEntries(enumEntries: List<PsiElement>) {
     forEachCommaSeparated(
         enumEntries,
-        delimiter =
-            {
+        delimiter = {
           builder.token(",")
           builder.forcedBreak()
         }) { it.accept(this) }
@@ -1066,8 +1065,7 @@ class KotlinInputAstVisitor(
     if (!canBreak) {
       builder.breakToFill(" ")
     } else if (annotationEntry.parent is KtFileAnnotationList ||
-        annotationEntry.valueArguments
-            .isNotEmpty()) {
+        annotationEntry.valueArguments.isNotEmpty()) {
       builder.forcedBreak()
     } else {
       builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)

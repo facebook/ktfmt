@@ -269,6 +269,18 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `prioritize according to associativity`() =
+      assertFormatted(
+          """
+      |--------------------------------------
+      |fun foo() {
+      |  return expression1 != expression2 ||
+      |      expression2 != expression1
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `once a binary expression is broken, split on every line`() =
       assertFormatted(
           """
