@@ -783,6 +783,19 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `formatting kdoc preserves lists of asterisks`() =
+      assertFormatted(
+          """
+      |/**
+      | * Here are some fruit I like:
+      | * * Banana
+      | * * Apple
+      | *
+      | * This is another paragraph
+      | */
+      |""".trimMargin())
+
+  @Test
   fun `formatting kdoc preserves numbered`() =
       assertFormatted(
           """

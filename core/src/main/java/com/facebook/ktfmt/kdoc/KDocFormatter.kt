@@ -93,7 +93,7 @@ object KDocFormatter {
             var first = true
             for (word in words) {
               if (first) {
-                if (word == "-" || word.matches(NUMBERED_LIST_PATTERN)) {
+                if (word == "-" || word == "*" || word.matches(NUMBERED_LIST_PATTERN)) {
                   tokens.add(Token(LIST_ITEM_OPEN_TAG, ""))
                 }
                 first = false
