@@ -731,39 +731,42 @@ class KotlinInputAstVisitor(
         }
       }
 
-      // Emits ": String" in "val thisIsALongName : String"
+      // For example `: String` in `val thisIsALongName: String` or `fun f(): String`
       if (type != null) {
         if (name != null) {
-          builder.breakOp(Doc.FillMode.INDEPENDENT, "", expressionBreakIndent)
-          builder.open(ZERO)
           builder.token(":")
-          builder.space()
+          builder.open(expressionBreakIndent) // open block for typed values
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
         }
         type.accept(this)
       }
+
     }
 
+    // For example `where T : Int` in a generic method
     if (typeConstraintList != null) {
       builder.space()
       typeConstraintList.accept(this)
       builder.space()
     }
+
+    // for example `by lazy { compute() }`
     if (delegate != null) {
       builder.space()
       builder.token("by")
       builder.space()
       delegate.accept(this)
-    }
-    if (initializer != null) {
+    } else if (initializer != null) {
       builder.space()
       builder.token("=")
+      builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+      builder.block(expressionBreakIndent) {
+        initializer.accept(this)
+      }
     }
+
     if (type != null && name != null) {
-      builder.close()
-    }
-    if (initializer != null) {
-      builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-      builder.block(expressionBreakIndent) { initializer.accept(this) }
+      builder.close()  // close block for typed values
     }
 
     if (isField) {

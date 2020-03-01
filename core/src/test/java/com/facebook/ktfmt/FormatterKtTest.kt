@@ -343,8 +343,8 @@ class FormatterKtTest {
           """
       |--------------------
       |class Foo {
-      |  val thisIsALongName
-      |      : String =
+      |  val thisIsALongName:
+      |      String =
       |      "Hello there this is long"
       |    get() = field
       |}
@@ -1461,6 +1461,25 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `handle property delegation with type and breaks`() =
+      assertFormatted(
+          """
+      |---------------------------------
+      |val importantValue: Int by lazy {
+      |  1 + 1
+      |}
+      |
+      |val importantValue: Int by lazy {
+      |  val b = 1 + 1
+      |  b + b
+      |}
+      |
+      |val importantValueLonger:
+      |    Int by lazy { 1 + 1 }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `handle lambda types`() =
       assertFormatted(
           """
@@ -1714,15 +1733,15 @@ class FormatterKtTest {
   fun `properly break fully qualified nested user types`() =
       assertFormatted(
           """
-      |-----------------------------------------------------
-      |val complicated
-      |    : com.example.interesting.SomeType<
-      |    com.example.interesting.SomeType<Int, Nothing>,
+      |-------------------------------------------------------
+      |val complicated:
       |    com.example.interesting.SomeType<
+      |        com.example.interesting.SomeType<Int, Nothing>,
       |        com.example.interesting.SomeType<
-      |            Int,
-      |            Nothing>,
-      |        Nothing>> =
+      |            com.example.interesting.SomeType<
+      |                Int,
+      |                Nothing>,
+      |            Nothing>> =
       |    DUMMY
       |""".trimMargin(),
           deduceMaxWidth = true)
