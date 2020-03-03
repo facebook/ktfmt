@@ -2105,20 +2105,35 @@ class FormatterKtTest {
   fun `handle KDoc with links one after another`() =
       assertFormatted(
           """
-      |/** Here are some links [AnotherClass] [AnotherClass2] */
+      |/** Here are some links [AnotherClass] [AnotherClass2]. */
       |class MyClass {}
       |""".trimMargin())
 
   @Test
-  fun `add spaces after links in Kdoc`() {
+  fun `add spaces between links in KDoc`() {
     val code =
         """
-      |/** Here are some links [AnotherClass][AnotherClass2]hello */
+      |/** Here are some links [AnotherClass][AnotherClass2] */
       |class MyClass {}
       |""".trimMargin()
     val expected =
         """
-      |/** Here are some links [AnotherClass] [AnotherClass2] hello */
+      |/** Here are some links [AnotherClass] [AnotherClass2] */
+      |class MyClass {}
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `collapse spaces after links in KDoc`() {
+    val code =
+        """
+      |/** Here are some links [Class1],[Class2]   [Class3]. hello */
+      |class MyClass {}
+      |""".trimMargin()
+    val expected =
+        """
+      |/** Here are some links [Class1], [Class2] [Class3]. hello */
       |class MyClass {}
       |""".trimMargin()
     assertThatFormatting(code).isEqualTo(expected)

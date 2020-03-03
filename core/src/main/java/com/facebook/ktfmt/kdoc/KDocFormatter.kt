@@ -81,7 +81,6 @@ object KDocFormatter {
         KDocTokens.CODE_BLOCK_TEXT -> tokens.add(Token(CODE, tokenText))
         KDocTokens.MARKDOWN_INLINE_LINK, KDocTokens.MARKDOWN_LINK -> {
           tokens.add(Token(LITERAL, tokenText))
-          tokens.add(Token(WHITESPACE, " "))
         }
         KDocTokens.TEXT -> {
           if (tokenText.isBlank()) {
@@ -89,6 +88,11 @@ object KDocFormatter {
           } else if (tokenText == "```") {
             tokens.add(Token(CODE_BLOCK_MARKER, tokenText))
           } else {
+            if ((previousType == KDocTokens.MARKDOWN_INLINE_LINK ||
+                previousType == KDocTokens.MARKDOWN_LINK) && tokenText[0].isWhitespace()) {
+              tokens.add(Token(WHITESPACE, " "))
+            }
+
             val words = tokenText.trim().split(" +".toRegex())
             var first = true
             for (word in words) {
@@ -110,10 +114,11 @@ object KDocFormatter {
           }
         }
         WHITE_SPACE -> {
-          if (previousType === KDocTokens.TAG_NAME || previousType === KDocTokens.MARKDOWN_LINK) {
+          if (previousType === KDocTokens.TAG_NAME ||
+              previousType === KDocTokens.MARKDOWN_LINK ||
+              previousType === KDocTokens.MARKDOWN_INLINE_LINK) {
             tokens.add(Token(WHITESPACE, " "))
-          } else if (previousType ==
-              KDocTokens.LEADING_ASTERISK ||
+          } else if (previousType == KDocTokens.LEADING_ASTERISK ||
               tokenText.count { it == '\n' } >= 2) {
             tokens.add(Token(BLANK_LINE, ""))
           }
