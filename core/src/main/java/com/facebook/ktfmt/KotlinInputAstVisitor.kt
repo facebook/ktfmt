@@ -857,21 +857,23 @@ class KotlinInputAstVisitor(
         constructor.modifierList?.accept(this)
         builder.token("constructor")
       }
-      builder.token("(")
-      if (constructor.valueParameters.isNotEmpty()) {
-        builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-        builder.block(expressionBreakIndent) { visitFormals(constructor.valueParameters) }
-      }
-      val ownerClassOrObject = constructor.parent
-      if (ownerClassOrObject is KtClassOrObject &&
-          (ownerClassOrObject.body != null || ownerClassOrObject.getSuperTypeList() != null)) {
-        builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      }
-      if (constructor.hasConstructorKeyword()) {
-        builder.close()
+      builder.block(ZERO) {
+        builder.token("(")
+        if (constructor.valueParameters.isNotEmpty()) {
+          builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
+          builder.block(expressionBreakIndent) { visitFormals(constructor.valueParameters) }
+        }
+        val ownerClassOrObject = constructor.parent
+        if (ownerClassOrObject is KtClassOrObject &&
+            (ownerClassOrObject.body != null || ownerClassOrObject.getSuperTypeList() != null)) {
+          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+        }
+        if (constructor.hasConstructorKeyword()) {
+          builder.close()
+        }
+        builder.token(")")
       }
     }
-    builder.token(")")
   }
 
   /** Example `private constructor(n: Int) : this(4, 5) { ... }` inside a class's body */

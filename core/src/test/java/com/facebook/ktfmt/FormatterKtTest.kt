@@ -988,7 +988,7 @@ class FormatterKtTest {
           """
       |data class Foo
       |    constructor(
-      |        val name: String, val age: Int, val title: String, val offspring: List<Foo>
+      |        val name: String, val age: Int, val title: String, val offspring: List<Foo>, val foo: String
       |    ) {}
       |""".trimMargin())
 
@@ -1066,6 +1066,15 @@ class FormatterKtTest {
       |class Foo : Bar {
       |  internal constructor(number: Int) : super(number) {}
       |}
+      |""".trimMargin())
+
+  @Test
+  fun `primary constructor without parameters with a KDoc`() =
+      assertFormatted(
+          """
+      |class Class
+      |    /** A comment */
+      |    constructor() {}
       |""".trimMargin())
 
   @Test
