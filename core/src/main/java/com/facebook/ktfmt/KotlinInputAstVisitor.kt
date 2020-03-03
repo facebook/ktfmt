@@ -116,8 +116,8 @@ import org.jetbrains.kotlin.types.Variance
 
 /** An AST visitor that builds a stream of {@link Op}s to format. */
 class KotlinInputAstVisitor(
-    blockIndent: Int, continuationIndent: Int, private val builder: OpsBuilder) :
-    KtTreeVisitorVoid() {
+    blockIndent: Int, continuationIndent: Int, private val builder: OpsBuilder
+) : KtTreeVisitorVoid() {
 
   /** Standard indentation for a block */
   private val blockIndent: Indent.Const = Indent.Const.make(blockIndent, 1)
@@ -740,7 +740,6 @@ class KotlinInputAstVisitor(
         }
         type.accept(this)
       }
-
     }
 
     // For example `where T : Int` in a generic method
@@ -760,13 +759,11 @@ class KotlinInputAstVisitor(
       builder.space()
       builder.token("=")
       builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
-      builder.block(expressionBreakIndent) {
-        initializer.accept(this)
-      }
+      builder.block(expressionBreakIndent) { initializer.accept(this) }
     }
 
     if (type != null && name != null) {
-      builder.close()  // close block for typed values
+      builder.close() // close block for typed values
     }
 
     if (isField) {
@@ -865,7 +862,11 @@ class KotlinInputAstVisitor(
         builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
         builder.block(expressionBreakIndent) { visitFormals(constructor.valueParameters) }
       }
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+      val ownerClassOrObject = constructor.parent
+      if (ownerClassOrObject is KtClassOrObject &&
+          (ownerClassOrObject.body != null || ownerClassOrObject.getSuperTypeList() != null)) {
+        builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+      }
       if (constructor.hasConstructorKeyword()) {
         builder.close()
       }
@@ -875,31 +876,33 @@ class KotlinInputAstVisitor(
 
   /** Example `private constructor(n: Int) : this(4, 5) { ... }` inside a class's body */
   override fun visitSecondaryConstructor(constructor: KtSecondaryConstructor) {
+    val delegationCall = constructor.getDelegationCall()
+    val bodyExpression = constructor.bodyExpression
+
     builder.sync(constructor)
-    builder.block(expressionBreakIndent) {
+    builder.block(ZERO) {
       constructor.modifierList?.accept(this)
       builder.token("constructor")
       builder.token("(")
-      if (constructor.valueParameters.isNotEmpty()) {
-        visitFormals(constructor.valueParameters)
+      builder.block(expressionBreakIndent) {
+        if (constructor.valueParameters.isNotEmpty()) {
+          visitFormals(constructor.valueParameters)
+        }
+      }
+      if (!delegationCall.isImplicit || bodyExpression != null) {
+        builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
       }
       builder.token(")")
     }
-    val delegationCall = constructor.getDelegationCall()
     if (!delegationCall.isImplicit) {
       builder.space()
       builder.token(":")
-      builder.block(expressionBreakIndent) {
-        builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-        builder.block(expressionBreakIndent) {
-          builder.token(if (delegationCall.isCallToThis) "this" else "super")
-          builder.token("(")
-          delegationCall.accept(this)
-          builder.token(")")
-        }
-      }
+      builder.space()
+      builder.token(if (delegationCall.isCallToThis) "this" else "super")
+      builder.token("(")
+      builder.block(ZERO) { delegationCall.accept(this) }
+      builder.token(")")
     }
-    val bodyExpression = constructor.bodyExpression
     if (bodyExpression != null) {
       builder.space()
       bodyExpression.accept(this)

@@ -939,12 +939,47 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `a primary constructor without a class body `() =
+      assertFormatted(
+          """
+      |-------------------------
+      |data class Foo(
+      |    val number: Int = 0)
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `a secondary constructor without a body`() =
+      assertFormatted(
+          """
+      |---------------------------
+      |data class Foo {
+      |  constructor(
+      |      val number: Int = 0)
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `a secondary constructor with a body breaks before closing parenthesis`() =
+      assertFormatted(
+          """
+      |---------------------------
+      |data class Foo {
+      |  constructor(
+      |      val number: Int = 0
+      |  ) {}
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `a constructor with many arguments over breaking to next line`() =
       assertFormatted(
           """
       |data class Foo(
       |    val number: Int, val name: String, val age: Int, val title: String, val offspring2: List<Foo>
-      |)
+      |) {}
       |""".trimMargin())
 
   @Test
@@ -954,7 +989,7 @@ class FormatterKtTest {
       |data class Foo
       |    constructor(
       |        val name: String, val age: Int, val title: String, val offspring: List<Foo>
-      |    )
+      |    ) {}
       |""".trimMargin())
 
   @Test
@@ -969,7 +1004,7 @@ class FormatterKtTest {
       |        val age: Int,
       |        val title: String,
       |        val offspring: List<Foo>
-      |    )
+      |    ) {}
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -1012,14 +1047,14 @@ class FormatterKtTest {
       |      val name: String,
       |      val age: Int,
       |      val title: String,
-      |      val offspring: List<Foo>) :
-      |          this(
-      |              number,
-      |              name,
-      |              age,
-      |              title,
-      |              offspring,
-      |              offspring)
+      |      val offspring: List<Foo>
+      |  ) : this(
+      |      number,
+      |      name,
+      |      age,
+      |      title,
+      |      offspring,
+      |      offspring)
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
