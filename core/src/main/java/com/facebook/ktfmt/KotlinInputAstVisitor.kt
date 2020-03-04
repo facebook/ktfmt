@@ -1132,10 +1132,12 @@ class KotlinInputAstVisitor(
               builder.token("->")
               if (whenExpression is KtBlockExpression) {
                 builder.space()
-                whenExpression?.accept(this)
+                whenExpression.accept(this)
               } else {
-                builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-                builder.block(expressionBreakIndent) { whenExpression?.accept(this) }
+                builder.block(expressionBreakIndent) {
+                  builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+                  whenExpression?.accept(this)
+                }
               }
             }
             builder.forcedBreak()
