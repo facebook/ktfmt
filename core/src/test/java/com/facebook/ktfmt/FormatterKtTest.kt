@@ -473,6 +473,21 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `named arguments indent their value expression`() =
+      assertFormatted(
+          """
+      |fun f() =
+      |    Bar(
+      |        tokens =
+      |            mutableListOf<Token>()
+      |                .apply {
+      |              // Printing
+      |              print()
+      |            },
+      |        duration = duration)
+      |""".trimMargin())
+
+  @Test
   fun `Arguments are blocks`() =
       assertFormatted(
           """

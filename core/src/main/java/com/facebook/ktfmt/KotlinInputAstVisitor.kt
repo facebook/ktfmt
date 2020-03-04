@@ -564,19 +564,21 @@ class KotlinInputAstVisitor(
   /** Example `a` in `foo(a)`, or `*a`, or `limit = 50` */
   override fun visitArgument(argument: KtValueArgument) {
     builder.sync(argument)
+    val hasArgName = argument.getArgumentName() != null
+    val isLambda = argument.getArgumentExpression() is KtLambdaExpression
     builder.block(ZERO) {
-      val hasArgName = argument.getArgumentName() != null
       if (hasArgName) {
         argument.getArgumentName()?.accept(this)
         builder.space()
         builder.token("=")
-        if (argument.getArgumentExpression() is KtLambdaExpression) {
+        if (isLambda) {
           builder.space()
-        } else {
-          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
         }
       }
-      builder.block(ZERO) {
+      builder.block(if (hasArgName && !isLambda) expressionBreakIndent else ZERO) {
+        if (hasArgName && !isLambda) {
+          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+        }
         if (argument.isSpread) {
           builder.token("*")
         }
