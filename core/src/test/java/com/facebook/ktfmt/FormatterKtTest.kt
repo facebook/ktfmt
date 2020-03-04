@@ -2285,8 +2285,8 @@ class FormatterKtTest {
     return assertAbout(codes()).that(code)
   }
 
-  class FormattedCodeSubject(metadata: FailureMetadata, subject: String?) :
-      Subject<FormattedCodeSubject, String>(metadata, subject) {
+  class FormattedCodeSubject(metadata: FailureMetadata, val code: String) :
+      Subject(metadata, code) {
     var options: FormattingOptions = FormattingOptions()
 
     fun withOptions(options: FormattingOptions): FormattedCodeSubject {
@@ -2295,7 +2295,6 @@ class FormatterKtTest {
     }
 
     fun isEqualTo(expectedFormatting: String) {
-      val code = actual()
       if (expectedFormatting.lines().any { it.endsWith(" ") }) {
         throw RuntimeException(
             "Expected code contains trailing whitespace, which the formatter will never output:\n" +
