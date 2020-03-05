@@ -58,6 +58,8 @@ internal class Token(val type: Type, val value: String) {
     CODE,
     /** three backticks */
     CODE_BLOCK_MARKER,
+    /** A link in brakcets such as [Token] */
+    MARKDOWN_LINK,
     BLANK_LINE,
     /**
      * Whitespace that is not in a `<pre>` or `<table>` section. Whitespace includes leading

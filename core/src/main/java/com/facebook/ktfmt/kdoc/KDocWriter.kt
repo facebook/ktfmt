@@ -22,6 +22,7 @@ package com.facebook.ktfmt.kdoc
 import com.facebook.ktfmt.kdoc.KDocWriter.AutoIndent.AUTO_INDENT
 import com.facebook.ktfmt.kdoc.KDocWriter.AutoIndent.NO_AUTO_INDENT
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.BLANK_LINE
+import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.CONDITIONAL_WHITESPACE
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.NEWLINE
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.NONE
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.WHITESPACE
@@ -169,6 +170,11 @@ internal class KDocWriter(private val blockIndent: Int) {
     writeToken(token)
   }
 
+  fun writeMarkdownLink(token: Token) {
+    writeToken(token)
+    requestWhitespace(CONDITIONAL_WHITESPACE)
+  }
+
   override fun toString(): String {
     return output.toString()
   }
@@ -183,8 +189,7 @@ internal class KDocWriter(private val blockIndent: Int) {
 
   private fun requestWhitespace(requestedWhitespace: RequestedWhitespace) {
     this.requestedWhitespace =
-        Ordering.natural<Comparable<*>>()
-            .max(requestedWhitespace, this.requestedWhitespace)
+        Ordering.natural<Comparable<*>>().max(requestedWhitespace, this.requestedWhitespace)
   }
 
   /**
@@ -195,9 +200,21 @@ internal class KDocWriter(private val blockIndent: Int) {
    */
   internal enum class RequestedWhitespace {
     NONE,
+
+    /**
+     * Add one space, only if the next token seems like a word In contrast, punctuation like a dot
+     * does need a space before it.
+     */
+    CONDITIONAL_WHITESPACE,
+
+    /** Add one space, e.g. " " */
     WHITESPACE,
+
+    /** Break to the next line */
     NEWLINE,
-    BLANK_LINE
+
+    /** Add a whole blank line between the two lines of content */
+    BLANK_LINE,
   }
 
   private fun writeToken(token: Token) {
@@ -216,7 +233,9 @@ internal class KDocWriter(private val blockIndent: Int) {
       writeNewline()
       requestedWhitespace = NONE
     }
-    val needWhitespace = requestedWhitespace == WHITESPACE
+    val needWhitespace =
+        requestedWhitespace == WHITESPACE ||
+            requestedWhitespace == CONDITIONAL_WHITESPACE && token.value.first().isLetterOrDigit()
 
     /*
      * Write a newline if necessary to respect the line limit. (But if we're at the beginning of the

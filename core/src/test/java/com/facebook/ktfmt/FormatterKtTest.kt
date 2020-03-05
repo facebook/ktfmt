@@ -2187,10 +2187,66 @@ class FormatterKtTest {
   }
 
   @Test
+  fun `add spaces between links in KDoc`() {
+    val code =
+        """
+      |/** Here are some links [AnotherClass][AnotherClass2] */
+      |class MyClass {}
+      |""".trimMargin()
+    val expected =
+        """
+      |/** Here are some links [AnotherClass] [AnotherClass2] */
+      |class MyClass {}
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `collapse spaces after links in KDoc`() {
+    val code =
+        """
+      |/** Here are some links [Class1],[Class2]   [Class3]. hello */
+      |class MyClass {}
+      |""".trimMargin()
+    val expected =
+        """
+      |/** Here are some links [Class1], [Class2] [Class3]. hello */
+      |class MyClass {}
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `collapse newlines after links in KDoc`() {
+    val code =
+        """
+      |/**
+      | * Here are some links [Class1]
+      | * [Class2]
+      | */
+      |class MyClass {}
+      |""".trimMargin()
+    val expected =
+        """
+      |/** Here are some links [Class1] [Class2] */
+      |class MyClass {}
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
   fun `do not crash because of malformed KDocs`() =
       assertFormatted(
           """
       |/** Surprise ``` */
+      |class MyClass {}
+      |""".trimMargin())
+
+  @Test
+  fun `Respect spacing of text after link`() =
+      assertFormatted(
+          """
+      |/** Enjoy this link [linkstuff]. */
       |class MyClass {}
       |""".trimMargin())
 

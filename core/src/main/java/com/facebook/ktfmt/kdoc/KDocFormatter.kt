@@ -28,6 +28,7 @@ import com.facebook.ktfmt.kdoc.Token.Type.CODE_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.END_KDOC
 import com.facebook.ktfmt.kdoc.Token.Type.LIST_ITEM_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.LITERAL
+import com.facebook.ktfmt.kdoc.Token.Type.MARKDOWN_LINK
 import com.facebook.ktfmt.kdoc.Token.Type.PRE_CLOSE_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.PRE_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.TABLE_CLOSE_TAG
@@ -80,8 +81,7 @@ object KDocFormatter {
         KDocTokens.TAG_NAME -> tokens.add(Token(TAG, tokenText))
         KDocTokens.CODE_BLOCK_TEXT -> tokens.add(Token(CODE, tokenText))
         KDocTokens.MARKDOWN_INLINE_LINK, KDocTokens.MARKDOWN_LINK -> {
-          tokens.add(Token(LITERAL, tokenText))
-          tokens.add(Token(WHITESPACE, " "))
+          tokens.add(Token(MARKDOWN_LINK, tokenText))
         }
         KDocTokens.TEXT -> {
           if (tokenText.isBlank()) {
@@ -112,8 +112,7 @@ object KDocFormatter {
         WHITE_SPACE -> {
           if (previousType === KDocTokens.TAG_NAME || previousType === KDocTokens.MARKDOWN_LINK) {
             tokens.add(Token(WHITESPACE, " "))
-          } else if (previousType ==
-              KDocTokens.LEADING_ASTERISK ||
+          } else if (previousType == KDocTokens.LEADING_ASTERISK ||
               tokenText.count { it == '\n' } >= 2) {
             tokens.add(Token(BLANK_LINE, ""))
           }
@@ -150,6 +149,7 @@ object KDocFormatter {
         BLANK_LINE -> output.requestBlankLine()
         WHITESPACE -> output.requestWhitespace()
         LITERAL -> output.writeLiteral(token)
+        MARKDOWN_LINK -> output.writeMarkdownLink(token)
         else -> throw AssertionError(token.type)
       }
     }
