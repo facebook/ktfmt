@@ -443,18 +443,31 @@ class KotlinInputAstVisitor(
       leftMostReceiverExpression.accept(this)
       for (part in parts) {
         val isFirst = part === leftMostExpression
+        val selector = part.selectorExpression
+        val isLambdaCall = (selector as? KtCallExpression)?.lambdaArguments?.isNotEmpty() == true
+
+        // Break before .
         if (!isFirst || part.receiverExpression is KtCallExpression) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
+        } else if (isLambdaCall) {
+          builder.breakOp(Doc.FillMode.INDEPENDENT, "", expressionBreakIndent)
         }
+
+        // Output . or ?.
         builder.token(part.operationSign.value)
-        val selectorExpression = part.selectorExpression
+
+        // Output next part and close conditional blocks
         if (firstCallWithLambda == part && isSingleLambdaStyle) {
           builder.close()
         }
         val plusIndent =
-            if (isFirst || firstCallWithLambda == part && isSingleLambdaStyle) ZERO
-            else expressionBreakIndent
-        builder.block(plusIndent) { selectorExpression?.accept(this) }
+            when {
+              firstCallWithLambda == part && isSingleLambdaStyle -> ZERO
+              isLambdaCall -> expressionBreakIndent
+              isFirst -> ZERO
+              else -> expressionBreakIndent
+            }
+        builder.block(plusIndent) { selector?.accept(this) }
         if (typePrefixSections > 0 && ++count == typePrefixSections) {
           builder.close()
         }

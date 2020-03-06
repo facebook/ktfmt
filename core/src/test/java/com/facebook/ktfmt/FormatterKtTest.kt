@@ -1275,6 +1275,42 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `when two lambdas following a call, indent the lambda properly`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |fun f() {
+      |  doIt()
+      |      .apply {
+      |        number =
+      |            computeNumber1()
+      |      }
+      |      .apply {
+      |        number = 2 * number
+      |      }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `when two lambdas following a field, indent the lambda properly`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |fun f() {
+      |  field
+      |      .apply {
+      |        number =
+      |            computeNumber1()
+      |      }
+      |      .apply {
+      |        number = 2 * number
+      |      }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `properly place lambda arguments into blocks`() =
       assertFormatted(
           """
