@@ -111,6 +111,7 @@ import org.jetbrains.kotlin.psi.KtWhileExpression
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.jetbrains.kotlin.psi.psiUtil.isSingleQuoted
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
+import org.jetbrains.kotlin.psi.psiUtil.startsWithComment
 import org.jetbrains.kotlin.psi.stubs.elements.KtAnnotationEntryElementType
 import org.jetbrains.kotlin.types.Variance
 
@@ -524,7 +525,9 @@ class KotlinInputAstVisitor(
         builder.breakOp(Doc.FillMode.UNIFIED, " ", blockIndent)
         builder.block(blockIndent) {
           builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
-          if (statements.size == 1 && statements[0] !is KtReturnExpression) {
+          if (statements.size == 1 &&
+              statements.first() !is KtReturnExpression &&
+              lambdaExpression.bodyExpression?.startsWithComment() != true) {
             statements[0].accept(this)
           } else {
             visitStatements(statements)

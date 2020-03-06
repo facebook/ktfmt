@@ -507,7 +507,6 @@ class FormatterKtTest {
       |            mutableListOf<Token>().apply {
       |              // Printing
       |              print()
-      |              print()
       |            },
       |        duration = duration)
       |""".trimMargin())
@@ -1282,6 +1281,24 @@ class FormatterKtTest {
       |-----------------------
       |fun f() {
       |  foo {
+      |    red.orange.yellow()
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `properly handle one statement lambda with comment`() =
+      assertFormatted(
+          """
+      |-----------------------
+      |fun f() {
+      |  foo {
+      |    // this is a comment
+      |    red.orange.yellow()
+      |  }
+      |  foo {
+      |    /* this is also a comment */
       |    red.orange.yellow()
       |  }
       |}
