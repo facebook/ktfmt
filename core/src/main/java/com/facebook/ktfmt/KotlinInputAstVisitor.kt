@@ -421,15 +421,25 @@ class KotlinInputAstVisitor(
 
     builder.block(ZERO) {
       val leftMostExpression = parts.first()
-      leftMostExpression.receiverExpression.accept(this)
+      val leftMostReceiverExpression = leftMostExpression.receiverExpression
+      val typePrefixSections = getTypePrefixLength(expression)
+      var count = 0
+      if (typePrefixSections > 0) {
+        builder.open(ZERO)
+      }
+      leftMostReceiverExpression.accept(this)
       for (receiver in parts) {
         val isFirst = receiver === leftMostExpression
         if (!isFirst || receiver.receiverExpression is KtCallExpression) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
         }
         builder.token(receiver.operationSign.value)
+        val selectorExpression = receiver.selectorExpression
         builder.block(if (isFirst) ZERO else expressionBreakIndent) {
-          receiver.selectorExpression?.accept(this)
+          selectorExpression?.accept(this)
+        }
+        if (typePrefixSections > 0 && ++count == typePrefixSections) {
+          builder.close()
         }
       }
     }
@@ -1631,7 +1641,7 @@ class KotlinInputAstVisitor(
   }
 
   /**
-   * Emit a [Doc.Token] .
+   * Emit a [Doc.Token].
    *
    * @param token the [String] to wrap in a [Doc.Token]
    * @param plusIndentCommentsBefore extra block for comments before this token

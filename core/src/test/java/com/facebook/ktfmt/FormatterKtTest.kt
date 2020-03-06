@@ -409,6 +409,31 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `avoid breaking suspected package names`() =
+      assertFormatted(
+          """
+      |-----------------------
+      |fun f() {
+      |  com.facebook.Foo
+      |      .format()
+      |  org.facebook.Foo
+      |      .format()
+      |  java.lang.stuff.Foo
+      |      .format()
+      |  javax.lang.stuff.Foo
+      |      .format()
+      |  kotlin.lang.Foo
+      |      .format()
+      |
+      |  // comparison:
+      |  foo.facebook
+      |      .Foo
+      |      .format()
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `import list`() {
     val code =
         """
