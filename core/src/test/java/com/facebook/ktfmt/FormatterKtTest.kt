@@ -504,9 +504,9 @@ class FormatterKtTest {
       |fun f() =
       |    Bar(
       |        tokens =
-      |            mutableListOf<Token>()
-      |                .apply {
+      |            mutableListOf<Token>().apply {
       |              // Printing
+      |              print()
       |              print()
       |            },
       |        duration = duration)
@@ -1289,6 +1289,36 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `try to keep expression in the same line until the first lambda`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |fun f() {
+      |  foo.bar.bar?.let {
+      |    a()
+      |  }
+      |  foo.bar.bar?.let {
+      |    action()
+      |    action2()
+      |  }
+      |  foo.bar
+      |      .bar
+      |      .bar
+      |      .bar
+      |      ?.let { a() }
+      |  foo.bar
+      |      .bar
+      |      .bar
+      |      .bar
+      |      ?.let {
+      |    action()
+      |    action2()
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `Qualified type`() =
       assertFormatted(
           """
@@ -1859,11 +1889,18 @@ class FormatterKtTest {
       |    }
       |  }
       |  builder.block(ZERO) {
+      |    expression2.subjectExpression.let { subjectExp ->
+      |      builder.token(")")
+      |      return
+      |    }
+      |  }
+      |  builder.block(ZERO) {
       |    expression2.subjectExpression
       |        .let { subjectExp ->
       |          builder.token(")")
       |          return
       |        }
+      |        .sum
       |  }
       |}
       |""".trimMargin())

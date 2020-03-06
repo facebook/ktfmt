@@ -409,15 +409,24 @@ class KotlinInputAstVisitor(
       return
     }
 
+    var firstCallWithLambda: KtQualifiedExpression? = null
     val parts =
         ArrayDeque<KtQualifiedExpression>()
             .apply {
           var current: KtExpression = expression
           while (current is KtQualifiedExpression) {
             addFirst(current)
+            if ((current.selectorExpression as? KtCallExpression)?.lambdaArguments?.isNotEmpty() ==
+                true) {
+              firstCallWithLambda = current
+            }
             current = current.receiverExpression
           }
         }
+
+    // If there is exactly one lambda call, and it is the last expression we want to keep
+    // everything one line until the lambda
+    val isSingleLambdaStyle = firstCallWithLambda == expression
 
     builder.block(ZERO) {
       val leftMostExpression = parts.first()
@@ -427,17 +436,24 @@ class KotlinInputAstVisitor(
       if (typePrefixSections > 0) {
         builder.open(ZERO)
       }
+      if (isSingleLambdaStyle) {
+        builder.open(ZERO)
+      }
       leftMostReceiverExpression.accept(this)
-      for (receiver in parts) {
-        val isFirst = receiver === leftMostExpression
-        if (!isFirst || receiver.receiverExpression is KtCallExpression) {
+      for (part in parts) {
+        val isFirst = part === leftMostExpression
+        if (!isFirst || part.receiverExpression is KtCallExpression) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
         }
-        builder.token(receiver.operationSign.value)
-        val selectorExpression = receiver.selectorExpression
-        builder.block(if (isFirst) ZERO else expressionBreakIndent) {
-          selectorExpression?.accept(this)
+        builder.token(part.operationSign.value)
+        val selectorExpression = part.selectorExpression
+        if (firstCallWithLambda == part && isSingleLambdaStyle) {
+          builder.close()
         }
+        val plusIndent =
+            if (isFirst || firstCallWithLambda == part && isSingleLambdaStyle) ZERO
+            else expressionBreakIndent
+        builder.block(plusIndent) { selectorExpression?.accept(this) }
         if (typePrefixSections > 0 && ++count == typePrefixSections) {
           builder.close()
         }
@@ -497,16 +513,16 @@ class KotlinInputAstVisitor(
     val valueParameters = lambdaExpression.valueParameters
     val statements = (lambdaExpression.bodyExpression ?: fail()).children
     if (valueParameters.isNotEmpty() || statements.isNotEmpty()) {
-      builder.block(blockIndent) {
-        if (valueParameters.isNotEmpty()) {
-          builder.space()
-          forEachCommaSeparated(valueParameters) { it.accept(this) }
-          builder.space()
-          builder.token("->")
-          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-        }
-        if (statements.isNotEmpty()) {
-          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+      if (valueParameters.isNotEmpty()) {
+        builder.space()
+        forEachCommaSeparated(valueParameters) { it.accept(this) }
+        builder.space()
+        builder.token("->")
+        builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+      }
+      if (statements.isNotEmpty()) {
+        builder.breakOp(Doc.FillMode.UNIFIED, " ", blockIndent)
+        builder.block(blockIndent) {
           builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
           if (statements.size == 1 && statements[0] !is KtReturnExpression) {
             statements[0].accept(this)
