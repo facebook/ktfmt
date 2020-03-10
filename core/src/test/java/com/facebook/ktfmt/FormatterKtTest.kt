@@ -1372,6 +1372,26 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `keep parenthesis and braces together when there's only one lambda argument`() =
+      assertFormatted(
+          """
+      |fun f() {
+      |  doIt({})
+      |  doIt({ it + it })
+      |  doIt({
+      |    val a = it
+      |    a + a
+      |  })
+      |  doIt(functor = { it + it })
+      |  doIt(
+      |      functor = {
+      |        val a = it
+      |        a + a
+      |      })
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `Qualified type`() =
       assertFormatted(
           """

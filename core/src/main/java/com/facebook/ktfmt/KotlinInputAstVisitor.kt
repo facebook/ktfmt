@@ -412,8 +412,7 @@ class KotlinInputAstVisitor(
 
     var firstCallWithLambda: KtQualifiedExpression? = null
     val parts =
-        ArrayDeque<KtQualifiedExpression>()
-            .apply {
+        ArrayDeque<KtQualifiedExpression>().apply {
           var current: KtExpression = expression
           while (current is KtQualifiedExpression) {
             addFirst(current)
@@ -514,9 +513,17 @@ class KotlinInputAstVisitor(
   /** Example `(1, "hi")` in a function call */
   override fun visitValueArgumentList(list: KtValueArgumentList) {
     builder.sync(list)
-    // Break before args.
-    builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-    builder.block(expressionBreakIndent) { forEachCommaSeparated(list.arguments) { it.accept(this) }
+    val arguments = list.arguments
+    val isSingleUnnamedLambda =
+        arguments.size == 1 &&
+            arguments.first().getArgumentExpression() is KtLambdaExpression &&
+            arguments.first().getArgumentName() == null
+    if (isSingleUnnamedLambda) {
+      arguments.first().accept(this)
+    } else {
+      // Break before args.
+      builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
+      builder.block(expressionBreakIndent) { forEachCommaSeparated(arguments) { it.accept(this) } }
     }
   }
 
@@ -654,8 +661,7 @@ class KotlinInputAstVisitor(
     builder.sync(expression)
 
     val parts =
-        ArrayDeque<KtBinaryExpression>()
-            .apply {
+        ArrayDeque<KtBinaryExpression>().apply {
           val op = expression.operationToken
           var current: KtExpression? = expression
           while (current is KtBinaryExpression && current.operationToken == op) {
@@ -1150,42 +1156,40 @@ class KotlinInputAstVisitor(
     builder.sync(expression)
     builder.block(ZERO) {
       builder.token("when")
-      expression.subjectExpression
-          ?.let { subjectExp ->
-            builder.space()
-            builder.token("(")
-            builder.block(ZERO) { subjectExp.accept(this) }
-            builder.token(")")
-          }
+      expression.subjectExpression?.let { subjectExp ->
+        builder.space()
+        builder.token("(")
+        builder.block(ZERO) { subjectExp.accept(this) }
+        builder.token(")")
+      }
       builder.space()
       builder.token("{", Doc.Token.RealOrImaginary.REAL, blockIndent, Optional.of(blockIndent))
 
-      expression.entries
-          .forEach { whenEntry ->
-            builder.block(blockIndent) {
-              builder.forcedBreak()
-              if (whenEntry.isElse) {
-                builder.token("else")
-              } else {
-                builder.block(ZERO) {
-                  forEachCommaSeparated(whenEntry.conditions.asIterable()) { it.accept(this) }
-                }
-              }
-              val whenExpression = whenEntry.expression
-              builder.space()
-              builder.token("->")
-              if (whenExpression is KtBlockExpression) {
-                builder.space()
-                whenExpression.accept(this)
-              } else {
-                builder.block(expressionBreakIndent) {
-                  builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
-                  whenExpression?.accept(this)
-                }
-              }
+      expression.entries.forEach { whenEntry ->
+        builder.block(blockIndent) {
+          builder.forcedBreak()
+          if (whenEntry.isElse) {
+            builder.token("else")
+          } else {
+            builder.block(ZERO) {
+              forEachCommaSeparated(whenEntry.conditions.asIterable()) { it.accept(this) }
             }
-            builder.forcedBreak()
           }
+          val whenExpression = whenEntry.expression
+          builder.space()
+          builder.token("->")
+          if (whenExpression is KtBlockExpression) {
+            builder.space()
+            whenExpression.accept(this)
+          } else {
+            builder.block(expressionBreakIndent) {
+              builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+              whenExpression?.accept(this)
+            }
+          }
+        }
+        builder.forcedBreak()
+      }
       builder.token("}")
     }
   }
