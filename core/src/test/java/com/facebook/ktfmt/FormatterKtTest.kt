@@ -2291,6 +2291,31 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `deal with code blocks starting mid-line`() =
+      assertFormatted(
+          """
+      |/**
+      | * Look code: ``` aaa
+      | * fun f() = Unit
+      | * foo
+      | * ```
+      | */
+      |class MyClass {}
+      |""".trimMargin())
+
+  @Test
+  fun `deal with code blocks starting and ending mid-line`() =
+      assertFormatted(
+          """
+      |/**
+      | * Look code: ``` aaa
+      | * fun f() = Unit
+      | * foo ``` wow
+      | */
+      |class MyClass {}
+      |""".trimMargin())
+
+  @Test
   fun `handle KDoc with link reference`() =
       assertFormatted(
           """

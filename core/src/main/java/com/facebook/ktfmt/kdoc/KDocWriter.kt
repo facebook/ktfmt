@@ -153,8 +153,13 @@ internal class KDocWriter(private val blockIndent: Int) {
   }
 
   fun writeCodeLine(token: Token) {
+    if (!inCodeBlock) {
+      requestNewline()
+    }
     requestNewline()
-    writeToken(token)
+    if (token.value.isNotEmpty()) {
+      writeToken(token)
+    }
   }
 
   fun writeCodeBlockMarker(token: Token) {
