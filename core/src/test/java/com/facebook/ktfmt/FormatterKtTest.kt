@@ -2448,6 +2448,15 @@ class FormatterKtTest {
         .isEqualTo(code)
   }
 
+  @Test
+  fun `comment after a block is stable and does not add space lines`() =
+      assertFormatted(
+          """
+      |fun doIt() {}
+      |
+      |/* this is the first comment */
+      |""".trimMargin())
+
   /**
    * Verifies the given code passes through formatting, and stays the same at the end
    *

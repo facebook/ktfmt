@@ -22,6 +22,7 @@ import com.google.googlejavaformat.Indent
 import com.google.googlejavaformat.Indent.Const.ZERO
 import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.Output
+import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import java.util.ArrayDeque
@@ -1653,8 +1654,13 @@ class KotlinInputAstVisitor(
   override fun visitKtFile(file: KtFile) {
     markForPartialFormat()
     for (child in file.children) {
+      if (child is PsiWhiteSpace) {
+        continue
+      }
+      if (child !is PsiComment) {
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
+      }
       child.accept(this)
-      builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
     }
     markForPartialFormat()
   }
