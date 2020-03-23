@@ -21,6 +21,12 @@ import com.google.googlejavaformat.Doc
 import com.google.googlejavaformat.DocBuilder
 import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.java.JavaOutput
+import com.intellij.openapi.util.text.StringUtil
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.psi.KtImportDirective
+import org.jetbrains.kotlin.psi.psiUtil.endOffset
+import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 const val DEFAULT_MAX_WIDTH: Int = 100
 
@@ -60,6 +66,7 @@ fun format(code: String): String = format(FormattingOptions(), code)
  * format formats the Kotlin code given in 'code' with the 'maxWidth' and returns it as a string.
  */
 fun format(options: FormattingOptions, code: String): String {
+  val code = sortedImports(code)
   val file = Parser.parse(code)
 
   val kotlinInput = KotlinInput(code, file)
@@ -76,4 +83,37 @@ fun format(options: FormattingOptions, code: String): String {
   val tokenRangeSet =
       kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
   return JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet))
+}
+
+fun sortedImports(code: String): String {
+  val file = Parser.parse(code)
+
+  val importList = file.importList ?: return code
+
+  fun findNonImportElement(): PsiElement? {
+    var element = importList.firstChild
+    while (element != null) {
+      if (element !is KtImportDirective && element !is PsiWhiteSpace) {
+        return element
+      }
+      element = element.nextSibling
+    }
+    return null
+  }
+
+  val nonImportElement = findNonImportElement()
+  if (nonImportElement != null) {
+    throw ParseError(
+        "Imports not contiguous (perhaps a comment separates them?): " + nonImportElement.text,
+        StringUtil.offsetToLineColumn(code, nonImportElement.startOffset))
+  }
+  val sortedImports =
+      importList.imports.sortedBy { importDirective ->
+        importDirective.importedFqName?.asString() + " " + importDirective.alias?.text
+      }
+
+  return code.replaceRange(
+      importList.startOffset,
+      importList.endOffset,
+      sortedImports.joinToString(separator = "\n") { imprt -> imprt.text })
 }

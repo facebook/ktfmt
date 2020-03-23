@@ -18,6 +18,7 @@ import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
 import com.google.common.truth.Truth.assertAbout
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.fail
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -446,14 +447,35 @@ class FormatterKtTest {
       |""".trimMargin()
     val expected =
         """
-      |import com.example.common.reality.FooBar
-      |import com.example.common.reality.FooBar2 as foosBars
-      |import com.example.common.reality.*
-      |import foo.bar // Test
       |import abc.def /*
       |               test */
+      |import com.example.common.reality.*
+      |import com.example.common.reality.FooBar
+      |import com.example.common.reality.FooBar2 as foosBars
+      |import foo.bar // Test
       |""".trimMargin()
     assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `comments between imports are not allowed`() {
+    val code =
+        """
+        |package com.facebook.ktfmt
+        |
+        |import com.google.common.truth.Subject
+        |/* add */
+        |import com.google.common.truth.FailureMetadata as Foo
+        |""".trimMargin()
+
+    try {
+      format(code)
+      fail()
+    } catch (e: ParseError) {
+      assertThat(e.errorDescription).contains("Imports not contiguous")
+      assertThat(e.lineColumn.line).isEqualTo(3)
+      assertThat(e.lineColumn.column).isEqualTo(0)
+    }
   }
 
   @Test
@@ -2170,6 +2192,7 @@ class FormatterKtTest {
       |""".trimMargin()
     try {
       format(code)
+      fail()
     } catch (e: ParseError) {
       assertThat(e.lineColumn.line).isEqualTo(5)
       assertThat(e.lineColumn.column).isEqualTo(0)
@@ -2187,6 +2210,7 @@ class FormatterKtTest {
       |""".trimMargin()
     try {
       format(code)
+      fail()
     } catch (e: ParseError) {
       assertThat(e.lineColumn.line).isEqualTo(2)
       assertThat(e.lineColumn.column).isEqualTo(8)
