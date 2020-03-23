@@ -26,6 +26,7 @@ import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.CONDITIONAL_WHITES
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.NEWLINE
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.NONE
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.WHITESPACE
+import com.facebook.ktfmt.kdoc.Token.Type.CODE_BLOCK_MARKER
 import com.facebook.ktfmt.kdoc.Token.Type.HEADER_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.LIST_ITEM_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.PARAGRAPH_OPEN_TAG
@@ -86,12 +87,14 @@ internal class KDocWriter(private val blockIndent: Int) {
   }
 
   fun writeEndJavadoc() {
+    requestCloseCodeBlockMarker()
     output.append("\n")
     appendSpaces(blockIndent + 1)
     output.append("*/")
   }
 
   fun writeListItemOpen(token: Token) {
+    requestCloseCodeBlockMarker()
     requestNewline()
 
     if (continuingListItemOfInnermostList) {
@@ -153,25 +156,41 @@ internal class KDocWriter(private val blockIndent: Int) {
   }
 
   fun writeCodeLine(token: Token) {
-    if (!inCodeBlock) {
-      requestNewline()
-    }
+    requestOpenCodeBlockMarker()
     requestNewline()
     if (token.value.isNotEmpty()) {
       writeToken(token)
     }
   }
 
-  fun writeCodeBlockMarker(token: Token) {
-    if (!inCodeBlock) {
-      requestNewline()
+  /** Adds a code block marker if we are not in a code block currently */
+  private fun requestCloseCodeBlockMarker() {
+    if (inCodeBlock) {
+      this.requestedWhitespace = NEWLINE
+      writeExplicitCodeBlockMarker(Token(CODE_BLOCK_MARKER, "```"))
+      inCodeBlock = false
     }
+  }
+
+  /** Adds a code block marker if we are in a code block currently */
+  private fun requestOpenCodeBlockMarker() {
+    if (!inCodeBlock) {
+      this.requestedWhitespace = NEWLINE
+      writeExplicitCodeBlockMarker(Token(CODE_BLOCK_MARKER, "```"))
+      inCodeBlock = true
+    }
+  }
+
+  fun writeExplicitCodeBlockMarker(token: Token) {
+    requestNewline()
     writeToken(token)
     requestNewline()
     inCodeBlock = !inCodeBlock
   }
 
   fun writeLiteral(token: Token) {
+    requestCloseCodeBlockMarker()
+
     writeToken(token)
   }
 
@@ -301,7 +320,7 @@ internal class KDocWriter(private val blockIndent: Int) {
   }
 
   private fun innerIndent(): Int {
-    return continuingListItemCount.value() * 4 + continuingListCount.value() * 2
+    return 0
   }
 
   // If this is a hotspot, keep a String of many spaces around, and call append(string, start, end).

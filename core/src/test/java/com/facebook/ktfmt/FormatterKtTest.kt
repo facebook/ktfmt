@@ -847,6 +847,81 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `formatting kdoc lists with line wraps breaks and merges correctly`() {
+    val code =
+        """
+      |/**
+      | * Here are some fruit I like:
+      | * - Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana
+      | * - Apple Apple Apple Apple
+      | *   Apple Apple
+      | *
+      | * This is another paragraph
+      | */
+      |""".trimMargin()
+    val expected =
+        """
+      |/**
+      | * Here are some fruit I like:
+      | * - Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana
+      | * Banana Banana Banana Banana Banana
+      | * - Apple Apple Apple Apple Apple Apple
+      | *
+      | * This is another paragraph
+      | */
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `too many spaces on list continuation mean it's a code block, so mark it accordingly`() {
+    val code =
+        """
+      |/**
+      | * Here are some fruit I like:
+      | * - Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana
+      | *     Banana Banana Banana Banana Banana
+      | */
+      |""".trimMargin()
+    val expected =
+        """
+      |/**
+      | * Here are some fruit I like:
+      | * - Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana
+      | * ```
+      | *     Banana Banana Banana Banana Banana
+      | * ```
+      | */
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `add explicit code markers around indented code`() {
+    val code =
+        """
+      |/**
+      | * This is a code example:
+      | *
+      | *     this_is_code()
+      | *
+      | * This is not code again
+      | */
+      |""".trimMargin()
+    val expected =
+        """
+      |/**
+      | * This is a code example:
+      | * ```
+      | *     this_is_code()
+      | * ```
+      | * This is not code again
+      | */
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
   fun `formatting kdoc preserves lists of asterisks`() =
       assertFormatted(
           """
@@ -2315,29 +2390,58 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
-  fun `deal with code blocks starting mid-line`() =
-      assertFormatted(
-          """
+  fun `handle stray code markers in lines and produce stable output`() {
+    val code =
+        """
       |/**
-      | * Look code: ``` aaa
+      | * Look! code: ``` aaa
       | * fun f() = Unit
       | * foo
       | * ```
       | */
       |class MyClass {}
-      |""".trimMargin())
+      |""".trimMargin()
+    assertFormatted(format(code))
+  }
 
   @Test
-  fun `deal with code blocks starting and ending mid-line`() =
-      assertFormatted(
-          """
+  fun `code block with triple backtick`() {
+    val code =
+        """
       |/**
-      | * Look code: ``` aaa
+      | * Look! code:
+      | * ```
+      | * aaa ``` wow
+      | * ```
+      | */
+      |class MyClass {}
+      |""".trimMargin()
+    val expected =
+        """
+      |/**
+      | * Look! code:
+      | * ```
+      | * aaa ``` wow
+      | * ```
+      | */
+      |class MyClass {}
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `when code closer in mid of line, produce stable output`() {
+    val code =
+        """
+      |/**
+      | * Look! code: ``` aaa
       | * fun f() = Unit
       | * foo ``` wow
       | */
       |class MyClass {}
-      |""".trimMargin())
+      |""".trimMargin()
+    assertFormatted(format(code))
+  }
 
   @Test
   fun `handle KDoc with link reference`() =
@@ -2419,12 +2523,13 @@ class FormatterKtTest {
   }
 
   @Test
-  fun `do not crash because of malformed KDocs`() =
-      assertFormatted(
-          """
+  fun `do not crash because of malformed KDocs and produce stable output`() {
+    val code = """
       |/** Surprise ``` */
       |class MyClass {}
-      |""".trimMargin())
+      |""".trimMargin()
+    assertFormatted(format(code))
+  }
 
   @Test
   fun `Respect spacing of text after link`() =

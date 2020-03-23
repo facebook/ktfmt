@@ -86,8 +86,6 @@ object KDocFormatter {
         KDocTokens.TEXT -> {
           if (tokenText.isBlank()) {
             tokens.add(Token(WHITESPACE, " "))
-          } else if (tokenText == "```") {
-            tokens.add(Token(CODE_BLOCK_MARKER, tokenText))
           } else {
             val words = tokenText.trim().split(" +".toRegex())
             var first = true
@@ -102,6 +100,8 @@ object KDocFormatter {
               // END_KDOC properly. We want to recover in such cases
               if (word == "*/") {
                 tokens.add(Token(END_KDOC, word))
+              } else if (word == "```") {
+                tokens.add(Token(CODE_BLOCK_MARKER, word))
               } else {
                 tokens.add(Token(LITERAL, word))
                 tokens.add(Token(WHITESPACE, " "))
@@ -145,7 +145,7 @@ object KDocFormatter {
         TABLE_CLOSE_TAG -> output.writeTableClose(token)
         TAG -> output.writeTag(token)
         CODE -> output.writeCodeLine(token)
-        CODE_BLOCK_MARKER -> output.writeCodeBlockMarker(token)
+        CODE_BLOCK_MARKER -> output.writeExplicitCodeBlockMarker(token)
         BLANK_LINE -> output.requestBlankLine()
         WHITESPACE -> output.requestWhitespace()
         LITERAL -> output.writeLiteral(token)
