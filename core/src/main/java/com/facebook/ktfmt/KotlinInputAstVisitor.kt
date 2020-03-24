@@ -1105,7 +1105,9 @@ class KotlinInputAstVisitor(
    *
    * @param canBreak whether we are currently visiting annotations after which we can break the
    * line. An example of
+   * ```
    *    an annotation where we can't is one mixed with keywords such as in `public @Inject final`
+   * ```
    */
   private fun visitAnnotationEntry(annotationEntry: KtAnnotationEntry, canBreak: Boolean) {
     builder.sync(annotationEntry)

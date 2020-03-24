@@ -37,7 +37,8 @@ class FormattingOptions(
     /**
      * blockIndent is the size of the indent used when a new block is opened, in spaces.
      *
-     * For example, ```
+     * For example,
+     * ```
      * fun f() {
      *   //
      * }
@@ -49,7 +50,8 @@ class FormattingOptions(
      * continuationIndent is the size of the indent used when a line is broken because it's too
      * long, in spaces.
      *
-     * For example, ```
+     * For example,
+     * ```
      * val foo = bar(
      *     1)
      * ```

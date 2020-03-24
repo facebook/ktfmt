@@ -32,7 +32,8 @@ class Main(
     private val input: InputStream,
     private val out: PrintStream,
     private val err: PrintStream,
-    args: Array<String>) {
+    args: Array<String>
+) {
   private val parsedArgs: ParsedArgs = parseOptions(err, args)
 
   fun run(): Int {

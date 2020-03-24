@@ -63,8 +63,10 @@ open class Parser {
 }
 
 fun throwParseError(fileContents: String, error: PsiErrorElement): Nothing {
-  throw ParseError(error.errorDescription, StringUtil.offsetToLineColumn(fileContents, error.startOffset))
+  throw ParseError(
+      error.errorDescription, StringUtil.offsetToLineColumn(fileContents, error.startOffset))
 }
 
 class ParseError(val errorDescription: String, val lineColumn: LineColumn) :
-    IllegalArgumentException("${lineColumn.line + 1}:${lineColumn.column + 1}: error: $errorDescription")
+    IllegalArgumentException(
+        "${lineColumn.line + 1}:${lineColumn.column + 1}: error: $errorDescription")

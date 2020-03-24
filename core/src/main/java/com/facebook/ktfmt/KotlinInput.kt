@@ -121,20 +121,23 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
       throw FormatterException(
           String.format(
               "error: invalid length %d, offset + length (%d) is outside the file",
-              length, requiredLength))
+              length,
+              requiredLength))
     }
     when {
       length < 0 -> return EMPTY_RANGE
       length == 0 -> // 0 stands for "format the line under the cursor"
-        length = 1
+      length = 1
     }
-    val enclosed = getPositionTokenMap()
-        .subRangeMap(Range.closedOpen(offset, offset + length))
-        .asMapOfRanges()
-        .values
+    val enclosed =
+        getPositionTokenMap()
+            .subRangeMap(Range.closedOpen(offset, offset + length))
+            .asMapOfRanges()
+            .values
     return if (enclosed.isEmpty()) {
       EMPTY_RANGE
-    } else Range.closedOpen(
+    } else
+        Range.closedOpen(
         enclosed.iterator().next().tok.index, getLast(enclosed).getTok().getIndex() + 1)
   }
 
@@ -187,8 +190,8 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
         // name comments.
         //
         // TODO(cushon): find a better strategy.
-        if (toks[k].isSlashStarComment &&
-            (tok.text == "(" || tok.text == "<" || tok.text == ".")) break@OUTER
+        if (toks[k].isSlashStarComment && (tok.text == "(" || tok.text == "<" || tok.text == "."))
+            break@OUTER
         if (toks[k].isJavadocComment && tok.text == ";") break@OUTER
         if (isParamComment(toks[k])) {
           tokens.add(KotlinToken(toksBefore.build(), tok, toksAfter.build()))
@@ -233,6 +236,7 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
   override fun getColumnNumber(inputPosition: Int) =
       StringUtil.offsetToLineColumn(text, inputPosition).column
 }
+
 class KotlinTok(
     private val index: Int,
     private val originalText: String,
@@ -277,6 +281,7 @@ class KotlinTok(
         .toString()
   }
 }
+
 class KotlinToken(
     private val toksBefore: ImmutableList<KotlinTok>,
     private val kotlinTok: KotlinTok,

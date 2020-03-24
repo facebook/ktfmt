@@ -22,7 +22,7 @@ package com.facebook.ktfmt.kdoc
 /**
  * KDoc token. Our idea of what constitutes a token is often larger or smaller than what you'd
  * naturally expect. The decision is usually pragmatic rather than theoretical. Most of the details
- * are in [KDocFormatter] .
+ * are in [KDocFormatter].
  */
 internal class Token(val type: Type, val value: String) {
   /**
