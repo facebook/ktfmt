@@ -23,12 +23,14 @@ import org.junit.runners.JUnit4
 class TokenizerTest {
   @Test
   fun `PsiWhiteSpace are split to newlines and maximal-length whitespaces`() {
-    val code = """
-            |val  a = 
-            |
-            |     
-            |     15
-        """.trimMargin()
+    val code =
+        listOf(
+            "val  a = ", //
+            "", //
+            "     ", //
+            "     15")
+            .joinToString("\n")
+
     val file = Parser.parse(code)
     println("# Parse tree of input: ")
     println("#".repeat(20))
