@@ -68,6 +68,8 @@ fun format(code: String): String = format(FormattingOptions(), code)
  * format formats the Kotlin code given in 'code' with the 'maxWidth' and returns it as a string.
  */
 fun format(options: FormattingOptions, code: String): String {
+  checkWhitespaceTombstones(code)
+
   val code = sortedImports(code)
   val file = Parser.parse(code)
 
@@ -84,7 +86,17 @@ fun format(options: FormattingOptions, code: String): String {
 
   val tokenRangeSet =
       kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
-  return JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet))
+  return replaceTombstoneWithTrailingWhitespace(
+      JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
+}
+
+private fun checkWhitespaceTombstones(code: String) {
+  val index = code.indexOfWhitespaceTombstone()
+  if (index != -1) {
+    throw ParseError(
+        "ktfmt does not support code which contains a \\u0003 character; escape it",
+        StringUtil.offsetToLineColumn(code, index))
+  }
 }
 
 fun sortedImports(code: String): String {

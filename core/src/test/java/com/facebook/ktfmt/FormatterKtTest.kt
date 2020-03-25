@@ -1324,6 +1324,50 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `Trailing whitespaces are preserved in multiline strings`() {
+    val code =
+        listOf(
+            "fun doIt(world: String) {",
+            "  println(\"\"\"This line has trailing whitespace         ",
+            "      world!\"\"\")",
+            "  println(\"\"\"This line has trailing whitespace \$s     ",
+            "      world!\"\"\")",
+            "  println(\"\"\"This line has trailing whitespace \${s}   ",
+            "      world!\"\"\")",
+            "  println(\"\"\"This line has trailing whitespace \$      ",
+            "      world!\"\"\")",
+            "}",
+            "")
+            .joinToString("\n")
+    assertThatFormatting(code).allowTrailingWhitespace().isEqualTo(code)
+  }
+
+  @Test
+  fun `Trailing spaces in a comment are not preserved`() {
+    val before =
+        listOf("// trailing spaces in a comment are not preserved       ", "").joinToString("\n")
+    val after = listOf("// trailing spaces in a comment are not preserved", "").joinToString("\n")
+    assertThatFormatting(before).allowTrailingWhitespace().isEqualTo(after)
+  }
+
+  @Test
+  fun `Code with tombstones is not supported`() {
+    val code = """
+      |fun good() {
+      |  // ${'\u0003'}
+      |}
+      |""".trimMargin()
+    try {
+      format(code)
+      fail()
+    } catch (e: ParseError) {
+      assertThat(e.errorDescription).contains("\\u0003")
+      assertThat(e.lineColumn.line).isEqualTo(1)
+      assertThat(e.lineColumn.column).isEqualTo(5)
+    }
+  }
+
+  @Test
   fun `handle some basic generics scenarios`() =
       assertFormatted(
           """
@@ -2657,16 +2701,22 @@ class FormatterKtTest {
   class FormattedCodeSubject(metadata: FailureMetadata, val code: String) :
       Subject(metadata, code) {
     var options: FormattingOptions = FormattingOptions()
+    var allowTrailingWhitespace = false
 
     fun withOptions(options: FormattingOptions): FormattedCodeSubject {
       this.options = options
       return this
     }
 
+    fun allowTrailingWhitespace(): FormattedCodeSubject {
+      this.allowTrailingWhitespace = true
+      return this
+    }
+
     fun isEqualTo(expectedFormatting: String) {
-      if (expectedFormatting.lines().any { it.endsWith(" ") }) {
+      if (!allowTrailingWhitespace && expectedFormatting.lines().any { it.endsWith(" ") }) {
         throw RuntimeException(
-            "Expected code contains trailing whitespace, which the formatter will never output:\n" +
+            "Expected code contains trailing whitespace, which the formatter usually doesn't output:\n" +
                 expectedFormatting.lines()
                     .map { if (it.endsWith(" ")) "[$it]" else it }
                     .joinToString("\n"))

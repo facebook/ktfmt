@@ -355,7 +355,7 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
           toks.add(
               KotlinTok(
                   index,
-                  fileText.substring(startIndex, endIndex),
+                  replaceTrailingWhitespaceWithTombstone(fileText.substring(startIndex, endIndex)),
                   elementText,
                   startIndex,
                   0,

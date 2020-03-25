@@ -1315,7 +1315,7 @@ class KotlinInputAstVisitor(
   /** Example `hello` (Inside the string literal "hello") */
   override fun visitLiteralStringTemplateEntry(entry: KtLiteralStringTemplateEntry) {
     builder.sync(entry)
-    builder.token(entry.text)
+    builder.token(replaceTrailingWhitespaceWithTombstone(entry.text))
   }
 
   /** Example `$world` (inside a String) */
