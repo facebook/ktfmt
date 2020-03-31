@@ -70,10 +70,10 @@ fun format(code: String): String = format(FormattingOptions(), code)
 fun format(options: FormattingOptions, code: String): String {
   checkWhitespaceTombstones(code)
 
-  val code = sortedImports(code)
-  val file = Parser.parse(code)
+  val sortedImportsCode = sortedImports(code)
+  val file = Parser.parse(sortedImportsCode)
 
-  val kotlinInput = KotlinInput(code, file)
+  val kotlinInput = KotlinInput(sortedImportsCode, file)
   val javaOutput = JavaOutput("\n", kotlinInput, KDocCommentsHelper("\n"))
   val builder = OpsBuilder(kotlinInput, javaOutput)
   file.accept(KotlinInputAstVisitor(options.blockIndent, options.continuationIndent, builder))
@@ -85,9 +85,11 @@ fun format(options: FormattingOptions, code: String): String {
   javaOutput.flush()
 
   val tokenRangeSet =
-      kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
+      kotlinInput.characterRangesToTokenRanges(
+          ImmutableList.of(Range.closedOpen(0, sortedImportsCode.length)))
   return replaceTombstoneWithTrailingWhitespace(
-      JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
+      JavaOutput.applyReplacements(
+          sortedImportsCode, javaOutput.getFormatReplacements(tokenRangeSet)))
 }
 
 private fun checkWhitespaceTombstones(code: String) {
@@ -123,7 +125,9 @@ fun sortedImports(code: String): String {
   }
   val sortedImports =
       importList.imports.sortedBy { importDirective ->
-        importDirective.importedFqName?.asString() + " " + importDirective.alias?.text
+        importDirective.importedFqName?.asString() +
+            " " +
+            importDirective.alias?.text?.replace("`", "")
       }
 
   return code.replaceRange(

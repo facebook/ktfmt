@@ -458,6 +458,26 @@ class FormatterKtTest {
   }
 
   @Test
+  fun `backticks are ignored in import sort order`() =
+      assertFormatted(
+          """
+      |import com.example.`if`
+      |import com.example.we
+      |import com.example.`when`
+      |import com.example.wow
+      |""".trimMargin())
+
+  @Test
+  fun `backticks are ignored in import sort order ('as' directory)`() =
+      assertFormatted(
+          """
+      |import com.example.a as `if`
+      |import com.example.a as we
+      |import com.example.a as `when`
+      |import com.example.a as wow
+      |""".trimMargin())
+
+  @Test
   fun `comments between imports are not allowed`() {
     val code =
         """
