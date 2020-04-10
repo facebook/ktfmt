@@ -2191,6 +2191,21 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `handle comments in the middle of calling chain`() =
+      assertFormatted(
+          """
+        |---------------------------
+        |fun f() {
+        |  someObject.letsDoIt()
+        |      // this is a comment
+        |      .doItOnce()
+        |      // this is a comment
+        |      .doItTwice()
+        |}
+        |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `handle reified types`() =
       assertFormatted(
           """

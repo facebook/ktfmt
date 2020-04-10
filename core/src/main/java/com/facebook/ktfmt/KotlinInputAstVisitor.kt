@@ -25,6 +25,7 @@ import com.google.googlejavaformat.Output
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
+import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import java.util.ArrayDeque
 import java.util.Optional
 import org.jetbrains.kotlin.lexer.KtModifierKeywordToken
@@ -428,7 +429,6 @@ class KotlinInputAstVisitor(
     // If there is exactly one lambda call, and it is the last expression we want to keep
     // everything one line until the lambda
     val isSingleLambdaStyle = firstCallWithLambda == expression
-
     builder.block(ZERO) {
       val leftMostExpression = parts.first()
       val leftMostReceiverExpression = leftMostExpression.receiverExpression
@@ -445,7 +445,20 @@ class KotlinInputAstVisitor(
         val isFirst = part === leftMostExpression
         val selector = part.selectorExpression
         val isLambdaCall = (selector as? KtCallExpression)?.lambdaArguments?.isNotEmpty() == true
+        val hasComment = hasComment(part)
+        val plusIndent =
+            when {
+              firstCallWithLambda == part && isSingleLambdaStyle -> ZERO
+              isLambdaCall -> expressionBreakIndent
+              isFirst -> ZERO
+              else -> expressionBreakIndent
+            }
 
+        // If there's a comment, we need to start the block before the dot
+        // or the comment will not be indented properly
+        if (hasComment) {
+          builder.open(plusIndent)
+        }
         // Break before .
         if (!isFirst || part.receiverExpression is KtCallExpression) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
@@ -460,19 +473,35 @@ class KotlinInputAstVisitor(
         if (firstCallWithLambda == part && isSingleLambdaStyle) {
           builder.close()
         }
-        val plusIndent =
-            when {
-              firstCallWithLambda == part && isSingleLambdaStyle -> ZERO
-              isLambdaCall -> expressionBreakIndent
-              isFirst -> ZERO
-              else -> expressionBreakIndent
-            }
-        builder.block(plusIndent) { selector?.accept(this) }
+
+        // If there's no comment we still need to open the block
+        if (!hasComment) {
+          builder.open(plusIndent)
+        }
+        selector?.accept(this)
+        builder.close() // close block started in different locations due to comment existing
         if (typePrefixSections > 0 && ++count == typePrefixSections) {
           builder.close()
         }
       }
     }
+  }
+
+  /**
+   * Searches if any of the children are comments
+   *
+   * Using [KtQualifiedExpression.getChildren] skips these nodes, so we have to scan manually
+   */
+  private fun hasComment(part: KtQualifiedExpression): Boolean {
+    var child = part.firstChild
+    while (child != null) {
+      when {
+        child is PsiCommentImpl -> return true
+        child === part.selectorExpression -> return false
+        else -> child = child.nextSibling
+      }
+    }
+    return false
   }
 
   override fun visitCallExpression(callExpression: KtCallExpression) {
