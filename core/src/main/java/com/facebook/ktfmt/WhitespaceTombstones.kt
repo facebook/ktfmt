@@ -2,8 +2,11 @@
 
 package com.facebook.ktfmt
 
+import java.util.regex.Pattern
+import java.util.regex.Pattern.MULTILINE
+
 /** See [replaceTrailingWhitespaceWithTombstone]. */
-private const val SPACE_TOMBSTONE = '\u0003'
+const val SPACE_TOMBSTONE = '\u0003'
 
 fun String.indexOfWhitespaceTombstone() = this.indexOf(SPACE_TOMBSTONE)
 
@@ -14,10 +17,7 @@ fun String.indexOfWhitespaceTombstone() = this.indexOf(SPACE_TOMBSTONE)
  * replace it back to a space.
  */
 fun replaceTrailingWhitespaceWithTombstone(s: String): String {
-  if (s.isEmpty()) {
-    return s
-  }
-  return if (s.last() == ' ') s.substring(0, s.length - 1) + SPACE_TOMBSTONE else s
+  return Pattern.compile(" ($)", MULTILINE).matcher(s).replaceAll("$SPACE_TOMBSTONE$1")
 }
 
 /** See [replaceTrailingWhitespaceWithTombstone]. */

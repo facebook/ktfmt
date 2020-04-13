@@ -1315,6 +1315,7 @@ class FormatterKtTest {
       |}
       |""".trimMargin())
 
+  @Ignore("https://github.com/facebookincubator/ktfmt/issues/28")
   @Test
   fun `when there is an expression in a template string it gets formatted accordingly`() {
     val code =
@@ -1361,6 +1362,18 @@ class FormatterKtTest {
             .joinToString("\n")
     assertThatFormatting(code).allowTrailingWhitespace().isEqualTo(code)
   }
+
+  @Test
+  fun `Consecutive line breaks in multiline strings are preserved`() =
+      assertFormatted(
+          """
+      |val x = ""${'"'}
+      |
+      |
+      |
+      |Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+      |""${'"'}
+      |""".trimMargin())
 
   @Test
   fun `Trailing spaces in a comment are not preserved`() {

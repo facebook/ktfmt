@@ -52,7 +52,6 @@ import org.jetbrains.kotlin.psi.KtDestructuringDeclarationEntry
 import org.jetbrains.kotlin.psi.KtDoWhileExpression
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtEnumEntry
-import org.jetbrains.kotlin.psi.KtEscapeStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFileAnnotationList
@@ -67,7 +66,6 @@ import org.jetbrains.kotlin.psi.KtLabelReferenceExpression
 import org.jetbrains.kotlin.psi.KtLabeledExpression
 import org.jetbrains.kotlin.psi.KtLambdaArgument
 import org.jetbrains.kotlin.psi.KtLambdaExpression
-import org.jetbrains.kotlin.psi.KtLiteralStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtModifierList
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtNullableType
@@ -84,8 +82,6 @@ import org.jetbrains.kotlin.psi.KtReferenceExpression
 import org.jetbrains.kotlin.psi.KtReturnExpression
 import org.jetbrains.kotlin.psi.KtSecondaryConstructor
 import org.jetbrains.kotlin.psi.KtSimpleNameExpression
-import org.jetbrains.kotlin.psi.KtSimpleNameStringTemplateEntry
-import org.jetbrains.kotlin.psi.KtStringTemplateEntryWithExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtSuperTypeCallEntry
 import org.jetbrains.kotlin.psi.KtSuperTypeList
@@ -111,7 +107,6 @@ import org.jetbrains.kotlin.psi.KtWhenConditionWithExpression
 import org.jetbrains.kotlin.psi.KtWhenExpression
 import org.jetbrains.kotlin.psi.KtWhileExpression
 import org.jetbrains.kotlin.psi.psiUtil.children
-import org.jetbrains.kotlin.psi.psiUtil.isSingleQuoted
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import org.jetbrains.kotlin.psi.psiUtil.startsWithComment
 import org.jetbrains.kotlin.psi.stubs.elements.KtAnnotationEntryElementType
@@ -1335,36 +1330,7 @@ class KotlinInputAstVisitor(
   /** Example `"Hello $world!"` or `"""Hello world!"""` */
   override fun visitStringTemplateExpression(expression: KtStringTemplateExpression) {
     builder.sync(expression)
-    val quoteToken = if (expression.isSingleQuoted()) "\"" else "\"\"\""
-    builder.token(quoteToken)
-    expression.entries.forEach { it.accept(this) }
-    builder.token(quoteToken)
-  }
-
-  /** Example `hello` (Inside the string literal "hello") */
-  override fun visitLiteralStringTemplateEntry(entry: KtLiteralStringTemplateEntry) {
-    builder.sync(entry)
-    builder.token(replaceTrailingWhitespaceWithTombstone(entry.text))
-  }
-
-  /** Example `$world` (inside a String) */
-  override fun visitSimpleNameStringTemplateEntry(entry: KtSimpleNameStringTemplateEntry) {
-    builder.sync(entry)
-    builder.token("$")
-    builder.token(entry.text.substring(1))
-  }
-
-  /** Example `${1 + 2}` (inside a String) */
-  override fun visitStringTemplateEntryWithExpression(entry: KtStringTemplateEntryWithExpression) {
-    builder.sync(entry)
-    builder.token("$" + "{")
-    builder.block(ZERO) { entry.expression?.accept(this) }
-    builder.token("}")
-  }
-
-  override fun visitEscapeStringTemplateEntry(entry: KtEscapeStringTemplateEntry) {
-    builder.sync(entry)
-    builder.token(entry.text)
+    builder.token(replaceTrailingWhitespaceWithTombstone(expression.text))
   }
 
   /** Example `<T, S>` */

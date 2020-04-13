@@ -36,6 +36,7 @@ import java.util.regex.Pattern
 import org.jetbrains.kotlin.lexer.KtToken
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
@@ -318,9 +319,9 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
   var index = 0
 
   override fun visitElement(element: PsiElement) {
+    val startIndex = element.startOffset
     when (element) {
       is PsiComment -> {
-        val startIndex = element.startOffset
         toks.add(
             KotlinTok(
                 index,
@@ -331,6 +332,19 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
                 false,
                 KtTokens.EOF))
         index++
+        return
+      }
+      is KtStringTemplateExpression -> {
+        toks.add(
+            KotlinTok(
+                index,
+                replaceTrailingWhitespaceWithTombstone(
+                    fileText.substring(startIndex, element.endOffset)),
+                element.text,
+                startIndex,
+                0,
+                true,
+                KtTokens.EOF))
         return
       }
       is LeafPsiElement -> {
@@ -355,7 +369,7 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
           toks.add(
               KotlinTok(
                   index,
-                  replaceTrailingWhitespaceWithTombstone(fileText.substring(startIndex, endIndex)),
+                  fileText.substring(startIndex, endIndex),
                   elementText,
                   startIndex,
                   0,

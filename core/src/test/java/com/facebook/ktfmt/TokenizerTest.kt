@@ -37,8 +37,64 @@ class TokenizerTest {
     val tokenizer = Tokenizer(code, file)
     file.accept(tokenizer)
 
-    assertThat(tokenizer.toks.map { it.text })
+    assertThat(tokenizer.toks.map { it.originalText })
         .containsExactly("val", "  ", "a", " ", "=", " ", "\n", "\n", "     ", "\n", "     ", "15")
+        .inOrder()
+  }
+
+  @Test
+  fun `Strings are returns as a single token`() {
+    val code =
+        listOf(
+            "val a=\"\"\"",
+            "  ",
+            "   ",
+            "    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ",
+            "    Lorem",
+            "    ",
+            "     ",
+            "      \"\"\"",
+            "val b=\"lorem ipsum\"",
+            "      ",
+            "    ")
+            .joinToString("\n")
+
+    val file = Parser.parse(code)
+    println("# Parse tree of input: ")
+    println("#".repeat(20))
+    file.accept(PrintAstVisitor())
+
+    val tokenizer = Tokenizer(code, file)
+    file.accept(tokenizer)
+
+    print(tokenizer.toks.joinToString(", ") { "\"${it.originalText}\"" })
+
+    assertThat(tokenizer.toks.map { it.originalText })
+        .containsExactly(
+        "val",
+        " ",
+        "a",
+        "=",
+        listOf(
+            "\"\"\"",
+            " $SPACE_TOMBSTONE",
+            "  $SPACE_TOMBSTONE",
+            "    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do$SPACE_TOMBSTONE",
+            "    Lorem",
+            "   $SPACE_TOMBSTONE",
+            "    $SPACE_TOMBSTONE",
+            "      \"\"\"")
+            .joinToString("\n"),
+        "\n",
+        "val",
+        " ",
+        "b",
+        "=",
+        "\"lorem ipsum\"",
+        "\n",
+        "      ",
+        "\n",
+        "    ")
         .inOrder()
   }
 }
