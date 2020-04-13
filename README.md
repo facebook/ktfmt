@@ -18,17 +18,26 @@ For comparison, the same code formatted by [`ktlint`](https://github.com/pintere
 | ------ | --------|
 | ![ktlint](docs/images/ktlint.png) | ![IntelliJ](docs/images/intellij.png) |
 
+## Using the formatter
 
+### from the command-line
 
-# Using from the command-line
+[Download the formatter](https://github.com/facebookincubator/ktfmt/releases)
+and run it with:
 
-* Make sure the `vendor/google-java/format` submodule is populated. Either clone with submodules (`git pull --recurse-submodules https://github.com/facebookincubator/ktfmt.git`) or populate the submodule after cloning (`git submodule update --init`)
-* Run `mvn install`
-* Run `java -jar core/target/ktfmt-0.1-SNAPSHOT-jar-with-dependencies.jar`
+```
+java -jar /path/to/ktfmt-<VERSION>-jar-with-dependencies.jar [--dropbox-style] [files...]
+```
 
-# FAQ
+`--dropbox-style` makes `ktfmt` use a block indent of 4 spaces instead of 2. See below for details.
 
-## `ktfmt` vs `ktlint` vs IntelliJ
+***Note:*** *There is no configurability as to the formatter's algorithm for
+formatting (apart from `--dropbox-format`). This is a deliberate design decision to unify our code
+formatting on a single format.*
+
+## FAQ
+
+### `ktfmt` vs `ktlint` vs IntelliJ
 
 `ktfmt` uses google-java-format's underlying engine, and as such, many items on [google-java-format's FAQ](https://github.com/google/google-java-format/wiki/FAQ) apply to `ktfmt` as well.
 
@@ -40,15 +49,17 @@ These two properties make `ktfmt` a good fit in large Kotlin code bases, where c
 
 We created `ktfmt` because `ktlint` and IntelliJ sometime fail to produce nice-looking code that fits in 100 columns, as can be seen in the [Demo](README.md#Demo) section.
 
-## `ktfmt` uses a 2-space indent; why not 4?
+### `ktfmt` uses a 2-space indent; why not 4? any way to change that?
 
 Two reasons -
 1. Many of our projects use a mixture of Kotlin and Java, and we found the back-and-forth in styles to be distracting.
 2. From a pragmatic standpoint, the formatting engine behind google-java-format uses more whitespace and newlines than other formatters. Using an indentation of 4 spaces quickly reaches the maximal column width.
 
-# Developer's Guide
+However, we do offer an escape-hatch for projects that absolutely cannot make the move to `ktfmt` because of 2-space: the `--dropbox-style` flag changes block indents to 4-space.
 
-## Setup
+## Developer's Guide
+
+### Setup
 
 * Make sure the `vendor/google-java/format` submodule is populated. Either clone with submodules (`git pull --recurse-submodules https://github.com/facebookincubator/ktfmt.git`) or populate the submodule after cloning (`git submodule update --init`)
 * Open `pom.xml` in IntelliJ. Choose "Open as a Project"
@@ -56,10 +67,20 @@ Two reasons -
     * Turn off ErrorProne by removing the compiler parameters in IntelliJ at the bottom of "Settings -> Build, Execution, Deployment -> Compiler -> Java Compiler" (see https://github.com/google/google-java-format/issues/417)
     * Right click on "vendor/google-java-format/pom.xml" and choose "Add maven project"    
 
-## Development
+### Development
 
 * Currently, we mainly develop by adding tests to `FormatterKtTest.kt`.
 
-# License
+### Building on the Command Line
+
+* Make sure the `vendor/google-java/format` submodule is populated. Either clone with submodules (`git pull --recurse-submodules https://github.com/facebookincubator/ktfmt.git`) or populate the submodule after cloning (`git submodule update --init`)
+* Run `mvn install`
+* Run `java -jar core/target/ktfmt-<VERSION>-jar-with-dependencies.jar`
+
+### Releasing
+
+See [RELEASING.md](RELEASING.md).
+
+## License
 
 Apache License 2.0
