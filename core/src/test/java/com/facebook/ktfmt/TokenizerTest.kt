@@ -97,4 +97,27 @@ class TokenizerTest {
         "    ")
         .inOrder()
   }
+
+  @Test
+  fun `Token index is advanced after a string token`() {
+    val code = """
+      |val b="a"
+      |val a=5
+      |""".trimMargin().trimMargin()
+
+    val file = Parser.parse(code)
+    println("# Parse tree of input: ")
+    println("#".repeat(20))
+    val tokenizer = Tokenizer(code, file)
+    file.accept(tokenizer)
+
+    print(tokenizer.toks.joinToString(",\n") { "\"${it}\"" })
+
+    assertThat(tokenizer.toks.map { it.originalText })
+        .containsExactly("val", " ", "b", "=", "\"a\"", "\n", "val", " ", "a", "=", "5")
+        .inOrder()
+    assertThat(tokenizer.toks.map { it.index })
+        .containsExactly(0, -1, 1, 2, 3, -1, 4, -1, 5, 6, 7)
+        .inOrder()
+  }
 }

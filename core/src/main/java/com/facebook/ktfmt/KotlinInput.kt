@@ -345,6 +345,7 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
                 0,
                 true,
                 KtTokens.EOF))
+        index++
         return
       }
       is LeafPsiElement -> {

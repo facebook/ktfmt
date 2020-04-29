@@ -1740,11 +1740,16 @@ class FormatterKtTest {
 
   @Test
   fun `handle top level constants`() =
-      assertFormatted("""
+      assertFormatted(
+          """
+      |-----------------------------
       |val a = 5
       |
-      |const val b = 6
-      |""".trimMargin())
+      |const val b = "a"
+      |
+      |val a = 5
+      |""".trimMargin(),
+          deduceMaxWidth = true)
 
   @Test
   fun `handle lambda arg with named arguments`() =
