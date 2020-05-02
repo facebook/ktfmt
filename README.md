@@ -6,6 +6,8 @@
 
 **Note** that `ktfmt` still has some rough edges which we're constantly working on fixing.
 
+The minimum supported runtime version is JDK 11, released September 2018.
+
 ## Demo
 
 |Before Formatting| Formatted by `ktfmt`| 
@@ -61,11 +63,9 @@ However, we do offer an escape-hatch for projects that absolutely cannot make th
 
 ### Setup
 
-* Make sure the `vendor/google-java/format` submodule is populated. Either clone with submodules (`git pull --recurse-submodules https://github.com/facebookincubator/ktfmt.git`) or populate the submodule after cloning (`git submodule update --init`)
 * Open `pom.xml` in IntelliJ. Choose "Open as a Project"
 * The IntelliJ project will unfortunately be broken on import. To fix,
     * Turn off ErrorProne by removing the compiler parameters in IntelliJ at the bottom of "Settings -> Build, Execution, Deployment -> Compiler -> Java Compiler" (see https://github.com/google/google-java-format/issues/417)
-    * Right click on "vendor/google-java-format/pom.xml" and choose "Add maven project"    
 
 ### Development
 
@@ -73,7 +73,6 @@ However, we do offer an escape-hatch for projects that absolutely cannot make th
 
 ### Building on the Command Line
 
-* Make sure the `vendor/google-java/format` submodule is populated. Either clone with submodules (`git pull --recurse-submodules https://github.com/facebookincubator/ktfmt.git`) or populate the submodule after cloning (`git submodule update --init`)
 * Run `mvn install`
 * Run `java -jar core/target/ktfmt-<VERSION>-jar-with-dependencies.jar`
 
