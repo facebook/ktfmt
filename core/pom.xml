@@ -5,6 +5,9 @@
 
     <artifactId>ktfmt</artifactId>
 
+    <name>Ktfmt</name>
+    <description>A program that reformats Kotlin source code to comply with the common community standard for Kotlin code conventions.</description>
+
     <parent>
         <groupId>com.facebook</groupId>
         <artifactId>ktfmt-parent</artifactId>
