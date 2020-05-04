@@ -1,7 +1,7 @@
 # Releasing a New `ktfmt` Version
 
-1. Land a diff bumping the version to a non-SNAPSHOT version (e.g., `0.11`). For example, https://github.com/facebookincubator/ktfmt/commit/a674918aa9fddffed5321da3828fa028a520a406. Note that there are _2_ places to update.
-2. Land another diff, bumping the version to the next SNAPSHOT version (e.g., `0.12-SNAPSHOT`). For example, https://github.com/facebookincubator/ktfmt/commit/ed2d3d0b363cc04d867f7c9fe84c5a28b1f5c62e
+1. Update `bump_versions.sh` with the version information, and comment out its `exit` command.
+2. Run `./bump_versions.sh`.
 3. Obtain the private key used to sign `ktfmt` releases, as well as its passphrase.
 3. Make sure your `~/.m2/settings.xml` is:
 
