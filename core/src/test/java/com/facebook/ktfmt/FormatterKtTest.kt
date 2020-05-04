@@ -478,6 +478,26 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `imports are deduplicated`() {
+    val code =
+        """
+      |import com.example.a as `if`
+      |import com.example.a as we
+      |import com.example.a as `when`
+      |import com.example.a as wow
+      |import com.example.a as `when`
+      |""".trimMargin()
+    val expected =
+        """
+      |import com.example.a as `if`
+      |import com.example.a as we
+      |import com.example.a as `when`
+      |import com.example.a as wow
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
   fun `comments between imports are not allowed`() {
     val code =
         """

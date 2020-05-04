@@ -70,7 +70,7 @@ fun format(code: String): String = format(FormattingOptions(), code)
 fun format(options: FormattingOptions, code: String): String {
   checkWhitespaceTombstones(code)
 
-  val sortedImportsCode = sortedImports(code)
+  val sortedImportsCode = sortedAndDistinctImports(code)
   val file = Parser.parse(sortedImportsCode)
 
   val kotlinInput = KotlinInput(sortedImportsCode, file)
@@ -101,7 +101,7 @@ private fun checkWhitespaceTombstones(code: String) {
   }
 }
 
-fun sortedImports(code: String): String {
+fun sortedAndDistinctImports(code: String): String {
   val file = Parser.parse(code)
 
   val importList = file.importList ?: return code
@@ -123,12 +123,11 @@ fun sortedImports(code: String): String {
         "Imports not contiguous (perhaps a comment separates them?): " + nonImportElement.text,
         StringUtil.offsetToLineColumn(code, nonImportElement.startOffset))
   }
-  val sortedImports =
-      importList.imports.sortedBy { importDirective ->
-        importDirective.importedFqName?.asString() +
-            " " +
-            importDirective.alias?.text?.replace("`", "")
-      }
+  fun canonicalText(importDirective: KtImportDirective) =
+      importDirective.importedFqName?.asString() +
+          " " +
+          importDirective.alias?.text?.replace("`", "")
+  val sortedImports = importList.imports.sortedBy(::canonicalText).distinctBy(::canonicalText)
 
   return code.replaceRange(
       importList.startOffset,
