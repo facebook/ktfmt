@@ -156,7 +156,7 @@
         <dependency>
             <groupId>com.google.googlejavaformat</groupId>
             <artifactId>google-java-format</artifactId>
-            <version>1.8-SNAPSHOT</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -204,17 +204,22 @@
                         </executions>
                     </plugin>
 
-                    <!-- KDoc / Javadoc JAR -->
+                    <!-- Javadoc JAR -->
+                    <!-- Dokka, Kotlin's javadoc, doesn't work on JDK 10+, so we're creating an empty javadoc jar instead. -->
+                    <!-- (https://github.com/Kotlin/dokka/issues/294) -->
                     <plugin>
-                        <groupId>org.jetbrains.dokka</groupId>
-                        <artifactId>dokka-maven-plugin</artifactId>
-                        <version>${dokka.version}</version>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
                         <executions>
                             <execution>
                                 <phase>package</phase>
                                 <goals>
-                                    <goal>javadocJar</goal>
+                                    <goal>jar</goal>
                                 </goals>
+                                <configuration>
+                                    <classifier>javadoc</classifier>
+                                    <classesDirectory>${project.basedir}/non/existing/dir</classesDirectory>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

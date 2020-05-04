@@ -8,7 +8,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>vendor/google-java-format/core</module>
         <module>core</module>
   </modules>
 </project>
