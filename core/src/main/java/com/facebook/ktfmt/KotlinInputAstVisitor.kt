@@ -173,6 +173,7 @@ class KotlinInputAstVisitor(
     if (addParenthesis) {
       builder.token("(")
     }
+    nullableType.modifierList?.accept(this)
     innerType?.accept(this)
     if (addParenthesis) {
       builder.token(")")
