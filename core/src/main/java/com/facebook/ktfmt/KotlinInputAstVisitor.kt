@@ -410,78 +410,79 @@ class KotlinInputAstVisitor(
       return
     }
 
-    var firstCallWithLambda: KtQualifiedExpression? = null
     val parts =
         ArrayDeque<KtQualifiedExpression>().apply {
           var current: KtExpression = expression
           while (current is KtQualifiedExpression) {
             addFirst(current)
-            if ((current.selectorExpression as? KtCallExpression)?.lambdaArguments?.isNotEmpty() ==
-                true) {
-              firstCallWithLambda = current
-            }
             current = current.receiverExpression
           }
         }
 
-    // If there is exactly one lambda call, and it is the last expression we want to keep
-    // everything one line until the lambda
-    val isSingleLambdaStyle = firstCallWithLambda == expression
-    builder.block(ZERO) {
-      val leftMostExpression = parts.first()
-      val leftMostReceiverExpression = leftMostExpression.receiverExpression
-      val typePrefixSections = getTypePrefixLength(expression)
-      var count = 0
-      if (typePrefixSections > 0) {
-        builder.open(ZERO)
-      }
-      if (isSingleLambdaStyle) {
-        builder.open(ZERO)
-      }
-      leftMostReceiverExpression.accept(this)
-      for (part in parts) {
-        val isFirst = part === leftMostExpression
-        val selector = part.selectorExpression
-        val isLambdaCall = (selector as? KtCallExpression)?.lambdaArguments?.isNotEmpty() == true
-        val hasComment = hasComment(part)
-        val plusIndent =
-            when {
-              firstCallWithLambda == part && isSingleLambdaStyle -> ZERO
-              isLambdaCall -> expressionBreakIndent
-              isFirst -> ZERO
-              else -> expressionBreakIndent
-            }
+    // Simple check if an expression is only lowercase letters
+    fun isLowerCaseReference(expression: KtExpression?) =
+        expression is KtReferenceExpression && expression.text.all { it.isLowerCase() }
 
-        // If there's a comment, we need to start the block before the dot
-        // or the comment will not be indented properly
-        if (hasComment) {
-          builder.open(plusIndent)
+    val first = parts.first
+    val last = parts.last
+    val leftMostReceiverExpression = first.receiverExpression
+
+    // If we we a lambda call in the chain, we don't reduce indentation for the last one
+    var previousLambdaCallSeen = false
+
+    // A block to wrap the entire expression
+    // However, we skip it for when expressions, and we close it before the the last call
+    var mainBlockOpen = false
+    if (leftMostReceiverExpression !is KtWhenExpression) {
+      builder.open(expressionBreakIndent)
+      mainBlockOpen = true
+    }
+
+    // A block to group all parts that look like package names until first class name or method
+    // This is because we want to keep `com.facebook.foo.Foo()` grouped if possible
+    var secondaryBlockOpen = false
+    if (isLowerCaseReference(leftMostReceiverExpression)) {
+      builder.open(ZERO)
+      secondaryBlockOpen = true
+    }
+
+    leftMostReceiverExpression.accept(this)
+    for (part in parts) {
+      val selector = part.selectorExpression
+      val isLambdaCall = (selector as? KtCallExpression)?.lambdaArguments?.isNotEmpty() == true
+
+      // Maybe break before . or ?.
+      if (mainBlockOpen) {
+        if (part !== last && isLambdaCall ||
+            part !== first ||
+            part.receiverExpression is KtCallExpression) {
+          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
         }
-        // Break before .
-        if (!isFirst || part.receiverExpression is KtCallExpression) {
-          builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-        } else if (isLambdaCall) {
-          builder.breakOp(Doc.FillMode.INDEPENDENT, "", expressionBreakIndent)
-        }
+      }
+      builder.token(part.operationSign.value)
 
-        // Output . or ?.
-        builder.token(part.operationSign.value)
-
-        // Output next part and close conditional blocks
-        if (firstCallWithLambda == part && isSingleLambdaStyle) {
+      // Close blocks before last call to optimize lambda formatting
+      if (part === last && !previousLambdaCallSeen) {
+        if (secondaryBlockOpen) {
           builder.close()
+          secondaryBlockOpen = false
         }
-
-        // If there's no comment we still need to open the block
-        if (!hasComment) {
-          builder.open(plusIndent)
-        }
-        selector?.accept(this)
-        builder.close() // close block started in different locations due to comment existing
-        if (typePrefixSections > 0 && ++count == typePrefixSections) {
+        if (mainBlockOpen) {
           builder.close()
+          mainBlockOpen = false
         }
       }
+      selector?.accept(this)
+
+      // If selector no longer looks like a package name, close the secondary group
+      if (secondaryBlockOpen && !isLowerCaseReference(selector)) {
+        builder.close()
+        secondaryBlockOpen = false
+      }
+      previousLambdaCallSeen = isLambdaCall
+    }
+    if (mainBlockOpen) {
+      builder.close()
     }
   }
 

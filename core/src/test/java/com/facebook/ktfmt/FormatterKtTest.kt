@@ -427,10 +427,7 @@ class FormatterKtTest {
       |      .format()
       |  kotlin.lang.Foo
       |      .format()
-      |
-      |  // comparison:
-      |  foo.facebook
-      |      .Foo
+      |  foo.facebook.Foo
       |      .format()
       |}
       |""".trimMargin(),
@@ -727,7 +724,7 @@ class FormatterKtTest {
       |          ACTION_UP -> Toast.makeText(it.view.context, "Up!", Toast.LENGTH_SHORT).show()
       |          ACTION_DOWN ->
       |              Toast.makeText(
-      |                  it.view.context, "Down!", Toast.LENGTH_SHORT, blablabla, blablabl, blabla)
+      |                      it.view.context, "Down!", Toast.LENGTH_SHORT, blablabla, blablabl, blabla)
       |                  .show()
       |        }
       |      }
@@ -1563,6 +1560,40 @@ class FormatterKtTest {
       |    action()
       |    action2()
       |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `different indentation in chained calls`() =
+      assertFormatted(
+          """
+      |---------------------------
+      |fun f() {
+      |  fooDdoIt(
+      |      foo1, foo2, foo3)
+      |  foo.doIt(
+      |      foo1, foo2, foo3)
+      |  foo.doIt(
+      |          foo1, foo2, foo3)
+      |      .doThat()
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `always add a conditional break for a lambda which is not last`() =
+      assertFormatted(
+          """
+      |--------------------
+      |fun f() {
+      |  foo
+      |      .doIt {
+      |        doStuff()
+      |      }
+      |      .doIt {
+      |        doStuff()
+      |      }
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
