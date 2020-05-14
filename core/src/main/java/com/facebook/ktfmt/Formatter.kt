@@ -26,8 +26,18 @@ import com.google.googlejavaformat.java.JavaOutput
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
+import org.jetbrains.kotlin.psi.KtDeclaration
+import org.jetbrains.kotlin.psi.KtEnumEntry
+import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtImportDirective
+import org.jetbrains.kotlin.psi.KtStringTemplateEntry
+import org.jetbrains.kotlin.psi.KtStringTemplateExpression
+import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
+import org.jetbrains.kotlin.psi.KtWhileExpression
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
+import org.jetbrains.kotlin.psi.psiUtil.prevLeaf
+import org.jetbrains.kotlin.psi.psiUtil.siblings
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 const val DEFAULT_MAX_WIDTH: Int = 100
@@ -72,10 +82,16 @@ fun format(code: String): String = format(FormattingOptions(), code)
 fun format(options: FormattingOptions, code: String): String {
   checkWhitespaceTombstones(code)
 
-  val sortedImportsCode = sortedAndDistinctImports(code)
-  val file = Parser.parse(sortedImportsCode)
+  val sortedImports = sortedAndDistinctImports(code)
+  val pretty = prettyPrint(sortedImports, options)
+  val noRedundantElements = dropRedundantElements(pretty)
+  return prettyPrint(noRedundantElements, options)
+}
 
-  val kotlinInput = KotlinInput(sortedImportsCode, file)
+/** prettyPrint reflows 'code' using google-java-format's engine. */
+private fun prettyPrint(code: String, options: FormattingOptions): String {
+  val file = Parser.parse(code)
+  val kotlinInput = KotlinInput(code, file)
   val javaOutput = JavaOutput("\n", kotlinInput, KDocCommentsHelper("\n"))
   val builder = OpsBuilder(kotlinInput, javaOutput)
   file.accept(KotlinInputAstVisitor(options.blockIndent, options.continuationIndent, builder))
@@ -87,11 +103,48 @@ fun format(options: FormattingOptions, code: String): String {
   javaOutput.flush()
 
   val tokenRangeSet =
-      kotlinInput.characterRangesToTokenRanges(
-          ImmutableList.of(Range.closedOpen(0, sortedImportsCode.length)))
+      kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
   return replaceTombstoneWithTrailingWhitespace(
-      JavaOutput.applyReplacements(
-          sortedImportsCode, javaOutput.getFormatReplacements(tokenRangeSet)))
+      JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
+}
+
+fun dropRedundantElements(code: String): String {
+  val file = Parser.parse(code)
+  val toRemove = mutableListOf<PsiElement>()
+  file.accept(
+      object : KtTreeVisitorVoid() {
+        override fun visitElement(el: PsiElement) {
+          if (el.text != ";") {
+            return super.visitElement(el)
+          }
+          val parent = el.parent
+          if (parent is KtStringTemplateExpression || parent is KtStringTemplateEntry) {
+            return super.visitElement(el)
+          }
+          if (parent is KtEnumEntry &&
+              parent.siblings(forward = true, withItself = false).any { it is KtDeclaration }) {
+            return super.visitElement(el)
+          }
+          val prevLeaf = el.prevLeaf(false)
+          val prevSibling = el.prevSibling
+          if ((prevSibling is KtIfExpression || prevSibling is KtWhileExpression) &&
+              prevLeaf is KtContainerNodeForControlStructureBody &&
+              prevLeaf.text.isEmpty()) {
+            return super.visitElement(el)
+          }
+          toRemove.add(el)
+        }
+      })
+
+  val result = StringBuilder(code)
+
+  var offset = 0
+  for (element in toRemove) {
+    result.replace(element.startOffset - offset, element.endOffset - offset, "")
+    offset += element.textLength
+  }
+
+  return result.toString()
 }
 
 private fun checkWhitespaceTombstones(code: String) {

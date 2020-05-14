@@ -1084,7 +1084,7 @@ class FormatterKtTest {
           """
       |--------------------------------------------------
       |fun f() {
-      |  var myVariable = 5;
+      |  var myVariable = 5
       |  myVariable =
       |      function1(4, 60, 8) + function2(57, 39, 20)
       |}
@@ -2038,62 +2038,141 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
-  @Ignore("This requires being able to reliably ignore tokens")
-  fun `when imports or package have semicolons remove them`() {
+  fun `preserve semicolons in enums`() {
     val code =
         """
-      |package org.examples.wow;
-      |import org.examples.wow.MuchWow;
-      |import org.examples.wow.ManyAmaze
+      |enum class SemiColonIsNotRequired {
+      |  TRUE, FALSE;
+      |}
+      |
+      |enum class SemiColonIsRequired {
+      |  ONE, TWO;
+      |  
+      |  fun isOne(): Boolean = this == ONE
+      |}
       |""".trimMargin()
     val expected =
         """
-      |package org.examples.wow
-      |import org.examples.wow.MuchWow
-      |import org.examples.wow.ManyAmaze
+      |enum class SemiColonIsNotRequired {
+      |  TRUE,
+      |  FALSE
+      |}
+      |
+      |enum class SemiColonIsRequired {
+      |  ONE,
+      |  TWO;
+      |
+      |  fun isOne(): Boolean = this == ONE
+      |}
       |""".trimMargin()
     assertThatFormatting(code).isEqualTo(expected)
   }
 
   @Test
-  fun `handle optional semicolons until we can reliably remove them`() =
-      assertFormatted(
-          """
-      |package com.example.bar;
-      |
-      |import com.example.Foo;
-      |
-      |typealias Int2 = Int;
-      |
-      |fun f() {
-      |  val a = 5;
-      |  a = 7;
-      |  println(1);
-      |  return 4;
-      |};
-      |""".trimMargin())
-
-  @Test
-  @Ignore("This requires being able to reliably ignore tokens")
-  fun `remove unnecessary semicolons`() {
+  fun `preserve semicolons in comments and strings`() {
     val code =
         """
-      |val a = 5;
-      |fun foo() {
-      |  println(1);
-      |  println(2); println(3)
+      |fun f() {
+      |  val x = ";"
+      |  val x = ""${'"'}  don't touch ; in raw strings ""${'"'}
+      |}
+      |
+      |// Don't touch ; inside comments.
+      |
+      |/** Don't touch ; inside comments. */
+      |""".trimMargin()
+    val expected =
+        """
+      |fun f() {
+      |  val x = ";"
+      |  val x = ""${'"'}  don't touch ; in raw strings ""${'"'}
+      |}
+      |
+      |// Don't touch ; inside comments.
+      |
+      |
+      |
+      |/** Don't touch ; inside comments. */
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `preserve semicolons in empty if-s and while-s`() {
+    val code =
+        """
+      |fun f() {
+      |  while (true) ;
+      |  if (true);
+      |  if (true)
+      |    else
+      |  ;
       |}
       |""".trimMargin()
     val expected =
         """
-      |val a = 5
-      |fun foo() {
-      |  println(1)
-      |  println(2)
-      |  println(3)
+      |fun f() {
+      |  while (true) ;
+      |  if (true) ;
+      |  if (true)  else ;
       |}
       |""".trimMargin()
     assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `drop redundant semicolons`() {
+    val code =
+        """
+      |package org.examples.wow;
+      |import org.examples.wow.MuchWow;
+      |import org.examples.wow.ManyAmaze
+      |
+      |typealias Int2 = Int;
+      |
+      |fun f() {
+      |  val a = 3;
+      |  val x = 5 ; val y = 5;
+      |  myThingMap.forEach { val (key, value) = it; println("mapped") } 
+      |} ; 
+      |
+      |""".trimMargin()
+    val expected =
+        """
+      |package org.examples.wow
+      |
+      |import org.examples.wow.ManyAmaze
+      |import org.examples.wow.MuchWow
+      |
+      |typealias Int2 = Int
+      |
+      |fun f() {
+      |  val a = 3
+      |  val x = 5
+      |  val y = 5
+      |  myThingMap.forEach {
+      |    val (key, value) = it
+      |    println("mapped")
+      |  }
+      |}
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `pretty-print after dropping redundant semicolons`() {
+    val code = """
+      |fun f() {
+      |  val veryLongName = 5;
+      |}
+      |""".trimMargin()
+    val expected =
+        """
+      |fun f() {
+      |  val veryLongName = 5
+      |}
+      |""".trimMargin()
+    assertThatFormatting(code).withOptions(FormattingOptions(maxWidth = 22)).isEqualTo(expected)
   }
 
   @Test
@@ -2376,13 +2455,20 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
-  fun `enum comma and semicolon`() =
-      assertFormatted(
-          """
-      |enum class Highlander {
-      |  ONE,;
-      |}
-      |""".trimMargin())
+  fun `enum comma and semicolon`() {
+    assertThatFormatting(
+        """
+        |enum class Highlander {
+        |  ONE,;
+        |}
+        |""".trimMargin())
+        .isEqualTo(
+        """
+        |enum class Highlander {
+        |  ONE,
+        |}
+        |""".trimMargin())
+  }
 
   @Test
   fun `handle varargs and spread operator`() =
@@ -2848,7 +2934,7 @@ class FormatterKtTest {
           println("# Output: ")
           println("#".repeat(20))
           println(actualFormatting)
-          println()
+          println("#".repeat(20))
         }
       } catch (e: Error) {
         reportError(code)

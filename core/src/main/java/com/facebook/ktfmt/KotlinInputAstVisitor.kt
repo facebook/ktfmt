@@ -340,14 +340,15 @@ class KotlinInputAstVisitor(
 
   private fun visitStatements(statements: Array<PsiElement>) {
     var first = true
+    builder.guessToken(";")
     for (statement in statements) {
-      builder.guessToken(";")
       builder.forcedBreak()
       if (!first) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
       }
       first = false
       builder.block(ZERO) { statement.accept(this) }
+      builder.guessToken(";")
     }
   }
 
