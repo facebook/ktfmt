@@ -675,8 +675,11 @@ class KotlinInputAstVisitor(
     builder.sync(expression)
     builder.token("return")
     expression.getTargetLabel()?.accept(this)
-    builder.space()
-    expression.returnedExpression?.accept(this)
+    val returnedExpression = expression.returnedExpression
+    if (returnedExpression != null) {
+      builder.space()
+      returnedExpression.accept(this)
+    }
     builder.guessToken(";")
   }
 

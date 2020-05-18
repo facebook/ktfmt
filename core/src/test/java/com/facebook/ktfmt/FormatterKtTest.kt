@@ -1006,6 +1006,15 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `return expression without value`() =
+      assertFormatted(
+          """
+      |fun print(b: Boolean?) {
+      |  print(b ?: return)
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `if statement without else`() =
       assertFormatted(
           """
