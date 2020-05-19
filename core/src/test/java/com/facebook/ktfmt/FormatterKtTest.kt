@@ -1267,6 +1267,22 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `handle super statement with with label argument`() =
+      assertFormatted(
+          """
+      |class Foo : Bar(), FooBar {
+      |  override fun doIt() {
+      |    foo.doThat {
+      |      super<FooBar>@Foo.doIt()
+      |
+      |      // this one is actually generics on the call expression, not super
+      |      super@Foo<FooBar>.doIt()
+      |    }
+      |  }
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `primary constructor without parameters with a KDoc`() =
       assertFormatted(
           """
@@ -1387,17 +1403,17 @@ class FormatterKtTest {
   fun `Trailing whitespaces are preserved in multiline strings`() {
     val code =
         listOf(
-            "fun doIt(world: String) {",
-            "  println(\"\"\"This line has trailing whitespace         ",
-            "      world!\"\"\")",
-            "  println(\"\"\"This line has trailing whitespace \$s     ",
-            "      world!\"\"\")",
-            "  println(\"\"\"This line has trailing whitespace \${s}   ",
-            "      world!\"\"\")",
-            "  println(\"\"\"This line has trailing whitespace \$      ",
-            "      world!\"\"\")",
-            "}",
-            "")
+                "fun doIt(world: String) {",
+                "  println(\"\"\"This line has trailing whitespace         ",
+                "      world!\"\"\")",
+                "  println(\"\"\"This line has trailing whitespace \$s     ",
+                "      world!\"\"\")",
+                "  println(\"\"\"This line has trailing whitespace \${s}   ",
+                "      world!\"\"\")",
+                "  println(\"\"\"This line has trailing whitespace \$      ",
+                "      world!\"\"\")",
+                "}",
+                "")
             .joinToString("\n")
     assertThatFormatting(code).allowTrailingWhitespace().isEqualTo(code)
   }
@@ -2477,7 +2493,7 @@ class FormatterKtTest {
   @Test
   fun `enum comma and semicolon`() {
     assertThatFormatting(
-        """
+            """
         |enum class Highlander {
         |  ONE,;
         |}
@@ -2911,9 +2927,8 @@ class FormatterKtTest {
             "When deduceMaxWidth is true the first line need to be all dashes only (i.e. ---)")
       }
     }
-    assertThatFormatting(deducedCode)
-        .withOptions(FormattingOptions(maxWidth))
-        .isEqualTo(deducedCode)
+    assertThatFormatting(deducedCode).withOptions(FormattingOptions(maxWidth)).isEqualTo(
+        deducedCode)
   }
 
   fun assertThatFormatting(code: String): FormattedCodeSubject {

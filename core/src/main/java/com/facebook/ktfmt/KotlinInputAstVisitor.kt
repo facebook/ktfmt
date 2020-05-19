@@ -1351,6 +1351,7 @@ class KotlinInputAstVisitor(
       superTypeQualifier.accept(this)
       builder.token(">")
     }
+    expression.labelQualifier?.accept(this)
   }
 
   /** Example `<T, S>` */
