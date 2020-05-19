@@ -85,6 +85,7 @@ import org.jetbrains.kotlin.psi.KtReturnExpression
 import org.jetbrains.kotlin.psi.KtSecondaryConstructor
 import org.jetbrains.kotlin.psi.KtSimpleNameExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
+import org.jetbrains.kotlin.psi.KtSuperExpression
 import org.jetbrains.kotlin.psi.KtSuperTypeCallEntry
 import org.jetbrains.kotlin.psi.KtSuperTypeList
 import org.jetbrains.kotlin.psi.KtThisExpression
@@ -1339,6 +1340,17 @@ class KotlinInputAstVisitor(
   override fun visitStringTemplateExpression(expression: KtStringTemplateExpression) {
     builder.sync(expression)
     builder.token(replaceTrailingWhitespaceWithTombstone(expression.text))
+  }
+
+  /** Example `super` in `super.doIt(5)` or `super<Foo>` in `super<Foo>.doIt(5)` */
+  override fun visitSuperExpression(expression: KtSuperExpression) {
+    builder.token("super")
+    val superTypeQualifier = expression.superTypeQualifier
+    if (superTypeQualifier != null) {
+      builder.token("<")
+      superTypeQualifier.accept(this)
+      builder.token(">")
+    }
   }
 
   /** Example `<T, S>` */

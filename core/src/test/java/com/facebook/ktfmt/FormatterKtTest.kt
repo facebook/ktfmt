@@ -1256,6 +1256,17 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `handle super statement with with type argument`() =
+      assertFormatted(
+          """
+      |class Foo : Bar(), FooBar {
+      |  override fun doIt() {
+      |    super<FooBar>.doIt()
+      |  }
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `primary constructor without parameters with a KDoc`() =
       assertFormatted(
           """
