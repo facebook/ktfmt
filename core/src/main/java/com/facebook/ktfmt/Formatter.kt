@@ -181,7 +181,9 @@ fun sortedAndDistinctImports(code: String): String {
   fun canonicalText(importDirective: KtImportDirective) =
       importDirective.importedFqName?.asString() +
           " " +
-          importDirective.alias?.text?.replace("`", "")
+          importDirective.alias?.text?.replace("`", "") +
+          " " +
+          (if (importDirective.isAllUnder) "*" else "")
   val sortedImports = importList.imports.sortedBy(::canonicalText).distinctBy(::canonicalText)
 
   return code.replaceRange(
