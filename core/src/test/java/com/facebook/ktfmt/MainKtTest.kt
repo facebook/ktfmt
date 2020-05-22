@@ -82,8 +82,8 @@ class MainKtTest {
     val bar2 = dir1.resolve("bar2.kt")
     bar2.writeText("")
 
-    assertThat(expandArgsToFileNames(listOf(dir1.toString(), dir2.toString())))
-        .containsExactly(foo1, bar1, foo2, bar2)
+    assertThat(expandArgsToFileNames(listOf(dir1.toString(), dir2.toString()))).containsExactly(
+        foo1, bar1, foo2, bar2)
   }
 
   @Test
@@ -113,10 +113,10 @@ class MainKtTest {
     val err = ByteArrayOutputStream()
     val returnValue =
         Main(
-            code.byteInputStream(),
-            PrintStream(ByteArrayOutputStream()),
-            PrintStream(err),
-            arrayOf())
+                code.byteInputStream(),
+                PrintStream(ByteArrayOutputStream()),
+                PrintStream(err),
+                arrayOf())
             .formatStdin()
 
     assertThat(returnValue).isFalse()
@@ -130,10 +130,10 @@ class MainKtTest {
     val err = ByteArrayOutputStream()
     val returnValue =
         Main(
-            "".byteInputStream(),
-            PrintStream(ByteArrayOutputStream()),
-            PrintStream(err),
-            arrayOf(fooBar.toString()))
+                "".byteInputStream(),
+                PrintStream(ByteArrayOutputStream()),
+                PrintStream(err),
+                arrayOf(fooBar.toString()))
             .run()
 
     assertThat(returnValue).isEqualTo(1)
@@ -155,10 +155,10 @@ class MainKtTest {
 
     val output = ByteArrayOutputStream()
     Main(
-        "".byteInputStream(),
-        PrintStream(output),
-        PrintStream(output),
-        arrayOf("--dropbox-style", fooBar.toString()))
+            "".byteInputStream(),
+            PrintStream(output),
+            PrintStream(output),
+            arrayOf("--dropbox-style", fooBar.toString()))
         .run()
 
     assertThat(fooBar.readText()).isEqualTo(code)
@@ -176,10 +176,10 @@ class MainKtTest {
 """
     val output = ByteArrayOutputStream()
     Main(
-        code.byteInputStream(),
-        PrintStream(output),
-        PrintStream(output),
-        arrayOf("--dropbox-style", "-"))
+            code.byteInputStream(),
+            PrintStream(output),
+            PrintStream(output),
+            arrayOf("--dropbox-style", "-"))
         .run()
 
     assertThat(output.toString("UTF-8")).isEqualTo(code)
