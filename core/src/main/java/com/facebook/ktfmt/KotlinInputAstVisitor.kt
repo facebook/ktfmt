@@ -1272,7 +1272,7 @@ class KotlinInputAstVisitor(
         expression.then?.accept(this)
       } else {
         builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-        builder.block(ZERO) { expression.then?.accept(this) }
+        builder.block(expressionBreakIndent) { expression.then?.accept(this) }
       }
 
       if (expression.elseKeyword != null) {
@@ -1285,10 +1285,11 @@ class KotlinInputAstVisitor(
         builder.token("else")
         if (expression.`else` is KtBlockExpression || expression.`else` is KtIfExpression) {
           builder.space()
+          builder.block(ZERO) { expression.`else`?.accept(this) }
         } else {
           builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+          builder.block(expressionBreakIndent) { expression.`else`?.accept(this) }
         }
-        builder.block(ZERO) { expression.`else`?.accept(this) }
       }
     }
   }

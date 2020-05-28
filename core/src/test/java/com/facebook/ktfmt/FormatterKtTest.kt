@@ -1092,6 +1092,23 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `blocky expressions in if-else`() =
+      assertFormatted(
+          """
+      |fun numbers() {
+      |  if (true)
+      |      do {
+      |        eat("is")
+      |        matches += type()
+      |      } while (eat(","))
+      |  else
+      |      while (1 < 2) {
+      |        println("Everything is okay")
+      |      }
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `assignment expression on multiple lines`() =
       assertFormatted(
           """
