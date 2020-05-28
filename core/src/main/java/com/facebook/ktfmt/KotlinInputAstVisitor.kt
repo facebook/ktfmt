@@ -1673,7 +1673,7 @@ class KotlinInputAstVisitor(
   override fun visitKtFile(file: KtFile) {
     markForPartialFormat()
     for (child in file.children) {
-      if (child is PsiWhiteSpace) {
+      if (child.text.isBlank()) {
         continue
       }
       if (child !is PsiComment) {

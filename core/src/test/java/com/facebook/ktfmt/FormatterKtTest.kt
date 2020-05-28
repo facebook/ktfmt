@@ -522,6 +522,17 @@ class FormatterKtTest {
   }
 
   @Test
+  fun `no redundant newlines when there are no imports`() =
+      assertFormatted(
+          """
+        |package foo123
+        |
+        |/*
+        |bar
+        |*/
+        |""".trimMargin())
+
+  @Test
   fun `basic annotations`() =
       assertFormatted(
           """
