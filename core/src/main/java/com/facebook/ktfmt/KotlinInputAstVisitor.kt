@@ -1676,7 +1676,7 @@ class KotlinInputAstVisitor(
       if (child.text.isBlank()) {
         continue
       }
-      if (child !is PsiComment && child !is KtScript) {
+      if (child !is PsiComment) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
       }
       child.accept(this)
