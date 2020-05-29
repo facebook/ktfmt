@@ -31,24 +31,6 @@ import org.junit.runners.JUnit4
 class FormatterKtTest {
 
   @Test
-  fun `support script (kts) files`() =
-      assertFormatted(
-          """
-        |package foo
-        |
-        |import java.io.File
-        |
-        |val one: String
-        |val two: String
-        |
-        |fun f() {
-        |  println("asd")
-        |}
-        |println("Called with args:")
-        |args.forEach { println("-") }
-        |""".trimMargin())
-
-  @Test
   fun `first selector stays on same line`() =
       assertFormatted(
           """
@@ -2596,15 +2578,14 @@ class FormatterKtTest {
       |  //
       |}
       |
-      |fun (
+      |fn () { }
       |""".trimMargin()
     try {
       format(code)
       fail()
     } catch (e: ParseError) {
-      assertThat(e.lineColumn.line).isEqualTo(6)
+      assertThat(e.lineColumn.line).isEqualTo(5)
       assertThat(e.lineColumn.column).isEqualTo(0)
-      assertThat(e.errorDescription).contains("Parameter name expected")
     }
   }
 

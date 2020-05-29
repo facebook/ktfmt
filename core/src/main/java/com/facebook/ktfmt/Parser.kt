@@ -45,7 +45,7 @@ open class Parser {
       val env =
           KotlinCoreEnvironment.createForProduction(
               disposable, configuration, EnvironmentConfigFiles.JVM_CONFIG_FILES)
-      val virtualFile = LightVirtualFile("temp.kts", KotlinFileType.INSTANCE, code)
+      val virtualFile = LightVirtualFile("temp.kt", KotlinFileType.INSTANCE, code)
       val ktFile = PsiManager.getInstance(env.project).findFile(virtualFile) as KtFile
       ktFile.collectDescendantsOfType<PsiErrorElement>().let {
         if (it.isNotEmpty()) throwParseError(code, it[0])

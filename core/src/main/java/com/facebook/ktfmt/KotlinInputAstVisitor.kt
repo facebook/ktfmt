@@ -82,7 +82,6 @@ import org.jetbrains.kotlin.psi.KtPropertyDelegate
 import org.jetbrains.kotlin.psi.KtQualifiedExpression
 import org.jetbrains.kotlin.psi.KtReferenceExpression
 import org.jetbrains.kotlin.psi.KtReturnExpression
-import org.jetbrains.kotlin.psi.KtScript
 import org.jetbrains.kotlin.psi.KtSecondaryConstructor
 import org.jetbrains.kotlin.psi.KtSimpleNameExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
@@ -321,11 +320,7 @@ class KotlinInputAstVisitor(
     return Output.BreakTag()
   }
 
-  private fun visitBlockBody(
-      bodyBlockExpression: PsiElement,
-      emitBraces: Boolean,
-      blockIndent: Indent.Const = this.blockIndent
-  ) {
+  private fun visitBlockBody(bodyBlockExpression: PsiElement, emitBraces: Boolean) {
     if (emitBraces) {
       builder.token("{", Doc.Token.RealOrImaginary.REAL, blockIndent, Optional.of(blockIndent))
     }
@@ -1237,10 +1232,7 @@ class KotlinInputAstVisitor(
 
   override fun visitBlockExpression(expression: KtBlockExpression) {
     builder.sync(expression)
-    visitBlockBody(
-        expression,
-        expression.lBrace != null && expression.rBrace != null,
-        blockIndent = if (expression.parent is KtScript) ZERO else blockIndent)
+    visitBlockBody(expression, true)
   }
 
   override fun visitWhenConditionWithExpression(condition: KtWhenConditionWithExpression) {
