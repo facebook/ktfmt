@@ -2176,8 +2176,6 @@ class FormatterKtTest {
       |
       |// Don't touch ; inside comments.
       |
-      |
-      |
       |/** Don't touch ; inside comments. */
       |""".trimMargin()
     assertThatFormatting(code).isEqualTo(expected)
