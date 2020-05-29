@@ -21,9 +21,11 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.Range
 import com.google.googlejavaformat.Doc
 import com.google.googlejavaformat.DocBuilder
+import com.google.googlejavaformat.Newlines
 import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.java.JavaOutput
 import com.intellij.openapi.util.text.StringUtil
+import com.intellij.openapi.util.text.StringUtilRt
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
@@ -82,17 +84,18 @@ fun format(code: String): String = format(FormattingOptions(), code)
 fun format(options: FormattingOptions, code: String): String {
   checkWhitespaceTombstones(code)
 
-  val sortedImports = sortedAndDistinctImports(code)
-  val pretty = prettyPrint(sortedImports, options)
+  val lfCode = StringUtilRt.convertLineSeparators(code)
+  val sortedImports = sortedAndDistinctImports(lfCode)
+  val pretty = prettyPrint(sortedImports, options, "\n")
   val noRedundantElements = dropRedundantElements(pretty)
-  return prettyPrint(noRedundantElements, options)
+  return prettyPrint(noRedundantElements, options, Newlines.guessLineSeparator(code)!!)
 }
 
 /** prettyPrint reflows 'code' using google-java-format's engine. */
-private fun prettyPrint(code: String, options: FormattingOptions): String {
+private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator: String): String {
   val file = Parser.parse(code)
   val kotlinInput = KotlinInput(code, file)
-  val javaOutput = JavaOutput("\n", kotlinInput, KDocCommentsHelper("\n"))
+  val javaOutput = JavaOutput(lineSeparator, kotlinInput, KDocCommentsHelper(lineSeparator))
   val builder = OpsBuilder(kotlinInput, javaOutput)
   file.accept(KotlinInputAstVisitor(options.blockIndent, options.continuationIndent, builder))
   builder.sync(kotlinInput.text.length)

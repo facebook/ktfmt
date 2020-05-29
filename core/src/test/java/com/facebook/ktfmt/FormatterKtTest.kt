@@ -2947,6 +2947,15 @@ class FormatterKtTest {
       |/* this is the first comment */
       |""".trimMargin())
 
+  @Test
+  fun `preserve LF, CRLF and CR line endings`() {
+    val lines = listOf("fun main() {", "  println(\"test\")", "}")
+    for (ending in listOf("\n", "\r\n", "\r")) {
+      val code = lines.joinToString(ending) + ending
+      assertThatFormatting(code).isEqualTo(code)
+    }
+  }
+
   /**
    * Verifies the given code passes through formatting, and stays the same at the end
    *
