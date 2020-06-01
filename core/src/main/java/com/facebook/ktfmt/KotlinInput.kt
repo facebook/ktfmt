@@ -141,7 +141,7 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
       EMPTY_RANGE
     } else
         Range.closedOpen(
-        enclosed.iterator().next().tok.index, getLast(enclosed).getTok().getIndex() + 1)
+            enclosed.iterator().next().tok.index, getLast(enclosed).getTok().getIndex() + 1)
   }
 
   private fun makePositionToColumnMap(toks: List<KotlinTok>): ImmutableMap<Int, Int> {
