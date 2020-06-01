@@ -10,7 +10,7 @@ The minimum supported runtime version is JDK 11, released September 2018.
 
 ## Demo
 
-|Before Formatting| Formatted by `ktfmt`| 
+|Before Formatting| Formatted by `ktfmt`|
 | ---- | ---- |
 | ![Original](docs/images/before.png) | ![ktfmt](docs/images/ktfmt.png) |
 
@@ -34,8 +34,13 @@ java -jar /path/to/ktfmt-<VERSION>-jar-with-dependencies.jar [--dropbox-style] [
 `--dropbox-style` makes `ktfmt` use a block indent of 4 spaces instead of 2. See below for details.
 
 ***Note:*** *There is no configurability as to the formatter's algorithm for
-formatting (apart from `--dropbox-format`). This is a deliberate design decision to unify our code
+formatting (apart from `--dropbox-style`). This is a deliberate design decision to unify our code
 formatting on a single format.*
+
+## using [Spotless](https://github.com/diffplug/spotless/tree/master/plugin-gradle)
+
+On Gradle: https://github.com/diffplug/spotless/tree/master/plugin-gradle#applying-ktfmt-to-kotlin-files
+On Maven: https://github.com/diffplug/spotless/tree/master/plugin-maven#applying-ktfmt-to-kotlin-files
 
 ## FAQ
 
