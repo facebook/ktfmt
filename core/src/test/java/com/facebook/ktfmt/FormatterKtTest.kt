@@ -1746,6 +1746,19 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `when annotations cause line breaks, and constant has no type dont break before value`() =
+      assertFormatted(
+          """
+      |----------------------------------------------------------
+      |object Foo {
+      |  @LongLongLongLongAnnotation
+      |  @LongLongLongLongLongAnnotation
+      |  private val ROW_HEIGHT = 72
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `annotations on functions types parameters`() =
       assertFormatted(
           """

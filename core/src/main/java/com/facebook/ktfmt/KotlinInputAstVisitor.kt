@@ -815,11 +815,13 @@ class KotlinInputAstVisitor(
         }
       }
 
+      if (name != null) {
+        builder.open(expressionBreakIndent) // open block for named values
+      }
       // For example `: String` in `val thisIsALongName: String` or `fun f(): String`
       if (type != null) {
         if (name != null) {
           builder.token(":")
-          builder.open(expressionBreakIndent) // open block for typed values
           builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
         }
         type.accept(this)
@@ -846,8 +848,8 @@ class KotlinInputAstVisitor(
       builder.block(expressionBreakIndent) { initializer.accept(this) }
     }
 
-    if (type != null && name != null) {
-      builder.close() // close block for typed values
+    if (name != null) {
+      builder.close() // close block for named values
     }
 
     if (isField) {
