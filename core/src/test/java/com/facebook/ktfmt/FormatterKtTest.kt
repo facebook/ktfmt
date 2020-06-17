@@ -1572,6 +1572,23 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `keep last expression in qualified indented`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |fun f() {
+      |  Stuff()
+      |      .doIt(
+      |          Foo.doIt()
+      |              .doThat())
+      |      .doIt(
+      |          Foo.doIt()
+      |              .doThat())
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `properly place lambda arguments into blocks`() =
       assertFormatted(
           """

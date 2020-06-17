@@ -464,7 +464,7 @@ class KotlinInputAstVisitor(
       builder.token(part.operationSign.value)
 
       // Close blocks before last call to optimize lambda formatting
-      if (part === last && !previousLambdaCallSeen) {
+      if (part === last && !previousLambdaCallSeen && (isLambdaCall || parts.size == 1)) {
         if (secondaryBlockOpen) {
           builder.close()
           secondaryBlockOpen = false
@@ -482,6 +482,9 @@ class KotlinInputAstVisitor(
         secondaryBlockOpen = false
       }
       previousLambdaCallSeen = isLambdaCall
+    }
+    if (secondaryBlockOpen) {
+      builder.close()
     }
     if (mainBlockOpen) {
       builder.close()
@@ -1347,6 +1350,7 @@ class KotlinInputAstVisitor(
 
   /** Example `super` in `super.doIt(5)` or `super<Foo>` in `super<Foo>.doIt(5)` */
   override fun visitSuperExpression(expression: KtSuperExpression) {
+    builder.sync(expression)
     builder.token("super")
     val superTypeQualifier = expression.superTypeQualifier
     if (superTypeQualifier != null) {
