@@ -2998,8 +2998,9 @@ class FormatterKtTest {
             "When deduceMaxWidth is true the first line need to be all dashes only (i.e. ---)")
       }
     }
-    assertThatFormatting(deducedCode).withOptions(FormattingOptions(maxWidth)).isEqualTo(
-        deducedCode)
+    assertThatFormatting(deducedCode)
+        .withOptions(FormattingOptions(maxWidth))
+        .isEqualTo(deducedCode)
   }
 
   fun assertThatFormatting(code: String): FormattedCodeSubject {
