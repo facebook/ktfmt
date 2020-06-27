@@ -52,6 +52,7 @@ import org.jetbrains.kotlin.psi.KtDelegatedSuperTypeEntry
 import org.jetbrains.kotlin.psi.KtDestructuringDeclaration
 import org.jetbrains.kotlin.psi.KtDestructuringDeclarationEntry
 import org.jetbrains.kotlin.psi.KtDoWhileExpression
+import org.jetbrains.kotlin.psi.KtDynamicType
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtEnumEntry
 import org.jetbrains.kotlin.psi.KtExpression
@@ -96,6 +97,7 @@ import org.jetbrains.kotlin.psi.KtTypeAlias
 import org.jetbrains.kotlin.psi.KtTypeArgumentList
 import org.jetbrains.kotlin.psi.KtTypeConstraint
 import org.jetbrains.kotlin.psi.KtTypeConstraintList
+import org.jetbrains.kotlin.psi.KtTypeElement
 import org.jetbrains.kotlin.psi.KtTypeParameter
 import org.jetbrains.kotlin.psi.KtTypeParameterList
 import org.jetbrains.kotlin.psi.KtTypeProjection
@@ -164,6 +166,10 @@ class KotlinInputAstVisitor(
     if (hasParentheses) {
       builder.token(")")
     }
+  }
+
+  override fun visitDynamicType(type: KtDynamicType) {
+    builder.token("dynamic")
   }
 
   /** Example: `String?` or `((Int) -> Unit)?` */
