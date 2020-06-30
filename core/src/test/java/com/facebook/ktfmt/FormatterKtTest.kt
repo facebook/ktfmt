@@ -2593,6 +2593,15 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `handle the 'dynamic' type`() =
+      assertFormatted(
+          """
+      |fun x(): dynamic = "x"
+      |
+      |val dyn: dynamic = 1
+      |""".trimMargin())
+
+  @Test
   fun `handle class expression with generics`() =
       assertFormatted(
           """
