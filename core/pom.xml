@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.facebook</groupId>
         <artifactId>ktfmt-parent</artifactId>
-        <version>0.14</version>
+        <version>0.15-SNAPSHOT</version>
     </parent>
 
     <properties>
