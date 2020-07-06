@@ -47,6 +47,7 @@ import org.jetbrains.kotlin.psi.KtClassLiteralExpression
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtCollectionLiteralExpression
 import org.jetbrains.kotlin.psi.KtConstantExpression
+import org.jetbrains.kotlin.psi.KtConstructorCalleeExpression
 import org.jetbrains.kotlin.psi.KtContinueExpression
 import org.jetbrains.kotlin.psi.KtDelegatedSuperTypeEntry
 import org.jetbrains.kotlin.psi.KtDestructuringDeclaration
@@ -1162,7 +1163,7 @@ class KotlinInputAstVisitor(
     }
     visitCallElement(
         annotationEntry.calleeExpression,
-        annotationEntry.typeArgumentList,
+        null, // Type-arguments are included in the annotation's callee expression.
         annotationEntry.valueArgumentList,
         listOf())
 

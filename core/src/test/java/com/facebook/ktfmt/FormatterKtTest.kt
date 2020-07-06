@@ -2683,6 +2683,14 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `handle type arguments in annotations`() =
+      assertFormatted(
+          """
+      |@TypeParceler<UUID, UUIDParceler>()
+      |class MyClass {}
+      |""".trimMargin())
+
+  @Test
   fun `handle one line KDoc`() =
       assertFormatted(
           """
