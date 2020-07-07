@@ -35,6 +35,7 @@ import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtAnnotatedExpression
 import org.jetbrains.kotlin.psi.KtAnnotation
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
+import org.jetbrains.kotlin.psi.KtAnnotationUseSiteTarget
 import org.jetbrains.kotlin.psi.KtArrayAccessExpression
 import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtBinaryExpressionWithTypeRHS
@@ -1159,13 +1160,42 @@ class KotlinInputAstVisitor(
     }
   }
 
+  /** For example, @field:[Inject Named("WEB_VIEW")] */
+  override fun visitAnnotation(annotation: KtAnnotation) {
+    builder.sync(annotation)
+    builder.block(ZERO) {
+      builder.token("@")
+      annotation.useSiteTarget?.accept(this)
+      builder.token(":")
+      builder.block(expressionBreakIndent) {
+        builder.token("[")
+        forEachCommaSeparated(
+            annotation.entries,
+            delimiter = { builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO) },
+            function = { it.accept(this) })
+      }
+      builder.token("]")
+    }
+    builder.forcedBreak()
+  }
+
+  /** For example, 'field' in @field:[Inject Named("WEB_VIEW")] */
+  override fun visitAnnotationUseSiteTarget(
+      annotationTarget: KtAnnotationUseSiteTarget, data: Void?
+  ): Void? {
+    builder.token(annotationTarget.getAnnotationUseSiteTarget().renderName)
+    return null
+  }
+
   /** For example `@Magic` or `@Fred(1, 5)` */
   override fun visitAnnotationEntry(annotationEntry: KtAnnotationEntry) {
     builder.sync(annotationEntry)
-    builder.token("@")
-    val useSiteTarget = annotationEntry.useSiteTarget?.getAnnotationUseSiteTarget()
-    if (useSiteTarget != null) {
-      builder.token(useSiteTarget.renderName)
+    if (annotationEntry.atSymbol != null) {
+      builder.token("@")
+    }
+    val useSiteTarget = annotationEntry.useSiteTarget
+    if (useSiteTarget != null && useSiteTarget.parent == annotationEntry) {
+      useSiteTarget.accept(this)
       builder.token(":")
     }
     visitCallElement(

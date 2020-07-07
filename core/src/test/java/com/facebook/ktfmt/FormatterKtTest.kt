@@ -2085,6 +2085,24 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `handle multi-annotations with use-site targets`() =
+      assertFormatted(
+          """
+    |class Something {
+    |  @field:[Inject Named("WEB_VIEW")]
+    |  internal lateinit var httpClient: OkHttpClient
+    |
+    |  @field:[Inject Named("WEB_VIEW")]
+    |  var httpClient: OkHttpClient
+    |
+    |  @Px
+    |  @field:[Inject Named("WEB_VIEW")]
+    |  var httpClient: OkHttpClient
+    |}
+    |
+    """.trimMargin())
+
+  @Test
   fun `handle lambda types`() =
       assertFormatted(
           """
