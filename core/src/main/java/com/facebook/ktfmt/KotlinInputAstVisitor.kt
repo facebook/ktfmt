@@ -32,6 +32,8 @@ import java.util.ArrayDeque
 import java.util.Optional
 import org.jetbrains.kotlin.lexer.KtModifierKeywordToken
 import org.jetbrains.kotlin.lexer.KtTokens
+import org.jetbrains.kotlin.psi.KtAnnotatedExpression
+import org.jetbrains.kotlin.psi.KtAnnotation
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import org.jetbrains.kotlin.psi.KtArrayAccessExpression
 import org.jetbrains.kotlin.psi.KtBinaryExpression
@@ -47,7 +49,6 @@ import org.jetbrains.kotlin.psi.KtClassLiteralExpression
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtCollectionLiteralExpression
 import org.jetbrains.kotlin.psi.KtConstantExpression
-import org.jetbrains.kotlin.psi.KtConstructorCalleeExpression
 import org.jetbrains.kotlin.psi.KtContinueExpression
 import org.jetbrains.kotlin.psi.KtDelegatedSuperTypeEntry
 import org.jetbrains.kotlin.psi.KtDestructuringDeclaration
@@ -114,7 +115,6 @@ import org.jetbrains.kotlin.psi.KtWhileExpression
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import org.jetbrains.kotlin.psi.psiUtil.startsWithComment
-import org.jetbrains.kotlin.psi.stubs.elements.KtAnnotationEntryElementType
 import org.jetbrains.kotlin.types.Variance
 
 /** An AST visitor that builds a stream of {@link Op}s to format. */
@@ -249,7 +249,9 @@ class KotlinInputAstVisitor(
       emitBraces: Boolean
   ) {
     builder.block(ZERO) {
-      modifierList?.accept(this)
+      if (modifierList != null) {
+        visitModifierList(modifierList)
+      }
       builder.token(keyword)
       if (typeParameters != null) {
         builder.space()
@@ -373,23 +375,23 @@ class KotlinInputAstVisitor(
           typeConstraintList = property.typeConstraintList,
           delegate = property.delegate,
           initializer = property.initializer)
-    }
-    for (accessor in property.accessors) {
-      builder.block(blockIndent) {
-        builder.forcedBreak()
-        visitFunctionLikeExpression(
-            accessor.modifierList,
-            accessor.namePlaceholder.text,
-            null,
-            null,
-            null,
-            accessor.bodyExpression != null || accessor.bodyBlockExpression != null,
-            accessor.parameterList?.parameters,
-            null,
-            accessor.bodyBlockExpression,
-            accessor.bodyExpression,
-            accessor.returnTypeReference,
-            accessor.bodyBlockExpression?.lBrace != null)
+      for (accessor in property.accessors) {
+        builder.block(blockIndent) {
+          builder.forcedBreak()
+          visitFunctionLikeExpression(
+              accessor.modifierList,
+              accessor.namePlaceholder.text,
+              null,
+              null,
+              null,
+              accessor.bodyExpression != null || accessor.bodyBlockExpression != null,
+              accessor.parameterList?.parameters,
+              null,
+              accessor.bodyBlockExpression,
+              accessor.bodyExpression,
+              accessor.returnTypeReference,
+              accessor.bodyBlockExpression?.lBrace != null)
+        }
       }
     }
     builder.guessToken(";")
@@ -794,14 +796,9 @@ class KotlinInputAstVisitor(
       builder.blankLineWanted(OpsBuilder.BlankLineWanted.conditional(verticalAnnotationBreak))
     }
 
-    if (modifiers != null) {
-      visitAnnotationBeforeModifiers(modifiers)
-    }
+    modifiers?.accept(this)
     builder.block(ZERO) {
       builder.block(ZERO) {
-        if (modifiers != null) {
-          visitKeywordModifiers(modifiers)
-        }
         if (valOrVarKeyword != null) {
           builder.token(valOrVarKeyword)
           builder.space()
@@ -870,8 +867,11 @@ class KotlinInputAstVisitor(
 
   override fun visitClassOrObject(classOrObject: KtClassOrObject) {
     builder.sync(classOrObject)
-    classOrObject.modifierList?.accept(this)
+    val modifierList = classOrObject.modifierList
     builder.block(ZERO) {
+      if (modifierList != null) {
+        visitModifierList(modifierList)
+      }
       val declarationKeyword = classOrObject.getDeclarationKeyword()
       if (declarationKeyword != null) {
         builder.token(declarationKeyword.text ?: fail())
@@ -883,27 +883,27 @@ class KotlinInputAstVisitor(
         classOrObject.typeParameterList?.accept(this)
       }
       classOrObject.primaryConstructor?.accept(this)
-    }
-    val superTypes = classOrObject.getSuperTypeList()
-    if (superTypes != null) {
-      builder.space()
-      builder.block(ZERO) {
-        builder.token(":")
-        builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
-        superTypes.accept(this)
+      val superTypes = classOrObject.getSuperTypeList()
+      if (superTypes != null) {
+        builder.space()
+        builder.block(ZERO) {
+          builder.token(":")
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+          superTypes.accept(this)
+        }
       }
-    }
-    builder.space()
-    val typeConstraintList = classOrObject.typeConstraintList
-    if (typeConstraintList != null) {
-      typeConstraintList.accept(this)
       builder.space()
-    }
-    val body = classOrObject.body
-    if (classOrObject.hasModifier(KtTokens.ENUM_KEYWORD)) {
-      visitEnumBody(classOrObject as KtClass)
-    } else if (body != null) {
-      visitBlockBody(body, true)
+      val typeConstraintList = classOrObject.typeConstraintList
+      if (typeConstraintList != null) {
+        typeConstraintList.accept(this)
+        builder.space()
+      }
+      val body = classOrObject.body
+      if (classOrObject.hasModifier(KtTokens.ENUM_KEYWORD)) {
+        visitEnumBody(classOrObject as KtClass)
+      } else if (body != null) {
+        visitBlockBody(body, true)
+      }
     }
     if (classOrObject.nameIdentifier != null) {
       builder.forcedBreak()
@@ -1087,53 +1087,69 @@ class KotlinInputAstVisitor(
   /** For example `@Magic private final` */
   override fun visitModifierList(list: KtModifierList) {
     builder.sync(list)
-    visitAnnotationBeforeModifiers(list)
-    visitKeywordModifiers(list)
-  }
+    var onlyAnnotationsSoFar = true
 
-  /**
-   * For example `@Magic @Fred(1, 5)`
-   *
-   * This visits only annotations that appear before keyword modifiers (such as `public`) since we
-   * can break after annotations, but only if they appear before keywords. We avoid breaking in the
-   * middle of the modifier keywords list
-   */
-  private fun visitAnnotationBeforeModifiers(list: KtModifierList) {
     for (child in list.node.children()) {
-      if (child.psi is PsiWhiteSpace) {
+      val psi = child.psi
+      if (psi is PsiWhiteSpace) {
         continue
       }
-      if (child.elementType !is KtAnnotationEntryElementType) {
-        break
+
+      if (child.elementType is KtModifierKeywordToken) {
+        onlyAnnotationsSoFar = false
+        builder.token(child.text)
+      } else {
+        psi.accept(this)
       }
-      child.psi.accept(this)
+
+      if (onlyAnnotationsSoFar) {
+        builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+      } else {
+        builder.space()
+      }
     }
   }
 
   /**
-   * For example `private final inline`
+   * Example:
+   * ```
+   * @SuppressLint("MagicNumber")
+   * print(10)
+   * ```
    *
-   * This visits keywords and annotations that appear after the first keyword. For example `public
-   * @Inject constructor`. Ideally, you should user `@Inject public constructor` but since we cannot
-   * reorder those without making possible mistakes with tokens right now, we just treat annotations
-   * before the keywords differently and visit them in [visitAnnotationBeforeModifiers] instead.
+   * in
+   *
+   * ```
+   * fun f() {
+   *   @SuppressLint("MagicNumber")
+   *   print(10)
+   * }
+   * ```
    */
-  private fun visitKeywordModifiers(list: KtModifierList) {
-    var onlyAnnotationsSoFar = true
-    for (child in list.node.children()) {
-      if (child.psi is PsiWhiteSpace) {
-        continue
-      }
-      if (onlyAnnotationsSoFar && child.elementType is KtAnnotationEntryElementType) {
-        continue
-      }
-      onlyAnnotationsSoFar = false
-      when (child.elementType) {
-        is KtAnnotationEntryElementType ->
-            visitAnnotationEntry(child.psi as KtAnnotationEntry, canBreak = false)
-        is KtModifierKeywordToken -> {
-          builder.token(child.text)
-          builder.space()
+  override fun visitAnnotatedExpression(expression: KtAnnotatedExpression) {
+    builder.sync(expression)
+    builder.block(ZERO) {
+      loop@ for (child in expression.node.children()) {
+        val psi = child.psi
+        when (psi) {
+          is PsiWhiteSpace -> continue@loop
+          is KtAnnotation -> {
+            psi.accept(this)
+            if (psi.entries.size != 1 || psi.entries[0].valueArguments.isNotEmpty()) {
+              builder.forcedBreak()
+            } else {
+              builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+            }
+          }
+          is KtAnnotationEntry -> {
+            psi.accept(this)
+            if (psi.valueArguments.isNotEmpty()) {
+              builder.forcedBreak()
+            } else {
+              builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+            }
+          }
+          else -> psi.accept(this)
         }
       }
     }
@@ -1141,19 +1157,6 @@ class KotlinInputAstVisitor(
 
   /** For example `@Magic` or `@Fred(1, 5)` */
   override fun visitAnnotationEntry(annotationEntry: KtAnnotationEntry) {
-    visitAnnotationEntry(annotationEntry, true)
-  }
-
-  /**
-   * For example `@Magic` or `@Fred(1, 5)`
-   *
-   * @param canBreak whether we are currently visiting annotations after which we can break the
-   * line. An example of
-   * ```
-   *    an annotation where we can't is one mixed with keywords such as in `public @Inject final`
-   * ```
-   */
-  private fun visitAnnotationEntry(annotationEntry: KtAnnotationEntry, canBreak: Boolean) {
     builder.sync(annotationEntry)
     builder.token("@")
     val useSiteTarget = annotationEntry.useSiteTarget?.getAnnotationUseSiteTarget()
@@ -1166,15 +1169,20 @@ class KotlinInputAstVisitor(
         null, // Type-arguments are included in the annotation's callee expression.
         annotationEntry.valueArgumentList,
         listOf())
+  }
 
-    if (!canBreak) {
-      builder.breakToFill(" ")
-    } else if (annotationEntry.parent is KtFileAnnotationList ||
-        annotationEntry.valueArguments.isNotEmpty()) {
+  override fun visitFileAnnotationList(
+      fileAnnotationList: KtFileAnnotationList, data: Void?
+  ): Void? {
+    for (child in fileAnnotationList.node.children()) {
+      if (child is PsiElement) {
+        continue
+      }
+      child.psi.accept(this)
       builder.forcedBreak()
-    } else {
-      builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
     }
+
+    return null
   }
 
   override fun visitSuperTypeList(list: KtSuperTypeList) {
@@ -1627,9 +1635,7 @@ class KotlinInputAstVisitor(
   override fun visitEnumEntry(enumEntry: KtEnumEntry) {
     builder.sync(enumEntry)
     builder.block(ZERO) {
-      for (annotationEntry in enumEntry.annotationEntries) {
-        annotationEntry.accept(this)
-      }
+      enumEntry.modifierList?.accept(this)
       builder.token(enumEntry.nameIdentifier?.text ?: fail())
       enumEntry.initializerList?.initializers?.forEach { it.accept(this) }
       val body = enumEntry.body
