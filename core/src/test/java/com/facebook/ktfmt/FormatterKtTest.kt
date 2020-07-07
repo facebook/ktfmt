@@ -833,7 +833,8 @@ class FormatterKtTest {
   @Test
   fun `annotations with parameters`() =
       assertFormatted("""
-      |@AnnWithArrayValue(1, 2, 3) class C
+      |@AnnWithArrayValue(1, 2, 3)
+      |class C
       |""".trimMargin())
 
   @Test
@@ -1754,13 +1755,16 @@ class FormatterKtTest {
           """
       |@Px fun f(): Int = 5
       |
-      |@Dimenstion(unit = DP) fun g(): Int = 5
+      |@Dimenstion(unit = DP)
+      |fun g(): Int = 5
       |
-      |@RunWith(MagicRunner::class) @Px class Test {}
+      |@RunWith(MagicRunner::class)
+      |@Px
+      |class Test {}
       |""".trimMargin())
 
   @Test
-  fun `no newlines after annotations if entire expression fits in one line`() =
+  fun `no newlines after annotations if entire expr fits in one line (unless has value params)`() =
       assertFormatted(
           """
       |-----------------------------------------------
@@ -1782,7 +1786,9 @@ class FormatterKtTest {
       |  return 5
       |}
       |
-      |@Dimenstion(unit = DP) @Px fun g(): Int = 5
+      |@Dimenstion(unit = DP)
+      |@Px
+      |fun g(): Int = 5
       |
       |@Dimenstion(unit = DP)
       |@Px
@@ -1790,9 +1796,17 @@ class FormatterKtTest {
       |  return 5
       |}
       |
-      |@RunWith(MagicRunner::class) @Px class Test
+      |@RunWith @Px class Test
       |
-      |@RunWith(MagicRunner::class) @Px class Test {}
+      |@RunWith(MagicRunner::class)
+      |@Px
+      |class Test
+      |
+      |@RunWith @Px class Test {}
+      |
+      |@RunWith(MagicRunner::class)
+      |@Px
+      |class Test {}
       |
       |@RunWith(MagicRunner::class)
       |@Px
@@ -1845,7 +1859,11 @@ class FormatterKtTest {
       |fun doIt() {
       |  try {
       |    doItAgain()
-      |  } catch (@Supress("GeneralException") e: Exception) {}
+      |  } catch (@Nullable e: Exception) {
+      |    //
+      |  } catch (
+      |      @Suppress("GeneralException")
+      |      e: Exception) {}
       |}
       |""".trimMargin())
 
@@ -2098,9 +2116,11 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
-  fun `handle colleciton literals in annotations`() =
-      assertFormatted("""
-      |@Foo(a = [1, 2]) fun doIt(o: Object) {}
+  fun `handle collection literals in annotations`() =
+      assertFormatted(
+          """
+      |@Foo(a = [1, 2])
+      |fun doIt(o: Object) {}
       |""".trimMargin())
 
   @Test
@@ -2719,7 +2739,9 @@ class FormatterKtTest {
           """
       |class FooTest {
       |  @get:Rule val exceptionRule: ExpectedException = ExpectedException.none()
-      |  @set:Magic(name = "Jane") var field: String
+      |
+      |  @set:Magic(name = "Jane")
+      |  var field: String
       |}
       |""".trimMargin())
 
@@ -2731,14 +2753,19 @@ class FormatterKtTest {
       |
       |public @Magic(1) final class Foo
       |
-      |@Magic(1) public final class Foo
+      |@Magic(1)
+      |public final class Foo
       |""".trimMargin())
 
   @Test
   fun `handle annotations more`() =
       assertFormatted(
           """
-      |@Anno1 @Anno2(param = Param1::class) @Anno3 @Anno4(param = Param2::class) class MyClass {}
+      |@Anno1
+      |@Anno2(param = Param1::class)
+      |@Anno3
+      |@Anno4(param = Param2::class)
+      |class MyClass {}
       |
       |fun f() {
       |  @Suppress("MagicNumber")
@@ -2786,7 +2813,8 @@ class FormatterKtTest {
           """
       |@Anno class F
       |
-      |@Anno(param = 1) class F
+      |@Anno(param = 1)
+      |class F
       |
       |@Anno(P)
       |// Foo

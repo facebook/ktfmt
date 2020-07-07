@@ -1103,7 +1103,11 @@ class KotlinInputAstVisitor(
       }
 
       if (onlyAnnotationsSoFar) {
-        builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+        if (psi is KtAnnotationEntry && psi.valueArguments.isNotEmpty()) {
+          builder.forcedBreak()
+        } else {
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+        }
       } else {
         builder.space()
       }
