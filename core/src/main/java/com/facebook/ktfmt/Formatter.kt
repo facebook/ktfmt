@@ -117,25 +117,33 @@ fun dropRedundantElements(code: String): String {
   file.accept(
       object : KtTreeVisitorVoid() {
         override fun visitElement(el: PsiElement) {
+          if (isExtraSemicolon(el)) {
+            toRemove.add(el)
+          } else {
+            super.visitElement(el)
+          }
+        }
+
+        private fun isExtraSemicolon(el: PsiElement): Boolean {
           if (el.text != ";") {
-            return super.visitElement(el)
+            return false
           }
           val parent = el.parent
           if (parent is KtStringTemplateExpression || parent is KtStringTemplateEntry) {
-            return super.visitElement(el)
+            return false
           }
           if (parent is KtEnumEntry &&
               parent.siblings(forward = true, withItself = false).any { it is KtDeclaration }) {
-            return super.visitElement(el)
+            return false
           }
           val prevLeaf = el.prevLeaf(false)
           val prevSibling = el.prevSibling
           if ((prevSibling is KtIfExpression || prevSibling is KtWhileExpression) &&
               prevLeaf is KtContainerNodeForControlStructureBody &&
               prevLeaf.text.isEmpty()) {
-            return super.visitElement(el)
+            return false
           }
-          toRemove.add(el)
+          return true
         }
       })
 
