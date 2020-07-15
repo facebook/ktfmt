@@ -33,7 +33,5 @@ fun parseOptions(err: PrintStream, args: Array<String>): ParsedArgs {
     }
   }
   return ParsedArgs(
-      fileNames,
-      if (isDropboxStyle) FormattingOptions(blockIndent = 4, continuationIndent = 4)
-      else FormattingOptions())
+      fileNames, if (isDropboxStyle) FormattingOptions.dropboxStyle() else FormattingOptions())
 }

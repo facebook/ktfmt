@@ -70,7 +70,14 @@ class FormattingOptions(
      *     1)
      * ```
      */
-    val continuationIndent: Int = 4)
+    val continuationIndent: Int = 4
+) {
+  companion object {
+    /** Represents dropbox style formatting. */
+    fun dropboxStyle(): FormattingOptions =
+        FormattingOptions(blockIndent = 4, continuationIndent = 4)
+  }
+}
 
 /**
  * format formats the Kotlin code given in 'code' and returns it as a string. This method is
