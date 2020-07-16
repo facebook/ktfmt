@@ -19,7 +19,10 @@ exit # <--- comment out after updating the versions below.
 CURRENT_VERSION="0.13"
 NEXT_VERSION="0.14"
 
-sed -i.bak "s/$CURRENT_VERSION-SNAPSHOT/$CURRENT_VERSION/g" pom.xml core/pom.xml
-hg commit -m "[ktfmt] Bump version to $CURRENT_VERSION"
-sed -i.bak "s/$CURRENT_VERSION/$NEXT_VERSION-SNAPSHOT/g" pom.xml core/pom.xml
-hg commit -m "[ktfmt] Bump version to $NEXT_VERSION-SNAPSHOT"
+POM1="$HOME/fbsource/xplat/ktfmt/pom.xml"
+POM2="$HOME/fbsource/xplat/ktfmt/core/pom.xml"
+
+sed -i.bak "s/$CURRENT_VERSION-SNAPSHOT/$CURRENT_VERSION/g" "$POM1" "$POM2"
+hg commit -m "[ktfmt] Bump version to $CURRENT_VERSION" "$POM1" "$POM2"
+sed -i.bak "s/$CURRENT_VERSION/$NEXT_VERSION-SNAPSHOT/g" "$POM1" "$POM2"
+hg commit -m "[ktfmt] Bump version to $NEXT_VERSION-SNAPSHOT" "$POM1" "$POM2"
