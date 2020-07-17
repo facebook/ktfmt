@@ -551,6 +551,34 @@ class FormatterKtTest {
   }
 
   @Test
+  fun `imports from the same package are removed`() {
+    val code =
+        """
+      |package com.example
+      |
+      |import com.example.Sample
+      |import com.example.Sample.CONSTANT
+      |import com.example.a.foo
+      |
+      |fun test() {
+      |  foo(CONSTANT, Sample())
+      |}
+      |""".trimMargin()
+    val expected =
+        """
+      |package com.example
+      |
+      |import com.example.Sample.CONSTANT
+      |import com.example.a.foo
+      |
+      |fun test() {
+      |  foo(CONSTANT, Sample())
+      |}
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
   fun `keep operator imports`() =
       assertFormatted(
           """
@@ -2403,7 +2431,7 @@ class FormatterKtTest {
   fun `drop redundant semicolons`() {
     val code =
         """
-      |package org.examples.wow;
+      |package org.examples;
       |import org.examples.wow.MuchWow;
       |import org.examples.wow.ManyAmaze
       |
@@ -2418,7 +2446,7 @@ class FormatterKtTest {
       |""".trimMargin()
     val expected =
         """
-      |package org.examples.wow
+      |package org.examples
       |
       |import org.examples.wow.ManyAmaze
       |import org.examples.wow.MuchWow

@@ -28,6 +28,7 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.util.text.StringUtilRt
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
 import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.psi.KtEnumEntry
@@ -175,6 +176,7 @@ fun dropRedundantElements(code: String, options: FormattingOptions): String {
   val file = Parser.parse(code)
   val toRemove = mutableListOf<PsiElement>()
 
+  var thisPackage: FqName? = null
   lateinit var importCleanUpCandidates: Set<KtImportDirective>
   val usedReferences = OPERATORS.toMutableSet()
   file.accept(
@@ -191,6 +193,8 @@ fun dropRedundantElements(code: String, options: FormattingOptions): String {
         }
 
         override fun visitPackageDirective(directive: KtPackageDirective) {
+          thisPackage = directive.fqName
+
           isPackageElement = true
           super.visitPackageDirective(directive)
           isPackageElement = false
@@ -248,7 +252,8 @@ fun dropRedundantElements(code: String, options: FormattingOptions): String {
     // Collect unused imports
     for (import in importCleanUpCandidates) {
       val isUnused = import.aliasName !in usedReferences && import.identifier !in usedReferences
-      if (isUnused) {
+      val isFromSamePackage = import.importedFqName?.parent() == thisPackage && import.alias == null
+      if (isUnused || isFromSamePackage) {
         toRemove += import
       }
     }
