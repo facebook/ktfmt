@@ -95,6 +95,8 @@ private val OPERATORS =
         "setValue",
         "provideDelegate")
 
+private val COMPONENT_OPERATOR_REGEX = Regex("component\\d+")
+
 class FormattingOptions(
     /** ktfmt breaks lines longer than maxWidth. */
     val maxWidth: Int = DEFAULT_MAX_WIDTH,
@@ -207,7 +209,8 @@ fun dropRedundantElements(code: String, options: FormattingOptions): String {
                     import.isValidImport &&
                         !import.isAllUnder &&
                         import.identifier != null &&
-                        requireNotNull(import.identifier) !in OPERATORS
+                        requireNotNull(import.identifier) !in OPERATORS &&
+                        !COMPONENT_OPERATOR_REGEX.matches(import.identifier.orEmpty())
                   }
                   .toSet()
 

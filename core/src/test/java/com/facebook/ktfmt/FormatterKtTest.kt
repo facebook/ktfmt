@@ -579,6 +579,19 @@ class FormatterKtTest {
   }
 
   @Test
+  fun `keep component imports`() =
+      assertFormatted(
+          """
+          |import com.example.component1
+          |import com.example.component10
+          |import com.example.component120
+          |import com.example.component2
+          |import com.example.component3
+          |import com.example.component4
+          |import com.example.component5
+          |""".trimMargin())
+
+  @Test
   fun `keep operator imports`() =
       assertFormatted(
           """
@@ -2354,7 +2367,7 @@ class FormatterKtTest {
       |
       |enum class SemiColonIsRequired {
       |  ONE, TWO;
-      |  
+      |
       |  fun isOne(): Boolean = this == ONE
       |}
       |""".trimMargin()
@@ -2441,7 +2454,7 @@ class FormatterKtTest {
       |  val a = 3;
       |  val x = 5 ; val y = ManyAmaze();
       |  myThingMap.forEach { val (key, value) = it; println("mapped ${"$"}MuchWow") }
-      |} ; 
+      |} ;
       |
       |""".trimMargin()
     val expected =
