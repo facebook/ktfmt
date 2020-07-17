@@ -28,16 +28,13 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.util.text.StringUtilRt
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
-import com.intellij.psi.util.PsiTreeUtil.getChildOfType
-import com.intellij.psi.util.PsiTreeUtil.getParentOfType
-import kotlin.reflect.KClass
 import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
 import org.jetbrains.kotlin.psi.KtDeclaration
-import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
 import org.jetbrains.kotlin.psi.KtEnumEntry
 import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtImportDirective
-import org.jetbrains.kotlin.psi.KtNameReferenceExpression
+import org.jetbrains.kotlin.psi.KtImportList
+import org.jetbrains.kotlin.psi.KtPackageDirective
 import org.jetbrains.kotlin.psi.KtReferenceExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
@@ -178,30 +175,48 @@ fun dropRedundantElements(code: String, options: FormattingOptions): String {
   val file = Parser.parse(code)
   val toRemove = mutableListOf<PsiElement>()
 
-  val importDirectives = mutableSetOf<KtImportDirective>()
+  lateinit var importCleanUpCandidates: Set<KtImportDirective>
   val usedReferences = OPERATORS.toMutableSet()
   file.accept(
       object : KtTreeVisitorVoid() {
+        private var isPackageElement = false
+        private var isImportElement = false
+
         override fun visitElement(el: PsiElement) {
           if (isExtraSemicolon(el)) {
-            toRemove.add(el)
+            toRemove += el
           } else {
             super.visitElement(el)
           }
         }
 
-        override fun visitImportDirective(importDirective: KtImportDirective) {
-          importDirectives += importDirective
-          super.visitImportDirective(importDirective)
+        override fun visitPackageDirective(directive: KtPackageDirective) {
+          isPackageElement = true
+          super.visitPackageDirective(directive)
+          isPackageElement = false
+        }
+
+        override fun visitImportList(importList: KtImportList) {
+          importCleanUpCandidates =
+              importList.imports
+                  .filter { import ->
+                    import.isValidImport &&
+                        !import.isAllUnder &&
+                        import.identifier != null &&
+                        requireNotNull(import.identifier) !in OPERATORS
+                  }
+                  .toSet()
+
+          isImportElement = true
+          super.visitImportList(importList)
+          isImportElement = false
         }
 
         override fun visitReferenceExpression(expression: KtReferenceExpression) {
-          if (expression !is KtNameReferenceExpression ||
-              expression.isChildOf(KtImportDirective::class)) {
-            return super.visitReferenceExpression(expression)
+          if (!isPackageElement && !isImportElement && expression.children.isEmpty()) {
+            usedReferences += expression.text.trim('`')
           }
-
-          expression.text?.let { usedReferences += it }
+          super.visitReferenceExpression(expression)
         }
 
         private fun isExtraSemicolon(el: PsiElement): Boolean {
@@ -225,20 +240,16 @@ fun dropRedundantElements(code: String, options: FormattingOptions): String {
           }
           return true
         }
-
-        private fun <T : PsiElement> PsiElement.isChildOf(clazz: KClass<T>) =
-            getParentOfType(this, clazz.java) != null
       })
 
   val result = StringBuilder(code)
 
-  // Collect unused imports
   if (options.removeUnusedImports) {
-    for (directive in importDirectives) {
-      val importIdentifier = directive.identifier ?: continue
-
-      if (importIdentifier !in usedReferences) {
-        toRemove.add(directive)
+    // Collect unused imports
+    for (import in importCleanUpCandidates) {
+      val isUnused = import.aliasName !in usedReferences && import.identifier !in usedReferences
+      if (isUnused) {
+        toRemove += import
       }
     }
   }
@@ -286,7 +297,7 @@ fun sortedAndDistinctImports(code: String): String {
           " " +
           importDirective.alias?.text?.replace("`", "") +
           " " +
-          (if (importDirective.isAllUnder) "*" else "")
+          if (importDirective.isAllUnder) "*" else ""
   val sortedImports = importList.imports.sortedBy(::canonicalText).distinctBy(::canonicalText)
 
   return code.replaceRange(
@@ -295,11 +306,5 @@ fun sortedAndDistinctImports(code: String): String {
       sortedImports.joinToString(separator = "\n") { imprt -> imprt.text })
 }
 
-private val KtImportDirective.identifier: String?
-  get() {
-    if (aliasName != null) return aliasName
-
-    if (importedName?.identifier == null) return null
-
-    return getChildOfType(this, KtDotQualifiedExpression::class.java)?.selectorExpression?.text
-  }
+private inline val KtImportDirective.identifier: String?
+  get() = importPath?.importedName?.identifier?.trim('`')
