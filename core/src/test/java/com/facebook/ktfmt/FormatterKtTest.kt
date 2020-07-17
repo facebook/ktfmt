@@ -443,6 +443,8 @@ class FormatterKtTest {
       | import  foo.bar // Test
       |  import  abc.def /*
       |                  test */
+      |
+      |val x = FooBar.def { foosBars(bar) }
       |""".trimMargin()
     val expected =
         """
@@ -452,6 +454,8 @@ class FormatterKtTest {
       |import com.example.common.reality.FooBar
       |import com.example.common.reality.FooBar2 as foosBars
       |import foo.bar // Test
+      |
+      |val x = FooBar.def { foosBars(bar) }
       |""".trimMargin()
     assertThatFormatting(code).isEqualTo(expected)
   }
@@ -464,6 +468,8 @@ class FormatterKtTest {
       |import com.example.we
       |import com.example.`when`
       |import com.example.wow
+      |
+      |val x = `if` { we.`when`(wow) }
       |""".trimMargin())
 
   @Test
@@ -474,6 +480,8 @@ class FormatterKtTest {
       |import com.example.a as we
       |import com.example.a as `when`
       |import com.example.a as wow
+      |
+      |val x = `if` { we.`when`(wow) }
       |""".trimMargin())
 
   @Test
@@ -487,6 +495,8 @@ class FormatterKtTest {
       |import com.example.a as `when`
       |import com.example.a as wow
       |import com.example.a as `when`
+      |
+      |val x = `if` { we.`when`(wow) } ?: b
       |""".trimMargin()
     val expected =
         """
@@ -496,6 +506,46 @@ class FormatterKtTest {
       |import com.example.a as wow
       |import com.example.b
       |import com.example.b.*
+      |
+      |val x = `if` { we.`when`(wow) } ?: b
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `unused imports are removed`() {
+    val code =
+        """
+      |import com.unused.Sample
+      |import com.used.FooBarBaz as Baz
+      |import com.used.bar // test
+      |import com.used.`class`
+      |import com.used.a.*
+      |import com.used.b as `if`
+      |import com.used.b as we
+      |import com.unused.a as `when`
+      |import com.unused.a as wow
+      |
+      |fun test(input: we) {
+      |  Baz(`class`)
+      |  `if` { bar }
+      |  val x = unused()
+      |}
+      |""".trimMargin()
+    val expected =
+        """
+      |import com.used.FooBarBaz as Baz
+      |import com.used.a.*
+      |import com.used.b as `if`
+      |import com.used.b as we
+      |import com.used.bar // test
+      |import com.used.`class`
+      |
+      |fun test(input: we) {
+      |  Baz(`class`)
+      |  `if` { bar }
+      |  val x = unused()
+      |}
       |""".trimMargin()
     assertThatFormatting(code).isEqualTo(expected)
   }
@@ -1744,6 +1794,7 @@ class FormatterKtTest {
       |  val `when` = NEVER
       |  val (`do not`, `ever write`) = SERIOUSLY
       |  val `a a`: Int
+      |  `yay yay`(`foo foo`)
       |}
       |
       |class `more spaces`
@@ -2038,7 +2089,9 @@ class FormatterKtTest {
       |
       |import com.somecompany.example2
       |
-      |class Foo {}
+      |class Foo {
+      |  val a = example2("and 1")
+      |}
       |""".trimMargin())
 
   @Test
@@ -2320,8 +2373,8 @@ class FormatterKtTest {
       |
       |fun f() {
       |  val a = 3;
-      |  val x = 5 ; val y = 5;
-      |  myThingMap.forEach { val (key, value) = it; println("mapped") } 
+      |  val x = 5 ; val y = ManyAmaze();
+      |  myThingMap.forEach { val (key, value) = it; println("mapped ${"$"}MuchWow") }
       |} ; 
       |
       |""".trimMargin()
@@ -2337,10 +2390,10 @@ class FormatterKtTest {
       |fun f() {
       |  val a = 3
       |  val x = 5
-      |  val y = 5
+      |  val y = ManyAmaze()
       |  myThingMap.forEach {
       |    val (key, value) = it
-      |    println("mapped")
+      |    println("mapped ${"$"}MuchWow")
       |  }
       |}
       |""".trimMargin()
@@ -3186,7 +3239,10 @@ class FormatterKtTest {
 
   class FormattedCodeSubject(metadata: FailureMetadata, val code: String) :
       Subject(metadata, code) {
-    var options: FormattingOptions = FormattingOptions()
+    var options: FormattingOptions =
+        FormattingOptions(
+            // Keep this on for the tests
+            removeUnusedImports = true)
     var allowTrailingWhitespace = false
 
     fun withOptions(options: FormattingOptions): FormattedCodeSubject {

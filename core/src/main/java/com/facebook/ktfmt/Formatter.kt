@@ -28,11 +28,17 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.util.text.StringUtilRt
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
+import com.intellij.psi.util.PsiTreeUtil.getChildOfType
+import com.intellij.psi.util.PsiTreeUtil.getParentOfType
+import kotlin.reflect.KClass
 import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
 import org.jetbrains.kotlin.psi.KtDeclaration
+import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
 import org.jetbrains.kotlin.psi.KtEnumEntry
 import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtImportDirective
+import org.jetbrains.kotlin.psi.KtNameReferenceExpression
+import org.jetbrains.kotlin.psi.KtReferenceExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
@@ -70,7 +76,10 @@ class FormattingOptions(
      *     1)
      * ```
      */
-    val continuationIndent: Int = 4
+    val continuationIndent: Int = 4,
+
+    /** Whether ktfmt should remove imports that are not used. */
+    val removeUnusedImports: Boolean = false
 ) {
   companion object {
     /** Represents dropbox style formatting. */
@@ -94,7 +103,7 @@ fun format(options: FormattingOptions, code: String): String {
   val lfCode = StringUtilRt.convertLineSeparators(code)
   val sortedImports = sortedAndDistinctImports(lfCode)
   val pretty = prettyPrint(sortedImports, options, "\n")
-  val noRedundantElements = dropRedundantElements(pretty)
+  val noRedundantElements = dropRedundantElements(pretty, options)
   return prettyPrint(noRedundantElements, options, Newlines.guessLineSeparator(code)!!)
 }
 
@@ -118,9 +127,12 @@ private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator:
       JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
 }
 
-fun dropRedundantElements(code: String): String {
+fun dropRedundantElements(code: String, options: FormattingOptions): String {
   val file = Parser.parse(code)
   val toRemove = mutableListOf<PsiElement>()
+
+  val importDirectives = mutableSetOf<KtImportDirective>()
+  val usedReferences = mutableSetOf<String>()
   file.accept(
       object : KtTreeVisitorVoid() {
         override fun visitElement(el: PsiElement) {
@@ -129,6 +141,20 @@ fun dropRedundantElements(code: String): String {
           } else {
             super.visitElement(el)
           }
+        }
+
+        override fun visitImportDirective(importDirective: KtImportDirective) {
+          importDirectives += importDirective
+          super.visitImportDirective(importDirective)
+        }
+
+        override fun visitReferenceExpression(expression: KtReferenceExpression) {
+          if (expression !is KtNameReferenceExpression ||
+              expression.isChildOf(KtImportDirective::class)) {
+            return super.visitReferenceExpression(expression)
+          }
+
+          expression.text?.let { usedReferences += it }
         }
 
         private fun isExtraSemicolon(el: PsiElement): Boolean {
@@ -152,14 +178,26 @@ fun dropRedundantElements(code: String): String {
           }
           return true
         }
+
+        private fun <T : PsiElement> PsiElement.isChildOf(clazz: KClass<T>) =
+            getParentOfType(this, clazz.java) != null
       })
 
   val result = StringBuilder(code)
 
-  var offset = 0
-  for (element in toRemove) {
-    result.replace(element.startOffset - offset, element.endOffset - offset, "")
-    offset += element.textLength
+  // Collect unused imports
+  if (options.removeUnusedImports) {
+    for (directive in importDirectives) {
+      val importIdentifier = directive.identifier ?: continue
+
+      if (importIdentifier !in usedReferences) {
+        toRemove.add(directive)
+      }
+    }
+  }
+
+  for (element in toRemove.sortedByDescending(PsiElement::endOffset)) {
+    result.replace(element.startOffset, element.endOffset, "")
   }
 
   return result.toString()
@@ -209,3 +247,12 @@ fun sortedAndDistinctImports(code: String): String {
       importList.endOffset,
       sortedImports.joinToString(separator = "\n") { imprt -> imprt.text })
 }
+
+private val KtImportDirective.identifier: String?
+  get() {
+    if (aliasName != null) return aliasName
+
+    if (importedName?.identifier == null) return null
+
+    return getChildOfType(this, KtDotQualifiedExpression::class.java)?.selectorExpression?.text
+  }
