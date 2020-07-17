@@ -50,6 +50,53 @@ import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 const val DEFAULT_MAX_WIDTH: Int = 100
 
+private val OPERATORS =
+    setOf(
+        // Unary prefix operators
+        "unaryPlus",
+        "unaryMinus",
+        "not",
+        // Increments and decrements
+        "inc",
+        "dec",
+        // Arithmetic operators
+        "plus",
+        "minus",
+        "times",
+        "div",
+        "rem",
+        "mod", // deprecated
+        "rangeTo",
+        // 'In' operator
+        "contains",
+        // Indexed access operator
+        "get",
+        "set",
+        // Invoke operator
+        "invoke",
+        // Augmented assignments
+        "plusAssign",
+        "minusAssign",
+        "timesAssign",
+        "divAssign",
+        "remAssign",
+        "modAssign", // deprecated
+        // Equality and inequality operators
+        "equals",
+        // Comparison operators
+        "compareTo",
+        // Iterator operators
+        "iterator",
+        "next",
+        "hasNext",
+        // Bitwise operators
+        "and",
+        "or",
+        // Property delegation operators
+        "getValue",
+        "setValue",
+        "provideDelegate")
+
 class FormattingOptions(
     /** ktfmt breaks lines longer than maxWidth. */
     val maxWidth: Int = DEFAULT_MAX_WIDTH,
@@ -132,7 +179,7 @@ fun dropRedundantElements(code: String, options: FormattingOptions): String {
   val toRemove = mutableListOf<PsiElement>()
 
   val importDirectives = mutableSetOf<KtImportDirective>()
-  val usedReferences = mutableSetOf<String>()
+  val usedReferences = OPERATORS.toMutableSet()
   file.accept(
       object : KtTreeVisitorVoid() {
         override fun visitElement(el: PsiElement) {
