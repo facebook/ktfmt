@@ -37,10 +37,10 @@ java -jar /path/to/ktfmt-<VERSION>-jar-with-dependencies.jar [--dropbox-style] [
 formatting (apart from `--dropbox-style`). This is a deliberate design decision to unify our code
 formatting on a single format.*
 
-## using [Spotless](https://github.com/diffplug/spotless/tree/master/plugin-gradle)
+## using [Spotless](https://github.com/diffplug/spotless)
 
-On Gradle: https://github.com/diffplug/spotless/tree/master/plugin-gradle#applying-ktfmt-to-kotlin-files
-On Maven: https://github.com/diffplug/spotless/tree/master/plugin-maven#applying-ktfmt-to-kotlin-files
+On Gradle: https://github.com/diffplug/spotless/tree/main/plugin-gradle#ktfmt
+On Maven: https://github.com/diffplug/spotless/tree/main/plugin-maven#ktfmt
 
 ## FAQ
 
