@@ -631,20 +631,14 @@ class KotlinInputAstVisitor(
     }
   }
 
-  private fun <T> forEachCommaSeparated(
-      list: Iterable<T>, delimiter: (() -> Unit)? = null, function: (T) -> Unit
-  ) {
+  private fun <T> forEachCommaSeparated(list: Iterable<T>, function: (T) -> Unit) {
     builder.block(ZERO) {
       var first = true
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
       for (value in list) {
         if (!first) {
-          if (delimiter != null) {
-            delimiter()
-          } else {
-            builder.token(",")
-            builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
-          }
+          builder.token(",")
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
         }
         first = false
 
@@ -934,14 +928,15 @@ class KotlinInputAstVisitor(
 
   /** Example `RED, GREEN, BLUE,` in an enum class, or `RED, GREEN;` */
   private fun visitEnumEntries(enumEntries: List<PsiElement>) {
-    forEachCommaSeparated(
-        enumEntries,
-        delimiter = {
-          builder.token(",")
-          builder.forcedBreak()
-        }) { it.accept(this) }
-    builder.guessToken(",")
-    builder.guessToken(";")
+    builder.block(ZERO) {
+      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+      for (value in enumEntries) {
+        value.accept(this)
+        builder.guessToken(",")
+        builder.guessToken(";")
+        builder.forcedBreak()
+      }
+    }
   }
 
   override fun visitPrimaryConstructor(constructor: KtPrimaryConstructor) {
@@ -1169,10 +1164,19 @@ class KotlinInputAstVisitor(
       builder.token(":")
       builder.block(expressionBreakIndent) {
         builder.token("[")
-        forEachCommaSeparated(
-            annotation.entries,
-            delimiter = { builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO) },
-            function = { it.accept(this) })
+
+        builder.block(ZERO) {
+          var first = true
+          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+          for (value in annotation.entries) {
+            if (!first) {
+              builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+            }
+            first = false
+
+            value.accept(this)
+          }
+        }
       }
       builder.token("]")
     }
