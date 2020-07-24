@@ -1423,12 +1423,7 @@ class KotlinInputAstVisitor(
         // Break before args.
         builder.breakToFill("")
       }
-      builder.block(ZERO) {
-        forEachCommaSeparated(parameters) {
-          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-          it.accept(this)
-        }
-      }
+      builder.block(ZERO) { forEachCommaSeparated(parameters) { it.accept(this) } }
       builder.token(">")
     }
   }
