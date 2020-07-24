@@ -77,6 +77,7 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtNullableType
 import org.jetbrains.kotlin.psi.KtPackageDirective
 import org.jetbrains.kotlin.psi.KtParameter
+import org.jetbrains.kotlin.psi.KtParameterList
 import org.jetbrains.kotlin.psi.KtParenthesizedExpression
 import org.jetbrains.kotlin.psi.KtPrefixExpression
 import org.jetbrains.kotlin.psi.KtPrimaryConstructor
@@ -146,7 +147,7 @@ class KotlinInputAstVisitor(
           function.receiverTypeReference,
           function.nameIdentifier?.text,
           true,
-          function.valueParameters,
+          function.valueParameterList,
           function.typeConstraintList,
           function.bodyBlockExpression,
           function.bodyExpression,
@@ -242,7 +243,7 @@ class KotlinInputAstVisitor(
       receiverTypeReference: KtTypeReference?,
       name: String?,
       emitParenthesis: Boolean,
-      parameters: List<KtParameter>?,
+      parameterList: KtParameterList?,
       typeConstraintList: KtTypeConstraintList?,
       bodyBlockExpression: KtBlockExpression?,
       nonBlockBodyExpressions: PsiElement?,
@@ -273,12 +274,12 @@ class KotlinInputAstVisitor(
         builder.token("(")
       }
       builder.block(ZERO) {
-        if (parameters != null && parameters.isNotEmpty()) {
+        if (parameterList != null && parameterList.parameters.isNotEmpty()) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-          builder.block(expressionBreakIndent) { visitFormals(parameters) }
+          builder.block(expressionBreakIndent) { visitFormals(parameterList) }
         }
         if (emitParenthesis) {
-          if (parameters != null && parameters.isNotEmpty()) {
+          if (parameterList != null && parameterList.parameters.isNotEmpty()) {
             builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
           }
           builder.token(")")
@@ -286,7 +287,7 @@ class KotlinInputAstVisitor(
         if (type != null) {
           builder.block(ZERO) {
             builder.token(":")
-            if (parameters.isNullOrEmpty()) {
+            if (parameterList?.parameters.isNullOrEmpty()) {
               builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
             } else {
               builder.space()
@@ -318,7 +319,8 @@ class KotlinInputAstVisitor(
     }
   }
 
-  private fun visitFormals(parameters: List<KtParameter>) {
+  private fun visitFormals(parameterList: KtParameterList) {
+    val parameters = parameterList.parameters
     if (parameters.isEmpty()) {
       return
     }
@@ -386,7 +388,7 @@ class KotlinInputAstVisitor(
               null,
               null,
               accessor.bodyExpression != null || accessor.bodyBlockExpression != null,
-              accessor.parameterList?.parameters,
+              accessor.parameterList,
               null,
               accessor.bodyBlockExpression,
               accessor.bodyExpression,
@@ -950,9 +952,10 @@ class KotlinInputAstVisitor(
       }
       builder.block(ZERO) {
         builder.token("(")
-        if (constructor.valueParameters.isNotEmpty()) {
+        val parameterList = constructor.valueParameterList
+        if (parameterList != null && parameterList.parameters.isNotEmpty()) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-          builder.block(expressionBreakIndent) { visitFormals(constructor.valueParameters) }
+          builder.block(expressionBreakIndent) { visitFormals(parameterList) }
         }
         val ownerClassOrObject = constructor.parent
         if (ownerClassOrObject is KtClassOrObject &&
@@ -978,8 +981,9 @@ class KotlinInputAstVisitor(
       builder.token("constructor")
       builder.token("(")
       builder.block(expressionBreakIndent) {
-        if (constructor.valueParameters.isNotEmpty()) {
-          visitFormals(constructor.valueParameters)
+        val parameterList = constructor.valueParameterList
+        if (parameterList != null && parameterList.parameters.isNotEmpty()) {
+          visitFormals(parameterList)
         }
       }
       if (!delegationCall.isImplicit || bodyExpression != null) {
