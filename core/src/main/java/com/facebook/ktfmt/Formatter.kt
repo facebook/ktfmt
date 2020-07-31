@@ -64,7 +64,7 @@ class FormattingOptions(
     val continuationIndent: Int = 4,
 
     /** Whether ktfmt should remove imports that are not used. */
-    val removeUnusedImports: Boolean = false
+    val removeUnusedImports: Boolean = true
 ) {
   companion object {
     /** Represents dropbox style formatting. */

@@ -696,6 +696,26 @@ class FormatterKtTest {
           |""".trimMargin())
 
   @Test
+  fun `keep unused imports when formatting options has feature turned off`() {
+    val code =
+        """
+      |import com.unused.FooBarBaz as Baz
+      |import com.unused.Sample
+      |import com.unused.a as `when`
+      |import com.unused.a as wow
+      |import com.unused.a.*
+      |import com.unused.b as `if`
+      |import com.unused.b as we
+      |import com.unused.bar // test
+      |import com.unused.`class`
+      |""".trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(FormattingOptions(removeUnusedImports = false))
+        .isEqualTo(code)
+  }
+
+  @Test
   fun `comments between imports are not allowed`() {
     val code =
         """
@@ -3384,10 +3404,7 @@ class FormatterKtTest {
 
   class FormattedCodeSubject(metadata: FailureMetadata, val code: String) :
       Subject(metadata, code) {
-    var options: FormattingOptions =
-        FormattingOptions(
-            // Keep this on for the tests
-            removeUnusedImports = true)
+    var options: FormattingOptions = FormattingOptions()
     var allowTrailingWhitespace = false
 
     fun withOptions(options: FormattingOptions): FormattedCodeSubject {
