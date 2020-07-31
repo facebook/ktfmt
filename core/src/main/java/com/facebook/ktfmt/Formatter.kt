@@ -16,6 +16,7 @@
 
 package com.facebook.ktfmt
 
+import com.facebook.ktfmt.RedundantElementRemover.dropRedundantElements
 import com.facebook.ktfmt.kdoc.KDocCommentsHelper
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Range
@@ -28,74 +29,11 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.util.text.StringUtilRt
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
-import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
-import org.jetbrains.kotlin.psi.KtDeclaration
-import org.jetbrains.kotlin.psi.KtEnumEntry
-import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtImportDirective
-import org.jetbrains.kotlin.psi.KtImportList
-import org.jetbrains.kotlin.psi.KtPackageDirective
-import org.jetbrains.kotlin.psi.KtReferenceExpression
-import org.jetbrains.kotlin.psi.KtStringTemplateEntry
-import org.jetbrains.kotlin.psi.KtStringTemplateExpression
-import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
-import org.jetbrains.kotlin.psi.KtWhileExpression
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
-import org.jetbrains.kotlin.psi.psiUtil.prevLeaf
-import org.jetbrains.kotlin.psi.psiUtil.siblings
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 const val DEFAULT_MAX_WIDTH: Int = 100
-
-private val OPERATORS =
-    setOf(
-        // Unary prefix operators
-        "unaryPlus",
-        "unaryMinus",
-        "not",
-        // Increments and decrements
-        "inc",
-        "dec",
-        // Arithmetic operators
-        "plus",
-        "minus",
-        "times",
-        "div",
-        "rem",
-        "mod", // deprecated
-        "rangeTo",
-        // 'In' operator
-        "contains",
-        // Indexed access operator
-        "get",
-        "set",
-        // Invoke operator
-        "invoke",
-        // Augmented assignments
-        "plusAssign",
-        "minusAssign",
-        "timesAssign",
-        "divAssign",
-        "remAssign",
-        "modAssign", // deprecated
-        // Equality and inequality operators
-        "equals",
-        // Comparison operators
-        "compareTo",
-        // Iterator operators
-        "iterator",
-        "next",
-        "hasNext",
-        // Bitwise operators
-        "and",
-        "or",
-        // Property delegation operators
-        "getValue",
-        "setValue",
-        "provideDelegate")
-
-private val COMPONENT_OPERATOR_REGEX = Regex("component\\d+")
 
 class FormattingOptions(
     /** ktfmt breaks lines longer than maxWidth. */
@@ -174,101 +112,6 @@ private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator:
       JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
 }
 
-fun dropRedundantElements(code: String, options: FormattingOptions): String {
-  val file = Parser.parse(code)
-  val toRemove = mutableListOf<PsiElement>()
-
-  var thisPackage: FqName? = null
-  lateinit var importCleanUpCandidates: Set<KtImportDirective>
-  val usedReferences = OPERATORS.toMutableSet()
-  file.accept(
-      object : KtTreeVisitorVoid() {
-        private var isPackageElement = false
-        private var isImportElement = false
-
-        override fun visitElement(el: PsiElement) {
-          if (isExtraSemicolon(el)) {
-            toRemove += el
-          } else {
-            super.visitElement(el)
-          }
-        }
-
-        override fun visitPackageDirective(directive: KtPackageDirective) {
-          thisPackage = directive.fqName
-
-          isPackageElement = true
-          super.visitPackageDirective(directive)
-          isPackageElement = false
-        }
-
-        override fun visitImportList(importList: KtImportList) {
-          importCleanUpCandidates =
-              importList.imports
-                  .filter { import ->
-                    import.isValidImport &&
-                        !import.isAllUnder &&
-                        import.identifier != null &&
-                        requireNotNull(import.identifier) !in OPERATORS &&
-                        !COMPONENT_OPERATOR_REGEX.matches(import.identifier.orEmpty())
-                  }
-                  .toSet()
-
-          isImportElement = true
-          super.visitImportList(importList)
-          isImportElement = false
-        }
-
-        override fun visitReferenceExpression(expression: KtReferenceExpression) {
-          if (!isPackageElement && !isImportElement && expression.children.isEmpty()) {
-            usedReferences += expression.text.trim('`')
-          }
-          super.visitReferenceExpression(expression)
-        }
-
-        private fun isExtraSemicolon(el: PsiElement): Boolean {
-          if (el.text != ";") {
-            return false
-          }
-          val parent = el.parent
-          if (parent is KtStringTemplateExpression || parent is KtStringTemplateEntry) {
-            return false
-          }
-          if (parent is KtEnumEntry &&
-              parent.siblings(forward = true, withItself = false).any { it is KtDeclaration }) {
-            return false
-          }
-          val prevLeaf = el.prevLeaf(false)
-          val prevSibling = el.prevSibling
-          if ((prevSibling is KtIfExpression || prevSibling is KtWhileExpression) &&
-              prevLeaf is KtContainerNodeForControlStructureBody &&
-              prevLeaf.text.isEmpty()) {
-            return false
-          }
-          return true
-        }
-      })
-
-  val result = StringBuilder(code)
-
-  if (options.removeUnusedImports) {
-    // Collect unused imports
-    for (import in importCleanUpCandidates) {
-      val isUnused = import.aliasName !in usedReferences && import.identifier !in usedReferences
-      val isFromSamePackage = import.importedFqName?.parent() == thisPackage && import.alias == null
-      if (isUnused || isFromSamePackage) {
-        toRemove += import
-      }
-    }
-  }
-
-  for (element in toRemove.sortedByDescending(PsiElement::endOffset)) {
-    result.replace(element.startOffset, element.endOffset, "")
-  }
-
-  return result.toString()
-}
-
 private fun checkWhitespaceTombstones(code: String) {
   val index = code.indexOfWhitespaceTombstone()
   if (index != -1) {
@@ -313,6 +156,3 @@ fun sortedAndDistinctImports(code: String): String {
       importList.endOffset,
       sortedImports.joinToString(separator = "\n") { imprt -> imprt.text })
 }
-
-private inline val KtImportDirective.identifier: String?
-  get() = importPath?.importedName?.identifier?.trim('`')
