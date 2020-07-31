@@ -17,6 +17,11 @@
 package com.facebook.ktfmt
 
 import com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.kdoc.psi.impl.KDocImpl
+import org.jetbrains.kotlin.kdoc.psi.impl.KDocLink
+import org.jetbrains.kotlin.kdoc.psi.impl.KDocName
+import org.jetbrains.kotlin.kdoc.psi.impl.KDocSection
+import org.jetbrains.kotlin.kdoc.psi.impl.KDocTag
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
 import org.jetbrains.kotlin.psi.KtDeclaration
@@ -31,6 +36,7 @@ import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 import org.jetbrains.kotlin.psi.KtWhileExpression
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
+import org.jetbrains.kotlin.psi.psiUtil.getChildrenOfType
 import org.jetbrains.kotlin.psi.psiUtil.prevLeaf
 import org.jetbrains.kotlin.psi.psiUtil.siblings
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
@@ -46,7 +52,11 @@ object RedundantElementRemover {
     file.accept(
         object : KtTreeVisitorVoid() {
           override fun visitElement(element: PsiElement) {
-            redundantCommaDetector.takeElement(element) { super.visitElement(element) }
+            if (element is KDocImpl) {
+              redundantImportDetector.takeKdoc(element)
+            } else {
+              redundantCommaDetector.takeElement(element) { super.visitElement(element) }
+            }
           }
 
           override fun visitPackageDirective(directive: KtPackageDirective) {
@@ -165,6 +175,8 @@ private class RedundantImportDetector(val enabled: Boolean) {
             "provideDelegate")
 
     private val COMPONENT_OPERATOR_REGEX = Regex("component\\d+")
+
+    private val KDOC_TAG_SKIP_FIRST_REFERENCE_REGEX = Regex("^@(param|property) (.+)")
   }
 
   private var thisPackage: FqName? = null
@@ -207,6 +219,30 @@ private class RedundantImportDetector(val enabled: Boolean) {
     isImportElement = true
     superBlock.invoke()
     isImportElement = false
+  }
+
+  fun takeKdoc(kdoc: KDocImpl) {
+    kdoc.getChildrenOfType<KDocSection>().forEach { kdocSection ->
+      val tagLinks =
+          kdocSection.getChildrenOfType<KDocTag>().flatMap { tag ->
+            val tagLinks = tag.getChildrenOfType<KDocLink>().toList()
+            when {
+              KDOC_TAG_SKIP_FIRST_REFERENCE_REGEX.matches(tag.text) -> tagLinks.drop(1)
+              else -> tagLinks
+            }
+          }
+
+      val links = kdocSection.getChildrenOfType<KDocLink>() + tagLinks
+
+      val references =
+          links.flatMap { link ->
+            link.getChildrenOfType<KDocName>().mapNotNull {
+              it.getQualifiedName().firstOrNull()?.trim('[', ']')
+            }
+          }
+
+      usedReferences += references
+    }
   }
 
   fun takeReferenceExpression(expression: KtReferenceExpression) {
