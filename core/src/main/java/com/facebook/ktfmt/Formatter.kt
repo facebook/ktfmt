@@ -125,6 +125,9 @@ fun sortedAndDistinctImports(code: String): String {
   val file = Parser.parse(code)
 
   val importList = file.importList ?: return code
+  if (importList.imports.isEmpty()) {
+    return code
+  }
 
   fun findNonImportElement(): PsiElement? {
     var element = importList.firstChild
@@ -154,5 +157,5 @@ fun sortedAndDistinctImports(code: String): String {
   return code.replaceRange(
       importList.startOffset,
       importList.endOffset,
-      sortedImports.joinToString(separator = "\n") { imprt -> imprt.text })
+      sortedImports.joinToString(separator = "\n") { imprt -> imprt.text } + "\n")
 }

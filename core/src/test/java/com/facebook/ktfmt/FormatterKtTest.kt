@@ -461,6 +461,25 @@ class FormatterKtTest {
   }
 
   @Test
+  fun `imports with trailing comments and expressions`() {
+    val code =
+        """
+        |import com.example.zab // test
+        |import com.example.foo ; val x = Sample(foo, zab)
+        |""".trimMargin()
+
+    val expected =
+        """
+        |import com.example.foo
+        |import com.example.zab // test
+        |
+        |val x = Sample(foo, zab)
+        |""".trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
   fun `backticks are ignored in import sort order`() =
       assertFormatted(
           """
