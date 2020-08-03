@@ -17,6 +17,7 @@
 package com.facebook.ktfmt
 
 import com.facebook.ktfmt.RedundantElementRemover.dropRedundantElements
+import com.facebook.ktfmt.debughelpers.printOps
 import com.facebook.ktfmt.kdoc.KDocCommentsHelper
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Range
@@ -32,6 +33,9 @@ import com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.psi.KtImportDirective
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
+
+/** Turn on during debugging to get a better picture of what KotlinInputAstVisitor emits */
+const val PRINT_OPS_AFTER_FORMATTING = false
 
 const val DEFAULT_MAX_WIDTH: Int = 100
 
@@ -101,7 +105,11 @@ private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator:
   file.accept(KotlinInputAstVisitor(options.blockIndent, options.continuationIndent, builder))
   builder.sync(kotlinInput.text.length)
   builder.drain()
-  val doc = DocBuilder().withOps(builder.build()).build()
+  val ops = builder.build()
+  if (PRINT_OPS_AFTER_FORMATTING) {
+    printOps(ops)
+  }
+  val doc = DocBuilder().withOps(ops).build()
   doc.computeBreaks(javaOutput.commentsHelper, options.maxWidth, Doc.State(+0, 0))
   doc.write(javaOutput)
   javaOutput.flush()
