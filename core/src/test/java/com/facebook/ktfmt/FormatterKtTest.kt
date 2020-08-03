@@ -3414,20 +3414,20 @@ class FormatterKtTest {
         .isEqualTo(deducedCode)
   }
 
-  fun assertThatFormatting(code: String): FormattedCodeSubject {
+  private fun assertThatFormatting(code: String): FormattedCodeSubject {
     fun codes(): Subject.Factory<FormattedCodeSubject, String> {
       return Subject.Factory { metadata, subject -> FormattedCodeSubject(metadata, subject) }
     }
     return assertAbout(codes()).that(code)
   }
 
-  class FormattedCodeSubject(metadata: FailureMetadata, val code: String) :
+  class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) :
       Subject(metadata, code) {
-    var options: FormattingOptions = FormattingOptions()
-    var allowTrailingWhitespace = false
+    private var options: FormattingOptions = FormattingOptions()
+    private var allowTrailingWhitespace = false
 
     fun withOptions(options: FormattingOptions): FormattedCodeSubject {
-      this.options = options
+      this.options = options.copy(debuggingPrintOpsAfterFormatting = true)
       return this
     }
 
