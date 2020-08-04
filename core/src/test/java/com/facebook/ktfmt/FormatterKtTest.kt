@@ -31,11 +31,12 @@ import org.junit.runners.JUnit4
 class FormatterKtTest {
 
   @Test
-  fun `first selector stays on same line`() =
+  fun `call chains`() =
       assertFormatted(
           """
       |--------------------------------------------------
       |fun f() {
+      |  // Static method calls are attached to the class name.
       |  ImmutableList.newBuilder()
       |      .add(1)
       |      .add(1)
@@ -49,7 +50,7 @@ class FormatterKtTest {
       |      .add(1)
       |      .build()
       |
-      |  // ... unless it's a function call
+      |  // Multiple call expressions --> each on its own line.
       |  ImmutableList()
       |      .newBuilder()
       |      .add(1)
@@ -430,6 +431,183 @@ class FormatterKtTest {
       |  foo.facebook.Foo
       |      .format()
       |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `an assortment of tests for emitQualifiedExpression`() =
+      assertFormatted(
+          """
+      |-------------------------------------
+      |fun f() {
+      |  // Regression test: https://github.com/facebookincubator/ktfmt/issues/56
+      |  kjsdfglkjdfgkjdfkgjhkerjghkdfj
+      |      ?.methodName1()
+      |
+      |  // a series of field accesses followed by a single call expression
+      |  // is kept together.
+      |  abcdefghijkl.abcdefghijkl
+      |      ?.methodName2()
+      |
+      |  // Similar to above.
+      |  abcdefghijkl.abcdefghijkl
+      |      ?.methodName3?.abcdefghijkl()
+      |
+      |  // Multiple call expressions cause each part of the expression
+      |  // to be placed on its own line.
+      |  abcdefghijkl
+      |      ?.abcdefghijkl
+      |      ?.methodName4()
+      |      ?.abcdefghijkl()
+      |
+      |  // Don't break first call expression if it fits.
+      |  foIt(something.something.happens())
+      |      .thenReturn(result)
+      |
+      |  // Break after `longerThanFour(` before it's longer than 4 chars
+      |  longerThanFour(
+      |          something.something
+      |              .happens())
+      |      .thenReturn(result)
+      |
+      |  // Similarly to above, when part of qualified expression.
+      |  foo.longerThanFour(
+      |          something.something
+      |              .happens())
+      |      .thenReturn(result)
+      |
+      |  // Keep 'super' attached to the method name
+      |  super.abcdefghijkl
+      |      .methodName4()
+      |      .abcdefghijkl()
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Ignore(
+      "see JavaInputAstVisitor.fillFirstArgument in google-java-format." +
+          "It's more effort in ktfmt because of lambdas")
+  @Test
+  fun `don't break after four( since it's only 4 chars long`() =
+      assertFormatted(
+          """
+      |-------------------------------------
+      |fun f() {
+      |  four(something.something.something
+      |          .happens())
+      |      .thenReturn(result)
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `an assortment of tests for emitQualifiedExpression with lambdas`() =
+      assertFormatted(
+          """
+      |----------------------------------------------------------------------------
+      |fun f() {
+      |  val items =
+      |      items.toMutableList.apply {
+      |        //
+      |        foo
+      |      }
+      |
+      |  val items =
+      |      items.toMutableList().apply {
+      |        //
+      |        foo
+      |      }
+      |
+      |  // All dereferences are on one line (because they fit), even though
+      |  // the apply() at the end requires a line break.
+      |  val items =
+      |      items.toMutableList.sdfkjsdf.sdfjksdflk.sdlfkjsldfj.apply {
+      |        //
+      |        foo
+      |      }
+      |
+      |  // All method calls are on one line (because they fit), even though
+      |  // the apply() at the end requires a line break.
+      |  val items =
+      |      items.toMutableList().sdfkjsdf().sdfjksdflk().sdlfkjsldfj().apply {
+      |        //
+      |        foo
+      |      }
+      |
+      |  // All method calls with lambdas are on one line (because they fit),
+      |  // even though the apply() at the end requires a line break.
+      |  val items =
+      |      items.map { it + 1 }.filter { it > 0 }.apply {
+      |        //
+      |        foo
+      |      }
+      |
+      |  // The following is arguably a bug: we might want the lambda body to be
+      |  // indented 4 more columns, but the following formatting makes sense as well.
+      |  val items =
+      |      items.fieldName.sdfkjsdf.sdfjksdflk.sdlfkjsldfj.sdfjksdflk.sdlfkjsldfj
+      |          .sdlfkjsldfj.apply {
+      |        //
+      |        foo
+      |      }
+      |  items.fieldName.sdfkjsdf.sdfjksdflk.sdlfkjsldfj.sdfjksdflk.sdlfkjsldfj
+      |      .apply {
+      |        //
+      |        foo
+      |      }
+      |
+      |  // When there are multiple method calls, and they don't fit on one
+      |  // line, put each on a new line.
+      |  val items =
+      |      items
+      |          .toMutableList()
+      |          .sdfkjsdf()
+      |          .sdfjksdflk()
+      |          .sdlfkjsldfj()
+      |          .sdfjksdflk()
+      |          .sdlfkjsldfj()
+      |          .apply {
+      |            //
+      |            foo
+      |          }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `indent parameters after a break when there's a lambda afterwards`() =
+      assertFormatted(
+          """
+      |---------------------------
+      |class C {
+      |  fun method() {
+      |    Foo.FooBar(
+      |            param1, param2)
+      |        .apply {
+      |          //
+      |          foo
+      |        }
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `no break between multi-line strings and their selectors`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |val STRING =
+      |    ""${'"'}
+      |    |foo
+      |    |""${'"'}.trimMargin()
+      |
+      |// This is a bug (line is longer than limit)
+      |// that we don't know how to avoid, for now.
+      |val STRING =
+      |    ""${'"'}
+      |    |foo
+      |    |----------------------------------""${'"'}.trimMargin()
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -1758,10 +1936,7 @@ class FormatterKtTest {
       |    println(child)
       |  }
       |  for (child in
-      |      node.next
-      |          .next
-      |          .next
-      |          .next
+      |      node.next.next.next.next
       |          .data()) {
       |    println(child)
       |  }
@@ -1806,6 +1981,34 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `break after 'four' (even though it's 4 chars long) because there's a lambda afterwards`() =
+      assertFormatted(
+          """
+      |fun f() {
+      |  four
+      |      .let {
+      |        //
+      |        foo()
+      |      }
+      |      .methodCall()
+      |}
+      |""".trimMargin())
+
+  @Ignore("TODO: try fixing using conditional indents")
+  @Test
+  fun `break before call-expression with lambda when the parameters don't fit on same line`() =
+      assertFormatted(
+          """
+      |-------------------------------------
+      |fun f() =
+      |    aLongFieldName
+      |        .map { (param1, param2) ->
+      |          foo
+      |        }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `keep last expression in qualified indented`() =
       assertFormatted(
           """
@@ -1831,6 +2034,10 @@ class FormatterKtTest {
       |  foo {
       |    red.orange.yellow()
       |  }
+      |
+      |  foo.bar {
+      |    red.orange.yellow()
+      |  }
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -1846,6 +2053,18 @@ class FormatterKtTest {
       |    red.orange.yellow()
       |  }
       |  foo {
+      |    /* this is also a comment */
+      |    red.orange.yellow()
+      |  }
+      |  foo.bar {
+      |    // this is a comment
+      |    red.orange.yellow()
+      |  }
+      |  foo.bar() {
+      |    // this is a comment
+      |    red.orange.yellow()
+      |  }
+      |  foo.bar {
       |    /* this is also a comment */
       |    red.orange.yellow()
       |  }
@@ -1866,19 +2085,13 @@ class FormatterKtTest {
       |    action()
       |    action2()
       |  }
-      |  foo.bar
-      |      .bar
-      |      .bar
-      |      .bar
+      |  foo.bar.bar.bar.bar
       |      ?.let { a() }
-      |  foo.bar
-      |      .bar
-      |      .bar
-      |      .bar
+      |  foo.bar.bar.bar.bar
       |      ?.let {
-      |    action()
-      |    action2()
-      |  }
+      |        action()
+      |        action2()
+      |      }
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -2741,7 +2954,8 @@ class FormatterKtTest {
       assertFormatted(
           """
       |fun f() {
-      |  bob.map { x -> x * x }
+      |  bob
+      |      .map { x -> x * x }
       |      .map { x -> x * x }
       |      ?.map { x ->
       |        val y = x * x
@@ -2757,7 +2971,8 @@ class FormatterKtTest {
           """
         |--------------------------------------------------
         |fun f() {
-        |  someObject.someMethodReturningCollection()
+        |  someObject
+        |      .someMethodReturningCollection()
         |      .map { it.someProperty }
         |      .find { it.contains(someSearchValue) }
         |      ?: someDefaultValue
@@ -2771,7 +2986,8 @@ class FormatterKtTest {
           """
         |---------------------------
         |fun f() {
-        |  someObject.letsDoIt()
+        |  someObject
+        |      .letsDoIt()
         |      // this is a comment
         |      .doItOnce()
         |      // this is a comment
@@ -3346,10 +3562,7 @@ class FormatterKtTest {
         """
         |fun f() {
         |    for (child in
-        |        node.next
-        |            .next
-        |            .next
-        |            .next
+        |        node.next.next.next.next
         |            .data()) {
         |        println(child)
         |    }

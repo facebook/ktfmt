@@ -18,6 +18,7 @@ package com.facebook.ktfmt
 
 import com.google.common.base.Throwables
 import com.google.common.collect.ImmutableList
+import com.google.common.collect.ImmutableSortedSet
 import com.google.googlejavaformat.Doc
 import com.google.googlejavaformat.FormattingError
 import com.google.googlejavaformat.Indent
@@ -27,8 +28,9 @@ import com.google.googlejavaformat.Output
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
-import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import java.util.ArrayDeque
+import java.util.Deque
+import java.util.LinkedHashSet
 import java.util.Optional
 import org.jetbrains.kotlin.lexer.KtModifierKeywordToken
 import org.jetbrains.kotlin.lexer.KtTokens
@@ -50,6 +52,7 @@ import org.jetbrains.kotlin.psi.KtClassLiteralExpression
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtCollectionLiteralExpression
 import org.jetbrains.kotlin.psi.KtConstantExpression
+import org.jetbrains.kotlin.psi.KtConstructorDelegationCall
 import org.jetbrains.kotlin.psi.KtContinueExpression
 import org.jetbrains.kotlin.psi.KtDelegatedSuperTypeEntry
 import org.jetbrains.kotlin.psi.KtDestructuringDeclaration
@@ -121,7 +124,7 @@ import org.jetbrains.kotlin.types.Variance
 
 /** An AST visitor that builds a stream of {@link Op}s to format. */
 class KotlinInputAstVisitor(
-    blockIndent: Int, continuationIndent: Int, private val builder: OpsBuilder
+    blockIndent: Int, val continuationIndent: Int, private val builder: OpsBuilder
 ) : KtTreeVisitorVoid() {
 
   /** Standard indentation for a block */
@@ -132,6 +135,9 @@ class KotlinInputAstVisitor(
    * indentation on purpose
    */
   private val expressionBreakIndent: Indent.Const = Indent.Const.make(continuationIndent, 1)
+
+  private val expressionBreakNegativeIndent: Indent.Const =
+      Indent.Const.make(-continuationIndent, 1)
 
   /** A record of whether we have visited into an expression. */
   private val inExpression = ArrayDeque(ImmutableList.of(false))
@@ -413,8 +419,9 @@ class KotlinInputAstVisitor(
    */
   override fun visitQualifiedExpression(expression: KtQualifiedExpression) {
     builder.sync(expression)
+    val receiver = expression.receiverExpression
     if (inImport) {
-      expression.receiverExpression.accept(this)
+      receiver.accept(this)
       val selectorExpression = expression.selectorExpression
       if (selectorExpression != null) {
         builder.token(".")
@@ -423,111 +430,295 @@ class KotlinInputAstVisitor(
       return
     }
 
+    if (receiver is KtWhenExpression || receiver is KtStringTemplateExpression) {
+      builder.block(ZERO) {
+        receiver.accept(this)
+        builder.token(expression.operationSign.value)
+        expression.selectorExpression?.accept(this)
+      }
+      return
+    }
+
+    emitQualifiedExpression(expression)
+  }
+
+  private fun emitQualifiedExpression(expression: KtExpression) {
     val parts =
-        ArrayDeque<KtQualifiedExpression>().apply {
-          var current: KtExpression = expression
-          while (current is KtQualifiedExpression) {
-            addFirst(current)
-            current = current.receiverExpression
+        ArrayDeque<KtExpression>().apply {
+          var node: KtExpression = expression
+          addFirst(node)
+          while (node is KtQualifiedExpression) {
+            node = node.receiverExpression
+            addFirst(node)
           }
         }
 
-    // Simple check if an expression is only lowercase letters
-    fun isLowerCaseReference(expression: KtExpression?) =
-        expression is KtReferenceExpression && expression.text.all { it.isLowerCase() }
+    val prefixes = LinkedHashSet<Int>()
 
-    val first = parts.first
-    val last = parts.last
-    val leftMostReceiverExpression = first.receiverExpression
+    // Check if the dot chain has a prefix that looks like a type name, so we can
+    // treat the type name-shaped part as a single syntactic unit.
+    TypeNameClassifier.typePrefixLength(simpleNames(parts)).ifPresent { prefixes.add(it) }
 
-    // If we we a lambda call in the chain, we don't reduce indentation for the last one
-    var previousLambdaCallSeen = false
-
-    // A block to wrap the entire expression
-    // However, we skip it for when expressions, and we close it before the the last call
-    var mainBlockOpen = false
-    if (leftMostReceiverExpression !is KtWhenExpression) {
-      builder.open(expressionBreakIndent)
-      mainBlockOpen = true
-    }
-
-    // A block to group all parts that look like package names until first class name or method
-    // This is because we want to keep `com.facebook.foo.Foo()` grouped if possible
-    var secondaryBlockOpen = false
-    if (isLowerCaseReference(leftMostReceiverExpression)) {
-      builder.open(ZERO)
-      secondaryBlockOpen = true
-    }
-
-    leftMostReceiverExpression.accept(this)
-    for (part in parts) {
-      val selector = part.selectorExpression
-      val isLambdaCall = (selector as? KtCallExpression)?.lambdaArguments?.isNotEmpty() == true
-
-      // Maybe break before . or ?.
-      if (mainBlockOpen) {
-        if (part !== last && isLambdaCall ||
-            part !== first ||
-            part.receiverExpression is KtCallExpression) {
-          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+    var invocationCount = 0
+    var firstInvocationIndex = -1
+    var isFirstInvocationLambda = false
+    for ((i, part) in parts.withIndex()) {
+      val callExpression = extractCallExpression(part)
+      if (callExpression != null) {
+        // Don't count trailing lambdas as call expressions so they look like
+        // ```
+        // blah.foo().bar().map {
+        //   // blah
+        // }
+        // ```
+        if (invocationCount > 0 &&
+            i == parts.size - 1 &&
+            callExpression.lambdaArguments.isNotEmpty()) {
+          continue
+        }
+        invocationCount++
+        if (firstInvocationIndex < 0) {
+          firstInvocationIndex = i
+          if (callExpression.lambdaArguments.isNotEmpty()) {
+            isFirstInvocationLambda = true
+          }
         }
       }
-      builder.token(part.operationSign.value)
-
-      // Close blocks before last call to optimize lambda formatting
-      if (part === last && !previousLambdaCallSeen && (isLambdaCall || parts.size == 1)) {
-        if (secondaryBlockOpen) {
-          builder.close()
-          secondaryBlockOpen = false
-        }
-        if (mainBlockOpen) {
-          builder.close()
-          mainBlockOpen = false
-        }
-      }
-      selector?.accept(this)
-
-      // If selector no longer looks like a package name, close the secondary group
-      if (secondaryBlockOpen && !isLowerCaseReference(selector)) {
-        builder.close()
-        secondaryBlockOpen = false
-      }
-      previousLambdaCallSeen = isLambdaCall
     }
-    if (secondaryBlockOpen) {
-      builder.close()
+
+    // If there's only one invocation, treat leading field accesses as a single
+    // unit. In the normal case we want to preserve the alignment of subsequent
+    // method calls, and would emit e.g.:
+    //
+    // myField
+    //     .foo()
+    //     .bar();
+    //
+    // But if there's no 'bar()' to worry about the alignment of we prefer:
+    //
+    // myField.foo();
+    //
+    // to:
+    //
+    // myField
+    //     .foo();
+    //
+    val hasTrailingLambda =
+        extractCallExpression(parts.last())?.lambdaArguments?.isNotEmpty() == true
+    if ((invocationCount == 1 && firstInvocationIndex > 0)) {
+      if (firstInvocationIndex != parts.size - 1 && isFirstInvocationLambda) {
+        prefixes.add(firstInvocationIndex - 1)
+      } else {
+        prefixes.add(firstInvocationIndex)
+      }
     }
-    if (mainBlockOpen) {
-      builder.close()
+
+    if (prefixes.isEmpty() &&
+        (parts.first is KtSuperExpression || parts.first is KtThisExpression)) {
+      prefixes.add(1)
+    }
+
+    if (prefixes.isNotEmpty() || hasTrailingLambda) {
+      emitQualifiedExpressionSeveralInOneLine(parts, prefixes, Doc.FillMode.INDEPENDENT)
+    } else {
+      emitQualifiedExpressionOnePerLine(parts)
     }
   }
 
   /**
-   * Searches if any of the children are comments
-   *
-   * Using [KtQualifiedExpression.getChildren] skips these nodes, so we have to scan manually
+   * emitQualifiedExpression formats call expressions that are either part of a qualified
+   * expression, or standing alone. This method makes it easier to handle both cases uniformly.
    */
-  private fun hasComment(part: KtQualifiedExpression): Boolean {
-    var child = part.firstChild
-    while (child != null) {
-      when {
-        child is PsiCommentImpl -> return true
-        child === part.selectorExpression -> return false
-        else -> child = child.nextSibling
+  private fun extractCallExpression(expression: KtExpression): KtCallExpression? {
+    return (expression as? KtQualifiedExpression)?.selectorExpression as? KtCallExpression
+        ?: (expression as? KtCallExpression)
+  }
+
+  /**
+   * Returns the simple names of expressions in a "." chain, e.g., "foo.bar().zed[5]" --> [foo, bar,
+   * zed]
+   */
+  private fun simpleNames(stack: Deque<KtExpression>): List<String> {
+    val simpleNames = mutableListOf<String>()
+    loop@ for (expression in stack) {
+      val callExpression = extractCallExpression(expression)
+      if (callExpression != null) {
+        callExpression.calleeExpression?.text?.let { simpleNames.add(it) }
+        break@loop
+      }
+      when (expression) {
+        is KtQualifiedExpression -> expression.selectorExpression?.let { simpleNames.add(it.text) }
+        is KtReferenceExpression -> simpleNames.add(expression.text)
+        else -> break@loop
       }
     }
-    return false
+    return simpleNames
+  }
+
+  /**
+   * Output a "regular" chain of dereferences, possibly in builder-style. Break before every dot.
+   *
+   * Example:
+   * ```
+   * fieldName
+   *     .field1
+   *     .field2
+   *     .method1()
+   *     .method2()
+   *     .apply {
+   *       // ...
+   *     }
+   * ```
+   */
+  private fun emitQualifiedExpressionOnePerLine(items: Collection<KtExpression>) {
+    var needDot = false
+    val trailingDereferences = items.size > 1
+    builder.block(expressionBreakIndent) {
+      // don't break after the first element if it is every small, unless the
+      // chain starts with another expression
+      var length = 0
+      for (item in items) {
+        val extractCallExpression = extractCallExpression(item)
+
+        if (needDot) {
+          if (length > continuationIndent ||
+              !extractCallExpression?.lambdaArguments.isNullOrEmpty()) {
+            builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+          }
+          builder.token((item as KtQualifiedExpression).operationSign.value)
+          length++
+        }
+        emitSelectorUpToParenthesis(item)
+
+        // Emit parenthesis and lambda.
+        extractCallExpression?.apply {
+          visitCallElement(
+              null,
+              typeArgumentList,
+              valueArgumentList,
+              lambdaArguments,
+              argumentsIndent =
+                  if (trailingDereferences || needDot) expressionBreakIndent else ZERO,
+              lambdaIndent =
+                  if (trailingDereferences || needDot) ZERO else expressionBreakNegativeIndent)
+        }
+        length += item.text.length
+        needDot = true
+      }
+    }
+  }
+
+  /**
+   * Output a chain of dereferences, some of which should be grouped together.
+   *
+   * Example 1:
+   * ```
+   * field1.field2.field3.field4
+   *     .method1(...)
+   * ```
+   *
+   * Example 2:
+   * ```
+   * com.facebook.ktfmt.KotlinInputAstVisitor
+   *     .method1()
+   * ```
+   */
+  private fun emitQualifiedExpressionSeveralInOneLine(
+      items: Collection<KtExpression>, prefixes: Collection<Int>, prefixFillMode: Doc.FillMode
+  ) {
+    var needDot = false
+    val hasTrailingLambda =
+        extractCallExpression(items.last())?.lambdaArguments?.isNotEmpty() == true
+    // Are there method invocations or field accesses after the prefix?
+    val trailingDereferences =
+        prefixes.isNotEmpty() && prefixes.last() < items.size - (if (hasTrailingLambda) 1 else 1)
+
+    builder.block(expressionBreakIndent) {
+      for (ignored in prefixes.indices) {
+        builder.open(ZERO)
+      }
+      if (hasTrailingLambda) {
+        builder.open(ZERO)
+      }
+
+      val unconsumedPrefixes = ArrayDeque(ImmutableSortedSet.copyOf(prefixes))
+      val nameTag = genSym()
+      for ((i, item) in items.withIndex()) {
+        if (needDot) {
+          val fillMode =
+              if (unconsumedPrefixes.isNotEmpty() && i <= unconsumedPrefixes.peekFirst()) {
+                prefixFillMode
+              } else {
+                Doc.FillMode.UNIFIED
+              }
+
+          builder.breakOp(fillMode, "", ZERO, Optional.of(nameTag))
+          builder.token((item as KtQualifiedExpression).operationSign.value)
+        }
+        emitSelectorUpToParenthesis(item)
+        if (unconsumedPrefixes.isNotEmpty() && i == unconsumedPrefixes.peekFirst()) {
+          builder.close()
+          unconsumedPrefixes.removeFirst()
+        }
+
+        if (i == items.size - 1 && hasTrailingLambda) {
+          builder.close()
+        }
+
+        val argsIndent =
+            Indent.If
+                .make(
+                    nameTag,
+                    expressionBreakIndent,
+                    if (trailingDereferences) expressionBreakIndent else ZERO)
+
+        val lambdaIndent =
+            Indent.If
+                .make(
+                    nameTag,
+                    ZERO,
+                    if (trailingDereferences && !hasTrailingLambda) ZERO
+                    else expressionBreakNegativeIndent)
+
+        // Emit parenthesis and lambda.
+        extractCallExpression(item)?.apply {
+          visitCallElement(
+              null,
+              typeArgumentList,
+              valueArgumentList,
+              lambdaArguments,
+              argumentsIndent = argsIndent,
+              lambdaIndent = lambdaIndent)
+        }
+
+        needDot = true
+      }
+    }
+  }
+
+  /**
+   * Emits a method name up to its parenthesis and arguments.
+   *
+   * More generally, emits the selector excluding its parameters if it's a method call.
+   */
+  private fun emitSelectorUpToParenthesis(e: KtExpression) {
+    val callExpression = extractCallExpression(e)
+    when {
+      callExpression != null -> callExpression.calleeExpression?.accept(this)
+      e is KtQualifiedExpression -> e.selectorExpression?.accept(this)
+      else -> e.accept(this)
+    }
   }
 
   override fun visitCallExpression(callExpression: KtCallExpression) {
     builder.sync(callExpression)
-    builder.block(ZERO) {
+    with(callExpression) {
       visitCallElement(
-          callExpression.calleeExpression,
-          callExpression.typeArgumentList,
-          callExpression.valueArgumentList,
-          callExpression.lambdaArguments)
-      builder.guessToken(";")
+          calleeExpression,
+          typeArgumentList,
+          valueArgumentList,
+          lambdaArguments,
+          lambdaIndent = ZERO)
     }
   }
 
@@ -536,26 +727,29 @@ class KotlinInputAstVisitor(
       callee: KtExpression?,
       typeArgumentList: KtTypeArgumentList?,
       argumentList: KtValueArgumentList?,
-      lambdaArguments: List<KtLambdaArgument>
+      lambdaArguments: List<KtLambdaArgument>,
+      argumentsIndent: Indent = expressionBreakIndent,
+      lambdaIndent: Indent = ZERO
   ) {
     builder.block(ZERO) {
       callee?.accept(this)
       val argumentsSize = argumentList?.arguments?.size ?: 0
       typeArgumentList?.accept(this)
-      builder.guessToken("(")
-      if (argumentsSize > 0) {
-        builder.block(ZERO) { argumentList?.accept(this) }
+      builder.block(argumentsIndent) {
+        builder.guessToken("(")
+        if (argumentsSize > 0) {
+          builder.block(ZERO) { argumentList?.accept(this) }
+        }
+        builder.guessToken(")")
       }
-      builder.guessToken(")")
       if (lambdaArguments.isNotEmpty()) {
-        if (argumentsSize == 0) {}
         builder.space()
-        lambdaArguments.forEach { it.accept(this) }
+        builder.block(lambdaIndent) { lambdaArguments.forEach { it.accept(this) } }
       }
     }
   }
 
-  /** Example `(1, "hi")` in a function call */
+  /** Example (`1, "hi"`) in a function call */
   override fun visitValueArgumentList(list: KtValueArgumentList) {
     builder.sync(list)
     val arguments = list.arguments
@@ -564,11 +758,11 @@ class KotlinInputAstVisitor(
             arguments.first().getArgumentExpression() is KtLambdaExpression &&
             arguments.first().getArgumentName() == null
     if (isSingleUnnamedLambda) {
-      arguments.first().accept(this)
+      builder.block(expressionBreakNegativeIndent) { arguments.first().accept(this) }
     } else {
       // Break before args.
-      builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-      builder.block(expressionBreakIndent) { forEachCommaSeparated(arguments) { it.accept(this) } }
+      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+      forEachCommaSeparated(arguments) { it.accept(this) }
     }
   }
 
@@ -995,15 +1189,24 @@ class KotlinInputAstVisitor(
       builder.space()
       builder.token(":")
       builder.space()
-      builder.token(if (delegationCall.isCallToThis) "this" else "super")
-      builder.token("(")
-      builder.block(ZERO) { delegationCall.accept(this) }
-      builder.token(")")
+      delegationCall.accept(this)
     }
     if (bodyExpression != null) {
       builder.space()
       bodyExpression.accept(this)
     }
+  }
+
+  override fun visitConstructorDelegationCall(call: KtConstructorDelegationCall) {
+    // Work around a misfeature in kotlin-compiler: call.calleeExpression.accept doesn't call
+    // visitReferenceExpression, but calls visitElement instead.
+    builder.token(if (call.isCallToThis) "this" else "super")
+    visitCallElement(
+        null,
+        call.typeArgumentList,
+        call.valueArgumentList,
+        call.lambdaArguments,
+        lambdaIndent = ZERO)
   }
 
   override fun visitClassInitializer(initializer: KtClassInitializer) {
