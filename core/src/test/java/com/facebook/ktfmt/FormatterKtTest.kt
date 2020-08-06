@@ -2891,8 +2891,7 @@ class FormatterKtTest {
       |        com.example.interesting.SomeType<Int, Nothing>,
       |        com.example.interesting.SomeType<
       |            com.example.interesting.SomeType<
-      |                Int,
-      |                Nothing>,
+      |                Int, Nothing>,
       |            Nothing>> =
       |    DUMMY
       |""".trimMargin(),
@@ -3590,6 +3589,223 @@ class FormatterKtTest {
       assertThatFormatting(code).isEqualTo(code)
     }
   }
+
+  @Test
+  fun `handle trailing commas (constructors)`() =
+      assertFormatted(
+          """
+      |--------------------
+      |class Foo(
+      |    a: Int,
+      |)
+      |
+      |class Foo(
+      |    a: Int,
+      |    b: Int,
+      |)
+      |
+      |class Foo(
+      |    a: Int, b: Int)
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `handle trailing commas (explicit constructors)`() =
+      assertFormatted(
+          """
+      |------------------------
+      |class Foo
+      |    constructor(
+      |        a: Int,
+      |    )
+      |
+      |class Foo
+      |    constructor(
+      |        a: Int,
+      |        b: Int,
+      |    )
+      |
+      |class Foo
+      |    constructor(
+      |        a: Int, b: Int)
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `handle trailing commas (secondary constructors)`() =
+      assertFormatted(
+          """
+      |------------------------
+      |class Foo {
+      |  constructor(
+      |      a: Int,
+      |  )
+      |}
+      |
+      |class Foo {
+      |  constructor(
+      |      a: Int,
+      |      b: Int,
+      |  )
+      |}
+      |
+      |class Foo {
+      |  constructor(
+      |      a: Int, b: Int)
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `handle trailing commas (function definitions)`() =
+      assertFormatted(
+          """
+      |------------------------
+      |fun <
+      |    T,
+      |> foo() {}
+      |
+      |fun <
+      |    T,
+      |    S,
+      |> foo() {}
+      |
+      |fun foo(
+      |    a: Int,
+      |) {}
+      |
+      |fun foo(
+      |    a: Int, b: Int
+      |) {}
+      |
+      |fun foo(
+      |    a: Int,
+      |    b: Int,
+      |) {}
+      |
+      |fun foo(
+      |    a: Int,
+      |    b: Int,
+      |    c: Int,
+      |) {}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `handle trailing commas (function calls)`() =
+      assertFormatted(
+          """
+      |------------------------
+      |fun main() {
+      |  foo(
+      |      3,
+      |  )
+      |
+      |  foo<Int>(
+      |      3,
+      |  )
+      |
+      |  foo<
+      |      Int,
+      |  >(
+      |      3,
+      |  )
+      |
+      |  foo<Int>(
+      |      "asdf", "asdf")
+      |
+      |  foo<
+      |      Int,
+      |  >(
+      |      "asd",
+      |      "asd",
+      |  )
+      |
+      |  foo<
+      |      Int,
+      |      Boolean,
+      |  >(
+      |      3,
+      |  )
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `handle trailing commas (proprties)`() =
+      assertFormatted(
+          """
+      |--------------------------
+      |val foo: String
+      |  set(
+      |      value,
+      |  ) {}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `handle trailing commas (higher-order functions)`() =
+      assertFormatted(
+          """
+      |--------------------------
+      |fun foo(
+      |    x:
+      |        (
+      |            Int,
+      |        ) -> Unit
+      |) {}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `handle trailing commas (other)`() =
+      assertFormatted(
+          """
+      |--------------------------
+      |fun main() {
+      |  val (
+      |      x: Int,
+      |  ) = foo()
+      |  val (
+      |      x: Int,
+      |      y: Int,
+      |  ) = foo()
+      |
+      |  a[
+      |      0,
+      |  ] = 43
+      |  a[
+      |      0,
+      |      1,
+      |  ] = 43
+      |
+      |  [
+      |      0,
+      |  ]
+      |  [
+      |      0,
+      |      1,
+      |  ]
+      |
+      |  when (foo) {
+      |    'x', -> 43
+      |    'x', 'y', -> 43
+      |    'x',
+      |    'y',
+      |    'z',
+      |    'w',
+      |    'a',
+      |    'b', -> 43
+      |  }
+      |
+      |  try {
+      |    //
+      |  } catch (e: Error,) {
+      |    //
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
 
   /**
    * Verifies the given code passes through formatting, and stays the same at the end
