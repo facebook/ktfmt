@@ -3111,6 +3111,19 @@ class FormatterKtTest {
   }
 
   @Test
+  fun `semicolon is placed on next line when there's a trailing comma in an enum declaration`() =
+      assertFormatted(
+          """
+        |enum class Highlander {
+        |  ONE,
+        |  TWO,
+        |  ;
+        |
+        |  fun f() {}
+        |}
+        |""".trimMargin())
+
+  @Test
   fun `handle varargs and spread operator`() =
       assertFormatted(
           """
@@ -3852,7 +3865,8 @@ class FormatterKtTest {
 
   class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) :
       Subject(metadata, code) {
-    private var options: FormattingOptions = FormattingOptions()
+    private var options: FormattingOptions =
+        FormattingOptions(debuggingPrintOpsAfterFormatting = true)
     private var allowTrailingWhitespace = false
 
     fun withOptions(options: FormattingOptions): FormattedCodeSubject {

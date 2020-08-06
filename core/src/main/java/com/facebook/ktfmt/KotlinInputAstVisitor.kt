@@ -1168,11 +1168,14 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
       val (enumEntries, nonEnumEntryStatements) = body?.children?.partition { it is KtEnumEntry }
           ?: fail()
+      builder.forcedBreak()
       visitEnumEntries(enumEntries)
 
-      builder.forcedBreak()
-      builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
-      visitStatements(nonEnumEntryStatements.toTypedArray())
+      if (nonEnumEntryStatements.isNotEmpty()) {
+        builder.forcedBreak()
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
+        visitStatements(nonEnumEntryStatements.toTypedArray())
+      }
     }
     builder.forcedBreak()
     builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
@@ -1186,11 +1189,13 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
       for (value in enumEntries) {
         value.accept(this)
-        builder.guessToken(",")
-        builder.guessToken(";")
-        builder.forcedBreak()
+        if (builder.peekToken() == Optional.of(",")) {
+          builder.token(",")
+          builder.forcedBreak()
+        }
       }
     }
+    builder.guessToken(";")
   }
 
   override fun visitPrimaryConstructor(constructor: KtPrimaryConstructor) {
