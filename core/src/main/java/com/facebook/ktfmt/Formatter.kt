@@ -26,10 +26,10 @@ import com.google.googlejavaformat.DocBuilder
 import com.google.googlejavaformat.Newlines
 import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.java.JavaOutput
-import com.intellij.openapi.util.text.StringUtil
-import com.intellij.openapi.util.text.StringUtilRt
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
+import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtilRt
+import org.jetbrains.kotlin.com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.psi.KtImportDirective
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.kotlin.psi.psiUtil.startOffset

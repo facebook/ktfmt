@@ -16,12 +16,12 @@
 
 package com.facebook.ktfmt
 
-import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.util.text.LineColumn
-import com.intellij.openapi.util.text.StringUtil
-import com.intellij.psi.PsiErrorElement
-import com.intellij.psi.PsiManager
-import com.intellij.testFramework.LightVirtualFile
+import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer
+import org.jetbrains.kotlin.com.intellij.openapi.util.text.LineColumn
+import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
+import org.jetbrains.kotlin.com.intellij.psi.PsiErrorElement
+import org.jetbrains.kotlin.com.intellij.psi.PsiManager
+import org.jetbrains.kotlin.com.intellij.testFramework.LightVirtualFile
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer.PLAIN_RELATIVE_PATHS
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
