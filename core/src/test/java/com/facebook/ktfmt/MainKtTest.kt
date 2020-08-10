@@ -82,8 +82,8 @@ class MainKtTest {
     val bar2 = dir1.resolve("bar2.kt")
     bar2.writeText("")
 
-    assertThat(expandArgsToFileNames(listOf(dir1.toString(), dir2.toString()))).containsExactly(
-        foo1, bar1, foo2, bar2)
+    assertThat(expandArgsToFileNames(listOf(dir1.toString(), dir2.toString())))
+        .containsExactly(foo1, bar1, foo2, bar2)
   }
 
   @Test

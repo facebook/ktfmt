@@ -3103,7 +3103,7 @@ class FormatterKtTest {
         |}
         |""".trimMargin())
         .isEqualTo(
-        """
+            """
         |enum class Highlander {
         |  ONE,
         |}
@@ -3883,7 +3883,8 @@ class FormatterKtTest {
       if (!allowTrailingWhitespace && expectedFormatting.lines().any { it.endsWith(" ") }) {
         throw RuntimeException(
             "Expected code contains trailing whitespace, which the formatter usually doesn't output:\n" +
-                expectedFormatting.lines()
+                expectedFormatting
+                    .lines()
                     .map { if (it.endsWith(" ")) "[$it]" else it }
                     .joinToString("\n"))
       }

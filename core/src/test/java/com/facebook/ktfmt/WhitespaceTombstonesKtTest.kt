@@ -29,16 +29,16 @@ class WhitespaceTombstonesKtTest {
     assertThat(replaceTrailingWhitespaceWithTombstone("")).isEqualTo("")
 
     assertThat(replaceTrailingWhitespaceWithTombstone("  sdfl")).isEqualTo("  sdfl")
-    assertThat(replaceTrailingWhitespaceWithTombstone("  sdfl ")).isEqualTo(
-        "  sdfl$SPACE_TOMBSTONE")
-    assertThat(replaceTrailingWhitespaceWithTombstone("  sdfl  ")).isEqualTo(
-        "  sdfl $SPACE_TOMBSTONE")
+    assertThat(replaceTrailingWhitespaceWithTombstone("  sdfl "))
+        .isEqualTo("  sdfl$SPACE_TOMBSTONE")
+    assertThat(replaceTrailingWhitespaceWithTombstone("  sdfl  "))
+        .isEqualTo("  sdfl $SPACE_TOMBSTONE")
 
-    assertThat(replaceTrailingWhitespaceWithTombstone("  sdfl  \n skdjfh")).isEqualTo(
-        "  sdfl $SPACE_TOMBSTONE\n skdjfh")
-    assertThat(replaceTrailingWhitespaceWithTombstone("  sdfl  \n skdjfh ")).isEqualTo(
-        "  sdfl $SPACE_TOMBSTONE\n skdjfh$SPACE_TOMBSTONE")
-    assertThat(replaceTrailingWhitespaceWithTombstone("  sdfl  \n\n skdjfh ")).isEqualTo(
-        "  sdfl $SPACE_TOMBSTONE\n\n skdjfh$SPACE_TOMBSTONE")
+    assertThat(replaceTrailingWhitespaceWithTombstone("  sdfl  \n skdjfh"))
+        .isEqualTo("  sdfl $SPACE_TOMBSTONE\n skdjfh")
+    assertThat(replaceTrailingWhitespaceWithTombstone("  sdfl  \n skdjfh "))
+        .isEqualTo("  sdfl $SPACE_TOMBSTONE\n skdjfh$SPACE_TOMBSTONE")
+    assertThat(replaceTrailingWhitespaceWithTombstone("  sdfl  \n\n skdjfh "))
+        .isEqualTo("  sdfl $SPACE_TOMBSTONE\n\n skdjfh$SPACE_TOMBSTONE")
   }
 }
