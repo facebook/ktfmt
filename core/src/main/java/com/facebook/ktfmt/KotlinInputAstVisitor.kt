@@ -25,13 +25,13 @@ import com.google.googlejavaformat.Indent
 import com.google.googlejavaformat.Indent.Const.ZERO
 import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.Output
-import com.intellij.psi.PsiComment
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiWhiteSpace
 import java.util.ArrayDeque
 import java.util.Deque
 import java.util.LinkedHashSet
 import java.util.Optional
+import org.jetbrains.kotlin.com.intellij.psi.PsiComment
+import org.jetbrains.kotlin.com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.lexer.KtModifierKeywordToken
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtAnnotatedExpression
@@ -663,19 +663,17 @@ class KotlinInputAstVisitor(
         }
 
         val argsIndent =
-            Indent.If
-                .make(
-                    nameTag,
-                    expressionBreakIndent,
-                    if (trailingDereferences) expressionBreakIndent else ZERO)
+            Indent.If.make(
+                nameTag,
+                expressionBreakIndent,
+                if (trailingDereferences) expressionBreakIndent else ZERO)
 
         val lambdaIndent =
-            Indent.If
-                .make(
-                    nameTag,
-                    ZERO,
-                    if (trailingDereferences && !hasTrailingLambda) ZERO
-                    else expressionBreakNegativeIndent)
+            Indent.If.make(
+                nameTag,
+                ZERO,
+                if (trailingDereferences && !hasTrailingLambda) ZERO
+                else expressionBreakNegativeIndent)
 
         // Emit parenthesis and lambda.
         extractCallExpression(item)?.apply {

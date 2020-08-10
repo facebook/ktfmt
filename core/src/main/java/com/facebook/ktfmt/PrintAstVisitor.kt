@@ -16,7 +16,7 @@
 
 package com.facebook.ktfmt
 
-import com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 
 class PrintAstVisitor : KtTreeVisitorVoid() {

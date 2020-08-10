@@ -29,12 +29,12 @@ import com.google.googlejavaformat.Input
 import com.google.googlejavaformat.Newlines
 import com.google.googlejavaformat.java.FormatterException
 import com.google.googlejavaformat.java.JavaOutput
-import com.intellij.openapi.util.text.StringUtil
-import com.intellij.psi.PsiComment
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiWhiteSpace
-import com.intellij.psi.impl.source.tree.LeafPsiElement
 import java.util.regex.Pattern
+import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
+import org.jetbrains.kotlin.com.intellij.psi.PsiComment
+import org.jetbrains.kotlin.com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtToken
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtFile

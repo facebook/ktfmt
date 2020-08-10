@@ -35,8 +35,8 @@ import com.facebook.ktfmt.kdoc.Token.Type.TABLE_CLOSE_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.TABLE_OPEN_TAG
 import com.facebook.ktfmt.kdoc.Token.Type.TAG
 import com.facebook.ktfmt.kdoc.Token.Type.WHITESPACE
-import com.intellij.psi.tree.IElementType
 import java.util.regex.Pattern.compile
+import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 import org.jetbrains.kotlin.kdoc.lexer.KDocLexer
 import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
 import org.jetbrains.kotlin.lexer.KtTokens.WHITE_SPACE
