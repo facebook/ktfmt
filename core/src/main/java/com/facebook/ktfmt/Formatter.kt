@@ -25,6 +25,7 @@ import com.google.googlejavaformat.Doc
 import com.google.googlejavaformat.DocBuilder
 import com.google.googlejavaformat.Newlines
 import com.google.googlejavaformat.OpsBuilder
+import com.google.googlejavaformat.java.FormatterException
 import com.google.googlejavaformat.java.JavaOutput
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtilRt
@@ -84,11 +85,13 @@ data class FormattingOptions(
  * format formats the Kotlin code given in 'code' and returns it as a string. This method is
  * accessed through Reflection.
  */
+@Throws(FormatterException::class, ParseError::class)
 fun format(code: String): String = format(FormattingOptions(), code)
 
 /**
  * format formats the Kotlin code given in 'code' with the 'maxWidth' and returns it as a string.
  */
+@Throws(FormatterException::class, ParseError::class)
 fun format(options: FormattingOptions, code: String): String {
   checkWhitespaceTombstones(code)
 
