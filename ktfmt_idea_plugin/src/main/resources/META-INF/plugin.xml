@@ -1,0 +1,27 @@
+<idea-plugin url="https://github.com/facebookincubator/ktfmt/tree/master/ktfmt_idea_plugin">
+    <id>com.facebook.ktfmt_idea_plugin</id>
+    <name>ktfmt</name>
+    <vendor url="https://github.com/facebookincubator/ktfmt">Facebook</vendor>
+
+    <description>ktfmt is a program that reformats Kotlin source code to comply with the common community standard for
+        Kotlin code conventions.
+    </description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <applicationListeners>
+        <listener class="com.facebook.ktfmt.intellij.InitialConfigurationProjectManagerListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+        <listener class="com.facebook.ktfmt.intellij.KtfmtInstaller"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </applicationListeners>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectConfigurable instance="com.facebook.ktfmt.intellij.KtfmtConfigurable"
+                             id="com.facebook.ktfmt_idea_plugin.settings"
+                             displayName="ktfmt Settings"
+                             parentId="editor"/>
+        <projectService serviceImplementation="com.facebook.ktfmt.intellij.KtfmtSettings"/>
+    </extensions>
+
+</idea-plugin>
