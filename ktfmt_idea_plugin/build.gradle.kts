@@ -22,7 +22,7 @@ plugins {
 val ktfmtVersion = "0.19"
 
 group = "com.facebook"
-version = "1.0.$ktfmtVersion"
+version = "1.1-SNAPSHOT.$ktfmtVersion"
 
 repositories {
     mavenCentral()
