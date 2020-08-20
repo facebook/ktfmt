@@ -22,6 +22,28 @@ For comparison, the same code formatted by [`ktlint`](https://github.com/pintere
 
 ## Using the formatter
 
+### IntelliJ, Android Studio, and other JetBrains IDEs
+
+<iframe frameborder="none" width="245px" height="48px" src="https://plugins.jetbrains.com/embeddable/install/14912"></iframe>
+
+A
+[ktfmt IntelliJ plugin](https://plugins.jetbrains.com/plugin/14912-ktfmt)
+is available from the plugin repository. To install it, go to your IDE's
+settings and select the `Plugins` category. Click the `Marketplace` tab, search
+for the `ktfmt` plugin, and click the `Install` button.
+
+The plugin will be disabled by default. To enable it in the current project, go
+to `File→Settings...→ktfmt Settings` (or `IntelliJ
+IDEA→Preferences...→Editor→ktfmt Settings` on macOS) and
+check the `Enable ktfmt` checkbox. (A notification will be
+presented when you first open a project offering to do this for you.)
+
+To enable it by default in new projects, use `File→New Project Settings→Preferences for new Projects→Editor→ktfmt Settings`.
+
+When enabled, it will replace the normal `Reformat Code` action, which can be
+triggered from the `Code` menu or with the Ctrl-Alt-L (by default) keyboard
+shortcut.
+
 ### from the command-line
 
 [Download the formatter](https://github.com/facebookincubator/ktfmt/releases)
@@ -37,7 +59,7 @@ java -jar /path/to/ktfmt-<VERSION>-jar-with-dependencies.jar [--dropbox-style] [
 formatting (apart from `--dropbox-style`). This is a deliberate design decision to unify our code
 formatting on a single format.*
 
-## using [Spotless](https://github.com/diffplug/spotless)
+### using [Spotless](https://github.com/diffplug/spotless)
 
 On Gradle: https://github.com/diffplug/spotless/tree/main/plugin-gradle#ktfmt
 On Maven: https://github.com/diffplug/spotless/tree/main/plugin-maven#ktfmt
