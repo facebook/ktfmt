@@ -24,8 +24,6 @@ For comparison, the same code formatted by [`ktlint`](https://github.com/pintere
 
 ### IntelliJ, Android Studio, and other JetBrains IDEs
 
-<iframe frameborder="none" width="245px" height="48px" src="https://plugins.jetbrains.com/embeddable/install/14912"></iframe>
-
 A
 [ktfmt IntelliJ plugin](https://plugins.jetbrains.com/plugin/14912-ktfmt)
 is available from the plugin repository. To install it, go to your IDE's
