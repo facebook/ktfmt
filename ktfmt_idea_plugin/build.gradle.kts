@@ -19,7 +19,7 @@ plugins {
     java
 }
 
-val ktfmtVersion = "0.19"
+val ktfmtVersion = "0.18"
 
 group = "com.facebook"
 version = "1.1-SNAPSHOT.$ktfmtVersion"
@@ -41,9 +41,11 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version = "2020.3"
+    version = "LATEST-EAP-SNAPSHOT"
 }
-tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
-    changeNotes("""
-      First version.""")
+
+tasks {
+    patchPluginXml {
+        sinceBuild("203")
+    }
 }
