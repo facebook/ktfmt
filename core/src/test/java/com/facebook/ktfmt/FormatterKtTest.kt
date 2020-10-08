@@ -20,6 +20,7 @@ import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
 import com.google.common.truth.Truth.assertAbout
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import org.junit.Ignore
 import org.junit.Test
@@ -3902,7 +3903,7 @@ class FormatterKtTest {
         reportError(code)
         throw e
       }
-      assertThat(actualFormatting).isEqualTo(expectedFormatting)
+      assertEquals(expectedFormatting, actualFormatting)
     }
 
     private fun reportError(code: String) {
