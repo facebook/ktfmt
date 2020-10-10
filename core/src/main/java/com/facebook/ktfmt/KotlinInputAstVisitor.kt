@@ -385,7 +385,9 @@ class KotlinInputAstVisitor(
           accessors = property.accessors)
     }
     builder.guessToken(";")
-    builder.forcedBreak()
+    if (property.parent !is KtWhenExpression) {
+      builder.forcedBreak()
+    }
   }
 
   /** Tracks whether we are handling an import directive */

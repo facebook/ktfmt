@@ -1150,6 +1150,18 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `when() expression storing in local variable`() =
+      assertFormatted(
+          """
+      |fun f(x: Result) {
+      |  when (val y = x.improved()) {
+      |    is Success<*> -> print(y)
+      |    is Failure -> print(2)
+      |  }
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `line breaks inside when expressions and conditions`() =
       assertFormatted(
           """
