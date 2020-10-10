@@ -86,6 +86,7 @@ import org.jetbrains.kotlin.psi.KtPrefixExpression
 import org.jetbrains.kotlin.psi.KtPrimaryConstructor
 import org.jetbrains.kotlin.psi.KtProjectionKind
 import org.jetbrains.kotlin.psi.KtProperty
+import org.jetbrains.kotlin.psi.KtPropertyAccessor
 import org.jetbrains.kotlin.psi.KtPropertyDelegate
 import org.jetbrains.kotlin.psi.KtQualifiedExpression
 import org.jetbrains.kotlin.psi.KtReferenceExpression
@@ -380,25 +381,8 @@ class KotlinInputAstVisitor(
           type = property.typeReference,
           typeConstraintList = property.typeConstraintList,
           delegate = property.delegate,
-          initializer = property.initializer)
-      for (accessor in property.accessors) {
-        builder.block(blockIndent) {
-          builder.forcedBreak()
-          visitFunctionLikeExpression(
-              accessor.modifierList,
-              accessor.namePlaceholder.text,
-              null,
-              null,
-              null,
-              accessor.bodyExpression != null || accessor.bodyBlockExpression != null,
-              accessor.parameterList,
-              null,
-              accessor.bodyBlockExpression,
-              accessor.bodyExpression,
-              accessor.returnTypeReference,
-              accessor.bodyBlockExpression?.lBrace != null)
-        }
-      }
+          initializer = property.initializer,
+          accessors = property.accessors)
     }
     builder.guessToken(";")
     builder.forcedBreak()
@@ -1033,7 +1017,8 @@ class KotlinInputAstVisitor(
       type: KtTypeReference?,
       typeConstraintList: KtTypeConstraintList? = null,
       initializer: PsiElement?,
-      delegate: KtPropertyDelegate? = null
+      delegate: KtPropertyDelegate? = null,
+      accessors: List<KtPropertyAccessor>? = null
   ): Int {
     val verticalAnnotationBreak = genSym()
 
@@ -1100,9 +1085,28 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
       builder.block(expressionBreakIndent) { initializer.accept(this) }
     }
-
     if (name != null) {
       builder.close() // close block for named values
+    }
+    if (accessors?.isNotEmpty() == true) {
+      for (accessor in accessors) {
+        builder.block(blockIndent) {
+          builder.forcedBreak()
+          visitFunctionLikeExpression(
+              accessor.modifierList,
+              accessor.namePlaceholder.text,
+              null,
+              null,
+              null,
+              accessor.bodyExpression != null || accessor.bodyBlockExpression != null,
+              accessor.parameterList,
+              null,
+              accessor.bodyBlockExpression,
+              accessor.bodyExpression,
+              accessor.returnTypeReference,
+              accessor.bodyBlockExpression?.lBrace != null)
+        }
+      }
     }
 
     if (isField) {
