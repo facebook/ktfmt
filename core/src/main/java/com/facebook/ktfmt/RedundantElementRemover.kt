@@ -121,6 +121,13 @@ private class RedundantCommaDetector {
         prevLeaf.text.isEmpty()) {
       return false
     }
+
+    // do not remove `;` in `val a = 5; private set`
+    val nextSibling = element.nextSibling
+    if (nextSibling != null && '\n' !in nextSibling.text) {
+      return false
+    }
+
     return true
   }
 }

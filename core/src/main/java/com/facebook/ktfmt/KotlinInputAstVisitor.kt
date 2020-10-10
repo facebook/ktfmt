@@ -1074,24 +1074,35 @@ class KotlinInputAstVisitor(
     }
 
     // for example `by lazy { compute() }`
+    var hasSemicolon = false
     if (delegate != null) {
       builder.space()
       builder.token("by")
       builder.space()
       delegate.accept(this)
+      hasSemicolon = delegate.nextSibling?.text == ";" == true
     } else if (initializer != null) {
       builder.space()
       builder.token("=")
       builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+      hasSemicolon = initializer.nextSibling?.text == ";" == true
       builder.block(expressionBreakIndent) { initializer.accept(this) }
     }
     if (name != null) {
       builder.close() // close block for named values
     }
+    if (hasSemicolon) {
+      builder.token(";")
+    }
+    // for example `private set` or `get = 2 * field`
     if (accessors?.isNotEmpty() == true) {
       for (accessor in accessors) {
         builder.block(blockIndent) {
-          builder.forcedBreak()
+          if (hasSemicolon) {
+            builder.space()
+          } else {
+            builder.forcedBreak()
+          }
           visitFunctionLikeExpression(
               accessor.modifierList,
               accessor.namePlaceholder.text,

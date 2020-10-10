@@ -343,6 +343,16 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `properties with accessors and semicolons on same line`() =
+      assertFormatted(
+          """
+      |class Foo {
+      |  var x = false; private set
+      |  internal val a by lazy { 5 }; internal get
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `a property with a too long name being broken on multiple lines`() =
       assertFormatted(
           """
