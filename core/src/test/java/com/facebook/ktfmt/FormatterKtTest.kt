@@ -2607,6 +2607,37 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `handle casting with breaks`() =
+      assertFormatted(
+          """
+      |-----------------------
+      |fun castIt(
+      |    something: Any
+      |) {
+      |  println(
+      |      something is
+      |          List<String>)
+      |  doIt(
+      |      something as
+      |          List<String>)
+      |  println(
+      |      something is
+      |          PairList<
+      |              String,
+      |              Int>)
+      |  doIt(
+      |      something as
+      |          PairList<
+      |              String,
+      |              Int>)
+      |  println(
+      |      a is Int &&
+      |          b is String)
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `handle collection literals in annotations`() =
       assertFormatted(
           """

@@ -1888,22 +1888,26 @@ class KotlinInputAstVisitor(
 
   /** Example `a is Int` or `b !is Int` */
   override fun visitIsExpression(expression: KtIsExpression) {
-    builder.sync(expression)
-    expression.leftHandSide.accept(this)
-    builder.space()
-    expression.operationReference.accept(this)
-    builder.space()
-    expression.typeReference?.accept(this)
+    builder.block(ZERO) {
+      builder.sync(expression)
+      expression.leftHandSide.accept(this)
+      builder.space()
+      expression.operationReference.accept(this)
+      builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+      builder.block(expressionBreakIndent) { expression.typeReference?.accept(this) }
+    }
   }
 
   /** Example `a as Int` or `a as? Int` */
   override fun visitBinaryWithTypeRHSExpression(expression: KtBinaryExpressionWithTypeRHS) {
-    builder.sync(expression)
-    expression.left.accept(this)
-    builder.space()
-    expression.operationReference.accept(this)
-    builder.space()
-    expression.right?.accept(this)
+    builder.block(ZERO) {
+      builder.sync(expression)
+      expression.left.accept(this)
+      builder.space()
+      expression.operationReference.accept(this)
+      builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+      builder.block(expressionBreakIndent) { expression.right?.accept(this) }
+    }
   }
 
   /**
