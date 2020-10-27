@@ -1378,11 +1378,7 @@ class KotlinInputAstVisitor(
       }
 
       if (onlyAnnotationsSoFar) {
-        if (psi is KtAnnotationEntry && psi.valueArguments.isNotEmpty()) {
-          builder.forcedBreak()
-        } else {
-          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
-        }
+        builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
       } else {
         builder.space()
       }
@@ -1414,7 +1410,7 @@ class KotlinInputAstVisitor(
           is PsiWhiteSpace -> continue@loop
           is KtAnnotation -> {
             psi.accept(this)
-            if (psi.entries.size != 1 || psi.entries[0].valueArguments.isNotEmpty()) {
+            if (psi.entries.size != 1 /*|| psi.entries[0].valueArguments.isNotEmpty()*/) {
               builder.forcedBreak()
             } else {
               builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
