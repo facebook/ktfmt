@@ -822,7 +822,7 @@ class KotlinInputAstVisitor(
       return
     }
 
-    builder.block(ZERO) { forEachCommaSeparated(list, hasTrailingComma) { it.accept(this) } }
+    forEachCommaSeparated(list, hasTrailingComma) { it.accept(this) }
     if (hasTrailingComma) {
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
     }
