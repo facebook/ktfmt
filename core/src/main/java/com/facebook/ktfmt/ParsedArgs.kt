@@ -24,14 +24,14 @@ data class ParsedArgs(val fileNames: List<String>, val formattingOptions: Format
 /** parseOptions parses command-line arguments passed to ktfmt. */
 fun parseOptions(err: PrintStream, args: Array<String>): ParsedArgs {
   val fileNames = mutableListOf<String>()
-  var isDropboxStyle = false
+  var formattingOptions = FormattingOptions()
   for (arg in args) {
     when {
-      arg == "--dropbox-style" -> isDropboxStyle = true
+      arg == "--dropbox-style" -> formattingOptions = FormattingOptions.dropboxStyle()
+      arg == "--google-style" -> formattingOptions = FormattingOptions.googleStyle()
       arg.startsWith("--") -> err.println("Unexpected option: $arg")
       else -> fileNames.add(arg)
     }
   }
-  return ParsedArgs(
-      fileNames, if (isDropboxStyle) FormattingOptions.dropboxStyle() else FormattingOptions())
+  return ParsedArgs(fileNames, formattingOptions)
 }

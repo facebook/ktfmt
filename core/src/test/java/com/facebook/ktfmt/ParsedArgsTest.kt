@@ -59,4 +59,13 @@ class ParsedArgsTest {
     assertThat(formattingOptions.continuationIndent).isEqualTo(4)
     assertThat(out.toString()).isEqualTo("Unexpected option: --unknown\n")
   }
+
+  @Test
+  fun `parseOptions recognizes --google-style`() {
+    val out = ByteArrayOutputStream()
+
+    val (_, formattingOptions) = parseOptions(PrintStream(out), arrayOf("--google-style", "foo.kt"))
+
+    assertThat(formattingOptions).isEqualTo(FormattingOptions.googleStyle())
+  }
 }

@@ -78,6 +78,10 @@ data class FormattingOptions(
     /** Represents dropbox style formatting. */
     fun dropboxStyle(): FormattingOptions =
         FormattingOptions(blockIndent = 4, continuationIndent = 4)
+
+    /** Represents Google style formatting. */
+    fun googleStyle(): FormattingOptions =
+        FormattingOptions(blockIndent = 4, continuationIndent = 4)
   }
 }
 
