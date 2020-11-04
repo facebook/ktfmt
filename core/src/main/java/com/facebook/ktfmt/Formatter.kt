@@ -93,6 +93,14 @@ data class FormattingOptions(
 fun format(code: String): String = format(FormattingOptions(), code)
 
 /**
+ * format formats the Kotlin code given in 'code' with 'removeUnusedImports' and returns it as a
+ * string. This method is accessed through Reflection.
+ */
+@Throws(FormatterException::class, ParseError::class)
+fun format(code: String, removeUnusedImports: Boolean): String =
+    format(FormattingOptions(removeUnusedImports = removeUnusedImports), code)
+
+/**
  * format formats the Kotlin code given in 'code' with the 'maxWidth' and returns it as a string.
  */
 @Throws(FormatterException::class, ParseError::class)
