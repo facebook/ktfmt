@@ -66,6 +66,6 @@ class ParsedArgsTest {
 
     val (_, formattingOptions) = parseOptions(PrintStream(out), arrayOf("--google-style", "foo.kt"))
 
-    assertThat(formattingOptions).isEqualTo(FormattingOptions.googleStyle())
+    assertThat(formattingOptions).isEqualTo(GOOGLE_FORMAT)
   }
 }

@@ -27,8 +27,8 @@ fun parseOptions(err: PrintStream, args: Array<String>): ParsedArgs {
   var formattingOptions = FormattingOptions()
   for (arg in args) {
     when {
-      arg == "--dropbox-style" -> formattingOptions = FormattingOptions.dropboxStyle()
-      arg == "--google-style" -> formattingOptions = FormattingOptions.googleStyle()
+      arg == "--dropbox-style" -> formattingOptions = DROPBOX_FORMAT
+      arg == "--google-style" -> formattingOptions = GOOGLE_FORMAT
       arg.startsWith("--") -> err.println("Unexpected option: $arg")
       else -> fileNames.add(arg)
     }

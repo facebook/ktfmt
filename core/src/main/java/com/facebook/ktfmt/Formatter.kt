@@ -37,7 +37,17 @@ import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 const val DEFAULT_MAX_WIDTH: Int = 100
 
+val GOOGLE_FORMAT =
+    FormattingOptions(
+        style = FormattingOptions.Style.GOOGLE, blockIndent = 2, continuationIndent = 2)
+
+val DROPBOX_FORMAT =
+    FormattingOptions(
+        style = FormattingOptions.Style.DROPBOX, blockIndent = 4, continuationIndent = 4)
+
 data class FormattingOptions(
+    val style: Style = Style.FACEBOOK,
+
     /** ktfmt breaks lines longer than maxWidth. */
     val maxWidth: Int = DEFAULT_MAX_WIDTH,
 
@@ -74,14 +84,10 @@ data class FormattingOptions(
      */
     val debuggingPrintOpsAfterFormatting: Boolean = false
 ) {
-  companion object {
-    /** Represents dropbox style formatting. */
-    fun dropboxStyle(): FormattingOptions =
-        FormattingOptions(blockIndent = 4, continuationIndent = 4)
-
-    /** Represents Google style formatting. */
-    fun googleStyle(): FormattingOptions =
-        FormattingOptions(blockIndent = 4, continuationIndent = 4)
+  enum class Style {
+    FACEBOOK,
+    DROPBOX,
+    GOOGLE
   }
 }
 
@@ -120,7 +126,7 @@ private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator:
   val kotlinInput = KotlinInput(code, file)
   val javaOutput = JavaOutput(lineSeparator, kotlinInput, KDocCommentsHelper(lineSeparator))
   val builder = OpsBuilder(kotlinInput, javaOutput)
-  file.accept(KotlinInputAstVisitor(options.blockIndent, options.continuationIndent, builder))
+  file.accept(KotlinInputAstVisitor(options, builder))
   builder.sync(kotlinInput.text.length)
   builder.drain()
   val ops = builder.build()
@@ -178,6 +184,7 @@ fun sortedAndDistinctImports(code: String): String {
           importDirective.alias?.text?.replace("`", "") +
           " " +
           if (importDirective.isAllUnder) "*" else ""
+
   val sortedImports = importList.imports.sortedBy(::canonicalText).distinctBy(::canonicalText)
 
   return code.replaceRange(

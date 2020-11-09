@@ -16,6 +16,8 @@
 
 package com.facebook.ktfmt.intellij;
 
+import static com.facebook.ktfmt.FormatterKt.getDROPBOX_FORMAT;
+
 import com.facebook.ktfmt.FormatterKt;
 import com.facebook.ktfmt.FormattingOptions;
 import com.facebook.ktfmt.ParseError;
@@ -44,8 +46,6 @@ final class FormatterUtil {
 
   @VisibleForTesting
   static String formatCode(boolean isDropboxStyle, String code) throws FormatterException {
-    return FormatterKt.format(
-        isDropboxStyle ? FormattingOptions.Companion.dropboxStyle() : new FormattingOptions(),
-        code);
+    return FormatterKt.format(isDropboxStyle ? getDROPBOX_FORMAT() : new FormattingOptions(), code);
   }
 }
