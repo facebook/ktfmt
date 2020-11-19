@@ -798,7 +798,7 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
       builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
     }
-    builder.token("}")
+    builder.token("}", blockIndent)
   }
 
   /** Example `this` or `this@Foo` */

@@ -2091,6 +2091,38 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `properly handle one statement lambda with comment after body statements`() =
+      assertFormatted(
+          """
+      |-----------------------
+      |fun f() {
+      |  foo {
+      |    red.orange.yellow()
+      |    // this is a comment
+      |  }
+      |  foo {
+      |    red.orange.yellow()
+      |    /* this is also a comment */
+      |  }
+      |  foo.bar {
+      |    red.orange.yellow()
+      |    // this is a comment
+      |  }
+      |  foo.bar() {
+      |    red.orange.yellow()
+      |    // this is a comment
+      |  }
+      |  foo.bar {
+      |    red.orange.yellow()
+      |    /* this is also a comment */
+      |  }
+      |  red.orange.yellow()
+      |  // this is a comment
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `try to keep expression in the same line until the first lambda`() =
       assertFormatted(
           """
