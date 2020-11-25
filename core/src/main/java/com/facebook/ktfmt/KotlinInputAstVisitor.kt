@@ -730,12 +730,19 @@ class KotlinInputAstVisitor(
   ) {
     builder.block(ZERO) {
       callee?.accept(this)
-      val argumentsSize = argumentList?.arguments?.size ?: 0
+      val arguments = argumentList?.arguments
+      val argumentsSize = arguments?.size ?: 0
       builder.block(argumentsIndent) { typeArgumentList?.accept(this) }
       builder.block(argumentsIndent) {
         builder.guessToken("(")
         if (argumentsSize > 0) {
-          builder.block(ZERO) { argumentList?.accept(this) }
+          argumentList?.accept(this)
+          val first = arguments?.firstOrNull()
+          if (argumentsSize != 1 ||
+              first?.isNamed() != false ||
+              first.getArgumentExpression() !is KtLambdaExpression) {
+            builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
+          }
         }
         builder.guessToken(")")
       }
@@ -759,7 +766,7 @@ class KotlinInputAstVisitor(
     } else {
       // Break before args.
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      emitParameterLikeList(list.arguments, list.trailingComma != null, wrapInBlock = true)
+      emitParameterLikeList(list.arguments, list.trailingComma != null, wrapInBlock = false)
     }
   }
 

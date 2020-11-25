@@ -74,15 +74,23 @@ class FormatterKtTest {
       |  computeBreaks(
       |      javaOutput.commentsHelper,
       |      maxWidth,
-      |      Doc.State(+0, 0))
+      |      Doc.State(+0, 0)
+      |  )
       |  computeBreaks(
-      |      output.commentsHelper, maxWidth, State(0))
+      |      output.commentsHelper,
+      |      maxWidth,
+      |      State(0)
+      |  )
       |  doc.computeBreaks(
       |      javaOutput.commentsHelper,
       |      maxWidth,
-      |      Doc.State(+0, 0))
+      |      Doc.State(+0, 0)
+      |  )
       |  doc.computeBreaks(
-      |      output.commentsHelper, maxWidth, State(0))
+      |      output.commentsHelper,
+      |      maxWidth,
+      |      State(0)
+      |  )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -164,7 +172,8 @@ class FormatterKtTest {
         |          .add(1)
         |          .add(1)
         |          .add(1)
-        |          .build())
+        |          .build()
+        |  )
         |
         |  ImmutableList.newBuilder()
         |      .add(1)
@@ -263,7 +272,8 @@ class FormatterKtTest {
       |          (1 + 2) +
       |          function(
       |              value7,
-      |              value8) +
+      |              value8
+      |          ) +
       |          value9
       |}
       |""".trimMargin(),
@@ -474,13 +484,15 @@ class FormatterKtTest {
       |  // Break after `longerThanFour(` before it's longer than 4 chars
       |  longerThanFour(
       |          something.something
-      |              .happens())
+      |              .happens()
+      |      )
       |      .thenReturn(result)
       |
       |  // Similarly to above, when part of qualified expression.
       |  foo.longerThanFour(
       |          something.something
-      |              .happens())
+      |              .happens()
+      |      )
       |      .thenReturn(result)
       |
       |  // Keep 'super' attached to the method name
@@ -589,7 +601,9 @@ class FormatterKtTest {
       |class C {
       |  fun method() {
       |    Foo.FooBar(
-      |            param1, param2)
+      |            param1,
+      |            param2
+      |        )
       |        .apply {
       |          //
       |          foo
@@ -974,7 +988,8 @@ class FormatterKtTest {
       |  foo(
       |      123456789012345678901234567890,
       |      123456789012345678901234567890,
-      |      123456789012345678901234567890)
+      |      123456789012345678901234567890
+      |  )
       |}
       |""".trimMargin())
 
@@ -988,7 +1003,8 @@ class FormatterKtTest {
       |  foo(
       |      123456789012345678901234567890,
       |      b = 23456789012345678901234567890,
-      |      c = 3456789012345678901234567890)
+      |      c = 3456789012345678901234567890
+      |  )
       |}
       |""".trimMargin())
 
@@ -1003,7 +1019,8 @@ class FormatterKtTest {
       |              // Printing
       |              print()
       |            },
-      |        duration = duration)
+      |        duration = duration
+      |    )
       |""".trimMargin())
 
   @Test
@@ -1027,7 +1044,8 @@ class FormatterKtTest {
       |        typeConstraintList =
       |            property.typeConstraintList,
       |        delegate = property.delegate,
-      |        initializer = property.initializer)
+      |        initializer = property.initializer
+      |    )
       |  }
       |}
       |""".trimMargin(),
@@ -1041,7 +1059,8 @@ class FormatterKtTest {
       |  setListener(
       |      fun(number: Int) {
       |        println(number)
-      |      })
+      |      }
+      |  )
       |}
       |""".trimMargin())
 
@@ -1053,7 +1072,8 @@ class FormatterKtTest {
       |  setListener(
       |      fun View.() {
       |        println(this)
-      |      })
+      |      }
+      |  )
       |}
       |""".trimMargin())
 
@@ -1170,7 +1190,13 @@ class FormatterKtTest {
       |          ACTION_UP -> Toast.makeText(it.view.context, "Up!", Toast.LENGTH_SHORT).show()
       |          ACTION_DOWN ->
       |              Toast.makeText(
-      |                      it.view.context, "Down!", Toast.LENGTH_SHORT, blablabla, blablabl, blabla)
+      |                      it.view.context,
+      |                      "Down!",
+      |                      Toast.LENGTH_SHORT,
+      |                      blablabla,
+      |                      blablabl,
+      |                      blabla
+      |                  )
       |                  .show()
       |        }
       |      }
@@ -1495,7 +1521,8 @@ class FormatterKtTest {
       |      if (b) {
       |        val a = 1 + 1
       |        2 * a
-      |      } else 2)
+      |      } else 2
+      |  )
       |  return if (b) 1 else 2
       |}
       |""".trimMargin())
@@ -1721,7 +1748,8 @@ class FormatterKtTest {
       |      age,
       |      title,
       |      offspring,
-      |      offspring)
+      |      offspring
+      |  )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -2069,10 +2097,12 @@ class FormatterKtTest {
       |  Stuff()
       |      .doIt(
       |          Foo.doIt()
-      |              .doThat())
+      |              .doThat()
+      |      )
       |      .doIt(
       |          Foo.doIt()
-      |              .doThat())
+      |              .doThat()
+      |      )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -2187,12 +2217,40 @@ class FormatterKtTest {
       |---------------------------
       |fun f() {
       |  fooDdoIt(
-      |      foo1, foo2, foo3)
+      |      foo1,
+      |      foo2,
+      |      foo3
+      |  )
       |  foo.doIt(
-      |      foo1, foo2, foo3)
+      |      foo1,
+      |      foo2,
+      |      foo3
+      |  )
       |  foo.doIt(
-      |          foo1, foo2, foo3)
+      |          foo1,
+      |          foo2,
+      |          foo3
+      |      )
       |      .doThat()
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  // TODO: fix this.
+  @Test
+  fun `chained calls that don't fit in one line`() =
+      assertFormatted(
+          """
+      |---------------------------
+      |fun f() {
+      |  foo(
+      |          println("a"),
+      |          println("b")
+      |      )
+      |      .bar(
+      |          println("b"),
+      |          println("b")
+      |      )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -2230,7 +2288,8 @@ class FormatterKtTest {
       |      functor = {
       |        val a = it
       |        a + a
-      |      })
+      |      }
+      |  )
       |}
       |""".trimMargin())
 
@@ -2518,7 +2577,8 @@ class FormatterKtTest {
       |      lambdaArgument = {
       |        step1()
       |        step2()
-      |      }) { it.doIt() }
+      |      }
+      |  ) { it.doIt() }
       |}
       |""".trimMargin())
 
@@ -2682,23 +2742,28 @@ class FormatterKtTest {
       |) {
       |  println(
       |      something is
-      |          List<String>)
+      |          List<String>
+      |  )
       |  doIt(
       |      something as
-      |          List<String>)
+      |          List<String>
+      |  )
       |  println(
       |      something is
       |          PairList<
       |              String,
-      |              Int>)
+      |              Int>
+      |  )
       |  doIt(
       |      something as
       |          PairList<
       |              String,
-      |              Int>)
+      |              Int>
+      |  )
       |  println(
       |      a is Int &&
-      |          b is String)
+      |          b is String
+      |  )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -3853,7 +3918,9 @@ class FormatterKtTest {
       |  )
       |
       |  foo<Int>(
-      |      "asdf", "asdf")
+      |      "asdf",
+      |      "asdf"
+      |  )
       |
       |  foo<
       |      Int,
