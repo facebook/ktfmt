@@ -1612,7 +1612,8 @@ class FormatterKtTest {
       |---------------------------
       |data class Foo {
       |  constructor(
-      |      val number: Int = 0)
+      |      val number: Int = 0
+      |  )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -1696,7 +1697,8 @@ class FormatterKtTest {
       |      val name: String,
       |      val age: Int,
       |      val title: String,
-      |      val offspring: List<Foo>)
+      |      val offspring: List<Foo>
+      |  )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -1723,6 +1725,22 @@ class FormatterKtTest {
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
+
+  @Test
+  fun `secondary constructor with param list that fits in one line, with delegate`() =
+      assertFormatted(
+          """
+      |class C {
+      |  constructor(
+      |      context: Context?,
+      |      attrs: AttributeSet?,
+      |      defStyleAttr: Int,
+      |      defStyleRes: Int
+      |  ) : super(context, attrs, defStyleAttr, defStyleRes) {
+      |    init(attrs)
+      |  }
+      |}
+      |""".trimMargin())
 
   @Test
   fun `handle calling super constructor in secondary constructor`() =
@@ -3771,7 +3789,9 @@ class FormatterKtTest {
       |
       |class Foo {
       |  constructor(
-      |      a: Int, b: Int)
+      |      a: Int,
+      |      b: Int
+      |  )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
