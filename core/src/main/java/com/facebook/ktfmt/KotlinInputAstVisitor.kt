@@ -125,7 +125,8 @@ import org.jetbrains.kotlin.types.Variance
 
 /** An AST visitor that builds a stream of {@link Op}s to format. */
 class KotlinInputAstVisitor(
-    private val options: FormattingOptions, private val builder: OpsBuilder
+    private val options: FormattingOptions,
+    private val builder: OpsBuilder
 ) : KtTreeVisitorVoid() {
 
   /** Standard indentation for a block */
@@ -623,7 +624,9 @@ class KotlinInputAstVisitor(
    * ```
    */
   private fun emitQualifiedExpressionSeveralInOneLine(
-      items: Collection<KtExpression>, prefixes: Collection<Int>, prefixFillMode: Doc.FillMode
+      items: Collection<KtExpression>,
+      prefixes: Collection<Int>,
+      prefixFillMode: Doc.FillMode
   ) {
     var needDot = false
     val hasTrailingLambda =
@@ -834,7 +837,9 @@ class KotlinInputAstVisitor(
    * `foo(a, b, c)`
    */
   private fun <T : PsiElement> emitParameterLikeList(
-      list: List<T>?, hasTrailingComma: Boolean, wrapInBlock: Boolean
+      list: List<T>?,
+      hasTrailingComma: Boolean,
+      wrapInBlock: Boolean
   ) {
     if (list.isNullOrEmpty()) {
       return
@@ -1474,7 +1479,8 @@ class KotlinInputAstVisitor(
 
   /** For example, 'field' in @field:[Inject Named("WEB_VIEW")] */
   override fun visitAnnotationUseSiteTarget(
-      annotationTarget: KtAnnotationUseSiteTarget, data: Void?
+      annotationTarget: KtAnnotationUseSiteTarget,
+      data: Void?
   ): Void? {
     builder.token(annotationTarget.getAnnotationUseSiteTarget().renderName)
     return null
@@ -1499,7 +1505,8 @@ class KotlinInputAstVisitor(
   }
 
   override fun visitFileAnnotationList(
-      fileAnnotationList: KtFileAnnotationList, data: Void?
+      fileAnnotationList: KtFileAnnotationList,
+      data: Void?
   ): Void? {
     for (child in fileAnnotationList.node.children()) {
       if (child is PsiElement) {
@@ -1932,7 +1939,8 @@ class KotlinInputAstVisitor(
    * ```
    */
   override fun visitCollectionLiteralExpression(
-      expression: KtCollectionLiteralExpression, data: Void?
+      expression: KtCollectionLiteralExpression,
+      data: Void?
   ): Void? {
     builder.sync(expression)
     builder.block(ZERO) {
@@ -2102,7 +2110,9 @@ class KotlinInputAstVisitor(
    * @param block a code block to be run in this block level
    */
   private inline fun OpsBuilder.block(
-      plusIndent: Indent, isEnabled: Boolean = true, block: () -> Unit
+      plusIndent: Indent,
+      isEnabled: Boolean = true,
+      block: () -> Unit
   ) {
     if (isEnabled) {
       open(plusIndent)
