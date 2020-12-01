@@ -128,8 +128,6 @@ class KotlinInputAstVisitor(
     private val options: FormattingOptions, private val builder: OpsBuilder
 ) : KtTreeVisitorVoid() {
 
-  private val isGoogleStyle = options.style == FormattingOptions.Style.GOOGLE
-
   /** Standard indentation for a block */
   private val blockIndent: Indent.Const = Indent.Const.make(options.blockIndent, 1)
 
@@ -291,22 +289,14 @@ class KotlinInputAstVisitor(
       var paramBlockNeedsClosing = false
       builder.block(ZERO) {
         if (parameterList != null && parameterList.parameters.isNotEmpty()) {
-          if (isGoogleStyle) {
-            paramBlockNeedsClosing = true
-            builder.open(expressionBreakIndent)
-            builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-            parameterList.accept(this)
-          } else {
-            builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-            builder.block(expressionBreakIndent) { parameterList.accept(this) }
-          }
+          paramBlockNeedsClosing = true
+          builder.open(expressionBreakIndent)
+          builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
+          parameterList.accept(this)
         }
         if (emitParenthesis) {
           if (parameterList != null && parameterList.parameters.isNotEmpty()) {
-            builder.breakOp(
-                Doc.FillMode.UNIFIED,
-                "",
-                if (isGoogleStyle) expressionBreakNegativeIndent else ZERO)
+            builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
           }
           builder.token(")")
         } else {
@@ -831,10 +821,7 @@ class KotlinInputAstVisitor(
 
   /** e.g., `a: Int, b: Int, c: Int` in `fun foo(a: Int, b: Int, c: Int) { ... }`. */
   override fun visitParameterList(list: KtParameterList) {
-    emitParameterLikeList(
-        list.parameters,
-        list.trailingComma != null,
-        wrapInBlock = options.style != FormattingOptions.Style.GOOGLE)
+    emitParameterLikeList(list.parameters, list.trailingComma != null, wrapInBlock = false)
   }
 
   /**
@@ -1254,21 +1241,10 @@ class KotlinInputAstVisitor(
 
       builder.block(ZERO) {
         builder.token("(")
-        builder.block(expressionBreakIndent, isEnabled = isGoogleStyle) {
+        builder.block(expressionBreakIndent) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-          builder.block(expressionBreakIndent, isEnabled = !isGoogleStyle) {
-            constructor.valueParameterList?.accept(this)
-          }
-          val ownerClassOrObject = constructor.parent
-          if (options.style == FormattingOptions.Style.GOOGLE ||
-              (ownerClassOrObject is KtClassOrObject &&
-                  (ownerClassOrObject.body != null ||
-                      ownerClassOrObject.getSuperTypeList() != null))) {
-            builder.breakOp(
-                Doc.FillMode.UNIFIED,
-                "",
-                if (isGoogleStyle) expressionBreakNegativeIndent else ZERO)
-          }
+          constructor.valueParameterList?.accept(this)
+          builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
           if (constructor.hasConstructorKeyword()) {
             builder.close()
           }
@@ -2047,7 +2023,6 @@ class KotlinInputAstVisitor(
         typeAlias.getTypeReference()?.accept(this)
         typeAlias.typeConstraintList?.accept(this)
         builder.guessToken(";")
-        val peekToken = builder.peekToken()
       }
       builder.forcedBreak()
     }

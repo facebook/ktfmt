@@ -1208,13 +1208,15 @@ class FormatterKtTest {
       |--------------------------------------------------
       |interface X {
       |  fun f(
-      |      arg1: Arg1Type, arg2: Arg2Type
+      |      arg1: Arg1Type,
+      |      arg2: Arg2Type
       |  ): Map<String, Map<String, Double>>? {
       |    //
       |  }
       |
       |  fun functionWithGenericReturnType(
-      |      arg1: Arg1Type, arg2: Arg2Type
+      |      arg1: Arg1Type,
+      |      arg2: Arg2Type
       |  ): Map<String, Map<String, Double>>? {
       |    //
       |  }
@@ -1583,7 +1585,12 @@ class FormatterKtTest {
       |class Foo5
       |    @Inject
       |    private constructor(
-      |        number: Int, number2: Int, number3: Int, number4: Int, number5: Int, number6: Int
+      |        number: Int,
+      |        number2: Int,
+      |        number3: Int,
+      |        number4: Int,
+      |        number5: Int,
+      |        number6: Int
       |    ) {}
       |""".trimMargin())
 
@@ -1593,7 +1600,8 @@ class FormatterKtTest {
           """
       |-------------------------
       |data class Foo(
-      |    val number: Int = 0)
+      |    val number: Int = 0
+      |)
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -1627,7 +1635,11 @@ class FormatterKtTest {
       assertFormatted(
           """
       |data class Foo(
-      |    val number: Int, val name: String, val age: Int, val title: String, val offspring2: List<Foo>
+      |    val number: Int,
+      |    val name: String,
+      |    val age: Int,
+      |    val title: String,
+      |    val offspring2: List<Foo>
       |) {}
       |""".trimMargin())
 
@@ -1637,7 +1649,11 @@ class FormatterKtTest {
           """
       |data class Foo
       |    constructor(
-      |        val name: String, val age: Int, val title: String, val offspring: List<Foo>, val foo: String
+      |        val name: String,
+      |        val age: Int,
+      |        val title: String,
+      |        val offspring: List<Foo>,
+      |        val foo: String
       |    ) {}
       |""".trimMargin())
 
@@ -3705,7 +3721,9 @@ class FormatterKtTest {
       |)
       |
       |class Foo(
-      |    a: Int, b: Int)
+      |    a: Int,
+      |    b: Int
+      |)
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -3727,7 +3745,9 @@ class FormatterKtTest {
       |
       |class Foo
       |    constructor(
-      |        a: Int, b: Int)
+      |        a: Int,
+      |        b: Int
+      |    )
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -3775,7 +3795,8 @@ class FormatterKtTest {
       |) {}
       |
       |fun foo(
-      |    a: Int, b: Int
+      |    a: Int,
+      |    b: Int
       |) {}
       |
       |fun foo(
