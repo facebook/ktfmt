@@ -247,7 +247,8 @@ class KotlinInputAstVisitor(
 
   /**
    * @param keyword e.g., "fun" or "class".
-   * @param type for functions, the return type; for classes, the list of supertypes.
+   * @param typeOrDelegationCall for functions, the return typeOrDelegationCall; for classes, the
+   * list of supertypes.
    */
   private fun visitFunctionLikeExpression(
       modifierList: KtModifierList?,
@@ -260,7 +261,7 @@ class KotlinInputAstVisitor(
       typeConstraintList: KtTypeConstraintList?,
       bodyBlockExpression: KtBlockExpression?,
       nonBlockBodyExpressions: PsiElement?,
-      type: KtElement?,
+      typeOrDelegationCall: KtElement?,
       emitBraces: Boolean
   ) {
     builder.block(ZERO) {
@@ -304,29 +305,33 @@ class KotlinInputAstVisitor(
             builder.close()
           }
         }
-        if (type != null) {
+        if (typeOrDelegationCall != null) {
           builder.block(ZERO) {
+            if (typeOrDelegationCall is KtConstructorDelegationCall) {
+              builder.space()
+            }
             builder.token(":")
             if (parameterList?.parameters.isNullOrEmpty()) {
               builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
             } else {
               builder.space()
             }
-            builder.block(expressionBreakIndent) { type.accept(this) }
+            builder.block(expressionBreakNegativeIndent) { typeOrDelegationCall.accept(this) }
           }
         }
       }
       if (paramBlockNeedsClosing) {
         builder.close()
       }
-      builder.space()
       if (typeConstraintList != null) {
-        typeConstraintList.accept(this)
         builder.space()
+        typeConstraintList.accept(this)
       }
       if (bodyBlockExpression != null) {
+        builder.space()
         visitBlockBody(bodyBlockExpression, emitBraces)
       } else if (nonBlockBodyExpressions != null) {
+        builder.space()
         builder.block(ZERO) {
           builder.token("=")
           builder.block(expressionBreakIndent) {
@@ -1260,39 +1265,34 @@ class KotlinInputAstVisitor(
     val bodyExpression = constructor.bodyExpression
 
     builder.sync(constructor)
-    builder.block(ZERO) {
-      constructor.modifierList?.accept(this)
-      builder.token("constructor")
-      builder.token("(")
-      builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-      builder.block(expressionBreakIndent) { constructor.valueParameterList?.accept(this) }
-      if (!delegationCall.isImplicit || bodyExpression != null) {
-        builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      }
-      builder.token(")")
-    }
-    if (!delegationCall.isImplicit) {
-      builder.space()
-      builder.token(":")
-      builder.space()
-      delegationCall.accept(this)
-    }
-    if (bodyExpression != null) {
-      builder.space()
-      bodyExpression.accept(this)
-    }
+
+    visitFunctionLikeExpression(
+        constructor.modifierList,
+        "constructor",
+        null,
+        null,
+        null,
+        true,
+        constructor.valueParameterList,
+        null,
+        bodyExpression,
+        null,
+        if (!delegationCall.isImplicit) delegationCall else null,
+        true)
   }
 
   override fun visitConstructorDelegationCall(call: KtConstructorDelegationCall) {
     // Work around a misfeature in kotlin-compiler: call.calleeExpression.accept doesn't call
     // visitReferenceExpression, but calls visitElement instead.
-    builder.token(if (call.isCallToThis) "this" else "super")
-    visitCallElement(
-        null,
-        call.typeArgumentList,
-        call.valueArgumentList,
-        call.lambdaArguments,
-        lambdaIndent = ZERO)
+    builder.block(ZERO) {
+      builder.token(if (call.isCallToThis) "this" else "super")
+      visitCallElement(
+          null,
+          call.typeArgumentList,
+          call.valueArgumentList,
+          call.lambdaArguments,
+          lambdaIndent = ZERO)
+    }
   }
 
   override fun visitClassInitializer(initializer: KtClassInitializer) {
