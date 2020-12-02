@@ -505,7 +505,7 @@ class KotlinInputAstVisitor(
     //
     val hasTrailingLambda =
         extractCallExpression(parts.last())?.lambdaArguments?.isNotEmpty() == true
-    if ((invocationCount == 1 && firstInvocationIndex > 0)) {
+    if (invocationCount == 1 && firstInvocationIndex > 0) {
       if (firstInvocationIndex != parts.size - 1 && isFirstInvocationLambda) {
         prefixes.add(firstInvocationIndex - 1)
       } else {
@@ -530,8 +530,8 @@ class KotlinInputAstVisitor(
    * expression, or standing alone. This method makes it easier to handle both cases uniformly.
    */
   private fun extractCallExpression(expression: KtExpression): KtCallExpression? {
-    return (expression as? KtQualifiedExpression)?.selectorExpression as? KtCallExpression
-        ?: (expression as? KtCallExpression)
+    val ktExpression = (expression as? KtQualifiedExpression)?.selectorExpression ?: expression
+    return ktExpression as? KtCallExpression
   }
 
   /**
@@ -632,8 +632,7 @@ class KotlinInputAstVisitor(
     val hasTrailingLambda =
         extractCallExpression(items.last())?.lambdaArguments?.isNotEmpty() == true
     // Are there method invocations or field accesses after the prefix?
-    val trailingDereferences =
-        prefixes.isNotEmpty() && prefixes.last() < items.size - (if (hasTrailingLambda) 1 else 1)
+    val trailingDereferences = prefixes.isNotEmpty() && prefixes.last() < items.size - 1
 
     builder.block(expressionBreakIndent) {
       for (ignored in prefixes.indices) {
@@ -1424,8 +1423,7 @@ class KotlinInputAstVisitor(
     builder.sync(expression)
     builder.block(ZERO) {
       loop@ for (child in expression.node.children()) {
-        val psi = child.psi
-        when (psi) {
+        when (val psi = child.psi) {
           is PsiWhiteSpace -> continue@loop
           is KtAnnotation -> {
             psi.accept(this)
@@ -2039,6 +2037,8 @@ class KotlinInputAstVisitor(
   /**
    * visitElement is called for almost all types of AST nodes. We use it to keep track of whether
    * we're currently inside an expression or not.
+   *
+   * @throws FormattingError
    */
   override fun visitElement(element: PsiElement) {
     inExpression.addLast(element is KtExpression || inExpression.peekLast())
