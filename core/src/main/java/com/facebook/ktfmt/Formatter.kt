@@ -16,6 +16,8 @@
 
 package com.facebook.ktfmt
 
+import com.facebook.ktfmt.FormattingOptions.Style.DROPBOX
+import com.facebook.ktfmt.FormattingOptions.Style.GOOGLE
 import com.facebook.ktfmt.RedundantElementRemover.dropRedundantElements
 import com.facebook.ktfmt.debughelpers.printOps
 import com.facebook.ktfmt.kdoc.KDocCommentsHelper
@@ -37,13 +39,11 @@ import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 const val DEFAULT_MAX_WIDTH: Int = 100
 
-val GOOGLE_FORMAT =
-    FormattingOptions(
-        style = FormattingOptions.Style.GOOGLE, blockIndent = 2, continuationIndent = 2)
+@JvmField
+val GOOGLE_FORMAT = FormattingOptions(style = GOOGLE, blockIndent = 2, continuationIndent = 2)
 
-val DROPBOX_FORMAT =
-    FormattingOptions(
-        style = FormattingOptions.Style.DROPBOX, blockIndent = 4, continuationIndent = 4)
+@JvmField
+val DROPBOX_FORMAT = FormattingOptions(style = DROPBOX, blockIndent = 4, continuationIndent = 4)
 
 data class FormattingOptions(
     val style: Style = Style.FACEBOOK,
