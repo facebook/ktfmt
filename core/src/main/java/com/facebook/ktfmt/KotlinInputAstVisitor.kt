@@ -1111,9 +1111,14 @@ class KotlinInputAstVisitor(
     } else if (initializer != null) {
       builder.space()
       builder.token("=")
-      builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+      if (initializer is KtLambdaExpression) {
+        builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+        initializer.accept(this)
+      } else {
+        builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+        builder.block(expressionBreakIndent) { initializer.accept(this) }
+      }
       hasSemicolon = initializer.nextSibling?.text == ";" == true
-      builder.block(expressionBreakIndent) { initializer.accept(this) }
     }
     if (name != null) {
       builder.close() // close block for named values

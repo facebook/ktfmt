@@ -1146,6 +1146,18 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `lambda assigned to variable does not break before brace`() =
+      assertFormatted(
+          """
+      |fun doIt() {
+      |  val lambda = {
+      |    doItOnce()
+      |    doItTwice()
+      |  }
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `when() expression storing in local variable`() =
       assertFormatted(
           """
