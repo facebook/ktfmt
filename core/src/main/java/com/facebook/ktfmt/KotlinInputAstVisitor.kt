@@ -598,9 +598,9 @@ class KotlinInputAstVisitor(
               valueArgumentList,
               lambdaArguments,
               argumentsIndent =
-                  if (trailingDereferences || needDot) expressionBreakIndent else ZERO,
+              if (trailingDereferences || needDot) expressionBreakIndent else ZERO,
               lambdaIndent =
-                  if (trailingDereferences || needDot) ZERO else expressionBreakNegativeIndent)
+              if (trailingDereferences || needDot) ZERO else expressionBreakNegativeIndent)
         }
         length += item.text.length
         needDot = true
@@ -774,9 +774,13 @@ class KotlinInputAstVisitor(
     if (valueParameters.isNotEmpty() || statements.isNotEmpty()) {
       if (valueParameters.isNotEmpty()) {
         builder.space()
-        forEachCommaSeparated(valueParameters) { it.accept(this) }
-        builder.space()
-        builder.token("->")
+        builder.block(expressionBreakIndent) {
+          forEachCommaSeparated(valueParameters) { it.accept(this) }
+        }
+        builder.block(blockIndent) {
+          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+          builder.token("->")
+        }
         builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
       }
       if (statements.isNotEmpty()) {
@@ -977,7 +981,8 @@ class KotlinInputAstVisitor(
     leftMostExpression.left?.accept(this)
     for (leftExpression in parts) {
       when (leftExpression.operationToken) {
-        KtTokens.RANGE -> {}
+        KtTokens.RANGE -> {
+        }
         KtTokens.ELVIS -> builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
         else -> builder.space()
       }
@@ -987,7 +992,8 @@ class KotlinInputAstVisitor(
         builder.open(expressionBreakIndent)
       }
       when (leftExpression.operationToken) {
-        KtTokens.RANGE -> {}
+        KtTokens.RANGE -> {
+        }
         KtTokens.ELVIS -> builder.space()
         else -> builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
       }
@@ -1751,7 +1757,8 @@ class KotlinInputAstVisitor(
       builder.space()
     }
     when (parameter.variance) {
-      Variance.INVARIANT -> {}
+      Variance.INVARIANT -> {
+      }
       Variance.IN_VARIANCE -> {
         builder.token("in")
         builder.space()
