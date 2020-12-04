@@ -1889,8 +1889,7 @@ class FormatterKtTest {
       assertFormatted(
           """
       |fun doIt(world: String) {
-      |  println(${"\"".repeat(
-              3)}Hello
+      |  println(${"\"".repeat(3)}Hello
       |      world!${"\"".repeat(3)})
       |}
       |""".trimMargin())
