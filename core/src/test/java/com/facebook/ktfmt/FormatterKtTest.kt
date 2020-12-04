@@ -195,14 +195,11 @@ class FormatterKtTest {
       |}
       |""".trimMargin())
 
-  @Test
-  fun `class without a body nor properties`() = assertFormatted("class Foo\n")
+  @Test fun `class without a body nor properties`() = assertFormatted("class Foo\n")
 
-  @Test
-  fun `interface without a body nor properties`() = assertFormatted("interface Foo\n")
+  @Test fun `interface without a body nor properties`() = assertFormatted("interface Foo\n")
 
-  @Test
-  fun `preserve empty primary constructor`() = assertFormatted("class Foo()\n")
+  @Test fun `preserve empty primary constructor`() = assertFormatted("class Foo()\n")
 
   @Test
   fun `class without a body, with explicit ctor params`() =
@@ -397,8 +394,7 @@ class FormatterKtTest {
 
   @Test
   fun `safe dot operator expression`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |fun f() {
       |  node?.name
       |}
@@ -1281,15 +1277,13 @@ class FormatterKtTest {
 
   @Test
   fun `annotations with parameters`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |@AnnWithArrayValue(1, 2, 3) class C
       |""".trimMargin())
 
   @Test
   fun `method modifiers`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |override internal fun f() {}
       |""".trimMargin())
 
@@ -1584,8 +1578,7 @@ class FormatterKtTest {
 
   @Test
   fun `A program that tickled a bug in KotlinInput`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |val x = 2
       |""".trimMargin())
 
@@ -1807,8 +1800,7 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
-  fun `handle objects`() = assertFormatted(
-      """
+  fun `handle objects`() = assertFormatted("""
       |object Foo(n: Int) {}
       |""".trimMargin())
 
@@ -1862,8 +1854,7 @@ class FormatterKtTest {
 
   @Test
   fun `nullable function type`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |var listener: ((Boolean) -> Unit)? = null
       |""".trimMargin())
 
@@ -1919,17 +1910,17 @@ class FormatterKtTest {
   fun `Trailing whitespaces are preserved in multiline strings`() {
     val code =
         listOf(
-            "fun doIt(world: String) {",
-            "  println(\"\"\"This line has trailing whitespace         ",
-            "      world!\"\"\")",
-            "  println(\"\"\"This line has trailing whitespace \$s     ",
-            "      world!\"\"\")",
-            "  println(\"\"\"This line has trailing whitespace \${s}   ",
-            "      world!\"\"\")",
-            "  println(\"\"\"This line has trailing whitespace \$      ",
-            "      world!\"\"\")",
-            "}",
-            "")
+                "fun doIt(world: String) {",
+                "  println(\"\"\"This line has trailing whitespace         ",
+                "      world!\"\"\")",
+                "  println(\"\"\"This line has trailing whitespace \$s     ",
+                "      world!\"\"\")",
+                "  println(\"\"\"This line has trailing whitespace \${s}   ",
+                "      world!\"\"\")",
+                "  println(\"\"\"This line has trailing whitespace \$      ",
+                "      world!\"\"\")",
+                "}",
+                "")
             .joinToString("\n")
     assertThatFormatting(code).allowTrailingWhitespace().isEqualTo(code)
   }
@@ -2438,22 +2429,19 @@ class FormatterKtTest {
 
   @Test
   fun `handle covariant and contravariant type arguments`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |val p: Pair<in T, out S>
       |""".trimMargin())
 
   @Test
   fun `handle covariant and contravariant type parameters`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |class Foo<in T, out S>
       |""".trimMargin())
 
   @Test
   fun `handle bounds for type parameters`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |class Foo<in T : List<*>, out S : Any?>
       |""".trimMargin())
 
@@ -2558,8 +2546,7 @@ class FormatterKtTest {
 
   @Test
   fun `handle extension and operator functions`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |operator fun Point.component1() = x
       |""".trimMargin())
 
@@ -2573,8 +2560,7 @@ class FormatterKtTest {
 
   @Test
   fun `generic extension property`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |val <T> List<T>.twiceSize = 2 * size()
       |""".trimMargin())
 
@@ -2613,8 +2599,7 @@ class FormatterKtTest {
 
   @Test
   fun `handle property delegation`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |val a by lazy { 1 + 1 }
       |""".trimMargin())
 
@@ -2682,8 +2667,7 @@ class FormatterKtTest {
 
   @Test
   fun `handle unicode in string literals`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |val a = "\uD83D\uDC4D"
       |""".trimMargin())
 
@@ -3254,8 +3238,7 @@ class FormatterKtTest {
 
   @Test
   fun `handle empty enum`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |enum class YTho {
       |}
       |""".trimMargin())
@@ -3272,7 +3255,7 @@ class FormatterKtTest {
   @Test
   fun `enum comma and semicolon`() {
     assertThatFormatting(
-        """
+            """
         |enum class Highlander {
         |  ONE,;
         |}
