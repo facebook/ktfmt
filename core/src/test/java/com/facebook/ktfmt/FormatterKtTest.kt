@@ -3123,6 +3123,24 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `handle trailing comma in lambda`() =
+      assertFormatted(
+          """
+      |-----------
+      |fun f() {
+      |  a() {
+      |      arg1,
+      |      arg2,
+      |      x,
+      |    ->
+      |    doIt()
+      |    doIt()
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `break before Elvis operator`() =
       assertFormatted(
           """

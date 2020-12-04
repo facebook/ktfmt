@@ -778,7 +778,12 @@ class KotlinInputAstVisitor(
           forEachCommaSeparated(valueParameters) { it.accept(this) }
         }
         builder.block(blockIndent) {
-          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+          if (lambdaExpression.functionLiteral.valueParameterList?.trailingComma != null) {
+            builder.token(",")
+            builder.forcedBreak()
+          } else {
+            builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+          }
           builder.token("->")
         }
         builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
