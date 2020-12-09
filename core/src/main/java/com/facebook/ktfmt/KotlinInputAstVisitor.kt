@@ -1256,7 +1256,7 @@ class KotlinInputAstVisitor(
     builder.sync(constructor)
     builder.block(ZERO) {
       if (constructor.hasConstructorKeyword()) {
-        builder.open(expressionBreakIndent)
+        builder.open(ZERO)
         builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
         constructor.modifierList?.accept(this)
         builder.token("constructor")

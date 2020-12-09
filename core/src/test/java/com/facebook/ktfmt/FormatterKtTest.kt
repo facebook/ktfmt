@@ -1595,15 +1595,15 @@ class FormatterKtTest {
       |class Foo4 @Inject private constructor(number: Int) {}
       |
       |class Foo5
-      |    @Inject
-      |    private constructor(
-      |        number: Int,
-      |        number2: Int,
-      |        number3: Int,
-      |        number4: Int,
-      |        number5: Int,
-      |        number6: Int
-      |    ) {}
+      |@Inject
+      |private constructor(
+      |    number: Int,
+      |    number2: Int,
+      |    number3: Int,
+      |    number4: Int,
+      |    number5: Int,
+      |    number6: Int
+      |) {}
       |""".trimMargin())
 
   @Test
@@ -1661,13 +1661,13 @@ class FormatterKtTest {
       assertFormatted(
           """
       |data class Foo
-      |    constructor(
-      |        val name: String,
-      |        val age: Int,
-      |        val title: String,
-      |        val offspring: List<Foo>,
-      |        val foo: String
-      |    ) {}
+      |constructor(
+      |    val name: String,
+      |    val age: Int,
+      |    val title: String,
+      |    val offspring: List<Foo>,
+      |    val foo: String
+      |) {}
       |""".trimMargin())
 
   @Test
@@ -1676,13 +1676,13 @@ class FormatterKtTest {
           """
       |--------------------------------------------------
       |data class Foo
-      |    constructor(
-      |        val number: Int,
-      |        val name: String,
-      |        val age: Int,
-      |        val title: String,
-      |        val offspring: List<Foo>
-      |    ) {}
+      |constructor(
+      |    val number: Int,
+      |    val name: String,
+      |    val age: Int,
+      |    val title: String,
+      |    val offspring: List<Foo>
+      |) {}
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -1795,8 +1795,8 @@ class FormatterKtTest {
       assertFormatted(
           """
       |class Class
-      |    /** A comment */
-      |    constructor() {}
+      |/** A comment */
+      |constructor() {}
       |""".trimMargin())
 
   @Test
@@ -3805,21 +3805,21 @@ class FormatterKtTest {
           """
       |------------------------
       |class Foo
-      |    constructor(
-      |        a: Int,
-      |    )
+      |constructor(
+      |    a: Int,
+      |)
       |
       |class Foo
-      |    constructor(
-      |        a: Int,
-      |        b: Int,
-      |    )
+      |constructor(
+      |    a: Int,
+      |    b: Int,
+      |)
       |
       |class Foo
-      |    constructor(
-      |        a: Int,
-      |        b: Int
-      |    )
+      |constructor(
+      |    a: Int,
+      |    b: Int
+      |)
       |""".trimMargin(),
           deduceMaxWidth = true)
 
