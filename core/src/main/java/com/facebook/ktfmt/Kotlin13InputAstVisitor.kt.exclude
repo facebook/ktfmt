@@ -1,0 +1,15 @@
+package com.facebook.ktfmt
+
+import com.google.googlejavaformat.OpsBuilder
+import org.jetbrains.kotlin.psi.KtCollectionLiteralExpression
+
+class Kotlin13InputAstVisitor(options: FormattingOptions, builder: OpsBuilder) :
+    KotlinInputAstVisitorBase(options, builder) {
+  override fun visitCollectionLiteralExpression(
+      expression: KtCollectionLiteralExpression,
+      data: Void?
+  ): Void? {
+    super.actualVisitCollectionLiteralExpression(expression)
+    return null
+  }
+}

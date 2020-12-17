@@ -124,7 +124,7 @@ import org.jetbrains.kotlin.psi.psiUtil.startsWithComment
 import org.jetbrains.kotlin.types.Variance
 
 /** An AST visitor that builds a stream of {@link Op}s to format. */
-class KotlinInputAstVisitor(
+open class KotlinInputAstVisitorBase(
     private val options: FormattingOptions,
     private val builder: OpsBuilder
 ) : KtTreeVisitorVoid() {
@@ -1950,10 +1950,7 @@ class KotlinInputAstVisitor(
    * }
    * ```
    */
-  override fun visitCollectionLiteralExpression(
-      expression: KtCollectionLiteralExpression,
-      data: Void?
-  ): Void? {
+  fun actualVisitCollectionLiteralExpression(expression: KtCollectionLiteralExpression) {
     builder.sync(expression)
     builder.block(ZERO) {
       builder.token("[")
@@ -1964,7 +1961,6 @@ class KotlinInputAstVisitor(
       }
     }
     builder.token("]")
-    return null
   }
 
   override fun visitTryExpression(expression: KtTryExpression) {
