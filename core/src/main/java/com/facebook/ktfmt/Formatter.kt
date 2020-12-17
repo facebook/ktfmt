@@ -32,6 +32,7 @@ import com.google.googlejavaformat.java.JavaOutput
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtilRt
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.com.intellij.psi.PsiElementVisitor
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.psi.KtImportDirective
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
@@ -126,7 +127,7 @@ private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator:
   val kotlinInput = KotlinInput(code, file)
   val javaOutput = JavaOutput(lineSeparator, kotlinInput, KDocCommentsHelper(lineSeparator))
   val builder = OpsBuilder(kotlinInput, javaOutput)
-  file.accept(KotlinInputAstVisitor(options, builder))
+  file.accept(createAstVisitor(options, builder))
   builder.sync(kotlinInput.text.length)
   builder.drain()
   val ops = builder.build()
@@ -142,6 +143,23 @@ private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator:
       kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
   return replaceTombstoneWithTrailingWhitespace(
       JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
+}
+
+fun createAstVisitor(options: FormattingOptions, builder: OpsBuilder): PsiElementVisitor {
+  val visitorClassName =
+      when {
+        KotlinVersion.CURRENT.major == 1 && KotlinVersion.CURRENT.minor == 3 ->
+            "com.facebook.ktfmt.Kotlin13InputAstVisitor"
+        KotlinVersion.CURRENT.major == 1 && KotlinVersion.CURRENT.minor == 4 ->
+            "com.facebook.ktfmt.Kotlin14InputAstVisitor"
+        else ->
+            throw RuntimeException("Unsupported runtime Kotlin version: " + KotlinVersion.CURRENT)
+      }
+
+  return Class.forName(visitorClassName)
+      .asSubclass(KotlinInputAstVisitorBase::class.java)
+      .getConstructor(FormattingOptions::class.java, OpsBuilder::class.java)
+      .newInstance(options, builder)
 }
 
 private fun checkWhitespaceTombstones(code: String) {
