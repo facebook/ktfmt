@@ -202,6 +202,22 @@ class FormatterKtTest {
   @Test fun `preserve empty primary constructor`() = assertFormatted("class Foo()\n")
 
   @Test
+  fun `simple fun interface`() {
+    if (!KotlinVersion.CURRENT.isAtLeast(1, 4)) return
+    assertFormatted(
+        """fun interface MyRunnable {
+          |  fun runIt()
+          |}
+          |""".trimMargin())
+  }
+
+  @Test
+  fun `handle complex fun interface without body`() {
+    if (!KotlinVersion.CURRENT.isAtLeast(1, 4)) return
+    assertFormatted("public fun interface Function<T : List<*>> : (Int, T?) -> T?\n")
+  }
+
+  @Test
   fun `class without a body, with explicit ctor params`() =
       assertFormatted("class Foo(a: Int, var b: Double, val c: String)\n")
 
