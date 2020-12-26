@@ -30,8 +30,8 @@ repositories {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 dependencies {
@@ -39,13 +39,18 @@ dependencies {
     implementation("com.google.googlejavaformat", "google-java-format", "1.8")
 }
 
-// See https://github.com/JetBrains/gradle-intellij-plugin/
+/**
+ * Minimum compatible version.
+ *
+ * `intellij.version` should match `sinceBuild(value)`
+ */
 intellij {
-    version = "LATEST-EAP-SNAPSHOT"
+    version = "2020.1.4"
 }
 
 tasks {
     patchPluginXml {
-        sinceBuild("203")
+        sinceBuild("201")
+        untilBuild("")
     }
 }
