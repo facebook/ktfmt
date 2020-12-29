@@ -487,7 +487,7 @@ class FormatterKtTest {
       |  foIt(something.something.happens())
       |      .thenReturn(result)
       |
-      |  // Break after `longerThanFour(` before it's longer than 4 chars
+      |  // Break after `longerThanFour(` because it's longer than 4 chars
       |  longerThanFour(
       |          something.something
       |              .happens())

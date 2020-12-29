@@ -129,6 +129,8 @@ open class KotlinInputAstVisitorBase(
     private val builder: OpsBuilder
 ) : KtTreeVisitorVoid() {
 
+  private val isGoogleStyle = options.style == FormattingOptions.Style.GOOGLE
+
   /** Standard indentation for a block */
   private val blockIndent: Indent.Const = Indent.Const.make(options.blockIndent, 1)
 
@@ -732,12 +734,22 @@ open class KotlinInputAstVisitorBase(
   ) {
     builder.block(ZERO) {
       callee?.accept(this)
-      val argumentsSize = argumentList?.arguments?.size ?: 0
+      val arguments = argumentList?.arguments.orEmpty()
       builder.block(argumentsIndent) { typeArgumentList?.accept(this) }
       builder.block(argumentsIndent) {
         builder.guessToken("(")
-        if (argumentsSize > 0) {
-          builder.block(ZERO) { argumentList?.accept(this) }
+        if (arguments.isNotEmpty()) {
+          if (isGoogleStyle) {
+            argumentList?.accept(this)
+            val first = arguments.first()
+            if (arguments.size != 1 ||
+                first?.isNamed() != false ||
+                first.getArgumentExpression() !is KtLambdaExpression) {
+              builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
+            }
+          } else {
+            builder.block(ZERO) { argumentList?.accept(this) }
+          }
         }
         builder.guessToken(")")
       }
@@ -761,7 +773,8 @@ open class KotlinInputAstVisitorBase(
     } else {
       // Break before args.
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      emitParameterLikeList(list.arguments, list.trailingComma != null, wrapInBlock = true)
+      emitParameterLikeList(
+          list.arguments, list.trailingComma != null, wrapInBlock = !isGoogleStyle)
     }
   }
 
