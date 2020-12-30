@@ -148,8 +148,6 @@ private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator:
 fun createAstVisitor(options: FormattingOptions, builder: OpsBuilder): PsiElementVisitor {
   val visitorClassName =
       when {
-        KotlinVersion.CURRENT.major == 1 && KotlinVersion.CURRENT.minor == 3 ->
-            "com.facebook.ktfmt.Kotlin13InputAstVisitor"
         KotlinVersion.CURRENT.major == 1 && KotlinVersion.CURRENT.minor == 4 ->
             "com.facebook.ktfmt.Kotlin14InputAstVisitor"
         else ->
