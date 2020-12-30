@@ -19,7 +19,7 @@ plugins {
     java
 }
 
-val ktfmtVersion = "0.18"
+val ktfmtVersion = "0.19"
 
 group = "com.facebook"
 version = "1.1-SNAPSHOT.$ktfmtVersion"
@@ -41,11 +41,14 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version = "LATEST-EAP-SNAPSHOT"
+    // Version with which to build (and run; unless alternativeIdePath is specified)
+    version = "2020.3"
+    // To run on a different IDE, uncomment and specify a path.
+    // alternativeIdePath = "/Applications/Android Studio.app"
 }
 
 tasks {
     patchPluginXml {
-        sinceBuild("203")
+        sinceBuild("201")
     }
 }
