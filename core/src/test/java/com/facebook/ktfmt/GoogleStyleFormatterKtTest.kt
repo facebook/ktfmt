@@ -710,4 +710,19 @@ class GoogleStyleFormatterKtTest {
       |""".trimMargin(),
           formattingOptions = GOOGLE_FORMAT,
           deduceMaxWidth = true)
+
+  // TODO: fix indentation of foo()
+  @Test
+  fun `assignment of a scoping function`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |fun longName() =
+      |  coroutineScope {
+      |  foo()
+      |  //
+      |}
+      |""".trimMargin(),
+          formattingOptions = GOOGLE_FORMAT,
+          deduceMaxWidth = true)
 }

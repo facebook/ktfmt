@@ -337,9 +337,13 @@ open class KotlinInputAstVisitorBase(
         builder.space()
         builder.block(ZERO) {
           builder.token("=")
-          builder.block(expressionBreakIndent) {
-            builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
-            builder.block(ZERO) { nonBlockBodyExpressions.accept(this) }
+          if (lambdaOrScopingFunction(nonBlockBodyExpressions)) {
+            processLambdaOrScopingFunction(nonBlockBodyExpressions)
+          } else {
+            builder.block(expressionBreakIndent) {
+              builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+              builder.block(ZERO) { nonBlockBodyExpressions.accept(this) }
+            }
           }
         }
       }
@@ -1133,9 +1137,8 @@ open class KotlinInputAstVisitorBase(
     } else if (initializer != null) {
       builder.space()
       builder.token("=")
-      if (initializer is KtLambdaExpression) {
-        builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-        initializer.accept(this)
+      if (lambdaOrScopingFunction(initializer)) {
+        processLambdaOrScopingFunction(initializer)
       } else {
         builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
         builder.block(expressionBreakIndent) { initializer.accept(this) }
@@ -1179,6 +1182,32 @@ open class KotlinInputAstVisitorBase(
     }
 
     return 0
+  }
+
+  private fun processLambdaOrScopingFunction(initializer: PsiElement?) {
+    val tag = genSym()
+    builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent, Optional.of(tag))
+    if (initializer is KtLambdaExpression) {
+      initializer.accept(this)
+    } else {
+      val call = initializer as KtCallExpression
+      call.calleeExpression?.accept(this)
+      builder.space()
+      call.lambdaArguments.forEach { it.getLambdaExpression()?.accept(this) }
+    }
+  }
+
+  private fun lambdaOrScopingFunction(initializer: PsiElement?): Boolean {
+    if (initializer is KtLambdaExpression) {
+      return true
+    }
+    if (initializer is KtCallExpression &&
+        initializer.valueArgumentList?.leftParenthesis == null &&
+        initializer.lambdaArguments.isNotEmpty() &&
+        initializer.typeArgumentList?.arguments.isNullOrEmpty()) {
+      return true
+    }
+    return false
   }
 
   override fun visitClassOrObject(classOrObject: KtClassOrObject) {
