@@ -732,30 +732,40 @@ open class KotlinInputAstVisitorBase(
       argumentsIndent: Indent = expressionBreakIndent,
       lambdaIndent: Indent = ZERO
   ) {
+    val arguments = argumentList?.arguments.orEmpty()
+
     builder.block(ZERO) {
       callee?.accept(this)
-      val arguments = argumentList?.arguments.orEmpty()
       builder.block(argumentsIndent) { typeArgumentList?.accept(this) }
-      builder.block(argumentsIndent) {
-        builder.guessToken("(")
-        if (arguments.isNotEmpty()) {
-          if (isGoogleStyle) {
-            argumentList?.accept(this)
-            val first = arguments.first()
-            if (arguments.size != 1 ||
-                first?.isNamed() != false ||
-                first.getArgumentExpression() !is KtLambdaExpression) {
-              builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
-            }
-          } else {
-            builder.block(ZERO) { argumentList?.accept(this) }
-          }
+      builder.guessToken("(")
+    }
+    if (arguments.isNotEmpty()) {
+      builder.breakOp(Doc.FillMode.UNIFIED, "", argumentsIndent)
+    }
+
+    if (arguments.isNotEmpty()) {
+      if (isGoogleStyle) {
+        builder.block(argumentsIndent) { argumentList?.accept(this) }
+        val first = arguments.first()
+        if (arguments.size != 1 ||
+            first?.isNamed() != false ||
+            first.getArgumentExpression() !is KtLambdaExpression) {
+          builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
         }
-        builder.guessToken(")")
+      } else {
+        builder.block(argumentsIndent) { builder.block(ZERO) { argumentList?.accept(this) } }
       }
-      if (lambdaArguments.isNotEmpty()) {
+    }
+    builder.guessToken(")")
+
+    if (lambdaArguments.isNotEmpty()) {
+      if (argumentList?.leftParenthesis == null) {
         builder.space()
-        builder.block(lambdaIndent) { lambdaArguments.forEach { it.accept(this) } }
+      } else {
+        builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+      }
+      builder.block(lambdaIndent, false) {
+        lambdaArguments.forEach { it.getArgumentExpression()?.accept(this) }
       }
     }
   }
@@ -1133,7 +1143,7 @@ open class KotlinInputAstVisitorBase(
     } else if (initializer != null) {
       builder.space()
       builder.token("=")
-      if (initializer is KtLambdaExpression) {
+      if (initializer is KtLambdaExpression || initializer is KtCallExpression) {
         builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
         initializer.accept(this)
       } else {

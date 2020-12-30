@@ -710,4 +710,42 @@ class GoogleStyleFormatterKtTest {
       |""".trimMargin(),
           formattingOptions = GOOGLE_FORMAT,
           deduceMaxWidth = true)
+
+  @Test
+  fun `new object assigned to variable does not break before brace`() =
+      assertFormatted(
+          """
+      |------------------------------
+      |val foo = applyParameter(
+      |  apply()
+      |)
+      |
+      |val foo = applyParameter {
+      |  apply()
+      |}
+      |
+      |val foo = applyParameter() {
+      |  apply()
+      |}
+      |
+      |val foo = applyParameter(
+      |  abcdef
+      |) {
+      |  apply()
+      |}
+      |
+      |val foo =
+      |  applyParsdfsdfsdfameter(
+      |  asdfkljsldkfjsldkfjsldkf
+      |)
+      |
+      |val foo =
+      |  retrieveFoo(
+      |      foo,
+      |    //
+      |    )
+      |    .name
+      |""".trimMargin(),
+          formattingOptions = GOOGLE_FORMAT,
+          deduceMaxWidth = true)
 }
