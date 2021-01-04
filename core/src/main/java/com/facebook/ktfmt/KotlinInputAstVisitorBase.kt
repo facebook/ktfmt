@@ -91,6 +91,7 @@ import org.jetbrains.kotlin.psi.KtPropertyDelegate
 import org.jetbrains.kotlin.psi.KtQualifiedExpression
 import org.jetbrains.kotlin.psi.KtReferenceExpression
 import org.jetbrains.kotlin.psi.KtReturnExpression
+import org.jetbrains.kotlin.psi.KtScript
 import org.jetbrains.kotlin.psi.KtSecondaryConstructor
 import org.jetbrains.kotlin.psi.KtSimpleNameExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
@@ -2084,6 +2085,22 @@ open class KotlinInputAstVisitorBase(
       if (child.text.isBlank()) {
         continue
       }
+      if (child !is PsiComment && child !is KtScript) {
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
+      }
+      child.accept(this)
+    }
+    markForPartialFormat()
+  }
+
+  override fun visitScript(script: KtScript) {
+    markForPartialFormat()
+    for (child in script.blockExpression.children) {
+      if (child.text.isBlank()) {
+        continue
+      }
+      builder.forcedBreak()
+
       if (child !is PsiComment) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
       }
