@@ -141,6 +141,9 @@ open class KotlinInputAstVisitorBase(
    */
   private val expressionBreakIndent: Indent.Const = Indent.Const.make(options.continuationIndent, 1)
 
+  private val doubleExpressionBreakIndent: Indent.Const =
+      Indent.Const.make(options.continuationIndent, 2)
+
   private val expressionBreakNegativeIndent: Indent.Const =
       Indent.Const.make(-options.continuationIndent, 1)
 
@@ -338,9 +341,13 @@ open class KotlinInputAstVisitorBase(
         builder.space()
         builder.block(ZERO) {
           builder.token("=")
-          builder.block(expressionBreakIndent) {
-            builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
-            builder.block(ZERO) { nonBlockBodyExpressions.accept(this) }
+          if (lambdaOrScopingFunction(nonBlockBodyExpressions)) {
+            processLambdaOrScopingFunction(nonBlockBodyExpressions)
+          } else {
+            builder.block(expressionBreakIndent) {
+              builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+              builder.block(ZERO) { nonBlockBodyExpressions.accept(this) }
+            }
           }
         }
       }
@@ -1134,9 +1141,8 @@ open class KotlinInputAstVisitorBase(
     } else if (initializer != null) {
       builder.space()
       builder.token("=")
-      if (initializer is KtLambdaExpression) {
-        builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-        initializer.accept(this)
+      if (lambdaOrScopingFunction(initializer)) {
+        processLambdaOrScopingFunction(initializer)
       } else {
         builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
         builder.block(expressionBreakIndent) { initializer.accept(this) }
@@ -1180,6 +1186,57 @@ open class KotlinInputAstVisitorBase(
     }
 
     return 0
+  }
+
+  /**
+   * Examples:
+   * 1. '... = { ... }'
+   * 2. '... = Runnable { ... }'
+   * 3. '... = scope { ... }' '... = apply { ... }'
+   *
+   * but not:
+   * 1. '... = foo() { ... }'
+   * 2. '... = Runnable @Annotation { ... }'
+   */
+  private fun lambdaOrScopingFunction(initializer: PsiElement?): Boolean {
+    if (initializer is KtLambdaExpression) {
+      return true
+    }
+    if (initializer is KtCallExpression &&
+        initializer.valueArgumentList?.leftParenthesis == null &&
+        initializer.lambdaArguments.isNotEmpty() &&
+        initializer.typeArgumentList?.arguments.isNullOrEmpty() &&
+        initializer.lambdaArguments.first().getArgumentExpression() is KtLambdaExpression) {
+      return true
+    }
+    return false
+  }
+
+  /** See [lambdaOrScopingFunction] for examples. */
+  private fun processLambdaOrScopingFunction(initializer: PsiElement?) {
+    val tag = genSym()
+
+    // The use of doubleExpressionBreakIndent is an ugly hack to avoid formatting such as
+    //   fun longName() =
+    //     coroutineScope {
+    //     foo()
+    //       ...
+    //   }
+    // Also see https://github.com/google/google-java-format/issues/556
+    builder.breakOp(
+        Doc.FillMode.INDEPENDENT,
+        " ",
+        if (isGoogleStyle) doubleExpressionBreakIndent else expressionBreakIndent,
+        Optional.of(tag))
+
+    if (initializer is KtLambdaExpression) {
+      initializer.accept(this)
+    } else {
+      val call = initializer as KtCallExpression
+      call.calleeExpression?.accept(this)
+      builder.space()
+      call.lambdaArguments.forEach { it.getArgumentExpression()?.accept(this) }
+    }
   }
 
   override fun visitClassOrObject(classOrObject: KtClassOrObject) {

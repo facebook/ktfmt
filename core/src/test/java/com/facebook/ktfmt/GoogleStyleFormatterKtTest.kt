@@ -710,4 +710,35 @@ class GoogleStyleFormatterKtTest {
       |""".trimMargin(),
           formattingOptions = GOOGLE_FORMAT,
           deduceMaxWidth = true)
+
+  @Test
+  fun `lambda assigned to variable does not break before brace`() =
+      assertFormatted(
+          """
+      |fun doIt() {
+      |  val lambda = {
+      |    doItOnce()
+      |    doItTwice()
+      |  }
+      |}
+      |
+      |fun foo() = {
+      |  doItOnce()
+      |  doItTwice()
+      |}
+      |""".trimMargin())
+
+  @Test
+  fun `assignment of a scoping function`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |fun longName() =
+      |    coroutineScope {
+      |  foo()
+      |  //
+      |}
+      |""".trimMargin(),
+          formattingOptions = GOOGLE_FORMAT,
+          deduceMaxWidth = true)
 }

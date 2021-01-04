@@ -1188,6 +1188,11 @@ class FormatterKtTest {
       |    doItTwice()
       |  }
       |}
+      |
+      |fun foo() = {
+      |  doItOnce()
+      |  doItTwice()
+      |}
       |""".trimMargin())
 
   @Test
@@ -4032,6 +4037,36 @@ class FormatterKtTest {
       |  } catch (e: Error,) {
       |    //
       |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `assignment of a scoping function`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |val foo = coroutineScope {
+      |  foo()
+      |  //
+      |}
+      |
+      |fun foo() = coroutineScope {
+      |  foo()
+      |  //
+      |}
+      |
+      |fun foo() =
+      |    Runnable @Px
+      |    {
+      |      foo()
+      |      //
+      |    }
+      |
+      |fun longName() =
+      |    coroutineScope {
+      |  foo()
+      |  //
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
