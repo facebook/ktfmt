@@ -42,6 +42,15 @@ When enabled, it will replace the normal `Reformat Code` action, which can be
 triggered from the `Code` menu or with the Ctrl-Alt-L (by default) keyboard
 shortcut.
 
+To configure IntelliJ to approximate ktfmt's formatting rules during code editing,
+you can edit your project's
+[`.editorconfig` file](https://www.jetbrains.com/help/idea/configuring-code-style.html#editorconfig)
+to include the Kotlin section from
+[`docs/editorconfig-section.txt`](docs/editorconfig-section.txt).
+Not all of ktfmt's rules can be represented as IntelliJ editor settings, so you will still
+need to run ktfmt. Alternately, that file can be used as a reference to manually change
+the project's code style settings.
+
 ### from the command-line
 
 [Download the formatter](https://github.com/facebookincubator/ktfmt/releases)
