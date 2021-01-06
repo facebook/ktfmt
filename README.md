@@ -66,6 +66,10 @@ java -jar /path/to/ktfmt-<VERSION>-jar-with-dependencies.jar [--dropbox-style] [
 formatting (apart from `--dropbox-style`). This is a deliberate design decision to unify our code
 formatting on a single format.*
 
+### using Gradle
+
+A [Gradle plugin (ktfmt-gradle)](https://github.com/cortinico/ktfmt-gradle) is available on the Gradle Plugin Portal. To set it up, just follow the instructions in the [How-to-use section](https://github.com/cortinico/ktfmt-gradle#how-to-use-).
+
 ### using [Spotless](https://github.com/diffplug/spotless)
 
 On Gradle: https://github.com/diffplug/spotless/tree/main/plugin-gradle#ktfmt
