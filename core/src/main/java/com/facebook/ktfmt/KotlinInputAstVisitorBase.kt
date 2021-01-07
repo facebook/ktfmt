@@ -1630,8 +1630,15 @@ open class KotlinInputAstVisitorBase(
       builder.token("when")
       expression.subjectExpression?.let { subjectExp ->
         builder.space()
-        builder.token("(")
-        builder.block(ZERO) { subjectExp.accept(this) }
+        builder.block(ZERO) {
+          builder.token("(")
+          builder.block(if (isGoogleStyle) expressionBreakIndent else ZERO) {
+            subjectExp.accept(this)
+          }
+          if (isGoogleStyle) {
+            builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+          }
+        }
         builder.token(")")
       }
       builder.space()
