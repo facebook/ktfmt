@@ -1698,15 +1698,22 @@ open class KotlinInputAstVisitorBase(
   override fun visitIfExpression(expression: KtIfExpression) {
     builder.sync(expression)
     builder.block(ZERO) {
-      builder.token("if")
-      builder.space()
-      builder.token("(")
-      builder.block(ZERO) { expression.condition?.accept(this) }
+      builder.block(ZERO) {
+        builder.token("if")
+        builder.space()
+        builder.token("(")
+        builder.block(if (isGoogleStyle) expressionBreakIndent else ZERO) {
+          expression.condition?.accept(this)
+        }
+        if (isGoogleStyle) {
+          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+        }
+      }
       builder.token(")")
 
       if (expression.then is KtBlockExpression) {
         builder.space()
-        expression.then?.accept(this)
+        builder.block(ZERO) { expression.then?.accept(this) }
       } else {
         builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
         builder.block(expressionBreakIndent) { expression.then?.accept(this) }
@@ -1719,13 +1726,15 @@ open class KotlinInputAstVisitorBase(
           builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
         }
 
-        builder.token("else")
-        if (expression.`else` is KtBlockExpression || expression.`else` is KtIfExpression) {
-          builder.space()
-          builder.block(ZERO) { expression.`else`?.accept(this) }
-        } else {
-          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-          builder.block(expressionBreakIndent) { expression.`else`?.accept(this) }
+        builder.block(ZERO) {
+          builder.token("else")
+          if (expression.`else` is KtBlockExpression || expression.`else` is KtIfExpression) {
+            builder.space()
+            builder.block(ZERO) { expression.`else`?.accept(this) }
+          } else {
+            builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+            builder.block(expressionBreakIndent) { expression.`else`?.accept(this) }
+          }
         }
       }
     }

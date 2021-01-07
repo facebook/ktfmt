@@ -1602,6 +1602,28 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `if expression with multiline condition`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |fun foo() {
+      |  if (expressions1 &&
+      |      expression2 &&
+      |      expression3) {
+      |    bar()
+      |  }
+      |
+      |  if (foo(
+      |      expressions1 &&
+      |          expression2 &&
+      |          expression3)) {
+      |    bar()
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `assignment expression on multiple lines`() =
       assertFormatted(
           """

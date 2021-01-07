@@ -741,4 +741,30 @@ class GoogleStyleFormatterKtTest {
       |""".trimMargin(),
           formattingOptions = GOOGLE_FORMAT,
           deduceMaxWidth = true)
+
+  @Test
+  fun `if expression with multiline condition`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |fun foo() {
+      |  if (expressions1 &&
+      |      expression2 &&
+      |      expression3
+      |  ) {
+      |    bar()
+      |  }
+      |
+      |  if (foo(
+      |      expressions1 &&
+      |        expression2 &&
+      |        expression3
+      |    )
+      |  ) {
+      |    bar()
+      |  }
+      |}
+      |""".trimMargin(),
+          formattingOptions = GOOGLE_FORMAT,
+          deduceMaxWidth = true)
 }
