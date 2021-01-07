@@ -2394,6 +2394,12 @@ class FormatterKtTest {
       |class Test {
       |  //
       |}
+      |
+      |fun f() {
+      |  if (@Stuff(Magic::class) isGood()) {
+      |    println("")
+      |  }
+      |}
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -3465,8 +3471,7 @@ class FormatterKtTest {
       |class MyClass {}
       |
       |fun f() {
-      |  @Suppress("MagicNumber")
-      |  add(10)
+      |  @Suppress("MagicNumber") add(10)
       |
       |  @Annotation // test a comment after annotations
       |  return 5
@@ -3479,8 +3484,7 @@ class FormatterKtTest {
       assertFormatted(
           """
       |fun f() {
-      |  @Suppress("MagicNumber")
-      |  add(10)
+      |  @Suppress("MagicNumber") add(10)
       |
       |  @Anno1
       |  @Anno2(param = Param1::class)
