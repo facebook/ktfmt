@@ -1770,14 +1770,13 @@ open class KotlinInputAstVisitorBase(
       builder.token(valOrVarKeyword.text)
       builder.space()
     }
+    val hasTrailingComma = destructuringDeclaration.trailingComma != null
     builder.block(ZERO) {
       builder.token("(")
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
       builder.block(expressionBreakIndent) {
         emitParameterLikeList(
-            destructuringDeclaration.entries,
-            destructuringDeclaration.trailingComma != null,
-            wrapInBlock = true)
+            destructuringDeclaration.entries, hasTrailingComma, wrapInBlock = true)
       }
     }
     builder.token(")")
@@ -1785,8 +1784,12 @@ open class KotlinInputAstVisitorBase(
     if (initializer != null) {
       builder.space()
       builder.token("=")
-      builder.space()
-      initializer.accept(this)
+      if (hasTrailingComma) {
+        builder.space()
+      } else {
+        builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+      }
+      builder.block(expressionBreakIndent, !hasTrailingComma) { initializer.accept(this) }
     }
   }
 

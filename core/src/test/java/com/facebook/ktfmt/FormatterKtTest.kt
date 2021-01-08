@@ -1920,10 +1920,18 @@ class FormatterKtTest {
   fun `handle destructuring declaration`() =
       assertFormatted(
           """
+      |-----------------------------------------------
       |fun f() {
       |  val (a, b: Int) = listOf(1, 2)
+      |  val (asd, asd, asd, asd, asd, asd, asd) =
+      |      foo.bar(asdasd, asdasd)
+      |
+      |  val (accountType, accountId) =
+      |      oneTwoThreeFourFiveSixSeven(
+      |          foo, bar, zed, boo)
       |}
-      |""".trimMargin())
+      |""".trimMargin(),
+          deduceMaxWidth = true)
 
   @Test
   fun `handle ? for nullalble types`() =
@@ -4054,6 +4062,19 @@ class FormatterKtTest {
       |      x: Int,
       |      y: Int,
       |  ) = foo()
+      |
+      |  val (
+      |      x: Int,
+      |  ) = foo(
+      |      blablablablFoobar,
+      |      alskdjasld)
+      |
+      |  val (
+      |      x: Int,
+      |      y: Int,
+      |  ) = foo(
+      |      blablablablFoobar,
+      |      asldkalsd)
       |
       |  a[
       |      0,

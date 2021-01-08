@@ -795,4 +795,26 @@ class GoogleStyleFormatterKtTest {
       |""".trimMargin(),
           formattingOptions = GOOGLE_FORMAT,
           deduceMaxWidth = true)
+
+  @Test
+  fun `handle destructuring declaration`() =
+      assertFormatted(
+          """
+      |-------------------------------------------
+      |fun f() {
+      |  val (a, b: Int) = listOf(1, 2)
+      |  val (asd, asd, asd, asd, asd, asd, asd) =
+      |    foo.bar(asdasd, asdasd)
+      |
+      |  val (accountType, accountId) =
+      |    oneTwoThreeFourFiveSixSeven(
+      |      foo,
+      |      bar,
+      |      zed,
+      |      boo
+      |    )
+      |}
+      |""".trimMargin(),
+          formattingOptions = GOOGLE_FORMAT,
+          deduceMaxWidth = true)
 }
