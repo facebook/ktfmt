@@ -1510,14 +1510,6 @@ open class KotlinInputAstVisitorBase(
       loop@ for (child in expression.node.children()) {
         when (val psi = child.psi) {
           is PsiWhiteSpace -> continue@loop
-          is KtAnnotation -> {
-            psi.accept(this)
-            if (psi.entries.size != 1) {
-              builder.forcedBreak()
-            } else {
-              builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
-            }
-          }
           is KtAnnotationEntry -> {
             psi.accept(this)
             if (expression.annotationEntries.size != 1) {
@@ -1532,7 +1524,12 @@ open class KotlinInputAstVisitorBase(
     }
   }
 
-  /** For example, @field:[Inject Named("WEB_VIEW")] */
+  /**
+   * For example, @field:[Inject Named("WEB_VIEW")]
+   *
+   * A KtAnnotation is used only to group multiple annotations with the same use-site-target. It
+   * only appears in a modifier list since annotated expressions do not have use-site-targets.
+   */
   override fun visitAnnotation(annotation: KtAnnotation) {
     builder.sync(annotation)
     builder.block(ZERO) {
