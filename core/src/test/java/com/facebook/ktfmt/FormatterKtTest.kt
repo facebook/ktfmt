@@ -426,6 +426,17 @@ class FormatterKtTest {
   }
 
   @Test
+  fun `handle package name and imports with escapes and spaces`() =
+      assertFormatted(
+          """
+      |package com.`fun times`.`with package names`
+      |
+      |import `nothing stops`.`us`.`from doing this`
+      |
+      |fun f() = `from doing this`()
+      |""".trimMargin())
+
+  @Test
   fun `safe dot operator expression`() =
       assertFormatted("""
       |fun f() {

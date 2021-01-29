@@ -1418,7 +1418,7 @@ open class KotlinInputAstVisitorBase(
       } else {
         builder.token(".")
       }
-      builder.token(packageName.getReferencedName())
+      builder.token(packageName.getIdentifier()?.text ?: packageName.getReferencedName())
     }
 
     builder.guessToken(";")
