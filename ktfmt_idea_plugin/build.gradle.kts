@@ -42,7 +42,7 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     // Version with which to build (and run; unless alternativeIdePath is specified)
-    version = "2020.3"
+    version = "211-EAP-SNAPSHOT"
     // To run on a different IDE, uncomment and specify a path.
     // alternativeIdePath = "/Applications/Android Studio.app"
 }
