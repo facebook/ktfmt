@@ -19,7 +19,7 @@ plugins {
     java
 }
 
-val ktfmtVersion = "0.19"
+val ktfmtVersion = properties["ktfmt_version"].toString()
 
 group = "com.facebook"
 version = "1.1-SNAPSHOT.$ktfmtVersion"
@@ -42,7 +42,7 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     // Version with which to build (and run; unless alternativeIdePath is specified)
-    version = "2020.3"
+    version = properties["ktfmt_idea_plugin_version"].toString()
     // To run on a different IDE, uncomment and specify a path.
     // alternativeIdePath = "/Applications/Android Studio.app"
 }

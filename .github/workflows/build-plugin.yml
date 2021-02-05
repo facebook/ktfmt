@@ -1,0 +1,49 @@
+name: build-plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      ktfmt_version:
+        description: 'ktfmt version'
+        default: '0.19'
+        required: true
+      plugin_version:
+        description: 'ktfmt idea plugin version'
+        default: 'LATEST-EAP-SNAPSHOT'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Gradle cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build ktfmt plugin
+        working-directory: ./ktfmt_idea_plugin
+        run: |
+          ./gradlew build -P"ktfmt_version"="${{ github.event.inputs.ktfmt_version }}" -P"ktfmt_idea_plugin_version"="${{ github.event.inputs.plugin_version }}"
+          mkdir artifacts
+          cp build/distributions/*.zip artifacts/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ktfmt-idea-plugin
+          path: ktfmt_idea_plugin/artifacts
