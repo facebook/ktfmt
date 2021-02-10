@@ -1967,6 +1967,15 @@ open class KotlinInputAstVisitorBase(
   override fun visitCallableReferenceExpression(expression: KtCallableReferenceExpression) {
     builder.sync(expression)
     expression.receiverExpression?.accept(this)
+
+    // For some reason, expression.receiverExpression doesn't contain the question-mark
+    // token in case of a nullable type, e.g., in String?::isNullOrEmpty.
+    // Instead, KtCallableReferenceExpression exposes a method that looks for the QUEST token in its
+    // children.
+    if (expression.hasQuestionMarks) {
+      builder.token("?")
+    }
+
     builder.token("::")
     expression.callableReference.accept(this)
   }

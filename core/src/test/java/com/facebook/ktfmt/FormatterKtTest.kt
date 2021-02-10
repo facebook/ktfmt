@@ -2369,12 +2369,13 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
-  fun `handle scope operator`() =
+  fun `handle function references`() =
       assertFormatted(
           """
       |fun f(a: List<Int>) {
       |  a.forEach(::println)
       |  a.map(Int::toString)
+      |  a.map(String?::isNullOrEmpty)
       |}
       |""".trimMargin())
 
