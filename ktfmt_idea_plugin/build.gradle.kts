@@ -19,7 +19,7 @@ plugins {
     java
 }
 
-val ktfmtVersion = "0.19"
+val ktfmtVersion = "0.20"
 
 group = "com.facebook"
 version = "1.1-SNAPSHOT.$ktfmtVersion"
