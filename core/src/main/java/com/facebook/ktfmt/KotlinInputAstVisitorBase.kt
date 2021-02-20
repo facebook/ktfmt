@@ -413,7 +413,7 @@ open class KotlinInputAstVisitorBase(
     }
     builder.guessToken(";")
     if (property.parent !is KtWhenExpression) {
-      builder.forcedBreak()
+      builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
     }
   }
 

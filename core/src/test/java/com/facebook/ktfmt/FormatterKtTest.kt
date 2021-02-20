@@ -4153,4 +4153,55 @@ class FormatterKtTest {
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
+
+  @Test
+  fun `top level properties preserve newline spacing`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |const val SOME_CONST = 1
+      |val SOME_STR = "hi"
+      |
+      |val FOO = 2
+      |const val BAR = 3
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `top level properties with other types preserve newline spacing`() =
+      assertFormatted(
+          """
+      |---------------------------------
+      |const val SOME_CONST = 1
+      |val SOME_STR = "hi"
+      |
+      |val FOO = 2
+      |const val BAR = 3
+      |
+      |fun baz() = 1
+      |
+      |data class Qux(val foo: String)
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `top level properties in between other types preserve newline spacing`() =
+      assertFormatted(
+          """
+      |---------------------------------
+      |fun something() {
+      |  println("hi")
+      |}
+      |
+      |const val SOME_CONST = 1
+      |val SOME_STR = "hi"
+      |
+      |val FOO = 2
+      |const val BAR = 3
+      |
+      |fun baz() = 1
+      |
+      |data class Qux(val foo: String)
+      |""".trimMargin(),
+          deduceMaxWidth = true)
 }
