@@ -51,8 +51,8 @@ class ParsedArgsTest {
   fun `parseOptions recognizes --dropbox-style and rejects unknown flags`() {
     val out = ByteArrayOutputStream()
 
-    val (fileNames, formattingOptions) = parseOptions(
-        PrintStream(out), arrayOf("--dropbox-style", "foo.kt", "--unknown"))
+    val (fileNames, formattingOptions) =
+        parseOptions(PrintStream(out), arrayOf("--dropbox-style", "foo.kt", "--unknown"))
 
     assertThat(fileNames).containsExactly("foo.kt")
     assertThat(formattingOptions.blockIndent).isEqualTo(4)
