@@ -43,6 +43,10 @@ const val DEFAULT_MAX_WIDTH: Int = 100
 @JvmField
 val GOOGLE_FORMAT = FormattingOptions(style = GOOGLE, blockIndent = 2, continuationIndent = 2)
 
+/** A format that attempts to reflect https://kotlinlang.org/docs/coding-conventions.html. */
+@JvmField
+val KOTLINLANG_FORMAT = FormattingOptions(style = GOOGLE, blockIndent = 4, continuationIndent = 4)
+
 @JvmField
 val DROPBOX_FORMAT = FormattingOptions(style = DROPBOX, blockIndent = 4, continuationIndent = 4)
 

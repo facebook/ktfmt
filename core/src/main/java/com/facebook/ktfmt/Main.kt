@@ -40,7 +40,8 @@ class Main(
 
   fun run(): Int {
     if (parsedArgs.fileNames.isEmpty()) {
-      err.println("Usage: ktfmt File1.kt File2.kt ...")
+      err.println(
+          "Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] File1.kt File2.kt ...")
       return 1
     }
 
