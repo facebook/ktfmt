@@ -101,6 +101,9 @@ class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) 
         println("# Output: ")
         println("#".repeat(20))
         println(actualFormatting)
+        println("# Expected: ")
+        println("#".repeat(20))
+        println(expectedFormatting)
         println("#".repeat(20))
       }
     } catch (e: Error) {
