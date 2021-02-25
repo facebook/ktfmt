@@ -413,7 +413,7 @@ open class KotlinInputAstVisitorBase(
     }
     builder.guessToken(";")
     if (property.parent !is KtWhenExpression) {
-      builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
+      builder.forcedBreak()
     }
   }
 
@@ -2163,11 +2163,13 @@ open class KotlinInputAstVisitorBase(
 
   override fun visitKtFile(file: KtFile) {
     markForPartialFormat()
+    var importListEmpty = false
     for (child in file.children) {
       if (child.text.isBlank()) {
+        importListEmpty = child is KtImportList
         continue
       }
-      if (child !is PsiComment && child !is KtScript) {
+      if (child !is PsiComment && (child !is KtScript || !importListEmpty)) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
       }
       child.accept(this)
@@ -2177,16 +2179,23 @@ open class KotlinInputAstVisitorBase(
 
   override fun visitScript(script: KtScript) {
     markForPartialFormat()
+    var lastChildHadBlankLineBefore = false
+    var first = true
     for (child in script.blockExpression.children) {
       if (child.text.isBlank()) {
         continue
       }
       builder.forcedBreak()
-
-      if (child !is PsiComment) {
+      val childGetsBlankLineBefore = child !is KtProperty
+      if (first) {
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
+      } else if (child !is PsiComment &&
+          (childGetsBlankLineBefore || lastChildHadBlankLineBefore)) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
       }
       child.accept(this)
+      lastChildHadBlankLineBefore = childGetsBlankLineBefore
+      first = false
     }
     markForPartialFormat()
   }

@@ -2971,8 +2971,6 @@ class FormatterKtTest {
       |
       |// Don't touch ; inside comments.
       |
-      |
-      |
       |/** Don't touch ; inside comments. */
       |""".trimMargin()
     assertThatFormatting(code).isEqualTo(expected)
@@ -4155,39 +4153,9 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `top level properties preserve newline spacing`() =
-      assertFormatted(
-          """
-      |----------------------------
-      |const val SOME_CONST = 1
-      |val SOME_STR = "hi"
-      |
-      |val FOO = 2
-      |const val BAR = 3
-      |""".trimMargin(),
-          deduceMaxWidth = true)
-
-  @Test
-  fun `top level properties with other types preserve newline spacing`() =
-      assertFormatted(
-          """
-      |---------------------------------
-      |const val SOME_CONST = 1
-      |val SOME_STR = "hi"
-      |
-      |val FOO = 2
-      |const val BAR = 3
-      |
-      |fun baz() = 1
-      |
-      |data class Qux(val foo: String)
-      |""".trimMargin(),
-          deduceMaxWidth = true)
-
-  @Test
-  fun `top level properties in between other types preserve newline spacing`() =
-      assertFormatted(
-          """
+  fun `top level properties with other types preserve newline spacing`() {
+    assertFormatted(
+        """
       |---------------------------------
       |fun something() {
       |  println("hi")
@@ -4195,13 +4163,131 @@ class FormatterKtTest {
       |
       |const val SOME_CONST = 1
       |val SOME_STR = "hi"
+      |// Single comment
+      |val SOME_INT = 1
+      |
+      |// Intentional space above single comment
+      |val SOME_INT2 = 1
       |
       |val FOO = 2
       |const val BAR = 3
       |
       |fun baz() = 1
       |
+      |val d = 1
+      |
+      |class Bar {}
+      |
+      |val e = 1
+      |/** Doc block */
+      |val f = 1
+      |
+      |/** Intentional space above doc block */
+      |val g = 1
+      |
       |data class Qux(val foo: String)
       |""".trimMargin(),
-          deduceMaxWidth = true)
+        deduceMaxWidth = true)
+
+    assertThatFormatting(
+            """
+      |import com.example.foo
+      |import com.example.bar
+      |const val SOME_CONST = foo.a
+      |val SOME_STR = bar.a
+      |""".trimMargin())
+        .isEqualTo(
+            """
+      |import com.example.bar
+      |import com.example.foo
+      |
+      |const val SOME_CONST = foo.a
+      |val SOME_STR = bar.a
+      |""".trimMargin())
+  }
+
+  @Test
+  fun `first line is never empty`() =
+      assertThatFormatting("""
+      |
+      |fun f() {}
+      |""".trimMargin())
+          .isEqualTo("""
+      |fun f() {}
+      |""".trimMargin())
+
+  @Test
+  fun `at most one newline between any adjacent top-level elements`() =
+      assertThatFormatting(
+              """
+      |import com.Bar
+      |
+      |
+      |import com.Foo
+      |
+      |
+      |fun f() {}
+      |
+      |
+      |fun f() {}
+      |
+      |
+      |class C {}
+      | 
+      |
+      |class C {}
+      |
+      |
+      |val x = Foo()
+      |
+      |
+      |val x = Bar()
+      |""".trimMargin())
+          .isEqualTo(
+              """
+      |import com.Bar
+      |import com.Foo
+      |
+      |fun f() {}
+      |
+      |fun f() {}
+      |
+      |class C {}
+      |
+      |class C {}
+      |
+      |val x = Foo()
+      |
+      |val x = Bar()
+      |""".trimMargin())
+
+  @Test
+  fun `at least one newline between any adjacent top-level elements, unless it's a property`() =
+      assertThatFormatting(
+              """
+      |import com.Bar
+      |import com.Foo
+      |fun f() {}
+      |fun f() {}
+      |class C {}
+      |class C {}
+      |val x = Foo()
+      |val x = Bar()
+      |""".trimMargin())
+          .isEqualTo(
+              """
+      |import com.Bar
+      |import com.Foo
+      |
+      |fun f() {}
+      |
+      |fun f() {}
+      |
+      |class C {}
+      |
+      |class C {}
+      |
+      |val x = Foo()
+      |val x = Bar()
+      |""".trimMargin())
 }
