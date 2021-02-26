@@ -1,4 +1,4 @@
-name: Build ktfmt JetBrains plugin
+name: Build JetBrains plugin
 
 on:
   push:
