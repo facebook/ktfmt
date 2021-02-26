@@ -31,4 +31,4 @@ jobs:
     - name: Verify plugin
       run: |
         cd ktfmt_idea_plugin
-        ./ktfmt_idea_plugin/gradlew verifyPlugin
+        ./gradlew verifyPlugin
