@@ -25,15 +25,16 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import java.awt.Insets;
+import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import java.awt.Insets;
 
 public class KtfmtConfigurable extends BaseConfigurable implements SearchableConfigurable {
 
@@ -80,7 +81,7 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
   public void apply() throws ConfigurationException {
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
     settings.setEnabled(enable.isSelected() ? EnabledState.ENABLED : getDisabledState());
-    settings.setDropboxStyle(((UiFormatterStyle) styleComboBox.getSelectedItem()).convert());
+    settings.setUiFormatterStyle(((UiFormatterStyle) styleComboBox.getSelectedItem()));
   }
 
   private EnabledState getDisabledState() {
@@ -95,16 +96,14 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
   public void reset() {
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
     enable.setSelected(settings.isEnabled());
-    styleComboBox.setSelectedItem(UiFormatterStyle.convert(settings.getIsDropboxStyle()));
+    styleComboBox.setSelectedItem(settings.getUiFormatterStyle());
   }
 
   @Override
   public boolean isModified() {
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
     return enable.isSelected() != settings.isEnabled()
-        || !styleComboBox
-            .getSelectedItem()
-            .equals(UiFormatterStyle.convert(settings.getIsDropboxStyle()));
+        || !styleComboBox.getSelectedItem().equals(settings.getUiFormatterStyle());
   }
 
   @Override

@@ -16,8 +16,6 @@
 
 package com.facebook.ktfmt.intellij;
 
-import static java.util.Comparator.comparing;
-
 import com.google.common.collect.ImmutableList;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -29,12 +27,15 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.impl.CheckUtil;
 import com.intellij.util.IncorrectOperationException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.kotlin.idea.KotlinFileType;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.kotlin.idea.KotlinFileType;
+
+import static java.util.Comparator.comparing;
 
 /**
  * A {@link CodeStyleManager} implementation which formats .kt files with ktfmt. Formatting of all
@@ -92,7 +93,9 @@ class KtfmtCodeStyleManager extends CodeStyleManagerDecorator {
     }
   }
 
-  /** Return whether or not this formatter can handle formatting the given file. */
+  /**
+   * Return whether or not this formatter can handle formatting the given file.
+   */
   private boolean overrideFormatterForFile(PsiFile file) {
     return KotlinFileType.INSTANCE.getName().equals(file.getFileType().getName())
         && KtfmtSettings.getInstance(getProject()).isEnabled();
@@ -125,10 +128,10 @@ class KtfmtCodeStyleManager extends CodeStyleManagerDecorator {
    * formatter (usually using {@link #performReplacements(Document, Map)}.
    */
   private void format(Document document, Collection<TextRange> ranges) {
-    boolean isDropboxStyle = KtfmtSettings.getInstance(getProject()).getIsDropboxStyle();
+    UiFormatterStyle uiFormatterStyle = KtfmtSettings.getInstance(getProject()).getUiFormatterStyle();
 
     performReplacements(
-        document, FormatterUtil.getReplacements(isDropboxStyle, document.getText()));
+        document, FormatterUtil.getReplacements(uiFormatterStyle, document.getText()));
   }
 
   private void performReplacements(

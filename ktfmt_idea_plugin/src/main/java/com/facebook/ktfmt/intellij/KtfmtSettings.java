@@ -61,12 +61,12 @@ class KtfmtSettings implements PersistentStateComponent<KtfmtSettings.State> {
     return state.enabled.equals(EnabledState.UNKNOWN);
   }
 
-  boolean getIsDropboxStyle() {
-    return state.isDropboxStyle;
+  UiFormatterStyle getUiFormatterStyle() {
+    return state.uiFormatterStyle;
   }
 
-  void setDropboxStyle(boolean isDropboxStyle) {
-    state.isDropboxStyle = isDropboxStyle;
+  void setUiFormatterStyle(UiFormatterStyle uiFormatterStyle) {
+    state.uiFormatterStyle = uiFormatterStyle;
   }
 
   enum EnabledState {
@@ -78,7 +78,7 @@ class KtfmtSettings implements PersistentStateComponent<KtfmtSettings.State> {
   static class State {
 
     private EnabledState enabled = EnabledState.UNKNOWN;
-    public boolean isDropboxStyle = false;
+    public UiFormatterStyle uiFormatterStyle = UiFormatterStyle.DEFAULT;
 
     // enabled used to be a boolean so we use bean property methods for backwards
     // compatibility
