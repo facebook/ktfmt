@@ -41,8 +41,8 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    // Default value: the version with which to build (and run; unless alternativeIdePath is specified)
-    version = "LATEST-EAP-SNAPSHOT"
+    // Version with which to build (and run; unless alternativeIdePath is specified)
+    version = "2020.3"
     // See https://github.com/JetBrains/gradle-intellij-plugin#building-properties
     updateSinceUntilBuild = false
     // To run on a different IDE, uncomment and specify a path.
