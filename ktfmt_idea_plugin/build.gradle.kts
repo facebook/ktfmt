@@ -17,6 +17,7 @@
 plugins {
     id("org.jetbrains.intellij") version "0.4.21"
     java
+    id("com.diffplug.spotless") version "5.10.2"
 }
 
 val ktfmtVersion = "0.20"
@@ -50,5 +51,11 @@ intellij {
 tasks {
     patchPluginXml {
         sinceBuild("201")
+    }
+}
+
+spotless {
+    java {
+        googleJavaFormat()
     }
 }
