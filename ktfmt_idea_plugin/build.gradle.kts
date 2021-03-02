@@ -20,7 +20,7 @@ plugins {
     id("com.diffplug.spotless") version "5.10.2"
 }
 
-val ktfmtVersion = "0.20"
+val ktfmtVersion = "0.21"
 
 group = "com.facebook"
 version = "1.1-SNAPSHOT.$ktfmtVersion"

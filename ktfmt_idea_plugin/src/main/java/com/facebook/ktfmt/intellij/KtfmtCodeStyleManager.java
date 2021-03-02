@@ -125,10 +125,11 @@ class KtfmtCodeStyleManager extends CodeStyleManagerDecorator {
    * formatter (usually using {@link #performReplacements(Document, Map)}.
    */
   private void format(Document document, Collection<TextRange> ranges) {
-    boolean isDropboxStyle = KtfmtSettings.getInstance(getProject()).getIsDropboxStyle();
+    UiFormatterStyle uiFormatterStyle =
+        KtfmtSettings.getInstance(getProject()).getUiFormatterStyle();
 
     performReplacements(
-        document, FormatterUtil.getReplacements(isDropboxStyle, document.getText()));
+        document, FormatterUtil.getReplacements(uiFormatterStyle, document.getText()));
   }
 
   private void performReplacements(

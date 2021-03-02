@@ -16,10 +16,7 @@
 
 package com.facebook.ktfmt.intellij;
 
-import static com.facebook.ktfmt.FormatterKt.DROPBOX_FORMAT;
-
 import com.facebook.ktfmt.FormatterKt;
-import com.facebook.ktfmt.FormattingOptions;
 import com.facebook.ktfmt.ParseError;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -36,16 +33,18 @@ final class FormatterUtil {
    *
    * @return formatted code
    */
-  static Map<TextRange, String> getReplacements(boolean isDropboxStyle, String code) {
+  static Map<TextRange, String> getReplacements(UiFormatterStyle uiFormatterStyle, String code) {
     try {
-      return ImmutableMap.of(TextRange.allOf(code), formatCode(isDropboxStyle, code));
+      return ImmutableMap.of(TextRange.allOf(code), formatCode(uiFormatterStyle, code));
     } catch (FormatterException | ParseError e) {
       return ImmutableMap.of();
     }
   }
 
   @VisibleForTesting
-  static String formatCode(boolean isDropboxStyle, String code) throws FormatterException {
-    return FormatterKt.format(isDropboxStyle ? DROPBOX_FORMAT : new FormattingOptions(), code);
+  static String formatCode(UiFormatterStyle uiFormatterStyle, String code)
+      throws FormatterException {
+
+    return FormatterKt.format(uiFormatterStyle.getFormattingOptions(), code);
   }
 }

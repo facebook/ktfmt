@@ -16,35 +16,33 @@
 
 package com.facebook.ktfmt.intellij;
 
-import java.util.Arrays;
-import java.util.Objects;
+import static com.facebook.ktfmt.FormatterKt.DROPBOX_FORMAT;
+import static com.facebook.ktfmt.FormatterKt.GOOGLE_FORMAT;
+import static com.facebook.ktfmt.FormatterKt.KOTLINLANG_FORMAT;
+
+import com.facebook.ktfmt.FormattingOptions;
 
 /** Configuration options for the formatting style. */
 enum UiFormatterStyle {
-  DEFAULT("Default ktfmt style", false),
-  DROPBOX("Dropbox style", true);
+  DEFAULT("Default", new FormattingOptions()),
+  DROPBOX("Dropbox", DROPBOX_FORMAT),
+  GOOGLE("Google (internal)", GOOGLE_FORMAT),
+  KOTLINLANG("Kotlinlang", KOTLINLANG_FORMAT);
 
   private final String description;
-  private final boolean isDropboxStyle;
+  private final FormattingOptions formattingOptions;
 
-  UiFormatterStyle(String description, boolean isDropboxStyle) {
+  UiFormatterStyle(String description, FormattingOptions formattingOptions) {
     this.description = description;
-    this.isDropboxStyle = isDropboxStyle;
+    this.formattingOptions = formattingOptions;
+  }
+
+  FormattingOptions getFormattingOptions() {
+    return formattingOptions;
   }
 
   @Override
   public String toString() {
     return description;
-  }
-
-  public boolean convert() {
-    return isDropboxStyle;
-  }
-
-  static UiFormatterStyle convert(boolean isDropboxStyle) {
-    return Arrays.stream(UiFormatterStyle.values())
-        .filter(value -> Objects.equals(value.isDropboxStyle, isDropboxStyle))
-        .findFirst()
-        .get();
   }
 }

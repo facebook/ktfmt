@@ -80,7 +80,7 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
   public void apply() throws ConfigurationException {
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
     settings.setEnabled(enable.isSelected() ? EnabledState.ENABLED : getDisabledState());
-    settings.setDropboxStyle(((UiFormatterStyle) styleComboBox.getSelectedItem()).convert());
+    settings.setUiFormatterStyle(((UiFormatterStyle) styleComboBox.getSelectedItem()));
   }
 
   private EnabledState getDisabledState() {
@@ -95,16 +95,14 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
   public void reset() {
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
     enable.setSelected(settings.isEnabled());
-    styleComboBox.setSelectedItem(UiFormatterStyle.convert(settings.getIsDropboxStyle()));
+    styleComboBox.setSelectedItem(settings.getUiFormatterStyle());
   }
 
   @Override
   public boolean isModified() {
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
     return enable.isSelected() != settings.isEnabled()
-        || !styleComboBox
-            .getSelectedItem()
-            .equals(UiFormatterStyle.convert(settings.getIsDropboxStyle()));
+        || !styleComboBox.getSelectedItem().equals(settings.getUiFormatterStyle());
   }
 
   @Override

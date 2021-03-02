@@ -28,7 +28,7 @@ public class FormatterUtilTest {
   public void getReplacements() throws Exception {
     String code = "val   a =    5";
     String expected = "val a = 5\n";
-    String actual = FormatterUtil.formatCode(false, code);
+    String actual = FormatterUtil.formatCode(UiFormatterStyle.DEFAULT, code);
 
     assertEquals(expected, actual);
   }
