@@ -21,6 +21,7 @@ import com.facebook.ktfmt.FormattingOptions.Style.GOOGLE
 import com.facebook.ktfmt.RedundantElementRemover.dropRedundantElements
 import com.facebook.ktfmt.debughelpers.printOps
 import com.facebook.ktfmt.kdoc.KDocCommentsHelper
+import com.facebook.ktfmt.kdoc.indexOfCommentEscapeSequences
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Range
 import com.google.googlejavaformat.Doc
@@ -116,7 +117,7 @@ fun format(code: String, removeUnusedImports: Boolean): String =
  */
 @Throws(FormatterException::class, ParseError::class)
 fun format(options: FormattingOptions, code: String): String {
-  checkWhitespaceTombstones(code)
+  checkEscapeSequences(code)
 
   val lfCode = StringUtilRt.convertLineSeparators(code)
   val sortedImports = sortedAndDistinctImports(lfCode)
@@ -164,11 +165,15 @@ fun createAstVisitor(options: FormattingOptions, builder: OpsBuilder): PsiElemen
       .newInstance(options, builder)
 }
 
-private fun checkWhitespaceTombstones(code: String) {
-  val index = code.indexOfWhitespaceTombstone()
+private fun checkEscapeSequences(code: String) {
+  var index = code.indexOfWhitespaceTombstone()
+  if (index == -1) {
+    index = indexOfCommentEscapeSequences(code)
+  }
   if (index != -1) {
     throw ParseError(
-        "ktfmt does not support code which contains a \\u0003 character; escape it",
+        "ktfmt does not support code which contains one of {\\u0003, \\u0004, \\u0005} character" +
+            "; escape it",
         StringUtil.offsetToLineColumn(code, index))
   }
 }

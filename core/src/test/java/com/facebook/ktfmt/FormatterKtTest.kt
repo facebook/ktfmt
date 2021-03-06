@@ -1391,6 +1391,35 @@ class FormatterKtTest {
   }
 
   @Test
+  fun `nested kdoc comments`() {
+    val code =
+        """
+      |/**
+      | * foo /* bla */
+      | */ class F {
+      |
+      | }
+      |""".trimMargin()
+    val expected = """
+      |/** foo /* bla */ */
+      |class F {}
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `nested kdoc inside code block`() =
+      assertFormatted(
+          """
+      |/**
+      | * ```
+      | * edit -> { /* open edit screen */ }
+      | * ```
+      | */
+      |fun foo() {}
+      |""".trimMargin())
+
+  @Test
   fun `formatting kdoc doesn't add p HTML tags`() =
       assertFormatted(
           """
