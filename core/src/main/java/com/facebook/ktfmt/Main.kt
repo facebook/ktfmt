@@ -24,6 +24,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.PrintStream
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
@@ -63,7 +64,9 @@ class Main(
       return 1
     }
 
-    return if (files.parallelStream().allMatch { formatFile(it) }) 0 else 1
+    val success = AtomicBoolean(true)
+    files.parallelStream().forEach { success.compareAndSet(true, formatFile(it)) }
+    return if (success.get()) 0 else 1
   }
 
   @VisibleForTesting

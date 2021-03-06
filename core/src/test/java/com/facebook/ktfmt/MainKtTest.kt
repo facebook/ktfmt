@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
 import java.lang.IllegalStateException
+import java.util.concurrent.ForkJoinPool
 import org.junit.After
 import org.junit.Assert.fail
 import org.junit.Test
@@ -138,6 +139,37 @@ class MainKtTest {
 
     assertThat(returnValue).isEqualTo(1)
     assertThat(err.toString("UTF-8")).contains("foo.kt:1:14: error: ")
+  }
+
+  @Test
+  fun `all files in args are processed, even if one of them has an error`() {
+    val file1 = root.resolve("file1.kt")
+    val file2Broken = root.resolve("file2.kt")
+    val file3 = root.resolve("file3.kt")
+    file1.writeText("fun    f1 ()  ")
+    file2Broken.writeText("fun    f1 (  ")
+    file3.writeText("fun    f1 ()  ")
+    val err = ByteArrayOutputStream()
+
+    // Make Main() process files serially.
+    val forkJoinPool = ForkJoinPool(1)
+
+    val returnValue: Int =
+        forkJoinPool
+            .submit<Int> {
+              Main(
+                      "".byteInputStream(),
+                      PrintStream(ByteArrayOutputStream()),
+                      PrintStream(err),
+                      arrayOf(file1.toString(), file2Broken.toString(), file3.toString()))
+                  .run()
+            }
+            .get()
+
+    assertThat(returnValue).isEqualTo(1)
+    assertThat(err.toString("UTF-8")).contains("Done formatting $file1")
+    assertThat(err.toString("UTF-8")).contains("file2.kt:1:14: error: ")
+    assertThat(err.toString("UTF-8")).contains("Done formatting $file3")
   }
 
   @Test
