@@ -4,7 +4,7 @@
 #
 # It includes editor-specific config options for IntelliJ IDEA.
 #
-# To use Dropbox style, uncomment the lines at the bottom of the section.
+# If any option is wrong, PR are welcome
 
 [{*.kt,*.kts}]
 indent_style = space
@@ -12,6 +12,7 @@ insert_final_newline = true
 max_line_length = 100
 indent_size = 2
 ij_continuation_indent_size = 4
+ij_java_names_count_to_use_import_on_demand = 9999
 ij_kotlin_align_in_columns_case_branch = false
 ij_kotlin_align_multiline_binary_operation = false
 ij_kotlin_align_multiline_extends_list = false
@@ -45,7 +46,6 @@ ij_kotlin_field_annotation_wrap = split_into_lines
 ij_kotlin_finally_on_new_line = false
 ij_kotlin_if_rparen_on_new_line = false
 ij_kotlin_import_nested_classes = false
-ij_kotlin_imports_layout = *,java.**,javax.**,kotlin.**,^
 ij_kotlin_insert_whitespaces_in_simple_one_line_method = true
 ij_kotlin_keep_blank_lines_before_right_brace = 2
 ij_kotlin_keep_blank_lines_in_code = 2
@@ -61,9 +61,8 @@ ij_kotlin_method_call_chain_wrap = normal
 ij_kotlin_method_parameters_new_line_after_left_paren = true
 ij_kotlin_method_parameters_right_paren_on_new_line = true
 ij_kotlin_method_parameters_wrap = on_every_item
-ij_kotlin_name_count_to_use_star_import = 5
-ij_kotlin_name_count_to_use_star_import_for_members = 3
-ij_kotlin_packages_to_use_import_on_demand = java.util.*,kotlinx.android.synthetic.**,io.ktor.**
+ij_kotlin_name_count_to_use_star_import = 9999
+ij_kotlin_name_count_to_use_star_import_for_members = 9999
 ij_kotlin_parameter_annotation_wrap = off
 ij_kotlin_space_after_comma = true
 ij_kotlin_space_after_extend_colon = true
@@ -92,8 +91,3 @@ ij_kotlin_while_on_new_line = false
 ij_kotlin_wrap_elvis_expressions = 1
 ij_kotlin_wrap_expression_body_functions = 1
 ij_kotlin_wrap_first_method_in_call_chain = false
-#
-# Dropbox style: uncomment the following lines
-#
-#indent_size = 4
-#ij_continuation_indent_size = 8
