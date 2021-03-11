@@ -3531,6 +3531,29 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `annotations on function types`() =
+      assertFormatted(
+          """
+      |fun foo(bar: @StringRes Int) {}
+      |
+      |fun foo(error: @Composable ((x) -> Unit)) {}
+      |
+      |fun foo(error: (@Composable (x) -> Unit)) {}
+      |
+      |fun foo(
+      |    error:
+      |        @field:[Inject Named("WEB_VIEW")]
+      |        ((x) -> Unit)
+      |) {}
+      |
+      |fun foo(
+      |    error:
+      |        (@field:[Inject Named("WEB_VIEW")]
+      |        (x) -> Unit)
+      |) {}
+      |""".trimMargin())
+
+  @Test
   fun `handle annotations with use-site targets`() =
       assertFormatted(
           """
