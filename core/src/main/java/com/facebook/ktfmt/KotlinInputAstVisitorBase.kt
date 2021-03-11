@@ -745,7 +745,9 @@ open class KotlinInputAstVisitorBase(
       val arguments = argumentList?.arguments.orEmpty()
       builder.block(argumentsIndent) { typeArgumentList?.accept(this) }
       builder.block(argumentsIndent) {
-        builder.guessToken("(")
+        if (argumentList != null) {
+          builder.token("(")
+        }
         if (arguments.isNotEmpty()) {
           if (isGoogleStyle) {
             argumentList?.accept(this)
@@ -759,7 +761,9 @@ open class KotlinInputAstVisitorBase(
             builder.block(ZERO) { argumentList?.accept(this) }
           }
         }
-        builder.guessToken(")")
+        if (argumentList != null) {
+          builder.token(")")
+        }
       }
       if (lambdaArguments.isNotEmpty()) {
         builder.space()
