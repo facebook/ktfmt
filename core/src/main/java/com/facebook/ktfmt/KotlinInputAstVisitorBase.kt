@@ -173,14 +173,24 @@ open class KotlinInputAstVisitorBase(
   /** Example `Int`, `(String)` or `() -> Int` */
   override fun visitTypeReference(typeReference: KtTypeReference) {
     builder.sync(typeReference)
-    val hasParentheses = typeReference.hasParentheses()
-    if (hasParentheses) {
-      builder.token("(")
-    }
-    typeReference.modifierList?.accept(this)
-    typeReference.typeElement?.accept(this)
-    if (hasParentheses) {
-      builder.token(")")
+    // Normally we'd visit the children nodes through accessors on 'typeReference', and  we wouldn't
+    // loop over children.
+    // But, in this case the modifier list can either be inside the parenthesis:
+    // ... (@Composable (x) -> Unit)
+    // or outside of them:
+    // ... @Composable ((x) -> Unit)
+    val modifierList = typeReference.modifierList
+    val typeElement = typeReference.typeElement
+    for (child in typeReference.node.children()) {
+      if (child.psi == modifierList) {
+        modifierList?.accept(this)
+      } else if (child.psi == typeElement) {
+        typeElement?.accept(this)
+      } else if (child.elementType == KtTokens.LPAR) {
+        builder.token("(")
+      } else if (child.elementType == KtTokens.RPAR) {
+        builder.token(")")
+      }
     }
   }
 
