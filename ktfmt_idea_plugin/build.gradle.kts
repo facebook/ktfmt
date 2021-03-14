@@ -21,9 +21,10 @@ plugins {
 }
 
 val ktfmtVersion = "0.21"
+val pluginVersion = "1.1"
 
 group = "com.facebook"
-version = "1.1-SNAPSHOT.$ktfmtVersion"
+version = "$pluginVersion.$ktfmtVersion"
 
 repositories {
     mavenCentral()
@@ -52,6 +53,9 @@ tasks {
     patchPluginXml {
         sinceBuild("201")
         untilBuild("")
+    }
+    publishPlugin {
+        token(System.getenv("JETBRAINS_MARKETPLACE_TOKEN"))
     }
 }
 
