@@ -51,6 +51,7 @@ intellij {
 tasks {
     patchPluginXml {
         sinceBuild("201")
+        untilBuild("")
     }
 }
 
