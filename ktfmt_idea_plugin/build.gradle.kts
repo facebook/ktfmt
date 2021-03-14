@@ -15,7 +15,7 @@
  */
 
 plugins {
-    id("org.jetbrains.intellij") version "0.4.21"
+    id("org.jetbrains.intellij") version "0.7.2"
     java
     id("com.diffplug.spotless") version "5.10.2"
 }
@@ -56,6 +56,9 @@ tasks {
     }
     publishPlugin {
         token(System.getenv("JETBRAINS_MARKETPLACE_TOKEN"))
+    }
+    runPluginVerifier {
+        ideVersions(listOf("211.6432.7"))
     }
 }
 
