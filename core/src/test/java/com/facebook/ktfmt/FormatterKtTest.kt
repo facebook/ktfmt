@@ -3042,6 +3042,9 @@ class FormatterKtTest {
       |  val a = 3;
       |  val x = 5 ; val y = ManyAmaze();
       |  myThingMap.forEach { val (key, value) = it; println("mapped ${"$"}MuchWow") }
+      |  when {
+      |    true -> "1"; false -> "0"
+      |  }
       |} ;
       |
       |""".trimMargin()
@@ -3061,6 +3064,10 @@ class FormatterKtTest {
       |  myThingMap.forEach {
       |    val (key, value) = it
       |    println("mapped ${"$"}MuchWow")
+      |  }
+      |  when {
+      |    true -> "1"
+      |    false -> "0"
       |  }
       |}
       |""".trimMargin()

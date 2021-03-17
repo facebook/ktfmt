@@ -1678,6 +1678,7 @@ open class KotlinInputAstVisitorBase(
               whenExpression?.accept(this)
             }
           }
+          builder.guessToken(";")
         }
         builder.forcedBreak()
       }
