@@ -31,3 +31,7 @@ jobs:
             --batch-mode \
             -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} \
             -Prelease clean deploy
+      - name: Publish IntelliJ plugin to JetBrains Marketplace
+        run: ./gradlew publishPlugin --stacktrace
+        env:
+          JETBRAINS_MARKETPLACE_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
