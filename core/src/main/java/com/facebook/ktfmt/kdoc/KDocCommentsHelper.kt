@@ -29,7 +29,8 @@ import java.util.ArrayList
 import java.util.regex.Pattern
 
 /** `KDocCommentsHelper` extends [CommentsHelper] to rewrite KDoc comments. */
-class KDocCommentsHelper(private val lineSeparator: String) : CommentsHelper {
+class KDocCommentsHelper(private val lineSeparator: String, private val maxLineLength: Int) :
+    CommentsHelper {
 
   override fun rewrite(tok: Tok, maxWidth: Int, column0: Int): String {
     if (!tok.isComment) {
@@ -37,7 +38,7 @@ class KDocCommentsHelper(private val lineSeparator: String) : CommentsHelper {
     }
     var text = tok.originalText
     if (tok.isJavadocComment) {
-      text = KDocFormatter.formatKDoc(text, column0)
+      text = KDocFormatter.formatKDoc(text, column0, maxLineLength)
     }
     val lines = ArrayList<String>()
     val it = Newlines.lineIterator(text)

@@ -130,7 +130,8 @@ fun format(options: FormattingOptions, code: String): String {
 private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator: String): String {
   val file = Parser.parse(code)
   val kotlinInput = KotlinInput(code, file)
-  val javaOutput = JavaOutput(lineSeparator, kotlinInput, KDocCommentsHelper(lineSeparator))
+  val javaOutput =
+      JavaOutput(lineSeparator, kotlinInput, KDocCommentsHelper(lineSeparator, options.maxWidth))
   val builder = OpsBuilder(kotlinInput, javaOutput)
   file.accept(createAstVisitor(options, builder))
   builder.sync(kotlinInput.text.length)

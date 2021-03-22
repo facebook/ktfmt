@@ -3910,6 +3910,24 @@ class FormatterKtTest {
   }
 
   @Test
+  fun `KDoc is reflowed`() {
+    val code =
+        """
+      |/** Lorem ipsum dolor sit amet, consectetur */
+      |class MyClass {}
+      |""".trimMargin()
+    val expected =
+        """
+      |/**
+      | * Lorem ipsum dolor sit amet,
+      | * consectetur
+      | */
+      |class MyClass {}
+      |""".trimMargin()
+    assertThatFormatting(code).withOptions(FormattingOptions(maxWidth = 33)).isEqualTo(expected)
+  }
+
+  @Test
   fun `sanity - block and continuation indents are 4`() {
     val code =
         """
@@ -4241,7 +4259,7 @@ class FormatterKtTest {
       |/** Doc block */
       |val f = 1
       |
-      |/** Intentional space above doc block */
+      |/** Intent. space above doc */
       |val g = 1
       |
       |data class Qux(val foo: String)

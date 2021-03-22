@@ -51,8 +51,6 @@ import org.jetbrains.kotlin.lexer.KtTokens.WHITE_SPACE
  */
 object KDocFormatter {
 
-  internal val MAX_LINE_LENGTH = 100
-
   private val ONE_CONTENT_LINE_PATTERN = compile(" */[*][*]\n *[*] (.*)\n *[*]/")
 
   private val NUMBERED_LIST_PATTERN = "[0-9]+\\.".toRegex()
@@ -61,7 +59,7 @@ object KDocFormatter {
    * Formats the given Javadoc comment, which must start with ∕✱✱ and end with ✱∕. The output will
    * start and end with the same characters.
    */
-  fun formatKDoc(input: String, blockIndent: Int): String {
+  fun formatKDoc(input: String, blockIndent: Int, maxLineLength: Int): String {
     val escapedInput = escapeKDoc(input)
     val kDocLexer = KDocLexer()
     kDocLexer.start(escapedInput)
@@ -124,12 +122,12 @@ object KDocFormatter {
       previousType = tokenType
       kDocLexer.advance()
     }
-    val result = render(tokens, blockIndent)
-    return makeSingleLineIfPossible(blockIndent, result)
+    val result = render(tokens, blockIndent, maxLineLength)
+    return makeSingleLineIfPossible(blockIndent, result, maxLineLength)
   }
 
-  private fun render(input: List<Token>, blockIndent: Int): String {
-    val output = KDocWriter(blockIndent)
+  private fun render(input: List<Token>, blockIndent: Int, maxLineLength: Int): String {
+    val output = KDocWriter(blockIndent, maxLineLength)
     for (token in input) {
       when (token.type) {
         BEGIN_KDOC -> output.writeBeginJavadoc()
@@ -161,8 +159,12 @@ object KDocFormatter {
    * Returns the given string or a one-line version of it (e.g., "∕✱✱ Tests for foos. ✱∕") if it
    * fits on one line.
    */
-  private fun makeSingleLineIfPossible(blockIndent: Int, input: String): String {
-    val oneLinerContentLength = MAX_LINE_LENGTH - "/**  */".length - blockIndent
+  private fun makeSingleLineIfPossible(
+      blockIndent: Int,
+      input: String,
+      maxLineLength: Int
+  ): String {
+    val oneLinerContentLength = maxLineLength - "/**  */".length - blockIndent
     val matcher = ONE_CONTENT_LINE_PATTERN.matcher(input)
     if (matcher.matches() && matcher.group(1).isEmpty()) {
       return "/** */"

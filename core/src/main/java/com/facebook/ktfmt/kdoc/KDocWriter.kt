@@ -41,7 +41,7 @@ import com.google.common.collect.Sets.immutableEnumSet
  * must compute and store the answer to questions like "How many levels of nested HTML list are we
  * inside?"
  */
-internal class KDocWriter(private val blockIndent: Int) {
+internal class KDocWriter(private val blockIndent: Int, private val maxLineLength: Int) {
 
   /**
    * Tokens that are always pinned to the following token. For example, `<p>` in `<p>Foo bar` (never
@@ -104,14 +104,6 @@ internal class KDocWriter(private val blockIndent: Int) {
     writeToken(token)
     continuingListItemOfInnermostList = true
     continuingListItemCount.increment()
-  }
-
-  fun writeBlockquoteOpenOrClose(token: Token) {
-    requestBlankLine()
-
-    writeToken(token)
-
-    requestBlankLine()
   }
 
   fun writePreOpen(token: Token) {
@@ -306,7 +298,7 @@ internal class KDocWriter(private val blockIndent: Int) {
     appendSpaces(blockIndent + 1)
     output.append("*")
     appendSpaces(1)
-    remainingOnLine = KDocFormatter.MAX_LINE_LENGTH - blockIndent - 3
+    remainingOnLine = maxLineLength - blockIndent - 3
     if (autoIndent == AUTO_INDENT) {
       appendSpaces(innerIndent())
       remainingOnLine -= innerIndent()
