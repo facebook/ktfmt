@@ -1,5 +1,5 @@
-# When a new release is created, publish jars to Maven Central.
-name: Publish package to the Maven Central Repository
+# When a new release is created, publish artifacts to Maven Central / JetBrains Marketplace / etc..
+name: Publish package to Maven Central and JetBrains Marketplace
 on:
   release:
     types: [created]
@@ -21,7 +21,7 @@ jobs:
           cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
           gpg --list-secret-keys --keyid-format LONG
       - id: publish-to-central
-        name: Publish to Central Repository
+        name: Publish to Maven Central Repository
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
@@ -32,6 +32,9 @@ jobs:
             -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} \
             -Prelease clean deploy
       - name: Publish IntelliJ plugin to JetBrains Marketplace
-        run: ./gradlew publishPlugin --stacktrace
+        run: |
+          pushd ktfmt_idea_plugin
+          ./gradlew publishPlugin --stacktrace
+          popd
         env:
           JETBRAINS_MARKETPLACE_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
