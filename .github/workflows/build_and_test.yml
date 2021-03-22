@@ -24,11 +24,9 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: ${{ matrix.java }}
-    - name: Build with Maven
+    - name: Build ktfmt
       run: mvn -B install --file pom.xml
-    name: Build IntelliJ plugin on Java ${{ matrix.java }}
-    steps:
-    - name: Build
+    - name: Build ktfmt_idea_plugin
       run: |
         pushd ktfmt_idea_plugin
         ./gradlew build
