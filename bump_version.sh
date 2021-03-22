@@ -32,14 +32,14 @@ NEXT_VERSION="$2"
 
 POM1="$HOME/fbsource/xplat/ktfmt/pom.xml"
 POM2="$HOME/fbsource/xplat/ktfmt/core/pom.xml"
-BUILD_GRADLE="$HOME/fbsource/xplat/ktfmt/ktfmt_idea_plugin/build.gradle.kts"
+VERSION_FILE="$HOME/fbsource/xplat/ktfmt/version.txt"
 
 sed -i.bak "s/$CURRENT_VERSION-SNAPSHOT/$CURRENT_VERSION/g" "$POM1" "$POM2"
-sed -i.bak "s/val ktfmtVersion = \"$CURRENT_VERSION-SNAPSHOT\"/val ktfmtVersion = \"$CURRENT_VERSION\"/g" "$BUILD_GRADLE"
-hg commit -m "[ktfmt] Bump version to $CURRENT_VERSION" "$POM1" "$POM2" "$BUILD_GRADLE"
+echo "$CURRENT_VERSION" > "$VERSION_FILE"
+hg commit -m "[ktfmt] Bump version to $CURRENT_VERSION" "$POM1" "$POM2" "$VERSION_FILE"
 
 sed -i.bak "s/$CURRENT_VERSION/$NEXT_VERSION-SNAPSHOT/g" "$POM1" "$POM2"
-sed -i.bak "s/val ktfmtVersion = \"$CURRENT_VERSION\"/val ktfmtVersion = \"$NEXT_VERSION-SNAPSHOT\"/g" "$BUILD_GRADLE"
-hg commit -m "[ktfmt] Bump version to $NEXT_VERSION-SNAPSHOT" "$POM1" "$POM2" "$BUILD_GRADLE"
+echo "$NEXT_VERSION-SNAPSHOT" > "$VERSION_FILE"
+hg commit -m "[ktfmt] Bump version to $NEXT_VERSION-SNAPSHOT" "$POM1" "$POM2" "$VERSION_FILE"
 
-rm "$POM1.bak" "$POM2.bak" "$BUILD_GRADLE.bak"
+rm "$POM1.bak" "$POM2.bak"

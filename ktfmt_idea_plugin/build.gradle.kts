@@ -20,7 +20,7 @@ plugins {
     id("com.diffplug.spotless") version "5.10.2"
 }
 
-val ktfmtVersion = "0.22-SNAPSHOT"
+val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
 val pluginVersion = "1.1"
 
 group = "com.facebook"
