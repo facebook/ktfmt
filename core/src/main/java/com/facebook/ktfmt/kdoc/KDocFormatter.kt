@@ -73,51 +73,7 @@ object KDocFormatter {
             else this
           }
 
-      when (tokenType) {
-        KDocTokens.START -> tokens.add(Token(BEGIN_KDOC, tokenText))
-        KDocTokens.END -> tokens.add(Token(END_KDOC, tokenText))
-        KDocTokens.LEADING_ASTERISK -> Unit // Ignore, no need to output anything
-        KDocTokens.TAG_NAME -> tokens.add(Token(TAG, tokenText))
-        KDocTokens.CODE_BLOCK_TEXT -> tokens.add(Token(CODE, tokenText))
-        KDocTokens.MARKDOWN_INLINE_LINK, KDocTokens.MARKDOWN_LINK -> {
-          tokens.add(Token(MARKDOWN_LINK, tokenText))
-        }
-        KDocTokens.TEXT -> {
-          if (tokenText.isBlank()) {
-            tokens.add(Token(WHITESPACE, " "))
-          } else {
-            val words = tokenText.trim().split(" +".toRegex())
-            var first = true
-            for (word in words) {
-              if (first) {
-                if (word == "-" || word == "*" || word.matches(NUMBERED_LIST_PATTERN)) {
-                  tokens.add(Token(LIST_ITEM_OPEN_TAG, ""))
-                }
-                first = false
-              }
-              // If the KDoc is malformed (e.g. unclosed code block) KDocLexer doesn't report an
-              // END_KDOC properly. We want to recover in such cases
-              if (word == "*/") {
-                tokens.add(Token(END_KDOC, word))
-              } else if (word == "```") {
-                tokens.add(Token(CODE_BLOCK_MARKER, word))
-              } else {
-                tokens.add(Token(LITERAL, word))
-                tokens.add(Token(WHITESPACE, " "))
-              }
-            }
-          }
-        }
-        WHITE_SPACE -> {
-          if (previousType === KDocTokens.TAG_NAME || previousType === KDocTokens.MARKDOWN_LINK) {
-            tokens.add(Token(WHITESPACE, " "))
-          } else if (previousType == KDocTokens.LEADING_ASTERISK ||
-              tokenText.count { it == '\n' } >= 2) {
-            tokens.add(Token(BLANK_LINE, ""))
-          }
-        }
-        else -> throw RuntimeException("Unexpected: $tokenType")
-      }
+      processToken(tokenType, tokens, tokenText, previousType)
 
       previousType = tokenType
       kDocLexer.advance()
@@ -126,6 +82,55 @@ object KDocFormatter {
     return makeSingleLineIfPossible(blockIndent, result, maxLineLength)
   }
 
+  private fun processToken(
+      tokenType: IElementType?,
+      tokens: MutableList<Token>,
+      tokenText: String,
+      previousType: IElementType?
+  ) {
+    when (tokenType) {
+      KDocTokens.START -> tokens.add(Token(BEGIN_KDOC, tokenText))
+      KDocTokens.END -> tokens.add(Token(END_KDOC, tokenText))
+      KDocTokens.LEADING_ASTERISK -> Unit // Ignore, no need to output anything
+      KDocTokens.TAG_NAME -> tokens.add(Token(TAG, tokenText))
+      KDocTokens.CODE_BLOCK_TEXT -> tokens.add(Token(CODE, tokenText))
+      KDocTokens.MARKDOWN_INLINE_LINK, KDocTokens.MARKDOWN_LINK -> {
+        tokens.add(Token(MARKDOWN_LINK, tokenText))
+      }
+      KDocTokens.TEXT -> {
+        var first = true
+        for (word in tokenizeKdocText(tokenText)) {
+          if (word.first().isWhitespace()) {
+            tokens.add(Token(WHITESPACE, " "))
+            continue
+          }
+          if (first) {
+            if (word == "-" || word == "*" || word.matches(NUMBERED_LIST_PATTERN)) {
+              tokens.add(Token(LIST_ITEM_OPEN_TAG, ""))
+            }
+            first = false
+          }
+          // If the KDoc is malformed (e.g. unclosed code block) KDocLexer doesn't report an
+          // END_KDOC properly. We want to recover in such cases
+          if (word == "*/") {
+            tokens.add(Token(END_KDOC, word))
+          } else if (word == "```") {
+            tokens.add(Token(CODE_BLOCK_MARKER, word))
+          } else {
+            tokens.add(Token(LITERAL, word))
+          }
+        }
+      }
+      WHITE_SPACE -> {
+        if (previousType == KDocTokens.LEADING_ASTERISK || tokenText.count { it == '\n' } >= 2) {
+          tokens.add(Token(BLANK_LINE, ""))
+        } else {
+          tokens.add(Token(WHITESPACE, " "))
+        }
+      }
+      else -> throw RuntimeException("Unexpected: $tokenType")
+    }
+  }
   private fun render(input: List<Token>, blockIndent: Int, maxLineLength: Int): String {
     val output = KDocWriter(blockIndent, maxLineLength)
     for (token in input) {
@@ -172,5 +177,33 @@ object KDocFormatter {
       return "/** " + matcher.group(1) + " */"
     }
     return input
+  }
+
+  /**
+   * tokenizeKdocText splits 's' by whitespace, and returns both whitespace and non-whitespace
+   * parts.
+   *
+   * Multiple adjacent whitespace characters are collapsed into one. Trailing and leading spaces are
+   * included in the result.
+   *
+   * Example: `" one two three "` becomes `[" ", "one", " ", "two", " ", "three", " "]`. See tests
+   * for more examples.
+   */
+  fun tokenizeKdocText(s: String) = sequence {
+    if (s.isEmpty()) {
+      return@sequence
+    }
+    var mark = 0
+    var inWhitespace = s[0].isWhitespace()
+    for (i in 1..s.lastIndex) {
+      if (inWhitespace == s[i].isWhitespace()) {
+        continue
+      }
+      val result = if (inWhitespace) " " else s.substring(mark, i)
+      inWhitespace = s[i].isWhitespace()
+      mark = i
+      yield(result)
+    }
+    yield(if (inWhitespace) " " else s.substring(mark, s.length))
   }
 }

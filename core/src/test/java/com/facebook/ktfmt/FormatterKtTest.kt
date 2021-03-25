@@ -3787,40 +3787,45 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
-  fun `add spaces after links in Kdoc`() {
-    val code =
-        """
+  fun `don't add spaces after links in Kdoc`() =
+      assertFormatted(
+          """
       |/** Here are some links [AnotherClass][AnotherClass2]hello */
       |class MyClass {}
-      |""".trimMargin()
-    val expected =
-        """
-      |/** Here are some links [AnotherClass] [AnotherClass2] hello */
-      |class MyClass {}
-      |""".trimMargin()
-    assertThatFormatting(code).isEqualTo(expected)
-  }
+      |""".trimMargin())
 
   @Test
-  fun `add spaces between links in KDoc`() {
-    val code =
-        """
+  fun `don't remove spaces after links in Kdoc`() =
+      assertFormatted(
+          """
+      |/** Please see [onNext] (which has more details) */
+      |class MyClass {}
+      |""".trimMargin())
+
+  @Test
+  fun `link anchor in KDoc are preserved`() =
+      assertFormatted(
+          """
+      |/** [link anchor](the URL for the link anchor goes here) */
+      |class MyClass {}
+      |""".trimMargin())
+
+  @Test
+  fun `don't add spaces between links in KDoc (because they're actually references)`() =
+      assertFormatted(
+          """
       |/** Here are some links [AnotherClass][AnotherClass2] */
       |class MyClass {}
-      |""".trimMargin()
-    val expected =
-        """
-      |/** Here are some links [AnotherClass] [AnotherClass2] */
+      |
+      |/** The final produced value may have [size][ByteString.size] < [bufferSize]. */
       |class MyClass {}
-      |""".trimMargin()
-    assertThatFormatting(code).isEqualTo(expected)
-  }
+      |""".trimMargin())
 
   @Test
   fun `collapse spaces after links in KDoc`() {
     val code =
         """
-      |/** Here are some links [Class1],[Class2]   [Class3]. hello */
+      |/** Here are some links [Class1], [Class2]   [Class3]. hello */
       |class MyClass {}
       |""".trimMargin()
     val expected =
@@ -3863,6 +3868,9 @@ class FormatterKtTest {
       assertFormatted(
           """
       |/** Enjoy this link [linkstuff]. */
+      |class MyClass {}
+      |
+      |/** There are many [FooObject]s. */
       |class MyClass {}
       |""".trimMargin())
 

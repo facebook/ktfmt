@@ -188,7 +188,6 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
 
   fun writeMarkdownLink(token: Token) {
     writeToken(token)
-    requestWhitespace(CONDITIONAL_WHITESPACE)
   }
 
   override fun toString(): String {
