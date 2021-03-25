@@ -17,3 +17,6 @@ out/
 
 .DS_Store
 classes/
+
+online_formatter/build/
+online_formatter/out.yml

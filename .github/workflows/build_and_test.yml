@@ -31,3 +31,8 @@ jobs:
         pushd ktfmt_idea_plugin
         ./gradlew build
         popd
+    - name: Build the Online Formatter
+      run: |
+        pushd online_formatter
+        ./gradlew build
+        popd
