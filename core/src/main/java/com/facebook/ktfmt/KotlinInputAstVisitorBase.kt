@@ -549,7 +549,7 @@ open class KotlinInputAstVisitorBase(
    * emitQualifiedExpression formats call expressions that are either part of a qualified
    * expression, or standing alone. This method makes it easier to handle both cases uniformly.
    */
-  private fun extractCallExpression(expression: KtExpression): KtCallExpression? {
+  private fun extractCallExpression(expression: KtExpression?): KtCallExpression? {
     val ktExpression = (expression as? KtQualifiedExpression)?.selectorExpression ?: expression
     return ktExpression as? KtCallExpression
   }
@@ -1017,27 +1017,44 @@ open class KotlinInputAstVisitorBase(
           }
         }
 
-    val leftMostExpression = parts.first()
-    leftMostExpression.left?.accept(this)
-    for (leftExpression in parts) {
-      when (leftExpression.operationToken) {
-        KtTokens.RANGE -> {}
-        KtTokens.ELVIS -> builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-        else -> builder.space()
+    // Don't count trailing lambas as part of the binary expression, so they look like this:
+    //
+    // a + b + c {
+    //   d
+    // }
+    val hasTrailingLambda =
+        extractCallExpression(expression.right)?.lambdaArguments?.isNotEmpty() == true
+
+    builder.block(ZERO) {
+      val leftMostExpression = parts.first()
+      leftMostExpression.left?.accept(this)
+      for ((i, leftExpression) in parts.withIndex()) {
+        when (leftExpression.operationToken) {
+          KtTokens.RANGE -> {}
+          KtTokens.ELVIS -> builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+          else -> builder.space()
+        }
+        builder.token(leftExpression.operationReference.text)
+        val isFirst = leftExpression === leftMostExpression
+        if (isFirst) {
+          builder.open(expressionBreakIndent)
+        }
+
+        if (!hasTrailingLambda || i < parts.size - 1) {
+          when (leftExpression.operationToken) {
+            KtTokens.RANGE -> {}
+            KtTokens.ELVIS -> builder.space()
+            else -> builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+          }
+          leftExpression.right?.accept(this)
+        }
       }
-      builder.token(leftExpression.operationReference.text)
-      val isFirst = leftExpression === leftMostExpression
-      if (isFirst) {
-        builder.open(expressionBreakIndent)
-      }
-      when (leftExpression.operationToken) {
-        KtTokens.RANGE -> {}
-        KtTokens.ELVIS -> builder.space()
-        else -> builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
-      }
-      leftExpression.right?.accept(this)
+      builder.close()
     }
-    builder.close()
+
+    if (hasTrailingLambda) {
+      processLambdaOrScopingFunction(expression.right)
+    }
   }
 
   override fun visitUnaryExpression(expression: KtUnaryExpression) {
@@ -1243,13 +1260,16 @@ open class KotlinInputAstVisitorBase(
         if (isGoogleStyle) doubleExpressionBreakIndent else expressionBreakIndent,
         Optional.of(tag))
 
-    if (initializer is KtLambdaExpression) {
-      initializer.accept(this)
-    } else {
+    if (initializer is KtCallExpression) {
       val call = initializer as KtCallExpression
       call.calleeExpression?.accept(this)
       builder.space()
       call.lambdaArguments.forEach { it.getArgumentExpression()?.accept(this) }
+    } else if (initializer is KtQualifiedExpression) {
+      // Known bug: qualified lambdas like `coroutineScope.launch {}` are not handled correctly.
+      initializer?.accept(this)
+    } else {
+      initializer?.accept(this)
     }
   }
 
