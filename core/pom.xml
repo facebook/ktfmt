@@ -11,12 +11,12 @@
     <parent>
         <groupId>com.facebook</groupId>
         <artifactId>ktfmt-parent</artifactId>
-        <version>0.25-SNAPSHOT</version>
+        <version>0.26-SNAPSHOT</version>
     </parent>
 
     <properties>
         <dokka.version>0.10.1</dokka.version>
-        <kotlin.version>1.4.21</kotlin.version>
+        <kotlin.version>1.5.0</kotlin.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <main.class>com.facebook.ktfmt.MainKt</main.class>
