@@ -363,6 +363,22 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `binary operators break correctly when there's multiple before a lambda`() =
+      assertFormatted(
+          """
+      |----------------------
+      |foo =
+      |    foo +
+      |        bar +
+      |        dsl +
+      |        foo +
+      |        bar {
+      |      baz = 1
+      |    }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `properties with accessors`() =
       assertFormatted(
           """
