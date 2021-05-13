@@ -465,6 +465,23 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `binary operators break correctly when there's multiple before a lambda`() =
+      assertFormatted(
+          """
+      |----------------------
+      |foo =
+      |  foo +
+      |    bar +
+      |    dsl +
+      |    foo +
+      |      bar {
+      |    baz = 1
+      |  }
+      |""".trimMargin(),
+          formattingOptions = GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
   fun `handle casting with breaks`() =
       assertFormatted(
           """
