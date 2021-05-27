@@ -4375,4 +4375,30 @@ class FormatterKtTest {
       |val x = Foo()
       |val x = Bar()
       |""".trimMargin())
+
+  @Test
+  fun `handle array of annotations with field prefix`() {
+    val code: String =
+        """
+    |class MyClass {
+    |  @field:[JvmStatic Volatile]
+    |  var myVar: String? = null
+    |}
+    |
+    """.trimMargin()
+    assertThatFormatting(code).isEqualTo(code)
+  }
+
+  @Test
+  fun `handle array of annotations without field prefix`() {
+    val code: String =
+        """
+    |class MyClass {
+    |  @[JvmStatic Volatile]
+    |  var myVar: String? = null
+    |}
+    |
+    """.trimMargin()
+    assertThatFormatting(code).isEqualTo(code)
+  }
 }

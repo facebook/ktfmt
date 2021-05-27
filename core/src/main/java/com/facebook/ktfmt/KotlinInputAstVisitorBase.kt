@@ -1548,8 +1548,11 @@ open class KotlinInputAstVisitorBase(
     builder.sync(annotation)
     builder.block(ZERO) {
       builder.token("@")
-      annotation.useSiteTarget?.accept(this)
-      builder.token(":")
+      val useSiteTarget = annotation.useSiteTarget
+      if (useSiteTarget != null) {
+        useSiteTarget.accept(this)
+        builder.token(":")
+      }
       builder.block(expressionBreakIndent) {
         builder.token("[")
 
