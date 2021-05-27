@@ -1863,6 +1863,21 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `a secondary constructor with no arguments passed to delegate`() =
+      assertFormatted(
+          """
+      |--------------------------------------------------
+      |data class Foo {
+      |  constructor() :
+      |      this(
+      |          Foo.createSpeciallyDesignedParameter(),
+      |          Foo.createSpeciallyDesignedParameter(),
+      |      )
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `secondary constructor with param list that fits in one line, with delegate`() =
       assertFormatted(
           """

@@ -574,6 +574,22 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `a secondary constructor with no arguments passed to delegate`() =
+      assertFormatted(
+          """
+      |--------------------------------------------------
+      |data class Foo {
+      |  constructor() :
+      |    this(
+      |      Foo.createSpeciallyDesignedParameter(),
+      |      Foo.createSpeciallyDesignedParameter(),
+      |    )
+      |}
+      |""".trimMargin(),
+          formattingOptions = GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
   fun `handle trailing commas (function calls)`() =
       assertFormatted(
           """
