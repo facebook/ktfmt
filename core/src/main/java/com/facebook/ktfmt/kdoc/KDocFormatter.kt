@@ -114,7 +114,7 @@ object KDocFormatter {
           // END_KDOC properly. We want to recover in such cases
           if (word == "*/") {
             tokens.add(Token(END_KDOC, word))
-          } else if (word == "```") {
+          } else if (word.startsWith("```")) {
             tokens.add(Token(CODE_BLOCK_MARKER, word))
           } else {
             tokens.add(Token(LITERAL, word))

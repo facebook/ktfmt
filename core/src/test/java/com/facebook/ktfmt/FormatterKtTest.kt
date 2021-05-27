@@ -3717,6 +3717,20 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `handle KDoc with tagged code examples`() =
+      assertFormatted(
+          """
+      |/**
+      | * ```kotlin
+      | * fun main(args: Array<String>) {
+      | *   println("Hello World!")
+      | * }
+      | * ```
+      | */
+      |class MyClass {}
+      |""".trimMargin())
+
+  @Test
   fun `handle stray code markers in lines and produce stable output`() {
     val code =
         """
@@ -4318,7 +4332,7 @@ class FormatterKtTest {
       |
       |
       |class C {}
-      | 
+      |
       |
       |class C {}
       |
