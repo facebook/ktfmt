@@ -351,6 +351,34 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `binary operators dont break when the last one is a lambda`() =
+      assertFormatted(
+          """
+      |----------------------
+      |foo =
+      |    foo + bar + dsl {
+      |      baz = 1
+      |    }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `binary operators break correctly when there's multiple before a lambda`() =
+      assertFormatted(
+          """
+      |----------------------
+      |foo =
+      |    foo +
+      |        bar +
+      |        dsl +
+      |        foo +
+      |        bar {
+      |      baz = 1
+      |    }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `properties with accessors`() =
       assertFormatted(
           """
@@ -4401,4 +4429,39 @@ class FormatterKtTest {
     """.trimMargin()
     assertThatFormatting(code).isEqualTo(code)
   }
+
+  @Test
+  fun `assignment in a dsl does not break if not needed`() =
+      assertFormatted(
+          """
+      |---------------------
+      |foo = fooDsl {
+      |  bar = barDsl {
+      |    baz = bazDsl {
+      |      bal = balDsl {
+      |        bim = 1
+      |      }
+      |    }
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `assignment in a dsl breaks when needed`() =
+      assertFormatted(
+          """
+      |------------------
+      |val foo = fooDsl {
+      |  bar += barDsl {
+      |    baz = bazDsl {
+      |      bal =
+      |          balDsl {
+      |        bim = 1
+      |      }
+      |    }
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
 }

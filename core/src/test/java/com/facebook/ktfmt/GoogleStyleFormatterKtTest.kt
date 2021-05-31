@@ -452,6 +452,36 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `binary operators dont break when the last one is a lambda`() =
+      assertFormatted(
+          """
+      |--------------------
+      |foo =
+      |  foo + bar + dsl {
+      |    baz = 1
+      |  }
+      |""".trimMargin(),
+          formattingOptions = GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `binary operators break correctly when there's multiple before a lambda`() =
+      assertFormatted(
+          """
+      |----------------------
+      |foo =
+      |  foo +
+      |    bar +
+      |    dsl +
+      |    foo +
+      |      bar {
+      |    baz = 1
+      |  }
+      |""".trimMargin(),
+          formattingOptions = GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
   fun `handle casting with breaks`() =
       assertFormatted(
           """
@@ -813,6 +843,43 @@ class GoogleStyleFormatterKtTest {
       |      zed,
       |      boo
       |    )
+      |}
+      |""".trimMargin(),
+          formattingOptions = GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `assignment in a dsl does not break if not needed`() =
+      assertFormatted(
+          """
+      |---------------------
+      |foo = fooDsl {
+      |  bar = barDsl {
+      |    baz = bazDsl {
+      |      bal = balDsl {
+      |        bim = 1
+      |      }
+      |    }
+      |  }
+      |}
+      |""".trimMargin(),
+          formattingOptions = GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `assignment in a dsl breaks when needed`() =
+      assertFormatted(
+          """
+      |------------------
+      |foo = fooDsl {
+      |  bar += barDsl {
+      |    baz = bazDsl {
+      |      bal =
+      |          balDsl {
+      |        bim = 1
+      |      }
+      |    }
+      |  }
       |}
       |""".trimMargin(),
           formattingOptions = GOOGLE_FORMAT,
