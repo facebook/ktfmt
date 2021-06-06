@@ -330,10 +330,11 @@ open class KotlinInputAstVisitorBase(
             builder.token(":")
             if (parameterList?.parameters.isNullOrEmpty()) {
               builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+              builder.block(expressionBreakIndent) { typeOrDelegationCall.accept(this) }
             } else {
               builder.space()
+              builder.block(expressionBreakNegativeIndent) { typeOrDelegationCall.accept(this) }
             }
-            builder.block(expressionBreakNegativeIndent) { typeOrDelegationCall.accept(this) }
           }
         }
       }

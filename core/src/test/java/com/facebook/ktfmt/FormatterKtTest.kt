@@ -1891,6 +1891,21 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `a secondary constructor with no arguments passed to delegate`() =
+      assertFormatted(
+          """
+      |--------------------------------------------------
+      |data class Foo {
+      |  constructor() :
+      |      this(
+      |          Foo.createSpeciallyDesignedParameter(),
+      |          Foo.createSpeciallyDesignedParameter(),
+      |      )
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `secondary constructor with param list that fits in one line, with delegate`() =
       assertFormatted(
           """
@@ -3745,6 +3760,20 @@ class FormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `handle KDoc with tagged code examples`() =
+      assertFormatted(
+          """
+      |/**
+      | * ```kotlin
+      | * fun main(args: Array<String>) {
+      | *   println("Hello World!")
+      | * }
+      | * ```
+      | */
+      |class MyClass {}
+      |""".trimMargin())
+
+  @Test
   fun `handle stray code markers in lines and produce stable output`() {
     val code =
         """
@@ -4346,7 +4375,7 @@ class FormatterKtTest {
       |
       |
       |class C {}
-      | 
+      |
       |
       |class C {}
       |
