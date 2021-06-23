@@ -1225,9 +1225,9 @@ open class KotlinInputAstVisitorBase(
    * 1. '... = { ... }'
    * 2. '... = Runnable { ... }'
    * 3. '... = scope { ... }' '... = apply { ... }'
+   * 4. '... = foo() { ... }'
    *
    * but not:
-   * 1. '... = foo() { ... }'
    * 2. '... = Runnable @Annotation { ... }'
    */
   private fun lambdaOrScopingFunction(initializer: PsiElement?): Boolean {
@@ -1235,9 +1235,7 @@ open class KotlinInputAstVisitorBase(
       return true
     }
     if (initializer is KtCallExpression &&
-        initializer.valueArgumentList?.leftParenthesis == null &&
         initializer.lambdaArguments.isNotEmpty() &&
-        initializer.typeArgumentList?.arguments.isNullOrEmpty() &&
         initializer.lambdaArguments.first().getArgumentExpression() is KtLambdaExpression) {
       return true
     }
@@ -1263,7 +1261,17 @@ open class KotlinInputAstVisitorBase(
 
     if (initializer is KtCallExpression) {
       val call = initializer as KtCallExpression
-      call.calleeExpression?.accept(this)
+
+      with(call) {
+        visitCallElement(
+            calleeExpression,
+            typeArgumentList,
+            valueArgumentList,
+            listOf(), // No lambda, see below
+            lambdaIndent = ZERO)
+      }
+
+      // Pass the lambda separately to keep it at a lower syntax level
       builder.space()
       call.lambdaArguments.forEach { it.getArgumentExpression()?.accept(this) }
     } else if (initializer is KtQualifiedExpression) {

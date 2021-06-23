@@ -455,11 +455,17 @@ class GoogleStyleFormatterKtTest {
   fun `binary operators dont break when the last one is a lambda`() =
       assertFormatted(
           """
-      |--------------------
-      |foo =
-      |  foo + bar + dsl {
-      |    baz = 1
-      |  }
+      |-----------------------
+      |fun binaryOps() {
+      |  foo =
+      |    foo + bar + dsl {
+      |      baz = 1
+      |    }
+      |  boo =
+      |    boo + ba + f(1) {
+      |      bam = 1
+      |    }
+      |}
       |""".trimMargin(),
           formattingOptions = GOOGLE_FORMAT,
           deduceMaxWidth = true)
