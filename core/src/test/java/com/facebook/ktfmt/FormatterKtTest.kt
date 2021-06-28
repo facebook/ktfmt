@@ -351,34 +351,6 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `binary operators dont break when the last one is a lambda`() =
-      assertFormatted(
-          """
-      |----------------------
-      |foo =
-      |    foo + bar + dsl {
-      |      baz = 1
-      |    }
-      |""".trimMargin(),
-          deduceMaxWidth = true)
-
-  @Test
-  fun `binary operators break correctly when there's multiple before a lambda`() =
-      assertFormatted(
-          """
-      |----------------------
-      |foo =
-      |    foo +
-      |        bar +
-      |        dsl +
-      |        foo +
-      |        bar {
-      |      baz = 1
-      |    }
-      |""".trimMargin(),
-          deduceMaxWidth = true)
-
-  @Test
   fun `properties with accessors`() =
       assertFormatted(
           """
@@ -4459,38 +4431,25 @@ class FormatterKtTest {
     assertThatFormatting(code).isEqualTo(code)
   }
 
+  // Regression test against https://github.com/facebookincubator/ktfmt/issues/243
   @Test
-  fun `assignment in a dsl does not break if not needed`() =
-      assertFormatted(
-          """
-      |---------------------
-      |foo = fooDsl {
-      |  bar = barDsl {
-      |    baz = bazDsl {
-      |      bal = balDsl {
-      |        bim = 1
+  fun `regression test against Issue 243`() {
+    val code =
+        """
+      |class Foo {
+      |  companion object {
+      |    var instance: Foo? = null
+      |
+      |    fun getInstance() {
+      |      return instance ?: synchronized(Foo::class) {
+      |        Foo().also { instance = it }
       |      }
       |    }
       |  }
       |}
-      |""".trimMargin(),
-          deduceMaxWidth = true)
+      |""".trimMargin()
 
-  @Test
-  fun `assignment in a dsl breaks when needed`() =
-      assertFormatted(
-          """
-      |------------------
-      |val foo = fooDsl {
-      |  bar += barDsl {
-      |    baz = bazDsl {
-      |      bal =
-      |          balDsl {
-      |        bim = 1
-      |      }
-      |    }
-      |  }
-      |}
-      |""".trimMargin(),
-          deduceMaxWidth = true)
+    // Don't throw.
+    format(code)
+  }
 }
