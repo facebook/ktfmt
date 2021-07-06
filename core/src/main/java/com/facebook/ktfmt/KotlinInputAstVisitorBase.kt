@@ -1150,8 +1150,13 @@ open class KotlinInputAstVisitorBase(
     if (delegate != null) {
       builder.space()
       builder.token("by")
-      builder.space()
-      delegate.accept(this)
+      if (lambdaOrScopingFunction(delegate.expression)) {
+        builder.space()
+        delegate.accept(this)
+      } else {
+        builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+        builder.block(expressionBreakIndent) { delegate.accept(this) }
+      }
       hasSemicolon = delegate.nextSibling?.text == ";" == true
     } else if (initializer != null) {
       builder.space()

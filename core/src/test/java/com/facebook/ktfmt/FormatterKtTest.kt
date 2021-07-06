@@ -2773,6 +2773,9 @@ class FormatterKtTest {
       |
       |val importantValueLonger:
       |    Int by lazy { 1 + 1 }
+      |
+      |val importantValue: Int by
+      |    doIt(1 + 1)
       |""".trimMargin(),
           deduceMaxWidth = true)
 
