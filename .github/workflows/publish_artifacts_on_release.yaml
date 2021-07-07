@@ -1,4 +1,11 @@
 # When a new release is created, publish artifacts to Maven Central / JetBrains Marketplace / etc..
+#
+# About secrets used here:
+# 1. OSSRH_USERNAME, OSSRH_TOKEN: token obtained from https://oss.sonatype.org/
+# 2. OSSRH_GPG_SECRET_KEY - private key for signing Maven artifacts
+# 3. OSSRH_GPG_SECRET_KEY_PASSWORD - password for unlocking OSSRH_GPG_SECRET_KEY
+# 4. JETBRAINS_MARKETPLACE_TOKEN - token obtained from https://plugins.jetbrains.com/author/me/tokens
+
 name: Publish package to Maven Central and JetBrains Marketplace
 on:
   release:

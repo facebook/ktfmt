@@ -1,25 +1,10 @@
 # Releasing a New `ktfmt` Version
 
-1. Update `bump_versions.sh` with the version information, and comment out its `exit` command.
-2. Run `./bump_versions.sh`.
-3. Obtain the private key used to sign `ktfmt` releases, as well as its passphrase.
-3. Make sure your `~/.m2/settings.xml` is:
-
-    ```
-    <settings>
-    <servers>
-        <server>
-        <id>ossrh</id>
-        <username>your-jira-id</username>
-        <password>your-jira-pwd</password>
-        </server>
-    </servers>
-    </settings>
-    ```
-
-4. Run `mvn -Prelease clean deploy`
-5. Enter the passphrase when requested.
-6. Create a new release at https://github.com/facebookincubator/ktfmt/releases . Use a previous release as a template.
-7. Upload release files by dragging them from `core/target/`.
-
-This is terribly manual. We'll hopefully soon improve this using GitHub Actions.
+1. Run `./bump_versions.sh $OLD_VERSION $NEW_VERSION` and commit the changes.
+2. Create a new Release in GitHub. A GitHub Action is automatically triggered and builds and publishes the artifacts to
+    1. Maven
+    2. IntelliJ Plugin marketplace
+3. TODO: also automate website generation (https://facebookincubator.github.io/ktfmt/) and the AWS Lambda that powers it. For now, you must clone the repo locally, and manually run some steps.
+    1. pushd online_formatter; ./build_and_deploy.sh; popd
+        1. Credentials should be configured using https://docs.aws.amazon.com/cli/latest/topic/config-vars.html#credentials
+    2. Follow instructions in website/README.md
