@@ -2188,15 +2188,17 @@ open class KotlinInputAstVisitorBase(
   override fun visitKtFile(file: KtFile) {
     markForPartialFormat()
     var importListEmpty = false
+    var isFirst = true
     for (child in file.children) {
       if (child.text.isBlank()) {
         importListEmpty = child is KtImportList
         continue
       }
-      if (child !is PsiComment && (child !is KtScript || !importListEmpty)) {
+      if (!isFirst && child !is PsiComment && (child !is KtScript || !importListEmpty)) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
       }
       child.accept(this)
+      isFirst = false
     }
     markForPartialFormat()
   }

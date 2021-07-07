@@ -351,6 +351,16 @@ class FormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `don't keep adding newlines between these two comments when they're at end of file`() =
+      assertFormatted(
+          """
+     |package foo
+     |// a
+     |
+     |/* Another comment */
+     |""".trimMargin())
+
+  @Test
   fun `properties with accessors`() =
       assertFormatted(
           """
