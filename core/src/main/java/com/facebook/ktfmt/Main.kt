@@ -121,7 +121,10 @@ fun expandArgsToFileNames(args: List<String>): List<File> {
     if (arg == "-") {
       error("Error: '-', which causes ktfmt to read from stdin, should not be mixed with file name")
     }
-    result.addAll(File(arg).walkTopDown().filter { it.isFile && it.extension == "kt" })
+    result.addAll(
+        File(arg).walkTopDown().filter {
+          it.isFile && (it.extension == "kt" || it.extension == "kts")
+        })
   }
   return result
 }
