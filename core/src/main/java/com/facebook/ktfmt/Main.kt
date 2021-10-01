@@ -16,7 +16,6 @@
 
 package com.facebook.ktfmt
 
-import com.google.common.annotations.VisibleForTesting
 import com.google.googlejavaformat.FormattingError
 import java.io.BufferedReader
 import java.io.File
@@ -47,7 +46,7 @@ class Main(
     }
 
     if (parsedArgs.fileNames.size == 1 && parsedArgs.fileNames[0] == "-") {
-      val success = formatStdin()
+      val success = format(null)
       return if (success) 0 else 1
     }
 
@@ -65,36 +64,53 @@ class Main(
     }
 
     val success = AtomicBoolean(true)
-    files.parallelStream().forEach { success.compareAndSet(true, formatFile(it)) }
+    files.parallelStream().forEach { success.compareAndSet(true, format(it)) }
     return if (success.get()) 0 else 1
   }
 
-  @VisibleForTesting
-  fun formatStdin(): Boolean {
-    val code = BufferedReader(InputStreamReader(input)).readText()
+  /**
+   * Handles the logic for formatting and flags.
+   *
+   * If dry run mode is active, this simply prints the name of the [source] (file path or `<stdin>`)
+   * to [out]. Otherwise, this will run the appropriate formatting as normal.
+   *
+   * @param file The file to format. If null, the code is read from <stdin>.
+   * @return True if changes were made or no changes were needed, false if there was a failure or if
+   * changes were made and the --set-exit-if-changed flag is set.
+   */
+  private fun format(file: File?): Boolean {
+    val fileName = file?.toString() ?: "<stdin>"
     try {
-      out.print(format(parsedArgs.formattingOptions, code))
-      return true
-    } catch (e: ParseError) {
-      handleParseError("<stdin>", e)
-    }
-    return false
-  }
+      val code = file?.readText() ?: BufferedReader(InputStreamReader(input)).readText()
 
-  /** 'formatFile' formats 'file' in place, and return whether it was successful. */
-  private fun formatFile(file: File): Boolean {
-    try {
-      val code = file.readText()
-      file.writeText(format(parsedArgs.formattingOptions, code))
-      err.println("Done formatting $file")
-      return true
+      val formattedCode = format(parsedArgs.formattingOptions, code)
+
+      if (code == formattedCode) {
+        // The code was already formatted, nothing more to do here
+        err.println("No changes: $fileName")
+        return true
+      }
+
+      if (parsedArgs.dryRun) {
+        out.println(fileName)
+      } else {
+        if (file != null) {
+          file.writeText(formattedCode)
+        } else {
+          out.print(formattedCode)
+        }
+        err.println("Done formatting $fileName")
+      }
+
+      // If setExitIfChanged is true, then any change should result in an exit code of 1.
+      return if (parsedArgs.setExitIfChanged) false else true
     } catch (e: IOException) {
-      err.println("Error formatting $file: ${e.message}; skipping.")
+      err.println("Error formatting $fileName: ${e.message}; skipping.")
     } catch (e: ParseError) {
-      handleParseError(file.toString(), e)
+      handleParseError(fileName, e)
     } catch (e: FormattingError) {
       for (diagnostic in e.diagnostics()) {
-        System.err.println("$file:$diagnostic")
+        System.err.println("$fileName:$diagnostic")
       }
       e.printStackTrace(err)
     }

@@ -38,13 +38,21 @@ class ParsedArgsTest {
   }
 
   @Test
-  fun `parseOptions returns default indent sizes when --dropbox-style is not present`() {
+  fun `parseOptions uses default values when args are empty`() {
     val out = ByteArrayOutputStream()
 
-    val (_, formattingOptions) = parseOptions(PrintStream(out), arrayOf("foo.kt"))
+    val parsed = parseOptions(PrintStream(out), arrayOf("foo.kt"))
 
+    val formattingOptions = parsed.formattingOptions
+    assertThat(formattingOptions.style).isEqualTo(FormattingOptions.Style.FACEBOOK)
+    assertThat(formattingOptions.maxWidth).isEqualTo(100)
     assertThat(formattingOptions.blockIndent).isEqualTo(2)
     assertThat(formattingOptions.continuationIndent).isEqualTo(4)
+    assertThat(formattingOptions.removeUnusedImports).isTrue()
+    assertThat(formattingOptions.debuggingPrintOpsAfterFormatting).isFalse()
+
+    assertThat(parsed.dryRun).isFalse()
+    assertThat(parsed.setExitIfChanged).isFalse()
   }
 
   @Test
@@ -67,5 +75,32 @@ class ParsedArgsTest {
     val (_, formattingOptions) = parseOptions(PrintStream(out), arrayOf("--google-style", "foo.kt"))
 
     assertThat(formattingOptions).isEqualTo(GOOGLE_FORMAT)
+  }
+
+  @Test
+  fun `parseOptions recognizes --dry-run`() {
+    val out = ByteArrayOutputStream()
+
+    val parsed = parseOptions(PrintStream(out), arrayOf("--dry-run", "foo.kt"))
+
+    assertThat(parsed.dryRun).isTrue()
+  }
+
+  @Test
+  fun `parseOptions recognizes -n as --dry-run`() {
+    val out = ByteArrayOutputStream()
+
+    val parsed = parseOptions(PrintStream(out), arrayOf("-n", "foo.kt"))
+
+    assertThat(parsed.dryRun).isTrue()
+  }
+
+  @Test
+  fun `parseOptions recognizes --set-exit-if-changed`() {
+    val out = ByteArrayOutputStream()
+
+    val parsed = parseOptions(PrintStream(out), arrayOf("--set-exit-if-changed", "foo.kt"))
+
+    assertThat(parsed.setExitIfChanged).isTrue()
   }
 }
