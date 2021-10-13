@@ -158,6 +158,8 @@ fun createAstVisitor(options: FormattingOptions, builder: OpsBuilder): PsiElemen
             "com.facebook.ktfmt.Kotlin14InputAstVisitor"
         KotlinVersion.CURRENT.major == 1 && KotlinVersion.CURRENT.minor == 5 ->
             "com.facebook.ktfmt.Kotlin15InputAstVisitor"
+        KotlinVersion.CURRENT.major == 1 && KotlinVersion.CURRENT.minor == 6 ->
+            "com.facebook.ktfmt.Kotlin15InputAstVisitor"
         else ->
             throw RuntimeException("Unsupported runtime Kotlin version: " + KotlinVersion.CURRENT)
       }
