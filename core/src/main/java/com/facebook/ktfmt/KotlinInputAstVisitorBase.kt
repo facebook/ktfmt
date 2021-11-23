@@ -807,36 +807,37 @@ open class KotlinInputAstVisitorBase(
     builder.token("{")
     val valueParameters = lambdaExpression.valueParameters
     val statements = (lambdaExpression.bodyExpression ?: fail()).children
-    if (valueParameters.isNotEmpty() || statements.isNotEmpty()) {
-      if (valueParameters.isNotEmpty()) {
-        builder.space()
-        builder.block(expressionBreakIndent) {
-          forEachCommaSeparated(valueParameters) { it.accept(this) }
-        }
-        builder.block(blockIndent) {
-          if (lambdaExpression.functionLiteral.valueParameterList?.trailingComma != null) {
-            builder.token(",")
-            builder.forcedBreak()
-          } else {
-            builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
-          }
-          builder.token("->")
-        }
-        builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+    val arrow = lambdaExpression.functionLiteral.arrow
+    if (valueParameters.isNotEmpty() || arrow != null) {
+      builder.space()
+      builder.block(expressionBreakIndent) {
+        forEachCommaSeparated(valueParameters) { it.accept(this) }
       }
-      if (statements.isNotEmpty()) {
-        builder.breakOp(Doc.FillMode.UNIFIED, " ", blockIndent)
-        builder.block(blockIndent) {
-          builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
-          if (statements.size == 1 &&
-              statements.first() !is KtReturnExpression &&
-              lambdaExpression.bodyExpression?.startsWithComment() != true) {
-            statements[0].accept(this)
-          } else {
-            visitStatements(statements)
-          }
+      builder.block(blockIndent) {
+        if (lambdaExpression.functionLiteral.valueParameterList?.trailingComma != null) {
+          builder.token(",")
+          builder.forcedBreak()
+        } else if (valueParameters.isNotEmpty()) {
+          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+        }
+        builder.token("->")
+      }
+      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+    }
+    if (statements.isNotEmpty()) {
+      builder.breakOp(Doc.FillMode.UNIFIED, " ", blockIndent)
+      builder.block(blockIndent) {
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
+        if (statements.size == 1 &&
+            statements.first() !is KtReturnExpression &&
+            lambdaExpression.bodyExpression?.startsWithComment() != true) {
+          statements[0].accept(this)
+        } else {
+          visitStatements(statements)
         }
       }
+    }
+    if (valueParameters.isNotEmpty() || statements.isNotEmpty() || arrow != null) {
       builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
       builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
     }

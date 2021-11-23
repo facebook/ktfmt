@@ -4465,4 +4465,40 @@ class FormatterKtTest {
     // Don't throw.
     format(code)
   }
+
+  @Test
+  fun `lambda with required arrow`() =
+      assertFormatted(
+          """
+      |val a = { x: Int -> }
+      |val b = { x: Int -> 0 }
+      |val c = { x: Int ->
+      |  val y = 0
+      |  y
+      |}
+      |""".trimMargin())
+
+  @Test
+  fun `lambda with optional arrow`() =
+      assertFormatted(
+          """
+      |val a = { -> }
+      |val b = { -> 0 }
+      |val c = { ->
+      |  val y = 0
+      |  y
+      |}
+      |""".trimMargin())
+
+  @Test
+  fun `lambda missing optional arrow`() =
+      assertFormatted(
+          """
+      |val a = {}
+      |val b = { 0 }
+      |val c = {
+      |  val y = 0
+      |  y
+      |}
+      |""".trimMargin())
 }
