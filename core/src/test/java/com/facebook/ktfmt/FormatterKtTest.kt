@@ -3073,6 +3073,9 @@ class FormatterKtTest {
       |  when {
       |    true -> "1"; false -> "0"
       |  }
+      |  someLongVariableName.let {
+      |    someReallyLongFunctionNameThatMakesThisNotFitInOneLineWithTheAboveVariable();
+      |  }
       |} ;
       |
       |""".trimMargin()
@@ -3096,6 +3099,9 @@ class FormatterKtTest {
       |  when {
       |    true -> "1"
       |    false -> "0"
+      |  }
+      |  someLongVariableName.let {
+      |    someReallyLongFunctionNameThatMakesThisNotFitInOneLineWithTheAboveVariable()
       |  }
       |}
       |""".trimMargin()

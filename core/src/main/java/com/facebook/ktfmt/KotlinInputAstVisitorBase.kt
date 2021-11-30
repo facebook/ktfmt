@@ -392,6 +392,11 @@ open class KotlinInputAstVisitorBase(
     }
   }
 
+  private fun visitStatement(statement: PsiElement) {
+    builder.block(ZERO) { statement.accept(this) }
+    builder.guessToken(";")
+  }
+
   private fun visitStatements(statements: Array<PsiElement>) {
     var first = true
     builder.guessToken(";")
@@ -401,8 +406,7 @@ open class KotlinInputAstVisitorBase(
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
       }
       first = false
-      builder.block(ZERO) { statement.accept(this) }
-      builder.guessToken(";")
+      visitStatement(statement)
     }
   }
 
@@ -831,7 +835,7 @@ open class KotlinInputAstVisitorBase(
         if (statements.size == 1 &&
             statements.first() !is KtReturnExpression &&
             lambdaExpression.bodyExpression?.startsWithComment() != true) {
-          statements[0].accept(this)
+          visitStatement(statements[0])
         } else {
           visitStatements(statements)
         }
