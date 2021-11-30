@@ -41,6 +41,8 @@ import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 const val DEFAULT_MAX_WIDTH: Int = 100
 
+val MINIMUM_KOTLIN_VERSION = KotlinVersion(1, 4)
+
 @JvmField
 val GOOGLE_FORMAT = FormattingOptions(style = GOOGLE, blockIndent = 2, continuationIndent = 2)
 
@@ -152,22 +154,10 @@ private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator:
 }
 
 fun createAstVisitor(options: FormattingOptions, builder: OpsBuilder): PsiElementVisitor {
-  val visitorClassName =
-      when {
-        KotlinVersion.CURRENT.major == 1 && KotlinVersion.CURRENT.minor == 4 ->
-            "com.facebook.ktfmt.Kotlin14InputAstVisitor"
-        KotlinVersion.CURRENT.major == 1 && KotlinVersion.CURRENT.minor == 5 ->
-            "com.facebook.ktfmt.Kotlin15InputAstVisitor"
-        KotlinVersion.CURRENT.major == 1 && KotlinVersion.CURRENT.minor == 6 ->
-            "com.facebook.ktfmt.Kotlin15InputAstVisitor"
-        else ->
-            throw RuntimeException("Unsupported runtime Kotlin version: " + KotlinVersion.CURRENT)
-      }
-
-  return Class.forName(visitorClassName)
-      .asSubclass(KotlinInputAstVisitorBase::class.java)
-      .getConstructor(FormattingOptions::class.java, OpsBuilder::class.java)
-      .newInstance(options, builder)
+  if (KotlinVersion.CURRENT < MINIMUM_KOTLIN_VERSION) {
+    throw RuntimeException("Unsupported runtime Kotlin version: " + KotlinVersion.CURRENT)
+  }
+  return KotlinInputAstVisitor(options, builder)
 }
 
 private fun checkEscapeSequences(code: String) {
