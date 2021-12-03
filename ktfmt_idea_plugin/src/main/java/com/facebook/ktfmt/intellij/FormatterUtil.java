@@ -16,8 +16,8 @@
 
 package com.facebook.ktfmt.intellij;
 
-import com.facebook.ktfmt.FormatterKt;
-import com.facebook.ktfmt.ParseError;
+import com.facebook.ktfmt.format.FormatterKt;
+import com.facebook.ktfmt.format.ParseError;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.googlejavaformat.java.FormatterException;

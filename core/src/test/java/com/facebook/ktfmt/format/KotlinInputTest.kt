@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.facebook.ktfmt
+package com.facebook.ktfmt.format
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

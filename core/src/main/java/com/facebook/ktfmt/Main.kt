@@ -16,6 +16,8 @@
 
 package com.facebook.ktfmt
 
+import com.facebook.ktfmt.format.ParseError
+import com.facebook.ktfmt.format.format
 import com.google.googlejavaformat.FormattingError
 import java.io.BufferedReader
 import java.io.File

@@ -16,6 +16,8 @@
 
 package com.facebook.ktfmt
 
+import com.facebook.ktfmt.format.FormattingOptions
+import com.facebook.ktfmt.format.GOOGLE_FORMAT
 import com.google.common.truth.Truth.assertThat
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream

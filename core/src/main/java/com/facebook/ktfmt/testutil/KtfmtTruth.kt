@@ -16,11 +16,11 @@
 
 package com.facebook.ktfmt.testutil
 
-import com.facebook.ktfmt.DEFAULT_MAX_WIDTH
-import com.facebook.ktfmt.FormattingOptions
-import com.facebook.ktfmt.Parser
 import com.facebook.ktfmt.debughelpers.PrintAstVisitor
-import com.facebook.ktfmt.format
+import com.facebook.ktfmt.format.DEFAULT_MAX_WIDTH
+import com.facebook.ktfmt.format.FormattingOptions
+import com.facebook.ktfmt.format.Parser
+import com.facebook.ktfmt.format.format
 import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
 import com.google.common.truth.Truth

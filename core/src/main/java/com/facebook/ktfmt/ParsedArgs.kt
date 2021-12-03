@@ -16,6 +16,10 @@
 
 package com.facebook.ktfmt
 
+import com.facebook.ktfmt.format.DROPBOX_FORMAT
+import com.facebook.ktfmt.format.FormattingOptions
+import com.facebook.ktfmt.format.GOOGLE_FORMAT
+import com.facebook.ktfmt.format.KOTLINLANG_FORMAT
 import java.io.PrintStream
 
 /** ParsedArgs holds the arguments passed to ktfmt on the command-line, after parsing. */

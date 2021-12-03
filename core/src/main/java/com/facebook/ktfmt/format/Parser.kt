@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.facebook.ktfmt
+package com.facebook.ktfmt.format
 
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer.PLAIN_RELATIVE_PATHS

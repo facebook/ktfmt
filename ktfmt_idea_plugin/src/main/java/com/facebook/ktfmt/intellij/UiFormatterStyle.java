@@ -16,11 +16,11 @@
 
 package com.facebook.ktfmt.intellij;
 
-import static com.facebook.ktfmt.FormatterKt.DROPBOX_FORMAT;
-import static com.facebook.ktfmt.FormatterKt.GOOGLE_FORMAT;
-import static com.facebook.ktfmt.FormatterKt.KOTLINLANG_FORMAT;
+import static com.facebook.ktfmt.format.FormatterKt.DROPBOX_FORMAT;
+import static com.facebook.ktfmt.format.FormatterKt.GOOGLE_FORMAT;
+import static com.facebook.ktfmt.format.FormatterKt.KOTLINLANG_FORMAT;
 
-import com.facebook.ktfmt.FormattingOptions;
+import com.facebook.ktfmt.format.FormattingOptions;
 
 /** Configuration options for the formatting style. */
 enum UiFormatterStyle {

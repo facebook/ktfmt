@@ -15,7 +15,7 @@
 // This was copied from https://github.com/google/google-java-format and converted to Kotlin,
 // because the original is package-private.
 
-package com.facebook.ktfmt
+package com.facebook.ktfmt.format
 
 import com.google.common.base.Verify
 import java.util.Optional

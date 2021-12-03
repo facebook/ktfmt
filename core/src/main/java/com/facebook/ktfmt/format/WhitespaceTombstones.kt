@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.facebook.ktfmt
+package com.facebook.ktfmt.format
 
 import java.util.regex.Pattern
 import java.util.regex.Pattern.MULTILINE

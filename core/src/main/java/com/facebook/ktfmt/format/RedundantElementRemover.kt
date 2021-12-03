@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.facebook.ktfmt
+package com.facebook.ktfmt.format
 
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.kdoc.psi.impl.KDocImpl

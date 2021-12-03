@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.facebook.ktfmt
+package com.facebook.ktfmt.format
 
-import com.facebook.ktfmt.FormattingOptions.Style.DROPBOX
-import com.facebook.ktfmt.FormattingOptions.Style.GOOGLE
-import com.facebook.ktfmt.RedundantElementRemover.dropRedundantElements
 import com.facebook.ktfmt.debughelpers.printOps
+import com.facebook.ktfmt.format.FormattingOptions.Style.DROPBOX
+import com.facebook.ktfmt.format.FormattingOptions.Style.GOOGLE
+import com.facebook.ktfmt.format.RedundantElementRemover.dropRedundantElements
 import com.facebook.ktfmt.kdoc.KDocCommentsHelper
 import com.facebook.ktfmt.kdoc.indexOfCommentEscapeSequences
 import com.google.common.collect.ImmutableList
