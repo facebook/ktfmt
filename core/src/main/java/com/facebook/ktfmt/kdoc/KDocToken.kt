@@ -24,7 +24,7 @@ package com.facebook.ktfmt.kdoc
  * naturally expect. The decision is usually pragmatic rather than theoretical. Most of the details
  * are in [KDocFormatter].
  */
-internal class Token(val type: Type, val value: String) {
+internal class KDocToken(val type: Type, val value: String) {
   /**
    * KDoc token type.
    *
@@ -58,7 +58,7 @@ internal class Token(val type: Type, val value: String) {
     CODE,
     /** three backticks */
     CODE_BLOCK_MARKER,
-    /** A link in brakcets such as [Token] */
+    /** A link in brackets such as [KDocToken] */
     MARKDOWN_LINK,
     BLANK_LINE,
     /**
@@ -84,5 +84,5 @@ internal class Token(val type: Type, val value: String) {
 
   fun length(): Int = value.length
 
-  override fun toString(): String = "Token{$type: \"$value\"}"
+  override fun toString(): String = "KDocToken{$type: \"$value\"}"
 }

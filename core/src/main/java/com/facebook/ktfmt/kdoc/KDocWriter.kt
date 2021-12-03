@@ -19,6 +19,10 @@
 
 package com.facebook.ktfmt.kdoc
 
+import com.facebook.ktfmt.kdoc.KDocToken.Type.CODE_BLOCK_MARKER
+import com.facebook.ktfmt.kdoc.KDocToken.Type.HEADER_OPEN_TAG
+import com.facebook.ktfmt.kdoc.KDocToken.Type.LIST_ITEM_OPEN_TAG
+import com.facebook.ktfmt.kdoc.KDocToken.Type.PARAGRAPH_OPEN_TAG
 import com.facebook.ktfmt.kdoc.KDocWriter.AutoIndent.AUTO_INDENT
 import com.facebook.ktfmt.kdoc.KDocWriter.AutoIndent.NO_AUTO_INDENT
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.BLANK_LINE
@@ -26,10 +30,6 @@ import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.CONDITIONAL_WHITES
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.NEWLINE
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.NONE
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.WHITESPACE
-import com.facebook.ktfmt.kdoc.Token.Type.CODE_BLOCK_MARKER
-import com.facebook.ktfmt.kdoc.Token.Type.HEADER_OPEN_TAG
-import com.facebook.ktfmt.kdoc.Token.Type.LIST_ITEM_OPEN_TAG
-import com.facebook.ktfmt.kdoc.Token.Type.PARAGRAPH_OPEN_TAG
 import com.google.common.base.Strings
 import com.google.common.collect.Ordering
 import com.google.common.collect.Sets.immutableEnumSet
@@ -93,7 +93,7 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
     output.append("*/")
   }
 
-  fun writeListItemOpen(token: Token) {
+  fun writeListItemOpen(token: KDocToken) {
     requestCloseCodeBlockMarker()
     requestNewline()
 
@@ -106,33 +106,33 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
     continuingListItemCount.increment()
   }
 
-  fun writePreOpen(token: Token) {
+  fun writePreOpen(token: KDocToken) {
     requestBlankLine()
 
     writeToken(token)
   }
 
-  fun writePreClose(token: Token) {
+  fun writePreClose(token: KDocToken) {
     writeToken(token)
 
     requestBlankLine()
   }
 
-  fun writeCodeOpen(token: Token) {
+  fun writeCodeOpen(token: KDocToken) {
     writeToken(token)
   }
 
-  fun writeCodeClose(token: Token) {
+  fun writeCodeClose(token: KDocToken) {
     writeToken(token)
   }
 
-  fun writeTableOpen(token: Token) {
+  fun writeTableOpen(token: KDocToken) {
     requestBlankLine()
 
     writeToken(token)
   }
 
-  fun writeTableClose(token: Token) {
+  fun writeTableClose(token: KDocToken) {
     writeToken(token)
 
     requestBlankLine()
@@ -142,12 +142,12 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
     writeNewline(NO_AUTO_INDENT)
   }
 
-  fun writeTag(token: Token) {
+  fun writeTag(token: KDocToken) {
     requestNewline()
     writeToken(token)
   }
 
-  fun writeCodeLine(token: Token) {
+  fun writeCodeLine(token: KDocToken) {
     requestOpenCodeBlockMarker()
     requestNewline()
     if (token.value.isNotEmpty()) {
@@ -159,7 +159,7 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
   private fun requestCloseCodeBlockMarker() {
     if (inCodeBlock) {
       this.requestedWhitespace = NEWLINE
-      writeExplicitCodeBlockMarker(Token(CODE_BLOCK_MARKER, "```"))
+      writeExplicitCodeBlockMarker(KDocToken(CODE_BLOCK_MARKER, "```"))
       inCodeBlock = false
     }
   }
@@ -168,25 +168,25 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
   private fun requestOpenCodeBlockMarker() {
     if (!inCodeBlock) {
       this.requestedWhitespace = NEWLINE
-      writeExplicitCodeBlockMarker(Token(CODE_BLOCK_MARKER, "```"))
+      writeExplicitCodeBlockMarker(KDocToken(CODE_BLOCK_MARKER, "```"))
       inCodeBlock = true
     }
   }
 
-  fun writeExplicitCodeBlockMarker(token: Token) {
+  fun writeExplicitCodeBlockMarker(token: KDocToken) {
     requestNewline()
     writeToken(token)
     requestNewline()
     inCodeBlock = !inCodeBlock
   }
 
-  fun writeLiteral(token: Token) {
+  fun writeLiteral(token: KDocToken) {
     requestCloseCodeBlockMarker()
 
     writeToken(token)
   }
 
-  fun writeMarkdownLink(token: Token) {
+  fun writeMarkdownLink(token: KDocToken) {
     writeToken(token)
   }
 
@@ -232,7 +232,7 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
     BLANK_LINE,
   }
 
-  private fun writeToken(token: Token) {
+  private fun writeToken(token: KDocToken) {
     if (requestedWhitespace == BLANK_LINE) {
       // A blank line means all lists are terminated
       if (continuingListItemCount.isPositive) {

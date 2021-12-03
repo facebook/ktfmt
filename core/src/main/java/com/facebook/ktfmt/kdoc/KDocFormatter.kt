@@ -19,22 +19,22 @@
 
 package com.facebook.ktfmt.kdoc
 
-import com.facebook.ktfmt.kdoc.Token.Type.BEGIN_KDOC
-import com.facebook.ktfmt.kdoc.Token.Type.BLANK_LINE
-import com.facebook.ktfmt.kdoc.Token.Type.CODE
-import com.facebook.ktfmt.kdoc.Token.Type.CODE_BLOCK_MARKER
-import com.facebook.ktfmt.kdoc.Token.Type.CODE_CLOSE_TAG
-import com.facebook.ktfmt.kdoc.Token.Type.CODE_OPEN_TAG
-import com.facebook.ktfmt.kdoc.Token.Type.END_KDOC
-import com.facebook.ktfmt.kdoc.Token.Type.LIST_ITEM_OPEN_TAG
-import com.facebook.ktfmt.kdoc.Token.Type.LITERAL
-import com.facebook.ktfmt.kdoc.Token.Type.MARKDOWN_LINK
-import com.facebook.ktfmt.kdoc.Token.Type.PRE_CLOSE_TAG
-import com.facebook.ktfmt.kdoc.Token.Type.PRE_OPEN_TAG
-import com.facebook.ktfmt.kdoc.Token.Type.TABLE_CLOSE_TAG
-import com.facebook.ktfmt.kdoc.Token.Type.TABLE_OPEN_TAG
-import com.facebook.ktfmt.kdoc.Token.Type.TAG
-import com.facebook.ktfmt.kdoc.Token.Type.WHITESPACE
+import com.facebook.ktfmt.kdoc.KDocToken.Type.BEGIN_KDOC
+import com.facebook.ktfmt.kdoc.KDocToken.Type.BLANK_LINE
+import com.facebook.ktfmt.kdoc.KDocToken.Type.CODE
+import com.facebook.ktfmt.kdoc.KDocToken.Type.CODE_BLOCK_MARKER
+import com.facebook.ktfmt.kdoc.KDocToken.Type.CODE_CLOSE_TAG
+import com.facebook.ktfmt.kdoc.KDocToken.Type.CODE_OPEN_TAG
+import com.facebook.ktfmt.kdoc.KDocToken.Type.END_KDOC
+import com.facebook.ktfmt.kdoc.KDocToken.Type.LIST_ITEM_OPEN_TAG
+import com.facebook.ktfmt.kdoc.KDocToken.Type.LITERAL
+import com.facebook.ktfmt.kdoc.KDocToken.Type.MARKDOWN_LINK
+import com.facebook.ktfmt.kdoc.KDocToken.Type.PRE_CLOSE_TAG
+import com.facebook.ktfmt.kdoc.KDocToken.Type.PRE_OPEN_TAG
+import com.facebook.ktfmt.kdoc.KDocToken.Type.TABLE_CLOSE_TAG
+import com.facebook.ktfmt.kdoc.KDocToken.Type.TABLE_OPEN_TAG
+import com.facebook.ktfmt.kdoc.KDocToken.Type.TAG
+import com.facebook.ktfmt.kdoc.KDocToken.Type.WHITESPACE
 import java.util.regex.Pattern.compile
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 import org.jetbrains.kotlin.kdoc.lexer.KDocLexer
@@ -63,7 +63,7 @@ object KDocFormatter {
     val escapedInput = escapeKDoc(input)
     val kDocLexer = KDocLexer()
     kDocLexer.start(escapedInput)
-    val tokens = mutableListOf<Token>()
+    val tokens = mutableListOf<KDocToken>()
     var previousType: IElementType? = null
     while (kDocLexer.tokenType != null) {
       val tokenType = kDocLexer.tokenType
@@ -84,54 +84,54 @@ object KDocFormatter {
 
   private fun processToken(
       tokenType: IElementType?,
-      tokens: MutableList<Token>,
+      tokens: MutableList<KDocToken>,
       tokenText: String,
       previousType: IElementType?
   ) {
     when (tokenType) {
-      KDocTokens.START -> tokens.add(Token(BEGIN_KDOC, tokenText))
-      KDocTokens.END -> tokens.add(Token(END_KDOC, tokenText))
+      KDocTokens.START -> tokens.add(KDocToken(BEGIN_KDOC, tokenText))
+      KDocTokens.END -> tokens.add(KDocToken(END_KDOC, tokenText))
       KDocTokens.LEADING_ASTERISK -> Unit // Ignore, no need to output anything
-      KDocTokens.TAG_NAME -> tokens.add(Token(TAG, tokenText))
-      KDocTokens.CODE_BLOCK_TEXT -> tokens.add(Token(CODE, tokenText))
+      KDocTokens.TAG_NAME -> tokens.add(KDocToken(TAG, tokenText))
+      KDocTokens.CODE_BLOCK_TEXT -> tokens.add(KDocToken(CODE, tokenText))
       KDocTokens.MARKDOWN_INLINE_LINK, KDocTokens.MARKDOWN_LINK -> {
-        tokens.add(Token(MARKDOWN_LINK, tokenText))
+        tokens.add(KDocToken(MARKDOWN_LINK, tokenText))
       }
       KDocTokens.TEXT -> {
         var first = true
         for (word in tokenizeKdocText(tokenText)) {
           if (word.first().isWhitespace()) {
-            tokens.add(Token(WHITESPACE, " "))
+            tokens.add(KDocToken(WHITESPACE, " "))
             continue
           }
           if (first) {
             if (word == "-" || word == "*" || word.matches(NUMBERED_LIST_PATTERN)) {
-              tokens.add(Token(LIST_ITEM_OPEN_TAG, ""))
+              tokens.add(KDocToken(LIST_ITEM_OPEN_TAG, ""))
             }
             first = false
           }
           // If the KDoc is malformed (e.g. unclosed code block) KDocLexer doesn't report an
           // END_KDOC properly. We want to recover in such cases
           if (word == "*/") {
-            tokens.add(Token(END_KDOC, word))
+            tokens.add(KDocToken(END_KDOC, word))
           } else if (word.startsWith("```")) {
-            tokens.add(Token(CODE_BLOCK_MARKER, word))
+            tokens.add(KDocToken(CODE_BLOCK_MARKER, word))
           } else {
-            tokens.add(Token(LITERAL, word))
+            tokens.add(KDocToken(LITERAL, word))
           }
         }
       }
       WHITE_SPACE -> {
         if (previousType == KDocTokens.LEADING_ASTERISK || tokenText.count { it == '\n' } >= 2) {
-          tokens.add(Token(BLANK_LINE, ""))
+          tokens.add(KDocToken(BLANK_LINE, ""))
         } else {
-          tokens.add(Token(WHITESPACE, " "))
+          tokens.add(KDocToken(WHITESPACE, " "))
         }
       }
       else -> throw RuntimeException("Unexpected: $tokenType")
     }
   }
-  private fun render(input: List<Token>, blockIndent: Int, maxLineLength: Int): String {
+  private fun render(input: List<KDocToken>, blockIndent: Int, maxLineLength: Int): String {
     val output = KDocWriter(blockIndent, maxLineLength)
     for (token in input) {
       when (token.type) {
