@@ -16,6 +16,7 @@
 
 package com.facebook.ktfmt
 
+import com.facebook.ktfmt.debughelpers.PrintAstVisitor
 import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
 import com.google.common.truth.Truth

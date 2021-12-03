@@ -16,6 +16,7 @@
 
 package com.facebook.ktfmt
 
+import com.facebook.ktfmt.debughelpers.PrintAstVisitor
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
