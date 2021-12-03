@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.facebook.ktfmt
+package com.facebook.ktfmt.cli
 
 import com.facebook.ktfmt.format.ParseError
 import com.facebook.ktfmt.format.format
