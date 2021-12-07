@@ -19,9 +19,9 @@ package com.facebook.ktfmt.onlineformatter
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
-import com.facebook.ktfmt.KOTLINLANG_FORMAT
-import com.facebook.ktfmt.format
-import com.facebook.ktfmt.parseOptions
+import com.facebook.ktfmt.cli.parseOptions
+import com.facebook.ktfmt.format.KOTLINLANG_FORMAT
+import com.facebook.ktfmt.format.format
 import com.google.gson.Gson
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
