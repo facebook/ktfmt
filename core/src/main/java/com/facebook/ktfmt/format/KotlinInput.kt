@@ -16,7 +16,6 @@
 
 package com.facebook.ktfmt.format
 
-import com.google.common.base.MoreObjects
 import com.google.common.collect.DiscreteDomain
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
@@ -29,19 +28,9 @@ import com.google.googlejavaformat.Input
 import com.google.googlejavaformat.Newlines
 import com.google.googlejavaformat.java.FormatterException
 import com.google.googlejavaformat.java.JavaOutput
-import java.util.regex.Pattern
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
-import org.jetbrains.kotlin.com.intellij.psi.PsiComment
-import org.jetbrains.kotlin.com.intellij.psi.PsiElement
-import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
-import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
-import org.jetbrains.kotlin.lexer.KtToken
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.psi.KtStringTemplateExpression
-import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
-import org.jetbrains.kotlin.psi.psiUtil.endOffset
-import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 // TODO: share the code with JavaInput instead of copy-pasting here.
 /**
@@ -238,150 +227,4 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
 
   override fun getColumnNumber(inputPosition: Int) =
       StringUtil.offsetToLineColumn(text, inputPosition).column
-}
-
-class KotlinTok(
-    private val index: Int,
-    private val originalText: String,
-    private val text: String,
-    private val position: Int,
-    private val columnI: Int,
-    val isToken: Boolean,
-    private val kind: KtToken
-) : Input.Tok {
-
-  override fun getIndex(): Int = index
-
-  override fun getText(): String = text
-
-  override fun getOriginalText(): String = originalText
-
-  override fun length(): Int = originalText.length
-
-  override fun getPosition(): Int = position
-
-  override fun getColumn(): Int = columnI
-
-  override fun isNewline(): Boolean = Newlines.isNewline(text)
-
-  override fun isSlashSlashComment(): Boolean = text.startsWith("//")
-
-  override fun isSlashStarComment(): Boolean = text.startsWith("/*")
-
-  override fun isJavadocComment(): Boolean = text.startsWith("/**") && text.length > 4
-
-  override fun isComment(): Boolean = isSlashSlashComment || isSlashStarComment
-
-  fun kind(): KtToken = kind
-
-  override fun toString(): String {
-    return MoreObjects.toStringHelper(this)
-        .add("index", index)
-        .add("text", text)
-        .add("position", position)
-        .add("columnI", columnI)
-        .add("isToken", isToken)
-        .toString()
-  }
-}
-
-class KotlinToken(
-    private val toksBefore: ImmutableList<KotlinTok>,
-    private val kotlinTok: KotlinTok,
-    private val toksAfter: ImmutableList<KotlinTok>
-) : Input.Token {
-
-  override fun getTok(): KotlinTok = kotlinTok
-
-  override fun getToksBefore(): ImmutableList<out Input.Tok> = toksBefore
-
-  override fun getToksAfter(): ImmutableList<out Input.Tok> = toksAfter
-
-  override fun toString(): String {
-    return MoreObjects.toStringHelper(this)
-        .add("tok", kotlinTok)
-        .add("toksBefore", toksBefore)
-        .add("toksAfter", toksAfter)
-        .toString()
-  }
-}
-
-internal val WHITESPACE_NEWLINE_REGEX: Pattern = Pattern.compile("\\R|( )+")
-
-/**
- * Tokenizer traverses a Kotlin parse tree (which blessedly contains whitespaces and comments,
- * unlike Javac) and constructs a list of 'Tok's.
- *
- * <p>The google-java-format infra expects newline Toks to be separate from maximal-whitespace Toks,
- * but Kotlin emits them together. So, we split them using Java's \R regex matcher. We don't use
- * 'split' et al. because we want Toks for the newlines themselves.
- */
-class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorVoid() {
-  val toks = mutableListOf<KotlinTok>()
-  var index = 0
-
-  override fun visitElement(element: PsiElement) {
-    val startIndex = element.startOffset
-    when (element) {
-      is PsiComment -> {
-        toks.add(
-            KotlinTok(
-                index,
-                fileText.substring(startIndex, element.endOffset),
-                element.text,
-                startIndex,
-                0,
-                false,
-                KtTokens.EOF))
-        index++
-        return
-      }
-      is KtStringTemplateExpression -> {
-        toks.add(
-            KotlinTok(
-                index,
-                replaceTrailingWhitespaceWithTombstone(
-                    fileText.substring(startIndex, element.endOffset)),
-                element.text,
-                startIndex,
-                0,
-                true,
-                KtTokens.EOF))
-        index++
-        return
-      }
-      is LeafPsiElement -> {
-        val elementText = element.text
-        val startIndex = element.startOffset
-        val endIndex = element.endOffset
-        if (element is PsiWhiteSpace) {
-          val matcher = WHITESPACE_NEWLINE_REGEX.matcher(elementText)
-          while (matcher.find()) {
-            val text = matcher.group()
-            toks.add(
-                KotlinTok(
-                    -1,
-                    fileText.substring(startIndex + matcher.start(), startIndex + matcher.end()),
-                    text,
-                    startIndex + matcher.start(),
-                    0,
-                    false,
-                    KtTokens.EOF))
-          }
-        } else {
-          toks.add(
-              KotlinTok(
-                  index,
-                  fileText.substring(startIndex, endIndex),
-                  elementText,
-                  startIndex,
-                  0,
-                  true,
-                  KtTokens.EOF))
-          index++
-        }
-      }
-    }
-    super.visitElement(element)
-  }
 }
