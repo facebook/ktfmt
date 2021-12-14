@@ -1299,7 +1299,9 @@ class KotlinInputAstVisitor(
       }
       val body = classOrObject.body
       if (classOrObject.hasModifier(KtTokens.ENUM_KEYWORD)) {
-        visitEnumBody(classOrObject as KtClass)
+        if (body != null || !classOrObject.hasModifier(KtTokens.EXPECT_KEYWORD)) {
+          visitEnumBody(classOrObject as KtClass)
+        }
       } else if (body != null) {
         visitBlockBody(body, true)
       }
