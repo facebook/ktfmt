@@ -4512,8 +4512,7 @@ class FormatterTest {
 
   @Test
   fun `expect enum class`() =
-      assertFormatted(
-          """
+      assertFormatted("""
       |expect enum class ExpectedEnum
       |""".trimMargin())
 }
