@@ -55,15 +55,15 @@ open class Parser {
     }
   }
 
+  private fun throwParseError(fileContents: String, error: PsiErrorElement): Nothing {
+    throw ParseError(
+        error.errorDescription, StringUtil.offsetToLineColumn(fileContents, error.startOffset))
+  }
+
   companion object : Parser() {
     init {
       // To hide annoying warning on Windows
       System.setProperty("idea.use.native.fs.for.win", "false")
     }
   }
-}
-
-fun throwParseError(fileContents: String, error: PsiErrorElement): Nothing {
-  throw ParseError(
-      error.errorDescription, StringUtil.offsetToLineColumn(fileContents, error.startOffset))
 }
