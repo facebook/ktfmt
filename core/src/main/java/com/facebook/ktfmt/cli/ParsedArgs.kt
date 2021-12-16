@@ -16,10 +16,8 @@
 
 package com.facebook.ktfmt.cli
 
-import com.facebook.ktfmt.format.DROPBOX_FORMAT
+import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
-import com.facebook.ktfmt.format.GOOGLE_FORMAT
-import com.facebook.ktfmt.format.KOTLINLANG_FORMAT
 import java.io.PrintStream
 
 /** ParsedArgs holds the arguments passed to ktfmt on the command-line, after parsing. */
@@ -45,9 +43,9 @@ data class ParsedArgs(
 
       for (arg in args) {
         when {
-          arg == "--dropbox-style" -> formattingOptions = DROPBOX_FORMAT
-          arg == "--google-style" -> formattingOptions = GOOGLE_FORMAT
-          arg == "--kotlinlang-style" -> formattingOptions = KOTLINLANG_FORMAT
+          arg == "--dropbox-style" -> formattingOptions = Formatter.DROPBOX_FORMAT
+          arg == "--google-style" -> formattingOptions = Formatter.GOOGLE_FORMAT
+          arg == "--kotlinlang-style" -> formattingOptions = Formatter.KOTLINLANG_FORMAT
           arg == "--dry-run" || arg == "-n" -> dryRun = true
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
           arg.startsWith("--") -> err.println("Unexpected option: $arg")

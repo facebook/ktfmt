@@ -16,9 +16,9 @@
 
 package com.facebook.ktfmt.intellij;
 
-import static com.facebook.ktfmt.format.FormatterKt.DROPBOX_FORMAT;
-import static com.facebook.ktfmt.format.FormatterKt.GOOGLE_FORMAT;
-import static com.facebook.ktfmt.format.FormatterKt.KOTLINLANG_FORMAT;
+import static com.facebook.ktfmt.format.Formatter.DROPBOX_FORMAT;
+import static com.facebook.ktfmt.format.Formatter.GOOGLE_FORMAT;
+import static com.facebook.ktfmt.format.Formatter.KOTLINLANG_FORMAT;
 
 import com.facebook.ktfmt.format.FormattingOptions;
 

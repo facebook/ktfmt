@@ -16,8 +16,8 @@
 
 package com.facebook.ktfmt.cli
 
+import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.ParseError
-import com.facebook.ktfmt.format.format
 import com.google.googlejavaformat.FormattingError
 import java.io.BufferedReader
 import java.io.File
@@ -112,7 +112,7 @@ class Main(
     try {
       val code = file?.readText() ?: BufferedReader(InputStreamReader(input)).readText()
 
-      val formattedCode = format(parsedArgs.formattingOptions, code)
+      val formattedCode = Formatter.format(parsedArgs.formattingOptions, code)
 
       if (code == formattedCode) {
         // The code was already formatted, nothing more to do here

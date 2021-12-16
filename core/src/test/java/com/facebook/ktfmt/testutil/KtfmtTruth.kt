@@ -17,9 +17,9 @@
 package com.facebook.ktfmt.testutil
 
 import com.facebook.ktfmt.debughelpers.PrintAstVisitor
+import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
 import com.facebook.ktfmt.format.Parser
-import com.facebook.ktfmt.format.format
 import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
 import com.google.common.truth.Truth
@@ -99,7 +99,7 @@ class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) 
     }
     val actualFormatting: String
     try {
-      actualFormatting = format(options, code)
+      actualFormatting = Formatter.format(options, code)
       if (actualFormatting != expectedFormatting) {
         reportError(code)
         println("# Output: ")

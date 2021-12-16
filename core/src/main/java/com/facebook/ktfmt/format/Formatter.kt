@@ -39,128 +39,134 @@ import org.jetbrains.kotlin.psi.KtImportDirective
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
-val MINIMUM_KOTLIN_VERSION = KotlinVersion(1, 4)
+object Formatter {
 
-@JvmField
-val GOOGLE_FORMAT = FormattingOptions(style = GOOGLE, blockIndent = 2, continuationIndent = 2)
+  @JvmField
+  val GOOGLE_FORMAT = FormattingOptions(style = GOOGLE, blockIndent = 2, continuationIndent = 2)
 
-/** A format that attempts to reflect https://kotlinlang.org/docs/coding-conventions.html. */
-@JvmField
-val KOTLINLANG_FORMAT = FormattingOptions(style = GOOGLE, blockIndent = 4, continuationIndent = 4)
+  /** A format that attempts to reflect https://kotlinlang.org/docs/coding-conventions.html. */
+  @JvmField
+  val KOTLINLANG_FORMAT = FormattingOptions(style = GOOGLE, blockIndent = 4, continuationIndent = 4)
 
-@JvmField
-val DROPBOX_FORMAT = FormattingOptions(style = DROPBOX, blockIndent = 4, continuationIndent = 4)
+  @JvmField
+  val DROPBOX_FORMAT = FormattingOptions(style = DROPBOX, blockIndent = 4, continuationIndent = 4)
 
-/**
- * format formats the Kotlin code given in 'code' and returns it as a string. This method is
- * accessed through Reflection.
- */
-@Throws(FormatterException::class, ParseError::class)
-fun format(code: String): String = format(FormattingOptions(), code)
+  private val MINIMUM_KOTLIN_VERSION = KotlinVersion(1, 4)
 
-/**
- * format formats the Kotlin code given in 'code' with 'removeUnusedImports' and returns it as a
- * string. This method is accessed through Reflection.
- */
-@Throws(FormatterException::class, ParseError::class)
-fun format(code: String, removeUnusedImports: Boolean): String =
-    format(FormattingOptions(removeUnusedImports = removeUnusedImports), code)
+  /**
+   * format formats the Kotlin code given in 'code' and returns it as a string. This method is
+   * accessed through Reflection.
+   */
+  @JvmStatic
+  @Throws(FormatterException::class, ParseError::class)
+  fun format(code: String): String = format(FormattingOptions(), code)
 
-/**
- * format formats the Kotlin code given in 'code' with the 'maxWidth' and returns it as a string.
- */
-@Throws(FormatterException::class, ParseError::class)
-fun format(options: FormattingOptions, code: String): String {
-  checkEscapeSequences(code)
+  /**
+   * format formats the Kotlin code given in 'code' with 'removeUnusedImports' and returns it as a
+   * string. This method is accessed through Reflection.
+   */
+  @JvmStatic
+  @Throws(FormatterException::class, ParseError::class)
+  fun format(code: String, removeUnusedImports: Boolean): String =
+      format(FormattingOptions(removeUnusedImports = removeUnusedImports), code)
 
-  val lfCode = StringUtilRt.convertLineSeparators(code)
-  val sortedImports = sortedAndDistinctImports(lfCode)
-  val pretty = prettyPrint(sortedImports, options, "\n")
-  val noRedundantElements = dropRedundantElements(pretty, options)
-  return prettyPrint(noRedundantElements, options, Newlines.guessLineSeparator(code)!!)
-}
+  /**
+   * format formats the Kotlin code given in 'code' with the 'maxWidth' and returns it as a string.
+   */
+  @JvmStatic
+  @Throws(FormatterException::class, ParseError::class)
+  fun format(options: FormattingOptions, code: String): String {
+    checkEscapeSequences(code)
 
-/** prettyPrint reflows 'code' using google-java-format's engine. */
-private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator: String): String {
-  val file = Parser.parse(code)
-  val kotlinInput = KotlinInput(code, file)
-  val javaOutput =
-      JavaOutput(lineSeparator, kotlinInput, KDocCommentsHelper(lineSeparator, options.maxWidth))
-  val builder = OpsBuilder(kotlinInput, javaOutput)
-  file.accept(createAstVisitor(options, builder))
-  builder.sync(kotlinInput.text.length)
-  builder.drain()
-  val ops = builder.build()
-  if (options.debuggingPrintOpsAfterFormatting) {
-    printOps(ops)
-  }
-  val doc = DocBuilder().withOps(ops).build()
-  doc.computeBreaks(javaOutput.commentsHelper, options.maxWidth, Doc.State(+0, 0))
-  doc.write(javaOutput)
-  javaOutput.flush()
-
-  val tokenRangeSet =
-      kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
-  return replaceTombstoneWithTrailingWhitespace(
-      JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
-}
-
-fun createAstVisitor(options: FormattingOptions, builder: OpsBuilder): PsiElementVisitor {
-  if (KotlinVersion.CURRENT < MINIMUM_KOTLIN_VERSION) {
-    throw RuntimeException("Unsupported runtime Kotlin version: " + KotlinVersion.CURRENT)
-  }
-  return KotlinInputAstVisitor(options, builder)
-}
-
-private fun checkEscapeSequences(code: String) {
-  var index = code.indexOfWhitespaceTombstone()
-  if (index == -1) {
-    index = indexOfCommentEscapeSequences(code)
-  }
-  if (index != -1) {
-    throw ParseError(
-        "ktfmt does not support code which contains one of {\\u0003, \\u0004, \\u0005} character" +
-            "; escape it",
-        StringUtil.offsetToLineColumn(code, index))
-  }
-}
-
-fun sortedAndDistinctImports(code: String): String {
-  val file = Parser.parse(code)
-
-  val importList = file.importList ?: return code
-  if (importList.imports.isEmpty()) {
-    return code
+    val lfCode = StringUtilRt.convertLineSeparators(code)
+    val sortedImports = sortedAndDistinctImports(lfCode)
+    val pretty = prettyPrint(sortedImports, options, "\n")
+    val noRedundantElements = dropRedundantElements(pretty, options)
+    return prettyPrint(noRedundantElements, options, Newlines.guessLineSeparator(code)!!)
   }
 
-  fun findNonImportElement(): PsiElement? {
-    var element = importList.firstChild
-    while (element != null) {
-      if (element !is KtImportDirective && element !is PsiWhiteSpace) {
-        return element
-      }
-      element = element.nextSibling
+  /** prettyPrint reflows 'code' using google-java-format's engine. */
+  private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator: String): String {
+    val file = Parser.parse(code)
+    val kotlinInput = KotlinInput(code, file)
+    val javaOutput =
+        JavaOutput(lineSeparator, kotlinInput, KDocCommentsHelper(lineSeparator, options.maxWidth))
+    val builder = OpsBuilder(kotlinInput, javaOutput)
+    file.accept(createAstVisitor(options, builder))
+    builder.sync(kotlinInput.text.length)
+    builder.drain()
+    val ops = builder.build()
+    if (options.debuggingPrintOpsAfterFormatting) {
+      printOps(ops)
     }
-    return null
+    val doc = DocBuilder().withOps(ops).build()
+    doc.computeBreaks(javaOutput.commentsHelper, options.maxWidth, Doc.State(+0, 0))
+    doc.write(javaOutput)
+    javaOutput.flush()
+
+    val tokenRangeSet =
+        kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
+    return replaceTombstoneWithTrailingWhitespace(
+        JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
   }
 
-  val nonImportElement = findNonImportElement()
-  if (nonImportElement != null) {
-    throw ParseError(
-        "Imports not contiguous (perhaps a comment separates them?): " + nonImportElement.text,
-        StringUtil.offsetToLineColumn(code, nonImportElement.startOffset))
+  private fun createAstVisitor(options: FormattingOptions, builder: OpsBuilder): PsiElementVisitor {
+    if (KotlinVersion.CURRENT < MINIMUM_KOTLIN_VERSION) {
+      throw RuntimeException("Unsupported runtime Kotlin version: " + KotlinVersion.CURRENT)
+    }
+    return KotlinInputAstVisitor(options, builder)
   }
-  fun canonicalText(importDirective: KtImportDirective) =
-      importDirective.importedFqName?.asString() +
-          " " +
-          importDirective.alias?.text?.replace("`", "") +
-          " " +
-          if (importDirective.isAllUnder) "*" else ""
 
-  val sortedImports = importList.imports.sortedBy(::canonicalText).distinctBy(::canonicalText)
+  private fun checkEscapeSequences(code: String) {
+    var index = code.indexOfWhitespaceTombstone()
+    if (index == -1) {
+      index = indexOfCommentEscapeSequences(code)
+    }
+    if (index != -1) {
+      throw ParseError(
+          "ktfmt does not support code which contains one of {\\u0003, \\u0004, \\u0005} character" +
+              "; escape it",
+          StringUtil.offsetToLineColumn(code, index))
+    }
+  }
 
-  return code.replaceRange(
-      importList.startOffset,
-      importList.endOffset,
-      sortedImports.joinToString(separator = "\n") { imprt -> imprt.text } + "\n")
+  private fun sortedAndDistinctImports(code: String): String {
+    val file = Parser.parse(code)
+
+    val importList = file.importList ?: return code
+    if (importList.imports.isEmpty()) {
+      return code
+    }
+
+    fun findNonImportElement(): PsiElement? {
+      var element = importList.firstChild
+      while (element != null) {
+        if (element !is KtImportDirective && element !is PsiWhiteSpace) {
+          return element
+        }
+        element = element.nextSibling
+      }
+      return null
+    }
+
+    val nonImportElement = findNonImportElement()
+    if (nonImportElement != null) {
+      throw ParseError(
+          "Imports not contiguous (perhaps a comment separates them?): " + nonImportElement.text,
+          StringUtil.offsetToLineColumn(code, nonImportElement.startOffset))
+    }
+    fun canonicalText(importDirective: KtImportDirective) =
+        importDirective.importedFqName?.asString() +
+            " " +
+            importDirective.alias?.text?.replace("`", "") +
+            " " +
+            if (importDirective.isAllUnder) "*" else ""
+
+    val sortedImports = importList.imports.sortedBy(::canonicalText).distinctBy(::canonicalText)
+
+    return code.replaceRange(
+        importList.startOffset,
+        importList.endOffset,
+        sortedImports.joinToString(separator = "\n") { imprt -> imprt.text } + "\n")
+  }
 }

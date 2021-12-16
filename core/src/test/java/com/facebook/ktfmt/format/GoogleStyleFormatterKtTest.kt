@@ -98,7 +98,7 @@ class GoogleStyleFormatterKtTest {
         |}
         |""".trimMargin()
 
-    assertThatFormatting(code).withOptions(GOOGLE_FORMAT).isEqualTo(expected)
+    assertThatFormatting(code).withOptions(Formatter.GOOGLE_FORMAT).isEqualTo(expected)
     // Don't add more tests here
   }
 
@@ -141,7 +141,7 @@ class GoogleStyleFormatterKtTest {
       |  //
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -189,7 +189,7 @@ class GoogleStyleFormatterKtTest {
       |  //
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -213,7 +213,7 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -234,7 +234,7 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -251,7 +251,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT)
+          formattingOptions = Formatter.GOOGLE_FORMAT)
 
   @Test
   fun `line breaks inside when expressions and conditions`() =
@@ -281,7 +281,7 @@ class GoogleStyleFormatterKtTest {
       |    .build()
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
   @Test
@@ -296,7 +296,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
   @Test
@@ -313,7 +313,7 @@ class GoogleStyleFormatterKtTest {
       |  ) { it.doIt() }
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
   @Test
@@ -328,7 +328,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
   @Test
@@ -345,7 +345,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT)
+          formattingOptions = Formatter.GOOGLE_FORMAT)
 
   @Test
   fun `Arguments are blocks`() =
@@ -373,7 +373,7 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -393,7 +393,7 @@ class GoogleStyleFormatterKtTest {
       |    )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -411,7 +411,7 @@ class GoogleStyleFormatterKtTest {
       |  return if (b) 1 else 2
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT)
+          formattingOptions = Formatter.GOOGLE_FORMAT)
 
   @Test
   fun `named arguments indent their value expression`() =
@@ -427,7 +427,7 @@ class GoogleStyleFormatterKtTest {
       |    duration = duration
       |  )
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT)
+          formattingOptions = Formatter.GOOGLE_FORMAT)
 
   @Test
   fun `breaking long binary operations`() =
@@ -450,7 +450,7 @@ class GoogleStyleFormatterKtTest {
       |      value9
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -487,7 +487,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -518,7 +518,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   // TODO: there's a bug here - the last case shouldn't break after 'foo'.
@@ -547,7 +547,7 @@ class GoogleStyleFormatterKtTest {
       |    .doThat()
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -572,7 +572,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -588,7 +588,7 @@ class GoogleStyleFormatterKtTest {
       |    )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -631,7 +631,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -685,7 +685,7 @@ class GoogleStyleFormatterKtTest {
       |    .abcdefghijkl()
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -708,7 +708,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT)
+          formattingOptions = Formatter.GOOGLE_FORMAT)
 
   @Test
   fun `chained calls that don't fit in one line`() =
@@ -726,7 +726,7 @@ class GoogleStyleFormatterKtTest {
       |    )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -757,7 +757,7 @@ class GoogleStyleFormatterKtTest {
       |  //
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -783,7 +783,7 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -811,7 +811,7 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -833,6 +833,6 @@ class GoogleStyleFormatterKtTest {
       |    )
       |}
       |""".trimMargin(),
-          formattingOptions = GOOGLE_FORMAT,
+          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 }

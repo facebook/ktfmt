@@ -16,8 +16,8 @@
 
 package com.facebook.ktfmt.cli
 
+import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
-import com.facebook.ktfmt.format.GOOGLE_FORMAT
 import com.google.common.truth.Truth.assertThat
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
@@ -77,7 +77,7 @@ class ParsedArgsTest {
     val (_, formattingOptions) =
         ParsedArgs.parseOptions(PrintStream(out), arrayOf("--google-style", "foo.kt"))
 
-    assertThat(formattingOptions).isEqualTo(GOOGLE_FORMAT)
+    assertThat(formattingOptions).isEqualTo(Formatter.GOOGLE_FORMAT)
   }
 
   @Test

@@ -20,8 +20,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.facebook.ktfmt.cli.ParsedArgs
-import com.facebook.ktfmt.format.KOTLINLANG_FORMAT
-import com.facebook.ktfmt.format.format
+import com.facebook.ktfmt.format.Formatter
 import com.google.gson.Gson
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
@@ -29,7 +28,7 @@ import java.io.PrintStream
 class Handler : RequestHandler<APIGatewayProxyRequestEvent, String> {
   init {
     // Warm up.
-    gson.toJson(format(KOTLINLANG_FORMAT, "/* foo */ fun foo() {}"))
+    gson.toJson(Formatter.format(Formatter.KOTLINLANG_FORMAT, "/* foo */ fun foo() {}"))
   }
 
   override fun handleRequest(event: APIGatewayProxyRequestEvent, context: Context?): String {
@@ -42,7 +41,7 @@ class Handler : RequestHandler<APIGatewayProxyRequestEvent, String> {
               ParsedArgs.parseOptions(
                   PrintStream(parsingErrors), if (style == null) arrayOf() else arrayOf(style))
           Response(
-              format(
+              Formatter.format(
                   parsedArgs.formattingOptions.copy(maxWidth = request.maxWidth ?: 100),
                   request.source ?: ""),
               parsingErrors.toString().ifEmpty { null })

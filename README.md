@@ -108,7 +108,7 @@ However, we do offer an escape-hatch for projects that absolutely cannot make th
 
 ### Development
 
-* Currently, we mainly develop by adding tests to `FormatterKtTest.kt`.
+* Currently, we mainly develop by adding tests to `FormatterTest.kt`.
 
 ### Building on the Command Line
 

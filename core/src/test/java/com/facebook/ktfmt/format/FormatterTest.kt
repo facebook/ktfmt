@@ -27,7 +27,7 @@ import org.junit.runners.JUnit4
 
 @Suppress("FunctionNaming")
 @RunWith(JUnit4::class)
-class FormatterKtTest {
+class FormatterTest {
 
   @Test
   fun `support script (kts) files`() =
@@ -987,7 +987,7 @@ class FormatterKtTest {
         |""".trimMargin()
 
     try {
-      format(code)
+      Formatter.format(code)
       fail()
     } catch (e: ParseError) {
       assertThat(e.errorDescription).contains("Imports not contiguous")
@@ -2112,7 +2112,7 @@ class FormatterKtTest {
       |}
       |""".trimMargin()
     try {
-      format(code)
+      Formatter.format(code)
       fail()
     } catch (e: ParseError) {
       assertThat(e.errorDescription).contains("\\u0003")
@@ -3533,7 +3533,7 @@ class FormatterKtTest {
       |fn (
       |""".trimMargin()
     try {
-      format(code)
+      Formatter.format(code)
       fail()
     } catch (e: ParseError) {
       assertThat(e.lineColumn.line).isEqualTo(6)
@@ -3552,7 +3552,7 @@ class FormatterKtTest {
       |}
       |""".trimMargin()
     try {
-      format(code)
+      Formatter.format(code)
       fail()
     } catch (e: ParseError) {
       assertThat(e.lineColumn.line).isEqualTo(2)
@@ -3778,7 +3778,7 @@ class FormatterKtTest {
       | */
       |class MyClass {}
       |""".trimMargin()
-    assertFormatted(format(code))
+    assertFormatted(Formatter.format(code))
   }
 
   @Test
@@ -3817,7 +3817,7 @@ class FormatterKtTest {
       | */
       |class MyClass {}
       |""".trimMargin()
-    assertFormatted(format(code))
+    assertFormatted(Formatter.format(code))
   }
 
   @Test
@@ -3910,7 +3910,7 @@ class FormatterKtTest {
       |/** Surprise ``` */
       |class MyClass {}
       |""".trimMargin()
-    assertFormatted(format(code))
+    assertFormatted(Formatter.format(code))
   }
 
   @Test
@@ -4471,7 +4471,7 @@ class FormatterKtTest {
       |""".trimMargin()
 
     // Don't throw.
-    format(code)
+    Formatter.format(code)
   }
 
   @Test

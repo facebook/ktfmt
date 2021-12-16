@@ -16,7 +16,8 @@
 
 package com.facebook.ktfmt.intellij;
 
-import com.facebook.ktfmt.format.FormatterKt;
+import static com.facebook.ktfmt.format.Formatter.format;
+
 import com.facebook.ktfmt.format.ParseError;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -45,6 +46,6 @@ final class FormatterUtil {
   static String formatCode(UiFormatterStyle uiFormatterStyle, String code)
       throws FormatterException {
 
-    return FormatterKt.format(uiFormatterStyle.getFormattingOptions(), code);
+    return format(uiFormatterStyle.getFormattingOptions(), code);
   }
 }
