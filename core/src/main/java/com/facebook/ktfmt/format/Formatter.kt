@@ -21,8 +21,8 @@ import com.facebook.ktfmt.format.FormattingOptions.Style.DROPBOX
 import com.facebook.ktfmt.format.FormattingOptions.Style.GOOGLE
 import com.facebook.ktfmt.format.RedundantElementRemover.dropRedundantElements
 import com.facebook.ktfmt.format.WhitespaceTombstones.indexOfWhitespaceTombstone
+import com.facebook.ktfmt.kdoc.Escaping
 import com.facebook.ktfmt.kdoc.KDocCommentsHelper
-import com.facebook.ktfmt.kdoc.indexOfCommentEscapeSequences
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Range
 import com.google.googlejavaformat.Doc
@@ -121,7 +121,7 @@ object Formatter {
   private fun checkEscapeSequences(code: String) {
     var index = code.indexOfWhitespaceTombstone()
     if (index == -1) {
-      index = indexOfCommentEscapeSequences(code)
+      index = Escaping.indexOfCommentEscapeSequences(code)
     }
     if (index != -1) {
       throw ParseError(

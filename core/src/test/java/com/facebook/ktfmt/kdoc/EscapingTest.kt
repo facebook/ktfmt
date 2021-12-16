@@ -22,16 +22,18 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
 @RunWith(JUnit4::class)
-class EscapingKtTest {
+class EscapingTest {
 
   @Test
   fun `escaping kdoc`() {
-    assertThat(escapeKDoc("/** foo */")).isEqualTo("/** foo */")
-    assertThat(escapeKDoc("/*** foo */")).isEqualTo("/*** foo */")
-    assertThat(escapeKDoc("/** * foo */")).isEqualTo("/** * foo */")
-    assertThat(escapeKDoc("/** /* foo */")).isEqualTo("/** \u0004\u0005 foo */")
-    assertThat(escapeKDoc("/** /* foo */ */")).isEqualTo("/** \u0004\u0005 foo \u0005\u0004 */")
+    assertThat(Escaping.escapeKDoc("/** foo */")).isEqualTo("/** foo */")
+    assertThat(Escaping.escapeKDoc("/*** foo */")).isEqualTo("/*** foo */")
+    assertThat(Escaping.escapeKDoc("/** * foo */")).isEqualTo("/** * foo */")
+    assertThat(Escaping.escapeKDoc("/** /* foo */")).isEqualTo("/** \u0004\u0005 foo */")
+    assertThat(Escaping.escapeKDoc("/** /* foo */ */"))
+        .isEqualTo("/** \u0004\u0005 foo \u0005\u0004 */")
 
-    assertThat(escapeKDoc("/* /* foo */ */")).isEqualTo("/* \u0004\u0005 foo \u0005\u0004 */")
+    assertThat(Escaping.escapeKDoc("/* /* foo */ */"))
+        .isEqualTo("/* \u0004\u0005 foo \u0005\u0004 */")
   }
 }

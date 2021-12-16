@@ -60,7 +60,7 @@ object KDocFormatter {
    * start and end with the same characters.
    */
   fun formatKDoc(input: String, blockIndent: Int, maxLineLength: Int): String {
-    val escapedInput = escapeKDoc(input)
+    val escapedInput = Escaping.escapeKDoc(input)
     val kDocLexer = KDocLexer()
     kDocLexer.start(escapedInput)
     val tokens = mutableListOf<KDocToken>()
@@ -138,7 +138,7 @@ object KDocFormatter {
         BEGIN_KDOC -> output.writeBeginJavadoc()
         END_KDOC -> {
           output.writeEndJavadoc()
-          return unescapeKDoc(output.toString())
+          return Escaping.unescapeKDoc(output.toString())
         }
         LIST_ITEM_OPEN_TAG -> output.writeListItemOpen(token)
         PRE_OPEN_TAG -> output.writePreOpen(token)
