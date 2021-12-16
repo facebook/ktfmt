@@ -20,6 +20,7 @@ import com.facebook.ktfmt.debughelpers.printOps
 import com.facebook.ktfmt.format.FormattingOptions.Style.DROPBOX
 import com.facebook.ktfmt.format.FormattingOptions.Style.GOOGLE
 import com.facebook.ktfmt.format.RedundantElementRemover.dropRedundantElements
+import com.facebook.ktfmt.format.WhitespaceTombstones.indexOfWhitespaceTombstone
 import com.facebook.ktfmt.kdoc.KDocCommentsHelper
 import com.facebook.ktfmt.kdoc.indexOfCommentEscapeSequences
 import com.google.common.collect.ImmutableList
@@ -106,7 +107,7 @@ object Formatter {
 
     val tokenRangeSet =
         kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
-    return replaceTombstoneWithTrailingWhitespace(
+    return WhitespaceTombstones.replaceTombstoneWithTrailingWhitespace(
         JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
   }
 

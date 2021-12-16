@@ -80,12 +80,12 @@ class TokenizerTest {
             "=",
             listOf(
                     "\"\"\"",
-                    " $SPACE_TOMBSTONE",
-                    "  $SPACE_TOMBSTONE",
-                    "    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do$SPACE_TOMBSTONE",
+                    " ${WhitespaceTombstones.SPACE_TOMBSTONE}",
+                    "  ${WhitespaceTombstones.SPACE_TOMBSTONE}",
+                    "    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do${WhitespaceTombstones.SPACE_TOMBSTONE}",
                     "    Lorem",
-                    "   $SPACE_TOMBSTONE",
-                    "    $SPACE_TOMBSTONE",
+                    "   ${WhitespaceTombstones.SPACE_TOMBSTONE}",
+                    "    ${WhitespaceTombstones.SPACE_TOMBSTONE}",
                     "      \"\"\"")
                 .joinToString("\n"),
             "\n",

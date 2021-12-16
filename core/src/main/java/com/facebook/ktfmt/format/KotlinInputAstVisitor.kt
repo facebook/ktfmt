@@ -1836,7 +1836,7 @@ class KotlinInputAstVisitor(
   /** Example `"Hello $world!"` or `"""Hello world!"""` */
   override fun visitStringTemplateExpression(expression: KtStringTemplateExpression) {
     builder.sync(expression)
-    builder.token(replaceTrailingWhitespaceWithTombstone(expression.text))
+    builder.token(WhitespaceTombstones.replaceTrailingWhitespaceWithTombstone(expression.text))
   }
 
   /** Example `super` in `super.doIt(5)` or `super<Foo>` in `super<Foo>.doIt(5)` */
