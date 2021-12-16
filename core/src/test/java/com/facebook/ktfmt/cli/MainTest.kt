@@ -30,7 +30,7 @@ import org.junit.runners.JUnit4
 
 @Suppress("FunctionNaming")
 @RunWith(JUnit4::class)
-class MainKtTest {
+class MainTest {
 
   private val root = createTempDir()
 
@@ -51,13 +51,13 @@ class MainKtTest {
   fun `expandArgsToFileNames - single file arg is used as is`() {
     val fooBar = root.resolve("foo.bar")
     fooBar.writeText("hi")
-    assertThat(expandArgsToFileNames(listOf(fooBar.toString()))).containsExactly(fooBar)
+    assertThat(Main.expandArgsToFileNames(listOf(fooBar.toString()))).containsExactly(fooBar)
   }
 
   @Test
   fun `expandArgsToFileNames - single arg which is not a file is not returned`() {
     val fooBar = root.resolve("foo.bar")
-    assertThat(expandArgsToFileNames(listOf(fooBar.toString()))).isEmpty()
+    assertThat(Main.expandArgsToFileNames(listOf(fooBar.toString()))).isEmpty()
   }
 
   @Test
@@ -68,7 +68,7 @@ class MainKtTest {
     foo.writeText("")
     val bar = dir.resolve("bar.kt")
     bar.writeText("")
-    assertThat(expandArgsToFileNames(listOf(dir.toString()))).containsExactly(foo, bar)
+    assertThat(Main.expandArgsToFileNames(listOf(dir.toString()))).containsExactly(foo, bar)
   }
 
   @Test
@@ -87,14 +87,14 @@ class MainKtTest {
     val bar2 = dir1.resolve("bar2.kt")
     bar2.writeText("")
 
-    assertThat(expandArgsToFileNames(listOf(dir1.toString(), dir2.toString())))
+    assertThat(Main.expandArgsToFileNames(listOf(dir1.toString(), dir2.toString())))
         .containsExactly(foo1, bar1, foo2, bar2)
   }
 
   @Test
   fun `expandArgsToFileNames - a dash is an error`() {
     try {
-      expandArgsToFileNames(listOf(root.resolve("foo.bar").toString(), File("-").toString()))
+      Main.expandArgsToFileNames(listOf(root.resolve("foo.bar").toString(), File("-").toString()))
       fail("expected exception, but nothing was thrown")
     } catch (e: IllegalStateException) {
       assertThat(e.message).contains("Error")
@@ -230,7 +230,7 @@ class MainKtTest {
     for (f in files) {
       f.createNewFile()
     }
-    assertThat(expandArgsToFileNames(files.map { it.toString() }))
+    assertThat(Main.expandArgsToFileNames(files.map { it.toString() }))
         .containsExactly(f1, f2, f5, f6, f7)
   }
 

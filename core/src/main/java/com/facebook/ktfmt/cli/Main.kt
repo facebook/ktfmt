@@ -28,16 +28,43 @@ import java.io.PrintStream
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
-fun main(args: Array<String>) {
-  exitProcess(Main(System.`in`, System.out, System.err, args).run())
-}
-
 class Main(
     private val input: InputStream,
     private val out: PrintStream,
     private val err: PrintStream,
     args: Array<String>
 ) {
+  companion object {
+    @JvmStatic
+    fun main(args: Array<String>) {
+      exitProcess(Main(System.`in`, System.out, System.err, args).run())
+    }
+
+    /**
+     * expandArgsToFileNames expands 'args' to a list of .kt files to format.
+     *
+     * Most commonly, 'args' is either a list of .kt files, or a name of a directory whose contents
+     * the user wants to format.
+     */
+    fun expandArgsToFileNames(args: List<String>): List<File> {
+      if (args.size == 1 && File(args[0]).isFile) {
+        return listOf(File(args[0]))
+      }
+      val result = mutableListOf<File>()
+      for (arg in args) {
+        if (arg == "-") {
+          error(
+              "Error: '-', which causes ktfmt to read from stdin, should not be mixed with file name")
+        }
+        result.addAll(
+            File(arg).walkTopDown().filter {
+              it.isFile && (it.extension == "kt" || it.extension == "kts")
+            })
+      }
+      return result
+    }
+  }
+
   private val parsedArgs: ParsedArgs = parseOptions(err, args)
 
   fun run(): Int {
@@ -122,27 +149,4 @@ class Main(
   private fun handleParseError(fileName: String, e: ParseError) {
     err.println("$fileName:${e.message}")
   }
-}
-
-/**
- * expandArgsToFileNames expands 'args' to a list of .kt files to format.
- *
- * Most commonly, 'args' is either a list of .kt files, or a name of a directory whose contents the
- * user wants to format.
- */
-fun expandArgsToFileNames(args: List<String>): List<File> {
-  if (args.size == 1 && File(args[0]).isFile) {
-    return listOf(File(args[0]))
-  }
-  val result = mutableListOf<File>()
-  for (arg in args) {
-    if (arg == "-") {
-      error("Error: '-', which causes ktfmt to read from stdin, should not be mixed with file name")
-    }
-    result.addAll(
-        File(arg).walkTopDown().filter {
-          it.isFile && (it.extension == "kt" || it.extension == "kts")
-        })
-  }
-  return result
 }
