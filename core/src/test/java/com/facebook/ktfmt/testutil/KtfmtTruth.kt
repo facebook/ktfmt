@@ -17,7 +17,6 @@
 package com.facebook.ktfmt.testutil
 
 import com.facebook.ktfmt.debughelpers.PrintAstVisitor
-import com.facebook.ktfmt.format.DEFAULT_MAX_WIDTH
 import com.facebook.ktfmt.format.FormattingOptions
 import com.facebook.ktfmt.format.Parser
 import com.facebook.ktfmt.format.format
@@ -46,7 +45,7 @@ fun assertFormatted(
 ) {
   val first = code.lines().first()
   var deducedCode = code
-  var maxWidth = DEFAULT_MAX_WIDTH
+  var maxWidth = FormattingOptions.DEFAULT_MAX_WIDTH
   val isFirstLineAMaxWidthMarker = first.all { it == '-' }
   if (deduceMaxWidth) {
     if (!isFirstLineAMaxWidthMarker) {
