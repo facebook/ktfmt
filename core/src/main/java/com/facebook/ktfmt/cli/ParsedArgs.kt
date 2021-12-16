@@ -34,25 +34,27 @@ data class ParsedArgs(
 
     /** Return exit code 1 if any formatting changes are detected. */
     val setExitIfChanged: Boolean,
-)
+) {
+  companion object {
+    /** parseOptions parses command-line arguments passed to ktfmt. */
+    fun parseOptions(err: PrintStream, args: Array<String>): ParsedArgs {
+      val fileNames = mutableListOf<String>()
+      var formattingOptions = FormattingOptions()
+      var dryRun = false
+      var setExitIfChanged = false
 
-/** parseOptions parses command-line arguments passed to ktfmt. */
-fun parseOptions(err: PrintStream, args: Array<String>): ParsedArgs {
-  val fileNames = mutableListOf<String>()
-  var formattingOptions = FormattingOptions()
-  var dryRun = false
-  var setExitIfChanged = false
-
-  for (arg in args) {
-    when {
-      arg == "--dropbox-style" -> formattingOptions = DROPBOX_FORMAT
-      arg == "--google-style" -> formattingOptions = GOOGLE_FORMAT
-      arg == "--kotlinlang-style" -> formattingOptions = KOTLINLANG_FORMAT
-      arg == "--dry-run" || arg == "-n" -> dryRun = true
-      arg == "--set-exit-if-changed" -> setExitIfChanged = true
-      arg.startsWith("--") -> err.println("Unexpected option: $arg")
-      else -> fileNames.add(arg)
+      for (arg in args) {
+        when {
+          arg == "--dropbox-style" -> formattingOptions = DROPBOX_FORMAT
+          arg == "--google-style" -> formattingOptions = GOOGLE_FORMAT
+          arg == "--kotlinlang-style" -> formattingOptions = KOTLINLANG_FORMAT
+          arg == "--dry-run" || arg == "-n" -> dryRun = true
+          arg == "--set-exit-if-changed" -> setExitIfChanged = true
+          arg.startsWith("--") -> err.println("Unexpected option: $arg")
+          else -> fileNames.add(arg)
+        }
+      }
+      return ParsedArgs(fileNames, formattingOptions, dryRun, setExitIfChanged)
     }
   }
-  return ParsedArgs(fileNames, formattingOptions, dryRun, setExitIfChanged)
 }

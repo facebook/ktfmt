@@ -19,7 +19,7 @@ package com.facebook.ktfmt.onlineformatter
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
-import com.facebook.ktfmt.cli.parseOptions
+import com.facebook.ktfmt.cli.ParsedArgs
 import com.facebook.ktfmt.format.KOTLINLANG_FORMAT
 import com.facebook.ktfmt.format.format
 import com.google.gson.Gson
@@ -39,7 +39,7 @@ class Handler : RequestHandler<APIGatewayProxyRequestEvent, String> {
           val parsingErrors = ByteArrayOutputStream()
           val style = request.style
           val parsedArgs =
-              parseOptions(
+              ParsedArgs.parseOptions(
                   PrintStream(parsingErrors), if (style == null) arrayOf() else arrayOf(style))
           Response(
               format(

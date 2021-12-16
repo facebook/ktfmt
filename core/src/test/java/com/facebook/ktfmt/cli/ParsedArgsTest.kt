@@ -33,7 +33,7 @@ class ParsedArgsTest {
   fun `files to format are returned and unknown flags are reported`() {
     val out = ByteArrayOutputStream()
 
-    val (fileNames, _) = parseOptions(PrintStream(out), arrayOf("foo.kt", "--unknown"))
+    val (fileNames, _) = ParsedArgs.parseOptions(PrintStream(out), arrayOf("foo.kt", "--unknown"))
 
     assertThat(fileNames).containsExactly("foo.kt")
     assertThat(out.toString()).isEqualTo("Unexpected option: --unknown\n")
@@ -43,7 +43,7 @@ class ParsedArgsTest {
   fun `parseOptions uses default values when args are empty`() {
     val out = ByteArrayOutputStream()
 
-    val parsed = parseOptions(PrintStream(out), arrayOf("foo.kt"))
+    val parsed = ParsedArgs.parseOptions(PrintStream(out), arrayOf("foo.kt"))
 
     val formattingOptions = parsed.formattingOptions
     assertThat(formattingOptions.style).isEqualTo(FormattingOptions.Style.FACEBOOK)
@@ -62,7 +62,7 @@ class ParsedArgsTest {
     val out = ByteArrayOutputStream()
 
     val (fileNames, formattingOptions) =
-        parseOptions(PrintStream(out), arrayOf("--dropbox-style", "foo.kt", "--unknown"))
+        ParsedArgs.parseOptions(PrintStream(out), arrayOf("--dropbox-style", "foo.kt", "--unknown"))
 
     assertThat(fileNames).containsExactly("foo.kt")
     assertThat(formattingOptions.blockIndent).isEqualTo(4)
@@ -74,7 +74,8 @@ class ParsedArgsTest {
   fun `parseOptions recognizes --google-style`() {
     val out = ByteArrayOutputStream()
 
-    val (_, formattingOptions) = parseOptions(PrintStream(out), arrayOf("--google-style", "foo.kt"))
+    val (_, formattingOptions) =
+        ParsedArgs.parseOptions(PrintStream(out), arrayOf("--google-style", "foo.kt"))
 
     assertThat(formattingOptions).isEqualTo(GOOGLE_FORMAT)
   }
@@ -83,7 +84,7 @@ class ParsedArgsTest {
   fun `parseOptions recognizes --dry-run`() {
     val out = ByteArrayOutputStream()
 
-    val parsed = parseOptions(PrintStream(out), arrayOf("--dry-run", "foo.kt"))
+    val parsed = ParsedArgs.parseOptions(PrintStream(out), arrayOf("--dry-run", "foo.kt"))
 
     assertThat(parsed.dryRun).isTrue()
   }
@@ -92,7 +93,7 @@ class ParsedArgsTest {
   fun `parseOptions recognizes -n as --dry-run`() {
     val out = ByteArrayOutputStream()
 
-    val parsed = parseOptions(PrintStream(out), arrayOf("-n", "foo.kt"))
+    val parsed = ParsedArgs.parseOptions(PrintStream(out), arrayOf("-n", "foo.kt"))
 
     assertThat(parsed.dryRun).isTrue()
   }
@@ -101,7 +102,8 @@ class ParsedArgsTest {
   fun `parseOptions recognizes --set-exit-if-changed`() {
     val out = ByteArrayOutputStream()
 
-    val parsed = parseOptions(PrintStream(out), arrayOf("--set-exit-if-changed", "foo.kt"))
+    val parsed =
+        ParsedArgs.parseOptions(PrintStream(out), arrayOf("--set-exit-if-changed", "foo.kt"))
 
     assertThat(parsed.setExitIfChanged).isTrue()
   }

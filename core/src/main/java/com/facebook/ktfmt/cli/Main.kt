@@ -65,7 +65,7 @@ class Main(
     }
   }
 
-  private val parsedArgs: ParsedArgs = parseOptions(err, args)
+  private val parsedArgs: ParsedArgs = ParsedArgs.parseOptions(err, args)
 
   fun run(): Int {
     if (parsedArgs.fileNames.isEmpty()) {
