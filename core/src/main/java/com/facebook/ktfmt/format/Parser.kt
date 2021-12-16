@@ -22,7 +22,6 @@ import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer
-import org.jetbrains.kotlin.com.intellij.openapi.util.text.LineColumn
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
 import org.jetbrains.kotlin.com.intellij.psi.PsiErrorElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiManager
@@ -68,7 +67,3 @@ fun throwParseError(fileContents: String, error: PsiErrorElement): Nothing {
   throw ParseError(
       error.errorDescription, StringUtil.offsetToLineColumn(fileContents, error.startOffset))
 }
-
-class ParseError(val errorDescription: String, val lineColumn: LineColumn) :
-    IllegalArgumentException(
-        "${lineColumn.line + 1}:${lineColumn.column + 1}: error: $errorDescription")
