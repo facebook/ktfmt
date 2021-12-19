@@ -3442,6 +3442,12 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
+  fun `expect enum class`() =
+      assertFormatted("""
+      |expect enum class ExpectedEnum
+      |""".trimMargin())
+
+  @Test
   fun `enum without trailing comma`() =
       assertFormatted(
           """
@@ -4508,11 +4514,5 @@ class FormatterTest {
       |  val y = 0
       |  y
       |}
-      |""".trimMargin())
-
-  @Test
-  fun `expect enum class`() =
-      assertFormatted("""
-      |expect enum class ExpectedEnum
       |""".trimMargin())
 }

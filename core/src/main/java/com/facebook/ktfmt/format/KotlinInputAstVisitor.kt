@@ -1299,9 +1299,7 @@ class KotlinInputAstVisitor(
       }
       val body = classOrObject.body
       if (classOrObject.hasModifier(KtTokens.ENUM_KEYWORD)) {
-        if (body != null) {
-          visitEnumBody(classOrObject as KtClass)
-        }
+        visitEnumBody(classOrObject as KtClass)
       } else if (body != null) {
         visitBlockBody(body, true)
       }
@@ -1314,6 +1312,9 @@ class KotlinInputAstVisitor(
   /** Example `{ RED, GREEN; fun foo() { ... } }` for an enum class */
   private fun visitEnumBody(enumClass: KtClass) {
     val body = enumClass.body
+    if (body == null) {
+      return
+    }
     builder.token("{", Doc.Token.RealOrImaginary.REAL, blockIndent, Optional.of(blockIndent))
     builder.open(ZERO)
     builder.block(blockIndent) {
