@@ -19,7 +19,7 @@
         <kotlin.version>1.5.0</kotlin.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
-        <main.class>com.facebook.ktfmt.MainKt</main.class>
+        <main.class>com.facebook.ktfmt.cli.Main</main.class>
     </properties>
 
     <pluginRepositories>
