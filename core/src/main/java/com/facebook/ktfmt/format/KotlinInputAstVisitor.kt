@@ -150,6 +150,9 @@ class KotlinInputAstVisitor(
   /** A record of whether we have visited into an expression. */
   private val inExpression = ArrayDeque(ImmutableList.of(false))
 
+  /** Tracks whether we are handling an import directive */
+  private var inImport = false
+
   /** Example: `fun foo(n: Int) { println(n) }` */
   override fun visitNamedFunction(function: KtNamedFunction) {
     builder.sync(function)
@@ -431,9 +434,6 @@ class KotlinInputAstVisitor(
       builder.forcedBreak()
     }
   }
-
-  /** Tracks whether we are handling an import directive */
-  private var inImport = false
 
   /**
    * Example: "com.facebook.bla.bla" in imports or "a.b.c.d" in expressions.
