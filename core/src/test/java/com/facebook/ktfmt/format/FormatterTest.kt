@@ -20,7 +20,6 @@ import com.facebook.ktfmt.testutil.assertFormatted
 import com.facebook.ktfmt.testutil.assertThatFormatting
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.fail
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -543,22 +542,6 @@ class FormatterTest {
       |  super.abcdefghijkl
       |      .methodName4()
       |      .abcdefghijkl()
-      |}
-      |""".trimMargin(),
-          deduceMaxWidth = true)
-
-  @Ignore(
-      "see JavaInputAstVisitor.fillFirstArgument in google-java-format." +
-          "It's more effort in ktfmt because of lambdas")
-  @Test
-  fun `don't break after four( since it's only 4 chars long`() =
-      assertFormatted(
-          """
-      |-------------------------------------
-      |fun f() {
-      |  four(something.something.something
-      |          .happens())
-      |      .thenReturn(result)
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -2037,24 +2020,6 @@ class FormatterTest {
       |}
       |""".trimMargin())
 
-  @Ignore("https://github.com/facebookincubator/ktfmt/issues/28")
-  @Test
-  fun `when there is an expression in a template string it gets formatted accordingly`() {
-    val code =
-        """
-      |fun doIt() {
-      |  println("Hello! ${'$'}{"wor"+"ld"}")
-      |}
-      |""".trimMargin()
-    val expected =
-        """
-      |fun doIt() {
-      |  println("Hello! ${'$'}{"wor" + "ld"}")
-      |}
-      |""".trimMargin()
-    assertThatFormatting(code).isEqualTo(expected)
-  }
-
   @Test
   fun `handle multiline string literals`() =
       assertFormatted(
@@ -2215,20 +2180,6 @@ class FormatterTest {
       |      .methodCall()
       |}
       |""".trimMargin())
-
-  @Ignore("TODO: try fixing using conditional indents")
-  @Test
-  fun `break before call-expression with lambda when the parameters don't fit on same line`() =
-      assertFormatted(
-          """
-      |-------------------------------------
-      |fun f() =
-      |    aLongFieldName
-      |        .map { (param1, param2) ->
-      |          foo
-      |        }
-      |""".trimMargin(),
-          deduceMaxWidth = true)
 
   @Test
   fun `keep last expression in qualified indented`() =
@@ -3124,28 +3075,6 @@ class FormatterTest {
       |}
       |""".trimMargin()
     assertThatFormatting(code).withOptions(FormattingOptions(maxWidth = 22)).isEqualTo(expected)
-  }
-
-  @Test
-  @Ignore("This requires being able to reliably ignore tokens")
-  fun `remove unnecessary parenthesis in lambda calls`() {
-    val code =
-        """
-      |fun f() {
-      |  a() {
-      |    println("a")
-      |  }
-      |}
-      |""".trimMargin()
-    val expected =
-        """
-      |fun f() {
-      |  a {
-      |    println("a")
-      |  }
-      |}
-      |""".trimMargin()
-    assertThatFormatting(code).isEqualTo(expected)
   }
 
   @Test
