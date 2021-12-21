@@ -185,14 +185,11 @@ class KotlinInputAstVisitor(
     val modifierList = typeReference.modifierList
     val typeElement = typeReference.typeElement
     for (child in typeReference.node.children()) {
-      if (child.psi == modifierList) {
-        visit(modifierList)
-      } else if (child.psi == typeElement) {
-        visit(typeElement)
-      } else if (child.elementType == KtTokens.LPAR) {
-        builder.token("(")
-      } else if (child.elementType == KtTokens.RPAR) {
-        builder.token(")")
+      when {
+        child.psi == modifierList -> visit(modifierList)
+        child.psi == typeElement -> visit(typeElement)
+        child.elementType == KtTokens.LPAR -> builder.token("(")
+        child.elementType == KtTokens.RPAR -> builder.token(")")
       }
     }
   }
