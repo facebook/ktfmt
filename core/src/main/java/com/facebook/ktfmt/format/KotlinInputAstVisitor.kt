@@ -479,24 +479,28 @@ class KotlinInputAstVisitor(
       return
     }
 
-    emitQualifiedExpression(expression)
+    emitQualifiedExpression(breakIntoChunks(expression))
   }
 
-  private fun emitQualifiedExpression(expression: KtExpression) {
+  /**
+   * Decomposes a qualified expression into chunks.
+   *
+   * So this expression:
+   * ```
+   *     rainbow.red.orange.shine().yellow
+   * ```
+   *
+   * Becomes:
+   * ```
+   *     chunks: [
+   *         chunk(expressions=[rainbow, red, orange, shine()], shouldKeepOnSameLine=true),
+   *         chunk(expressions=[yellow], shouldKeepOnSameLine=false)
+   *     ]
+   * ```
+   */
+  private fun breakIntoChunks(expression: KtExpression): List<Chunk> {
     val parts = breakIntoParts(expression)
-    val chunks = breakIntoChunks(parts)
 
-    val hasPrefixes = chunks.first().shouldKeepOnSameLine
-    val hasTrailingLambda = parts.last().isLambda()
-
-    if (hasPrefixes || hasTrailingLambda) {
-      emitQualifiedExpressionSeveralInOneLine(chunks)
-    } else {
-      emitQualifiedExpressionOnePerLine(parts)
-    }
-  }
-
-  private fun breakIntoChunks(parts: List<KtExpression>): List<Chunk> {
     val prefixes = mutableSetOf<Int>()
 
     // Check if the dot chain has a prefix that looks like a type name, so we can
@@ -633,59 +637,6 @@ class KotlinInputAstVisitor(
   }
 
   /**
-   * Output a "regular" chain of dereferences, possibly in builder-style. Break before every dot.
-   *
-   * Example:
-   * ```
-   * fieldName
-   *     .field1
-   *     .field2
-   *     .method1()
-   *     .method2()
-   *     .apply {
-   *       // ...
-   *     }
-   * ```
-   */
-  private fun emitQualifiedExpressionOnePerLine(items: Collection<KtExpression>) {
-    var needDot = false
-    val trailingDereferences = items.size > 1
-    builder.block(expressionBreakIndent) {
-      // don't break after the first element if it is every small, unless the
-      // chain starts with another expression
-      var length = 0
-      for (item in items) {
-        val extractCallExpression = extractCallExpression(item)
-
-        if (needDot) {
-          if (length > options.continuationIndent ||
-              !extractCallExpression?.lambdaArguments.isNullOrEmpty()) {
-            builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-          }
-          builder.token((item as KtQualifiedExpression).operationSign.value)
-          length++
-        }
-        emitSelectorUpToParenthesis(item)
-
-        // Emit parenthesis and lambda.
-        extractCallExpression?.apply {
-          visitCallElement(
-              null,
-              typeArgumentList,
-              valueArgumentList,
-              lambdaArguments,
-              argumentsIndent =
-                  if (trailingDereferences || needDot) expressionBreakIndent else ZERO,
-              lambdaIndent =
-                  if (trailingDereferences || needDot) ZERO else expressionBreakNegativeIndent)
-        }
-        length += item.text.length
-        needDot = true
-      }
-    }
-  }
-
-  /**
    * Output a chain of dereferences, some of which should be grouped together.
    *
    * Example 1:
@@ -700,20 +651,52 @@ class KotlinInputAstVisitor(
    *     .method1()
    * ```
    */
-  private fun emitQualifiedExpressionSeveralInOneLine(
+  private fun emitQualifiedExpression(
       chunks: List<Chunk>,
   ) {
-    // is the last expression a lambda?
+    // Keeps track of how much text we've emitted so far, and is used to avoid line breaks that are
+    // shorter than the indentation length. For example:
+    // ```
+    //    user.field1
+    //        .field2
+    //          ...
+    //        .field9
+    // ```
+    // Since `user` is less than or equal to 4 characters (the indentation length here), `field1` is
+    // kept on the same line.
+    var textLength = 0
+
+    // is the last expression a lambda? e.g.`foo.bar.apply { ... }`
     val hasTrailingLambda = chunks.last().expressions.last().isLambda()
-    // are there method invocations or field accesses after the prefix?
+
+    // Do we have expressions that should be split up following expressions that should be kept on
+    // the same line?
+    // e.g
+    // ```
+    // rainbow.red.orange.shine() // <-- chunk with shouldKeepOnSameLine = true
+    //     .yellow  //  <--|
+    //     .green   //  <--|
+    //     .blue    //  <--|-- chunk with shouldKeepOnSameLine = false
+    // ```
     val trailingDereferences =
         chunks.first().shouldKeepOnSameLine && !chunks.last().shouldKeepOnSameLine
 
+    // Do we have any expressions that should be kept on the same line?
+    // True example: `rainbow.red.orange.shine()`
+    // False example: `rainbow.red.orange`
+    // Note that in this example the function invocation is what causes the chunk to be a "prefix",
+    // but there are other ways defined in [breakIntoChunks].
+    val hasPrefixes = chunks.first().shouldKeepOnSameLine
+
+    // simple chain with no meaningful groups or trailing lambda, e.g `rainbow.red.orange`
+    val simple = !hasPrefixes && !hasTrailingLambda
+
     // how to indent function arguments if the line is not broken
-    val argsIndentElse = if (trailingDereferences) expressionBreakIndent else ZERO
+    val argsIndentElse = if (trailingDereferences || simple) expressionBreakIndent else ZERO
     // how to indent lambdas if the line is not broken
     val lambdaIndentElse =
-        if (trailingDereferences && !hasTrailingLambda) ZERO else expressionBreakNegativeIndent
+        if ((trailingDereferences && !hasTrailingLambda) || simple) ZERO
+        else expressionBreakNegativeIndent
 
     builder.block(expressionBreakIndent) {
       // trailing lambdas get their own block, so wrap everything before it in a block
@@ -737,10 +720,17 @@ class KotlinInputAstVisitor(
 
           // for everything after the very first element, emit a break and a dot
           if (chunkIndex > 0 || itemIndex > 0) {
-            val fillMode =
-                if (chunk.shouldKeepOnSameLine) Doc.FillMode.INDEPENDENT else Doc.FillMode.UNIFIED
-            builder.breakOp(fillMode, "", ZERO, Optional.of(nameTag))
-            builder.token((item as KtQualifiedExpression).operationSign.value)
+
+            // break if there's a lambda, or the line is long enough
+            if (!simple || textLength > options.continuationIndent || item.isLambda()) {
+              val fillMode =
+                  if (chunk.shouldKeepOnSameLine) Doc.FillMode.INDEPENDENT else Doc.FillMode.UNIFIED
+              builder.breakOp(fillMode, "", ZERO, Optional.of(nameTag))
+            }
+
+            val operator = (item as KtQualifiedExpression).operationSign.value
+            builder.token(operator)
+            textLength += operator.length
           }
 
           // emit the reference or method name
@@ -770,6 +760,8 @@ class KotlinInputAstVisitor(
                 argumentsIndent = Indent.If.make(nameTag, expressionBreakIndent, argsIndentElse),
                 lambdaIndent = Indent.If.make(nameTag, ZERO, lambdaIndentElse))
           }
+
+          textLength += item.text.length
         }
       }
     }
