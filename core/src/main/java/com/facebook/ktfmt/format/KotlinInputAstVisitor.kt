@@ -472,20 +472,10 @@ class KotlinInputAstVisitor(
     // treat the type name-shaped part as a single syntactic unit.
     TypeNameClassifier.typePrefixLength(simpleNames(parts)).ifPresent { prefixes.add(it) }
 
-    var invocationCount = parts.count { it.isCallExpression() }
+    val invocationCount = parts.count { it.isCallExpression() }
     val firstInvocationIndex = parts.indexOfFirst { it.isCallExpression() }
     val isFirstInvocationLambda = parts.getOrNull(firstInvocationIndex)?.isLambda() ?: false
     val hasTrailingLambda = parts.last().isLambda()
-
-    // Don't count trailing lambdas as call expressions so they look like
-    // ```
-    // blah.foo().bar().map {
-    //   // blah
-    // }
-    // ```
-    if (invocationCount > 1 && hasTrailingLambda) {
-      invocationCount--
-    }
 
     // If there's only one invocation, treat leading field accesses as a single
     // unit. In the normal case we want to preserve the alignment of subsequent
@@ -504,14 +494,27 @@ class KotlinInputAstVisitor(
     // myField
     //     .foo();
     //
-    if (invocationCount == 1 && firstInvocationIndex > 0) {
-      if (firstInvocationIndex != parts.size - 1 && isFirstInvocationLambda) {
-        prefixes.add(firstInvocationIndex - 1)
-      } else {
-        prefixes.add(firstInvocationIndex)
-      }
+    val singleInvocation = invocationCount == 1
+
+    // For this case, don't count trailing lambdas as call expressions so they look like:
+    // ```
+    // blah.foo().bar().map {
+    //   // blah
+    // }
+    // ```
+    //
+    val singleInvocationWithTrailingLambda = invocationCount == 2 && hasTrailingLambda
+
+    if ((singleInvocation || singleInvocationWithTrailingLambda) && firstInvocationIndex > 0) {
+      prefixes.add(
+          if (firstInvocationIndex != parts.size - 1 && isFirstInvocationLambda) {
+            firstInvocationIndex - 1
+          } else {
+            firstInvocationIndex
+          })
     }
 
+    // keep `super` and `this` attached to the first dereference
     if (prefixes.isEmpty() &&
         (parts.first() is KtSuperExpression || parts.first() is KtThisExpression)) {
       prefixes.add(1)
