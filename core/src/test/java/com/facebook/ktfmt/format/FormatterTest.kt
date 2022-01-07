@@ -4444,4 +4444,544 @@ class FormatterTest {
       |  y
       |}
       |""".trimMargin())
+
+  @Test
+  fun `chaining - many dereferences`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, fit on one line`() =
+      assertFormatted(
+          """
+      |---------------------------------------------------------------------------
+      |rainbow.red.orange.yellow.green.blue.indigo.violet.cyan.magenta.key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one invocation at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .green.blue.indigo
+      |    .violet.cyan.magenta
+      |    .key.build()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one invocation at end, fit on one line`() =
+      assertFormatted(
+          """
+      |---------------------------------------------------------------------------
+      |rainbow.red.orange.yellow.green.blue.indigo.violet.cyan.magenta.key.build()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, two invocations at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build()
+      |    .shine()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one invocation in the middle`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .green.blue.shine()
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, two invocations in the middle`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .shine()
+      |    .bright()
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one lambda at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .green.blue.indigo
+      |    .violet.cyan.magenta
+      |    .key.build {
+      |  it.appear
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one short lambda at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .green.blue.indigo
+      |    .violet.cyan.magenta
+      |    .key.z { it }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one multiline lambda at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .green.blue.indigo
+      |    .violet.cyan.magenta
+      |    .key.z {
+      |  it
+      |  it
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one short lambda in the middle`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .green.blue
+      |    .z { it }
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one multiline lambda in the middle`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .green.blue
+      |    .z {
+      |      it
+      |      it
+      |    }
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one multiline lambda in the middle, remainder could fit on one line`() =
+      assertFormatted(
+          """
+      |-----------------------------------------------------------------------------------------
+      |rainbow.red.orange.yellow.green.blue
+      |    .z {
+      |      it
+      |      it
+      |    }
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one multiline lambda and two invocations in the middle, remainder could fit on one line`() =
+      assertFormatted(
+          """
+      |-----------------------------------------------------------------------------------------
+      |rainbow
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .z {
+      |      it
+      |      it
+      |    }
+      |    .shine()
+      |    .bright()
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one lambda and invocation at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .z { it }
+      |    .shine()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one multiline lambda and invocation at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .z {
+      |      it
+      |      it
+      |    }
+      |    .shine()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one invocation and lambda at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .green.blue.indigo
+      |    .violet.cyan.magenta
+      |    .key.shine()
+      |    .z { it }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, one short lambda and invocation in the middle`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .z { it }
+      |    .shine()
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, invocation and one short lambda in the middle`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .shine()
+      |    .z { it }
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, starting with this`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |this.red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, starting with this, one invocation at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |this.red.orange.yellow
+      |    .green.blue.indigo
+      |    .violet.cyan.magenta
+      |    .key.build()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, starting with super`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |super.red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, starting with super, one invocation at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |super.red.orange.yellow
+      |    .green.blue.indigo
+      |    .violet.cyan.magenta
+      |    .key.build()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, starting with short variable`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |z123.red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, starting with short variable, one invocation at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |z123.red.orange.yellow
+      |    .green.blue.indigo
+      |    .violet.cyan.magenta
+      |    .key.build()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, starting with short variable and lambda, invocation at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |z123
+      |    .z { it }
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .shine()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, starting with this and lambda, invocation at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |this.z { it }
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .shine()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many invocations`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.a().b().c()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many invocations, with multiline lambda at end`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.a().b().c().zz {
+      |  it
+      |  it
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many dereferences, starting type name`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |com.sky.Rainbow.red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many invocations, starting with short variable, lambda at end`() =
+      assertFormatted(
+          """
+      |-------------
+      |z123
+      |    .shine()
+      |    .bright()
+      |    .z { it }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - start with invocation, lambda at end`() =
+      assertFormatted(
+          """
+      |---------------------
+      |getRainbow(
+      |    red, blue, green)
+      |    .z { it }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - many invocations, start with lambda`() =
+      assertFormatted(
+          """
+      |---------------------
+      |z { it }
+      |    .shine()
+      |    .bright()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining - start with type name, end with invocation`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |com.sky.Rainbow
+      |    .colorFactory
+      |    .build()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
 }
