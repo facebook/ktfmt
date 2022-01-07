@@ -472,31 +472,19 @@ class KotlinInputAstVisitor(
     // treat the type name-shaped part as a single syntactic unit.
     TypeNameClassifier.typePrefixLength(simpleNames(parts)).ifPresent { prefixes.add(it) }
 
-    var invocationCount = 0
-    var firstInvocationIndex = -1
-    var isFirstInvocationLambda = false
-    for ((i, part) in parts.withIndex()) {
-      val callExpression = extractCallExpression(part)
-      if (callExpression != null) {
-        // Don't count trailing lambdas as call expressions so they look like
-        // ```
-        // blah.foo().bar().map {
-        //   // blah
-        // }
-        // ```
-        if (invocationCount > 0 &&
-            i == parts.size - 1 &&
-            callExpression.lambdaArguments.isNotEmpty()) {
-          continue
-        }
-        invocationCount++
-        if (firstInvocationIndex < 0) {
-          firstInvocationIndex = i
-          if (callExpression.lambdaArguments.isNotEmpty()) {
-            isFirstInvocationLambda = true
-          }
-        }
-      }
+    var invocationCount = parts.count { it.isCallExpression() }
+    val firstInvocationIndex = parts.indexOfFirst { it.isCallExpression() }
+    val isFirstInvocationLambda = parts.getOrNull(firstInvocationIndex)?.isLambda() ?: false
+    val hasTrailingLambda = parts.last().isLambda()
+
+    // Don't count trailing lambdas as call expressions so they look like
+    // ```
+    // blah.foo().bar().map {
+    //   // blah
+    // }
+    // ```
+    if (invocationCount > 1 && hasTrailingLambda) {
+      invocationCount--
     }
 
     // If there's only one invocation, treat leading field accesses as a single
@@ -516,8 +504,6 @@ class KotlinInputAstVisitor(
     // myField
     //     .foo();
     //
-    val hasTrailingLambda =
-        extractCallExpression(parts.last())?.lambdaArguments?.isNotEmpty() == true
     if (invocationCount == 1 && firstInvocationIndex > 0) {
       if (firstInvocationIndex != parts.size - 1 && isFirstInvocationLambda) {
         prefixes.add(firstInvocationIndex - 1)
@@ -555,6 +541,16 @@ class KotlinInputAstVisitor(
     }
 
     return parts.toList()
+  }
+
+  /** Returns true if the expression represents an invocation */
+  private fun KtExpression.isCallExpression(): Boolean {
+    return extractCallExpression(this) != null
+  }
+
+  /** Returns true if the expression represents an invocation that is also a lambda */
+  private fun KtExpression.isLambda(): Boolean {
+    return extractCallExpression(this)?.lambdaArguments?.isNotEmpty() ?: false
   }
 
   /**
