@@ -18,7 +18,6 @@ package com.facebook.ktfmt.format
 
 import com.google.common.base.Throwables
 import com.google.common.collect.ImmutableList
-import com.google.common.collect.ImmutableSortedSet
 import com.google.googlejavaformat.Doc
 import com.google.googlejavaformat.FormattingError
 import com.google.googlejavaformat.Indent
@@ -26,7 +25,6 @@ import com.google.googlejavaformat.Indent.Const.ZERO
 import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.Output
 import java.util.ArrayDeque
-import java.util.LinkedHashSet
 import java.util.Optional
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
@@ -151,6 +149,27 @@ class KotlinInputAstVisitor(
 
   /** Tracks whether we are handling an import directive */
   private var inImport = false
+
+  /**
+   * Represents a logical "chunk" of [expressions], and whether or not they should be kept on the
+   * same line
+   *
+   * As an example, consider the expression:
+   * ```
+   *     rainbow.red.orange.shine().yellow
+   * ```
+   * This might be split into chunks as such:
+   * ```
+   *     chunks: [
+   *         chunk(expressions=[rainbow, red, orange, shine()], shouldKeepOnSameLine=true),
+   *         chunk(expressions=[yellow], shouldKeepOnSameLine=false)
+   *     ]
+   * ```
+   */
+  data class Chunk(
+      val expressions: List<KtExpression>,
+      val shouldKeepOnSameLine: Boolean,
+  )
 
   /** Example: `fun foo(n: Int) { println(n) }` */
   override fun visitNamedFunction(function: KtNamedFunction) {
@@ -465,8 +484,20 @@ class KotlinInputAstVisitor(
 
   private fun emitQualifiedExpression(expression: KtExpression) {
     val parts = breakIntoParts(expression)
+    val chunks = breakIntoChunks(parts)
 
-    val prefixes = LinkedHashSet<Int>()
+    val hasPrefixes = chunks.first().shouldKeepOnSameLine
+    val hasTrailingLambda = parts.last().isLambda()
+
+    if (hasPrefixes || hasTrailingLambda) {
+      emitQualifiedExpressionSeveralInOneLine(chunks)
+    } else {
+      emitQualifiedExpressionOnePerLine(parts)
+    }
+  }
+
+  private fun breakIntoChunks(parts: List<KtExpression>): List<Chunk> {
+    val prefixes = mutableSetOf<Int>()
 
     // Check if the dot chain has a prefix that looks like a type name, so we can
     // treat the type name-shaped part as a single syntactic unit.
@@ -520,11 +551,26 @@ class KotlinInputAstVisitor(
       prefixes.add(1)
     }
 
-    if (prefixes.isNotEmpty() || hasTrailingLambda) {
-      emitQualifiedExpressionSeveralInOneLine(parts, prefixes, Doc.FillMode.INDEPENDENT)
-    } else {
-      emitQualifiedExpressionOnePerLine(parts)
+    // now that we've found the prefixes, break the parts into chunks
+    val chunks = mutableListOf<Chunk>()
+    val currentChunk = mutableListOf<KtExpression>()
+    val unconsumedPrefixes = ArrayDeque(prefixes.sorted())
+
+    parts.forEachIndexed { index, part ->
+      currentChunk.add(part)
+      if (!unconsumedPrefixes.isEmpty() && index == unconsumedPrefixes.peekFirst()) {
+        unconsumedPrefixes.removeFirst()
+        chunks.add(Chunk(currentChunk.toList(), shouldKeepOnSameLine = true))
+        currentChunk.clear()
+      }
     }
+
+    // the last chunk is part of a prefix, so it's not grouped
+    if (currentChunk.isNotEmpty()) {
+      chunks.add(Chunk(currentChunk.toList(), shouldKeepOnSameLine = false))
+    }
+
+    return chunks
   }
 
   /**
@@ -655,73 +701,76 @@ class KotlinInputAstVisitor(
    * ```
    */
   private fun emitQualifiedExpressionSeveralInOneLine(
-      items: Collection<KtExpression>,
-      prefixes: Collection<Int>,
-      prefixFillMode: Doc.FillMode
+      chunks: List<Chunk>,
   ) {
-    var needDot = false
-    val hasTrailingLambda =
-        extractCallExpression(items.last())?.lambdaArguments?.isNotEmpty() == true
-    // Are there method invocations or field accesses after the prefix?
-    val trailingDereferences = prefixes.isNotEmpty() && prefixes.last() < items.size - 1
+    // is the last expression a lambda?
+    val hasTrailingLambda = chunks.last().expressions.last().isLambda()
+    // are there method invocations or field accesses after the prefix?
+    val trailingDereferences =
+        chunks.first().shouldKeepOnSameLine && !chunks.last().shouldKeepOnSameLine
+
+    // how to indent function arguments if the line is not broken
+    val argsIndentElse = if (trailingDereferences) expressionBreakIndent else ZERO
+    // how to indent lambdas if the line is not broken
+    val lambdaIndentElse =
+        if (trailingDereferences && !hasTrailingLambda) ZERO else expressionBreakNegativeIndent
 
     builder.block(expressionBreakIndent) {
-      for (ignored in prefixes.indices) {
-        builder.open(ZERO)
-      }
+      // trailing lambdas get their own block, so wrap everything before it in a block
       if (hasTrailingLambda) {
         builder.open(ZERO)
       }
 
-      val unconsumedPrefixes = ArrayDeque(ImmutableSortedSet.copyOf(prefixes))
-      val nameTag = genSym()
-      for ((i, item) in items.withIndex()) {
-        if (needDot) {
-          val fillMode =
-              if (unconsumedPrefixes.isNotEmpty() && i <= unconsumedPrefixes.peekFirst()) {
-                prefixFillMode
-              } else {
-                Doc.FillMode.UNIFIED
-              }
+      // chunks that are grouped get their own block
+      chunks.filter { it.shouldKeepOnSameLine }.forEach { builder.open(ZERO) }
 
-          builder.breakOp(fillMode, "", ZERO, Optional.of(nameTag))
-          builder.token((item as KtQualifiedExpression).operationSign.value)
+      // each chunk represents a list of related expressions.
+      // if the expressions are "grouped", they'll be in the same block and be on the same line.
+      // otherwise they'll be broken onto several lines (assuming they don't fit on one).
+      for ((chunkIndex, chunk) in chunks.withIndex()) {
+        // get a unique name for this chunk, used for keeping track of indents and line breaks
+        val nameTag = genSym()
+
+        // each item represents a dereference or a call invocation
+        val items = chunk.expressions
+        for ((itemIndex, item) in items.withIndex()) {
+
+          // for everything after the very first element, emit a break and a dot
+          if (chunkIndex > 0 || itemIndex > 0) {
+            val fillMode =
+                if (chunk.shouldKeepOnSameLine) Doc.FillMode.INDEPENDENT else Doc.FillMode.UNIFIED
+            builder.breakOp(fillMode, "", ZERO, Optional.of(nameTag))
+            builder.token((item as KtQualifiedExpression).operationSign.value)
+          }
+
+          // emit the reference or method name
+          emitSelectorUpToParenthesis(item)
+
+          // we've reached the last element of this chunk
+          if (itemIndex == items.indices.last()) {
+
+            // close the grouping block before visiting the call expression body (if any)
+            if (chunk.shouldKeepOnSameLine) {
+              builder.close()
+            }
+
+            // we've reached the trailing lambda, close its block before visiting the body
+            if (chunkIndex == chunks.indices.last && hasTrailingLambda) {
+              builder.close()
+            }
+          }
+
+          // visit the call expression body (if any)
+          extractCallExpression(item)?.apply {
+            visitCallElement(
+                null,
+                typeArgumentList,
+                valueArgumentList,
+                lambdaArguments,
+                argumentsIndent = Indent.If.make(nameTag, expressionBreakIndent, argsIndentElse),
+                lambdaIndent = Indent.If.make(nameTag, ZERO, lambdaIndentElse))
+          }
         }
-        emitSelectorUpToParenthesis(item)
-        if (unconsumedPrefixes.isNotEmpty() && i == unconsumedPrefixes.peekFirst()) {
-          builder.close()
-          unconsumedPrefixes.removeFirst()
-        }
-
-        if (i == items.size - 1 && hasTrailingLambda) {
-          builder.close()
-        }
-
-        val argsIndent =
-            Indent.If.make(
-                nameTag,
-                expressionBreakIndent,
-                if (trailingDereferences) expressionBreakIndent else ZERO)
-
-        val lambdaIndent =
-            Indent.If.make(
-                nameTag,
-                ZERO,
-                if (trailingDereferences && !hasTrailingLambda) ZERO
-                else expressionBreakNegativeIndent)
-
-        // Emit parenthesis and lambda.
-        extractCallExpression(item)?.apply {
-          visitCallElement(
-              null,
-              typeArgumentList,
-              valueArgumentList,
-              lambdaArguments,
-              argumentsIndent = argsIndent,
-              lambdaIndent = lambdaIndent)
-        }
-
-        needDot = true
       }
     }
   }
