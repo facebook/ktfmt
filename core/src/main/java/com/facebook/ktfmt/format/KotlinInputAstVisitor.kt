@@ -26,7 +26,6 @@ import com.google.googlejavaformat.Indent.Const.ZERO
 import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.Output
 import java.util.ArrayDeque
-import java.util.Deque
 import java.util.LinkedHashSet
 import java.util.Optional
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
@@ -465,15 +464,7 @@ class KotlinInputAstVisitor(
   }
 
   private fun emitQualifiedExpression(expression: KtExpression) {
-    val parts =
-        ArrayDeque<KtExpression>().apply {
-          var node: KtExpression = expression
-          addFirst(node)
-          while (node is KtQualifiedExpression) {
-            node = node.receiverExpression
-            addFirst(node)
-          }
-        }
+    val parts = breakIntoParts(expression)
 
     val prefixes = LinkedHashSet<Int>()
 
@@ -536,7 +527,7 @@ class KotlinInputAstVisitor(
     }
 
     if (prefixes.isEmpty() &&
-        (parts.first is KtSuperExpression || parts.first is KtThisExpression)) {
+        (parts.first() is KtSuperExpression || parts.first() is KtThisExpression)) {
       prefixes.add(1)
     }
 
@@ -545,6 +536,25 @@ class KotlinInputAstVisitor(
     } else {
       emitQualifiedExpressionOnePerLine(parts)
     }
+  }
+
+  /**
+   * Decomposes a qualified expression into parts, so `rainbow.red.orange.yellow` becomes `[rainbow,
+   * rainbow.red, rainbow.red.orange, rainbow.orange.yellow]`
+   */
+  private fun breakIntoParts(expression: KtExpression): List<KtExpression> {
+    val parts = ArrayDeque<KtExpression>()
+
+    // use an ArrayDeque and add elements to the beginning so the innermost expression comes first
+    parts.addFirst(expression)
+
+    var node = expression
+    while (node is KtQualifiedExpression) {
+      node = node.receiverExpression
+      parts.addFirst(node)
+    }
+
+    return parts.toList()
   }
 
   /**
@@ -560,7 +570,7 @@ class KotlinInputAstVisitor(
    * Returns the simple names of expressions in a "." chain, e.g., "foo.bar().zed[5]" --> [foo, bar,
    * zed]
    */
-  private fun simpleNames(stack: Deque<KtExpression>): List<String> {
+  private fun simpleNames(stack: List<KtExpression>): List<String> {
     val simpleNames = mutableListOf<String>()
     loop@ for (expression in stack) {
       val callExpression = extractCallExpression(expression)
