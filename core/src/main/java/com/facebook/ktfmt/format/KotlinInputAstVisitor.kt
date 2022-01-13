@@ -693,10 +693,31 @@ class KotlinInputAstVisitor(
 
     // how to indent function arguments if the line is not broken
     val argsIndentElse = if (trailingDereferences || simple) expressionBreakIndent else ZERO
-    // how to indent lambdas if the line is not broken
-    val lambdaIndentElse =
-        if ((trailingDereferences && !hasTrailingLambda) || simple) ZERO
-        else expressionBreakNegativeIndent
+
+    // When we have a trailing lambda and the line it's on isn't broken, reduce its indentation:
+    // ```
+    // rainbow.let {
+    //   it.shine()
+    // }
+    // ```
+    // Here's an example of the line being broken, so we don't reduce the indentation:
+    // ```
+    // rainbow
+    //     .red
+    //     .orange
+    //     .let {
+    //       it.shine()
+    //     }
+    // ```
+    // Here's a negative side effect, can't be fixed unless we can detect that the lambda is not on
+    // the same line as the first reference (not currently possible):
+    // ```
+    // rainbow.red.orange
+    //     .yellow.let {
+    //   it.shine()
+    // }
+    // ```
+    val lambdaIndentElse = if (hasTrailingLambda) expressionBreakNegativeIndent else ZERO
 
     builder.block(expressionBreakIndent) {
       // trailing lambdas get their own block, so wrap everything before it in a block
