@@ -4958,7 +4958,7 @@ class FormatterTest {
           """
       |---------------------
       |getRainbow(
-      |    red, blue, green)
+      |    aa, bb, cc)
       |    .z { it }
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -4982,6 +4982,240 @@ class FormatterTest {
       |com.sky.Rainbow
       |    .colorFactory
       |    .build()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline lambda`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.z {
+      |  it
+      |  it
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline lambda with trailing dereferences`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow
+      |    .z {
+      |      it
+      |      it
+      |    }
+      |    .red
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline lambda with long name`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow
+      |    .someLongLambdaName {
+      |      it
+      |      it
+      |    }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline lambda with long name and trailing dereferences`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow
+      |    .someLongLambdaName {
+      |      it
+      |      it
+      |    }
+      |    .red
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline lambda with prefix`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.z {
+      |  it
+      |  it
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline lambda with prefix, forced to next line`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .longLambdaName {
+      |      it
+      |      it
+      |    }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline lambda with prefix, forced to next line with another expression`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .key.longLambdaName {
+      |  it
+      |  it
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline arguments`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.shine(
+      |    infrared,
+      |    ultraviolet,
+      |)
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline arguments with trailing dereferences`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |    .red
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline arguments, forced to next line`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline arguments, forced to next line with another expression`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .key.shine(
+      |    infrared,
+      |    ultraviolet,
+      |)
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline arguments, forced to next line with another expression, with trailing dereferences`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.red.orange.yellow
+      |    .key.shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |    .red
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline arguments, with trailing invocation`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow
+      |    .shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |    .bright()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline arguments, with trailing lambda`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |rainbow.shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |    .z { it }
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline arguments, prefixed with super, with trailing invocation`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |super.shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |    .bright()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - multiline arguments, starting with short variable, with trailing invocation`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |z123.shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |    .bright()
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - start with multiline arguments`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |getRainbow(
+      |    infrared,
+      |    ultraviolet,
+      |)
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `chaining (indentation) - start with multiline arguments, with trailing invocation`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |getRainbow(
+      |    infrared,
+      |    ultraviolet,
+      |)
+      |    .z { it }
       |""".trimMargin(),
           deduceMaxWidth = true)
 }
