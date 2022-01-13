@@ -669,16 +669,6 @@ class KotlinInputAstVisitor(
     // is the last expression a lambda? e.g.`foo.bar.apply { ... }`
     val hasTrailingLambda = chunks.last().expressions.last().isLambda()
 
-    // Do we have any expressions that should be kept on the same line?
-    // True example: `rainbow.red.orange.shine()`
-    // False example: `rainbow.red.orange`
-    // Note that in this example the function invocation is what causes the chunk to be a "prefix",
-    // but there are other ways defined in [breakIntoChunks].
-    val hasPrefixes = chunks.first().shouldKeepOnSameLine
-
-    // simple chain with no meaningful groups or trailing lambda, e.g `rainbow.red.orange`
-    val simple = !hasPrefixes && !hasTrailingLambda
-
     // When the last chunk is meant to be on one line, reduce the indentation of arguments:
     // ```
     // rainbow.shine(
@@ -754,7 +744,7 @@ class KotlinInputAstVisitor(
           if (chunkIndex > 0 || itemIndex > 0) {
 
             // break if there's a lambda, or the line is long enough
-            if (!simple || textLength > options.continuationIndent || item.isLambda()) {
+            if (textLength > options.continuationIndent || item.isLambda()) {
               val fillMode =
                   if (chunk.shouldKeepOnSameLine) Doc.FillMode.INDEPENDENT else Doc.FillMode.UNIFIED
               builder.breakOp(fillMode, "", ZERO, Optional.of(nameTag))

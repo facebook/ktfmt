@@ -4945,8 +4945,7 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------
-      |z123
-      |    .shine()
+      |z123.shine()
       |    .bright()
       |    .z { it }
       |""".trimMargin(),
