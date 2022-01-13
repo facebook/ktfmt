@@ -4958,7 +4958,7 @@ class FormatterTest {
           """
       |---------------------
       |getRainbow(
-      |    aa, bb, cc)
+      |        aa, bb, cc)
       |    .z { it }
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -5212,9 +5212,9 @@ class FormatterTest {
           """
       |-------------------------
       |getRainbow(
-      |    infrared,
-      |    ultraviolet,
-      |)
+      |        infrared,
+      |        ultraviolet,
+      |    )
       |    .z { it }
       |""".trimMargin(),
           deduceMaxWidth = true)

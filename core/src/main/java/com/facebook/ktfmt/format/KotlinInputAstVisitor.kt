@@ -669,18 +669,6 @@ class KotlinInputAstVisitor(
     // is the last expression a lambda? e.g.`foo.bar.apply { ... }`
     val hasTrailingLambda = chunks.last().expressions.last().isLambda()
 
-    // Do we have expressions that should be split up following expressions that should be kept on
-    // the same line?
-    // e.g
-    // ```
-    // rainbow.red.orange.shine() // <-- chunk with shouldKeepOnSameLine = true
-    //     .yellow  //  <--|
-    //     .green   //  <--|
-    //     .blue    //  <--|-- chunk with shouldKeepOnSameLine = false
-    // ```
-    val trailingDereferences =
-        chunks.first().shouldKeepOnSameLine && !chunks.last().shouldKeepOnSameLine
-
     // Do we have any expressions that should be kept on the same line?
     // True example: `rainbow.red.orange.shine()`
     // False example: `rainbow.red.orange`
@@ -691,8 +679,31 @@ class KotlinInputAstVisitor(
     // simple chain with no meaningful groups or trailing lambda, e.g `rainbow.red.orange`
     val simple = !hasPrefixes && !hasTrailingLambda
 
-    // how to indent function arguments if the line is not broken
-    val argsIndentElse = if (trailingDereferences || simple) expressionBreakIndent else ZERO
+    // When the last chunk is meant to be on one line, reduce the indentation of arguments:
+    // ```
+    // rainbow.shine(
+    //     infrared,
+    //     ultraviolet,
+    // )
+    // ```
+    // Here's an example of the line being broken, so we don't reduce the indentation:
+    // ```
+    // rainbow.red.orange.yellow
+    //     .shine(
+    //         infrared,
+    //         ultraviolet,
+    //     )
+    // ```
+    // Here's a negative side effect, can't be fixed unless we can detect that the invocation is not
+    // on the same line as the first reference (not currently possible):
+    // ```
+    // rainbow.red.orange.yellow
+    //     .key.shine(
+    //     infrared,
+    //     ultraviolet,
+    // )
+    // ```
+    val argsIndentElse = if (chunks.last().shouldKeepOnSameLine) ZERO else expressionBreakIndent
 
     // When we have a trailing lambda and the line it's on isn't broken, reduce its indentation:
     // ```
