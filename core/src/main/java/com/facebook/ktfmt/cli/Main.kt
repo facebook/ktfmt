@@ -25,7 +25,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.PrintStream
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.exitProcess
 
 class Main(
@@ -70,13 +70,17 @@ class Main(
   fun run(): Int {
     if (parsedArgs.fileNames.isEmpty()) {
       err.println(
-          "Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] File1.kt File2.kt ...")
+          "Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] File1.kt File2.kt ...")
       return 1
     }
 
     if (parsedArgs.fileNames.size == 1 && parsedArgs.fileNames[0] == "-") {
-      val success = format(null)
-      return if (success) 0 else 1
+      return try {
+        val alreadyFormatted = format(null)
+        if (!alreadyFormatted && parsedArgs.setExitIfChanged) 1 else 0
+      } catch (e: Exception) {
+        1
+      }
     }
 
     val files: List<File>
@@ -92,9 +96,17 @@ class Main(
       return 1
     }
 
-    val success = AtomicBoolean(true)
-    files.parallelStream().forEach { success.compareAndSet(true, format(it)) }
-    return if (success.get()) 0 else 1
+    val retval = AtomicInteger(0)
+    files.parallelStream().forEach {
+      try {
+        if (!format(it) && parsedArgs.setExitIfChanged) {
+          retval.set(1)
+        }
+      } catch (e: Exception) {
+        retval.set(1)
+      }
+    }
+    return retval.get()
   }
 
   /**
@@ -104,46 +116,50 @@ class Main(
    * to [out]. Otherwise, this will run the appropriate formatting as normal.
    *
    * @param file The file to format. If null, the code is read from <stdin>.
-   * @return True if changes were made or no changes were needed, false if there was a failure or if
-   * changes were made and the --set-exit-if-changed flag is set.
+   * @return true iff input is valid and already formatted.
    */
   private fun format(file: File?): Boolean {
     val fileName = file?.toString() ?: "<stdin>"
     try {
       val code = file?.readText() ?: BufferedReader(InputStreamReader(input)).readText()
-
       val formattedCode = Formatter.format(parsedArgs.formattingOptions, code)
+      val alreadyFormatted = code == formattedCode
 
-      if (code == formattedCode) {
-        // The code was already formatted, nothing more to do here
-        err.println("No changes: $fileName")
-        return true
-      }
-
-      if (parsedArgs.dryRun) {
-        out.println(fileName)
-      } else {
-        if (file != null) {
-          file.writeText(formattedCode)
+      // stdin
+      if (file == null) {
+        if (parsedArgs.dryRun) {
+          if (!alreadyFormatted) {
+            out.println("<stdin>")
+          }
         } else {
           out.print(formattedCode)
         }
+        return alreadyFormatted
+      }
+
+      if (parsedArgs.dryRun) {
+        if (!alreadyFormatted) {
+          out.println(fileName)
+        }
+      } else {
+        file.writeText(formattedCode)
         err.println("Done formatting $fileName")
       }
 
-      // If setExitIfChanged is true, then any change should result in an exit code of 1.
-      return if (parsedArgs.setExitIfChanged) false else true
+      return alreadyFormatted
     } catch (e: IOException) {
       err.println("Error formatting $fileName: ${e.message}; skipping.")
+      throw e
     } catch (e: ParseError) {
       handleParseError(fileName, e)
+      throw e
     } catch (e: FormattingError) {
       for (diagnostic in e.diagnostics()) {
         System.err.println("$fileName:$diagnostic")
       }
       e.printStackTrace(err)
+      throw e
     }
-    return false
   }
 
   private fun handleParseError(fileName: String, e: ParseError) {

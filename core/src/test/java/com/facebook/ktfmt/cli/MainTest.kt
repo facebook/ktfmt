@@ -106,8 +106,7 @@ class MainTest {
     val code = "fun    f1 (  ) :    Int =    0"
     Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("-")).run()
 
-    val expected = """fun f1(): Int = 0
-      |""".trimMargin()
+    val expected = "fun f1(): Int = 0\n"
     assertThat(out.toString("UTF-8")).isEqualTo(expected)
   }
 
@@ -232,6 +231,29 @@ class MainTest {
     }
     assertThat(Main.expandArgsToFileNames(files.map { it.toString() }))
         .containsExactly(f1, f2, f5, f6, f7)
+  }
+
+  @Test
+  fun `formatting from stdin prints formatted code to stdout regardless of whether it was already formatted`() {
+    val expected = """fun f() = println("hello, world")""" + "\n"
+
+    Main(
+            """fun f (   ) =    println("hello, world")""".byteInputStream(),
+            PrintStream(out),
+            PrintStream(err),
+            arrayOf("-"))
+        .run()
+    assertThat(out.toString("UTF-8")).isEqualTo(expected)
+
+    out.reset()
+
+    Main(
+            """fun f () = println("hello, world")""".byteInputStream(),
+            PrintStream(out),
+            PrintStream(err),
+            arrayOf("-"))
+        .run()
+    assertThat(out.toString("UTF-8")).isEqualTo(expected)
   }
 
   @Test
