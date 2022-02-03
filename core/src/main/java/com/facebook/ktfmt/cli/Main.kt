@@ -142,7 +142,10 @@ class Main(
           out.println(fileName)
         }
       } else {
-        file.writeText(formattedCode)
+        // TODO(T111284144): Add tests
+        if (!alreadyFormatted) {
+          file.writeText(formattedCode)
+        }
         err.println("Done formatting $fileName")
       }
 
