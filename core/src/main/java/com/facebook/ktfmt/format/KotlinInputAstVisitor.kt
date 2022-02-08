@@ -2293,6 +2293,7 @@ class KotlinInputAstVisitor(
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
       }
       visit(child)
+      builder.guessToken(";")
       lastChildHadBlankLineBefore = childGetsBlankLineBefore
       first = false
     }
