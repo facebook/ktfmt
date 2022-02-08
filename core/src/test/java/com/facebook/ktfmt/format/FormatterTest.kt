@@ -2929,6 +2929,31 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
+  fun `don't crash on top level statements with semicolons`() {
+    val code =
+        """
+      |val x = { 0 };
+      |
+      |foo({ 0 });
+      |
+      |foo { 0 };
+      |
+      |val fill = 0;
+      |""".trimMargin()
+    val expected =
+        """
+      |val x = { 0 }
+      |
+      |foo({ 0 })
+      |
+      |foo { 0 }
+      |
+      |val fill = 0
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
   fun `preserve semicolons in enums`() {
     val code =
         """
