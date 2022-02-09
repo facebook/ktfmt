@@ -82,7 +82,11 @@ object Formatter {
     val lfCode = StringUtilRt.convertLineSeparators(code)
     val sortedImports = sortedAndDistinctImports(lfCode)
     val pretty = prettyPrint(sortedImports, options, "\n")
-    val noRedundantElements = dropRedundantElements(pretty, options)
+    val noRedundantElements = try {
+      dropRedundantElements(pretty, options)
+    } catch (e: ParseError) {
+      throw IllegalStateException("Failed to re-parse code after pretty printing:\n $pretty", e)
+    }
     return prettyPrint(noRedundantElements, options, Newlines.guessLineSeparator(code)!!)
   }
 

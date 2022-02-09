@@ -69,12 +69,6 @@ internal class RedundantSemicolonDetector {
       return false // Example: `foo(0); { dead -> lambda }`
     }
 
-    // do not remove `;` in `val a = 5; private set`
-    val nextSibling = element.nextSibling
-    if (nextSibling != null && '\n' !in nextSibling.text) {
-      return false
-    }
-
     return true
   }
 }
