@@ -3016,8 +3016,12 @@ class FormatterTest {
     val code =
         """
       |fun f() {
-      |  while (true) ;
+      |  while (true);
+      |  while (true) /** a */ ;
+      |
       |  if (true);
+      |  if (true) /** a */ ;
+      |
       |  if (true)
       |    else
       |  ;
@@ -3027,8 +3031,57 @@ class FormatterTest {
         """
       |fun f() {
       |  while (true) ;
+      |  while (true)
+      |  /** a */
+      |  ;
+      |
       |  if (true) ;
+      |  if (true)
+      |  /** a */
+      |  ;
+      |
       |  if (true)  else ;
+      |}
+      |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `preserve semicolons between calls and dead lambdas`() {
+    val code =
+        """
+      |fun f() {
+      |  foo(0); { dead -> lambda }
+      |
+      |  foo(0) ; { dead -> lambda }
+      |
+      |  foo(0) /** a */ ; /** b */ { dead -> lambda }
+      |
+      |  foo(0) { trailing -> lambda }; { dead -> lambda }
+      |
+      |  foo { trailing -> lambda }; { dead -> lambda }
+      |}
+      |""".trimMargin()
+    val expected =
+        """
+      |fun f() {
+      |  foo(0);
+      |  { dead -> lambda }
+      |
+      |  foo(0);
+      |  { dead -> lambda }
+      |
+      |  foo(0)
+      |  /** a */
+      |  ;
+      |  /** b */
+      |  { dead -> lambda }
+      |
+      |  foo(0) { trailing -> lambda };
+      |  { dead -> lambda }
+      |
+      |  foo { trailing -> lambda };
+      |  { dead -> lambda }
       |}
       |""".trimMargin()
     assertThatFormatting(code).isEqualTo(expected)

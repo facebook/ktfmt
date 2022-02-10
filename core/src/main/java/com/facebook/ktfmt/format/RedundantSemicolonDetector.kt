@@ -17,25 +17,29 @@
 package com.facebook.ktfmt.format
 
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
 import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.psi.KtEnumEntry
 import org.jetbrains.kotlin.psi.KtIfExpression
+import org.jetbrains.kotlin.psi.KtLambdaExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtWhileExpression
+import org.jetbrains.kotlin.psi.psiUtil.getNextSiblingIgnoringWhitespaceAndComments
+import org.jetbrains.kotlin.psi.psiUtil.getPrevSiblingIgnoringWhitespaceAndComments
 import org.jetbrains.kotlin.psi.psiUtil.prevLeaf
 import org.jetbrains.kotlin.psi.psiUtil.siblings
 
-internal class RedundantCommaDetector {
-  private val extraCommas = mutableListOf<PsiElement>()
+internal class RedundantSemicolonDetector {
+  private val extraSemicolons = mutableListOf<PsiElement>()
 
-  fun getRedundantCommaElements(): List<PsiElement> = extraCommas
+  fun getRedundantSemicolonElements(): List<PsiElement> = extraSemicolons
 
   /** returns **true** if this element was an extra comma, **false** otherwise. */
   fun takeElement(element: PsiElement, superBlock: () -> Unit) {
     if (isExtraSemicolon(element)) {
-      extraCommas += element
+      extraSemicolons += element
     } else {
       superBlock.invoke()
     }
@@ -54,11 +58,15 @@ internal class RedundantCommaDetector {
       return false
     }
     val prevLeaf = element.prevLeaf(false)
-    val prevSibling = element.prevSibling
-    if ((prevSibling is KtIfExpression || prevSibling is KtWhileExpression) &&
+    val prevConcreteSibling = element.getPrevSiblingIgnoringWhitespaceAndComments()
+    if ((prevConcreteSibling is KtIfExpression || prevConcreteSibling is KtWhileExpression) &&
         prevLeaf is KtContainerNodeForControlStructureBody &&
         prevLeaf.text.isEmpty()) {
       return false
+    }
+    val nextConcreteSibling = element.getNextSiblingIgnoringWhitespaceAndComments()
+    if (prevConcreteSibling is KtCallExpression && nextConcreteSibling is KtLambdaExpression) {
+      return false // Example: `foo(0); { dead -> lambda }`
     }
 
     // do not remove `;` in `val a = 5; private set`

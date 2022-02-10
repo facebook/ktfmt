@@ -31,7 +31,7 @@ object RedundantElementRemover {
   fun dropRedundantElements(code: String, options: FormattingOptions): String {
     val file = Parser.parse(code)
     val redundantImportDetector = RedundantImportDetector(enabled = options.removeUnusedImports)
-    val redundantCommaDetector = RedundantCommaDetector()
+    val redundantSemicolonDetector = RedundantSemicolonDetector()
 
     file.accept(
         object : KtTreeVisitorVoid() {
@@ -39,7 +39,7 @@ object RedundantElementRemover {
             if (element is KDocImpl) {
               redundantImportDetector.takeKdoc(element)
             } else {
-              redundantCommaDetector.takeElement(element) { super.visitElement(element) }
+              redundantSemicolonDetector.takeElement(element) { super.visitElement(element) }
             }
           }
 
@@ -61,7 +61,7 @@ object RedundantElementRemover {
 
     val result = StringBuilder(code)
     val elementsToRemove =
-        redundantCommaDetector.getRedundantCommaElements() +
+        redundantSemicolonDetector.getRedundantSemicolonElements() +
             redundantImportDetector.getRedundantImportElements()
 
     for (element in elementsToRemove.sortedByDescending(PsiElement::endOffset)) {
