@@ -2501,10 +2501,35 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `annotations on functions types parameters`() =
+  fun `annotations in literal function types`() =
       assertFormatted(
           """
-      |val callback: (List<@JvmSuppressWildcards String>) -> Unit = foo
+      |val callback: (@Anno List<@JvmSuppressWildcards String>) -> Unit = foo
+      |""".trimMargin())
+
+  @Test
+  fun `annotations on type parameters`() =
+      assertFormatted(
+          """
+      |class Foo<@Anno out @Anno T, @Anno in @Anno U> {
+      |  inline fun <@Anno reified @Anno X, @Anno reified @Anno Y> bar() {}
+      |}
+      |""".trimMargin())
+
+  @Test
+  fun `annotations on type constraints`() =
+      assertFormatted(
+          """
+      |class Foo<T : @Anno Kip, U> where U : @Anno Kip, U : @Anno Qux {
+      |  fun <T : @Anno Kip, U> bar() where U : @Anno Kip, U : @Anno Qux {}
+      |}
+      |""".trimMargin())
+
+  @Test
+  fun `annotations on type arguments`() =
+      assertFormatted(
+          """
+      |fun foo(x: Foo<in @Anno Int>) {}
       |""".trimMargin())
 
   @Test
