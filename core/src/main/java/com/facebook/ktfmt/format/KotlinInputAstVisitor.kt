@@ -1218,7 +1218,6 @@ class KotlinInputAstVisitor(
     }
 
     // for example `by lazy { compute() }`
-    var hasSemicolon = false
     if (delegate != null) {
       builder.space()
       builder.token("by")
@@ -1229,7 +1228,6 @@ class KotlinInputAstVisitor(
         builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
         builder.block(expressionBreakIndent) { visit(delegate) }
       }
-      hasSemicolon = delegate.nextSibling?.text == ";" == true
     } else if (initializer != null) {
       builder.space()
       builder.token("=")
@@ -1239,39 +1237,38 @@ class KotlinInputAstVisitor(
         builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
         builder.block(expressionBreakIndent) { visit(initializer) }
       }
-      hasSemicolon = initializer.nextSibling?.text == ";" == true
     }
     if (name != null) {
       builder.close() // close block for named values
     }
-    if (hasSemicolon) {
-      builder.token(";")
-    }
     // for example `private set` or `get = 2 * field`
     if (accessors?.isNotEmpty() == true) {
-      for (accessor in accessors) {
-        builder.block(blockIndent) {
-          if (hasSemicolon) {
-            builder.space()
-          } else {
-            builder.forcedBreak()
+      builder.block(blockIndent) {
+        for (accessor in accessors) {
+          builder.forcedBreak()
+          // The semicolon must come after the newline, or the output code will not parse.
+          builder.guessToken(";")
+
+          builder.block(ZERO) {
+            visitFunctionLikeExpression(
+                accessor.modifierList,
+                accessor.namePlaceholder.text,
+                null,
+                null,
+                null,
+                accessor.bodyExpression != null || accessor.bodyBlockExpression != null,
+                accessor.parameterList,
+                null,
+                accessor.bodyBlockExpression,
+                accessor.bodyExpression,
+                accessor.returnTypeReference,
+                accessor.bodyBlockExpression?.lBrace != null)
           }
-          visitFunctionLikeExpression(
-              accessor.modifierList,
-              accessor.namePlaceholder.text,
-              null,
-              null,
-              null,
-              accessor.bodyExpression != null || accessor.bodyBlockExpression != null,
-              accessor.parameterList,
-              null,
-              accessor.bodyBlockExpression,
-              accessor.bodyExpression,
-              accessor.returnTypeReference,
-              accessor.bodyBlockExpression?.lBrace != null)
         }
       }
     }
+
+    builder.guessToken(";")
 
     if (isField) {
       builder.blankLineWanted(OpsBuilder.BlankLineWanted.conditional(verticalAnnotationBreak))

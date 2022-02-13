@@ -383,14 +383,31 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
-  fun `properties with accessors and semicolons on same line`() =
-      assertFormatted(
-          """
+  fun `properties with accessors and semicolons on same line`() {
+    val code =
+        """
       |class Foo {
       |  var x = false; private set
       |  internal val a by lazy { 5 }; internal get
+      |  var foo: Int; get() = 6; set(x) {};
       |}
-      |""".trimMargin())
+      |""".trimMargin()
+
+    val expected =
+        """
+      |class Foo {
+      |  var x = false
+      |    private set
+      |  internal val a by lazy { 5 }
+      |    internal get
+      |  var foo: Int
+      |    get() = 6
+      |    set(x) {}
+      |}
+      |""".trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
 
   @Test
   fun `a property with a too long name being broken on multiple lines`() =
