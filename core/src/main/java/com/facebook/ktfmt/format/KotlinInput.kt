@@ -28,6 +28,7 @@ import com.google.googlejavaformat.Input
 import com.google.googlejavaformat.Newlines
 import com.google.googlejavaformat.java.FormatterException
 import com.google.googlejavaformat.java.JavaOutput
+import java.util.LinkedHashMap
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtFile
@@ -107,7 +108,6 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
    */
   @Throws(FormatterException::class)
   internal fun characterRangeToTokenRange(offset: Int, length: Int): Range<Int> {
-    var length = length
     val requiredLength = offset + length
     if (requiredLength > text.length) {
       throw FormatterException(
@@ -116,14 +116,15 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
               length,
               requiredLength))
     }
-    when {
-      length < 0 -> return EMPTY_RANGE
-      length == 0 -> // 0 stands for "format the line under the cursor"
-      length = 1
-    }
+    val expandedLength =
+        when {
+          length < 0 -> return EMPTY_RANGE
+          length == 0 -> 1 // 0 stands for "format the line under the cursor"
+          else -> length
+        }
     val enclosed =
         getPositionTokenMap()
-            .subRangeMap(Range.closedOpen(offset, offset + length))
+            .subRangeMap(Range.closedOpen(offset, offset + expandedLength))
             .asMapOfRanges()
             .values
     return if (enclosed.isEmpty()) {
@@ -134,11 +135,11 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
   }
 
   private fun makePositionToColumnMap(toks: List<KotlinTok>): ImmutableMap<Int, Int> {
-    val builder = ImmutableMap.builder<Int, Int>()
+    val builder = LinkedHashMap<Int, Int>()
     for (tok in toks) {
       builder.put(tok.position, tok.column)
     }
-    return builder.build()
+    return ImmutableMap.copyOf(builder)
   }
 
   private fun buildToks(file: KtFile, fileText: String): ImmutableList<KotlinTok> {

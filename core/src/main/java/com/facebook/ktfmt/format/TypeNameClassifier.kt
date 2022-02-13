@@ -124,16 +124,16 @@ object TypeNameClassifier {
         var hasUppercase = false
         var hasLowercase = false
         var first = true
-        for (element in name) {
-          if (!Character.isAlphabetic(element.toInt())) {
+        for (char in name) {
+          if (!Character.isAlphabetic(char.code)) {
             continue
           }
           if (first) {
-            firstUppercase = Character.isUpperCase(element)
+            firstUppercase = Character.isUpperCase(char)
             first = false
           }
-          hasUppercase = hasUppercase or Character.isUpperCase(element)
-          hasLowercase = hasLowercase or Character.isLowerCase(element)
+          hasUppercase = hasUppercase or Character.isUpperCase(char)
+          hasLowercase = hasLowercase or Character.isLowerCase(char)
         }
         return if (firstUppercase) {
           if (hasLowercase) UPPER_CAMEL else UPPERCASE

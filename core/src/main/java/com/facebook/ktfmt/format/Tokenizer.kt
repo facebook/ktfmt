@@ -77,7 +77,6 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
       }
       is LeafPsiElement -> {
         val elementText = element.text
-        val startIndex = element.startOffset
         val endIndex = element.endOffset
         if (element is PsiWhiteSpace) {
           val matcher = WHITESPACE_NEWLINE_REGEX.matcher(elementText)

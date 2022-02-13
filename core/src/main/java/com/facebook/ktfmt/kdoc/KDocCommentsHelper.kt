@@ -86,13 +86,12 @@ class KDocCommentsHelper(private val lineSeparator: String, private val maxLineL
 
   // Wraps and re-indents line comments.
   private fun indentLineComments(lines: List<String>, column0: Int): String {
-    var lines = lines
-    lines = wrapLineComments(lines, column0)
+    val wrappedLines = wrapLineComments(lines, column0)
     val builder = StringBuilder()
-    builder.append(lines[0].trim())
+    builder.append(wrappedLines[0].trim())
     val indentString = Strings.repeat(" ", column0)
-    for (i in 1 until lines.size) {
-      builder.append(lineSeparator).append(indentString).append(lines[i].trim())
+    for (i in 1 until wrappedLines.size) {
+      builder.append(lineSeparator).append(indentString).append(wrappedLines[i].trim())
     }
     return builder.toString()
   }

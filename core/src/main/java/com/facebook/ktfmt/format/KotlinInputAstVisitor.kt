@@ -1437,8 +1437,7 @@ class KotlinInputAstVisitor(
     builder.open(ZERO)
     builder.block(blockIndent) {
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      val (enumEntries, nonEnumEntryStatements) =
-          body?.children?.partition { it is KtEnumEntry } ?: fail()
+      val (enumEntries, nonEnumEntryStatements) = body.children.partition { it is KtEnumEntry }
       builder.forcedBreak()
       visitEnumEntries(enumEntries)
 
