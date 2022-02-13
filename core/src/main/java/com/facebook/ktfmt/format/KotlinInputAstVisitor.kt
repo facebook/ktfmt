@@ -119,7 +119,6 @@ import org.jetbrains.kotlin.psi.KtWhileExpression
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import org.jetbrains.kotlin.psi.psiUtil.startsWithComment
-import org.jetbrains.kotlin.types.Variance
 
 /** An AST visitor that builds a stream of {@link Op}s to format. */
 class KotlinInputAstVisitor(
@@ -1936,21 +1935,7 @@ class KotlinInputAstVisitor(
 
   override fun visitTypeParameter(parameter: KtTypeParameter) {
     builder.sync(parameter)
-    if (parameter.hasModifier(KtTokens.REIFIED_KEYWORD)) {
-      builder.token("reified")
-      builder.space()
-    }
-    when (parameter.variance) {
-      Variance.INVARIANT -> {}
-      Variance.IN_VARIANCE -> {
-        builder.token("in")
-        builder.space()
-      }
-      Variance.OUT_VARIANCE -> {
-        builder.token("out")
-        builder.space()
-      }
-    }
+    visit(parameter.modifierList)
     builder.token(parameter.nameIdentifier?.text ?: "")
     val extendsBound = parameter.extendsBound
     if (extendsBound != null) {
@@ -1972,6 +1957,7 @@ class KotlinInputAstVisitor(
   /** Example `T : Foo` */
   override fun visitTypeConstraint(constraint: KtTypeConstraint) {
     builder.sync(constraint)
+    // TODO(nreid260): What about annotations on the type reference? `where @A T : Int`
     visit(constraint.subjectTypeParameterName)
     builder.space()
     builder.token(":")
