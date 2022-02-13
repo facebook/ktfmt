@@ -747,20 +747,6 @@ class GoogleStyleFormatterKtTest {
       |""".trimMargin())
 
   @Test
-  fun `assignment of a scoping function`() =
-      assertFormatted(
-          """
-      |----------------------------
-      |fun longName() =
-      |    coroutineScope {
-      |  foo()
-      |  //
-      |}
-      |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
-
-  @Test
   fun `if expression with multiline condition`() =
       assertFormatted(
           """

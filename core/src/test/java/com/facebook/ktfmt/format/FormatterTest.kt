@@ -4326,6 +4326,17 @@ class FormatterTest {
       |  //
       |}
       |
+      |fun foo() = use { x ->
+      |  foo()
+      |  //
+      |}
+      |
+      |fun foo() =
+      |    coroutineScope { x ->
+      |      foo()
+      |      //
+      |    }
+      |
       |fun foo() =
       |    Runnable @Px
       |    {
@@ -4335,9 +4346,9 @@ class FormatterTest {
       |
       |fun longName() =
       |    coroutineScope {
-      |  foo()
-      |  //
-      |}
+      |      foo()
+      |      //
+      |    }
       |""".trimMargin(),
           deduceMaxWidth = true)
 
