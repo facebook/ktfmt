@@ -18,6 +18,10 @@ package com.facebook.ktfmt.format
 
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.LineColumn
 
-class ParseError(val errorDescription: String, val lineColumn: LineColumn) :
-    IllegalArgumentException(
-        "${lineColumn.line + 1}:${lineColumn.column + 1}: error: $errorDescription")
+class ParseError(val description: String, val lineColumn: LineColumn) : IllegalArgumentException() {
+
+  internal var label: String? = null
+
+  override val message: String
+    get() = "${lineColumn.line + 1}:${lineColumn.column + 1}: ${label ?: ""} error: $description"
+}

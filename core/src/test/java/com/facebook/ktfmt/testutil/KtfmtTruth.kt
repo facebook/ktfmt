@@ -17,6 +17,7 @@
 package com.facebook.ktfmt.testutil
 
 import com.facebook.ktfmt.debughelpers.PrintAstVisitor
+import com.facebook.ktfmt.debughelpers.printOps
 import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
 import com.facebook.ktfmt.format.Parser
@@ -74,12 +75,11 @@ fun assertThatFormatting(code: String): FormattedCodeSubject {
 
 class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) :
     Subject(metadata, code) {
-  private var options: FormattingOptions =
-      FormattingOptions(debuggingPrintOpsAfterFormatting = true)
+  private var options: FormattingOptions = FormattingOptions()
   private var allowTrailingWhitespace = false
 
   fun withOptions(options: FormattingOptions): FormattedCodeSubject {
-    this.options = options.copy(debuggingPrintOpsAfterFormatting = true)
+    this.options = options
     return this
   }
 
@@ -97,23 +97,39 @@ class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) 
                   .map { if (it.endsWith(" ")) "[$it]" else it }
                   .joinToString("\n"))
     }
-    val actualFormatting: String
-    try {
-      actualFormatting = Formatter.format(options, code)
-      if (actualFormatting != expectedFormatting) {
-        reportError(code)
-        println("# Output: ")
-        println("#".repeat(20))
-        println(actualFormatting)
-        println("# Expected: ")
-        println("#".repeat(20))
-        println(expectedFormatting)
-        println("#".repeat(20))
-      }
-    } catch (e: Error) {
-      reportError(code)
-      throw e
+
+    val chain =
+        try {
+          Formatter.formatDebug(options, code)
+        } catch (e: Error) {
+          reportError(code)
+          throw e
+        }
+    val actualFormatting = chain.code
+
+    if (actualFormatting == expectedFormatting) {
+      return
     }
+
+    reportError(code)
+
+    println("# Output: ")
+    println("#".repeat(20))
+    println(actualFormatting)
+    println("# Expected: ")
+    println("#".repeat(20))
+    println(expectedFormatting)
+    println("#".repeat(20))
+
+    var opsChain: Formatter.FormatChain? = chain
+    while (opsChain != null) {
+      if (opsChain.ops != null) {
+        println("For step ${opsChain.label}")
+        printOps(opsChain.ops!!)
+      }
+      opsChain = chain.parent
+    }
+
     Assert.assertEquals(expectedFormatting, actualFormatting)
   }
 

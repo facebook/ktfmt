@@ -117,7 +117,7 @@ class MainTest {
         Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("-")).run()
 
     assertThat(returnValue).isEqualTo(1)
-    assertThat(err.toString("UTF-8")).startsWith("<stdin>:1:14: error: ")
+    assertThat(err.toString("UTF-8")).startsWith("<stdin>:1:14: ")
   }
 
   @Test
@@ -128,7 +128,7 @@ class MainTest {
         Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf(fooBar.toString())).run()
 
     assertThat(returnValue).isEqualTo(1)
-    assertThat(err.toString("UTF-8")).contains("foo.kt:1:14: error: ")
+    assertThat(err.toString("UTF-8")).contains("foo.kt:1:14: ")
   }
 
   @Test
@@ -157,7 +157,7 @@ class MainTest {
 
     assertThat(returnValue).isEqualTo(1)
     assertThat(err.toString("UTF-8")).contains("Done formatting $file1")
-    assertThat(err.toString("UTF-8")).contains("file2.kt:1:14: error: ")
+    assertThat(err.toString("UTF-8")).contains("file2.kt:1:14: ")
     assertThat(err.toString("UTF-8")).contains("Done formatting $file3")
   }
 

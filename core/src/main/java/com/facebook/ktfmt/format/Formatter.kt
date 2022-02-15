@@ -16,7 +16,6 @@
 
 package com.facebook.ktfmt.format
 
-import com.facebook.ktfmt.debughelpers.printOps
 import com.facebook.ktfmt.format.FormattingOptions.Style.DROPBOX
 import com.facebook.ktfmt.format.FormattingOptions.Style.GOOGLE
 import com.facebook.ktfmt.format.RedundantElementRemover.dropRedundantElements
@@ -28,6 +27,7 @@ import com.google.common.collect.Range
 import com.google.googlejavaformat.Doc
 import com.google.googlejavaformat.DocBuilder
 import com.google.googlejavaformat.Newlines
+import com.google.googlejavaformat.Op
 import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.java.FormatterException
 import com.google.googlejavaformat.java.JavaOutput
@@ -77,23 +77,57 @@ object Formatter {
    */
   @JvmStatic
   @Throws(FormatterException::class, ParseError::class)
-  fun format(options: FormattingOptions, code: String): String {
+  fun format(options: FormattingOptions, code: String): String = formatDebug(options, code).code
+
+  @JvmStatic
+  @Throws(FormatterException::class, ParseError::class)
+  fun formatDebug(options: FormattingOptions, code: String): FormatChain {
     checkEscapeSequences(code)
 
-    val lfCode = StringUtilRt.convertLineSeparators(code)
-    val sortedImports = sortedAndDistinctImports(lfCode)
-    val pretty = prettyPrint(sortedImports, options, "\n")
-    val noRedundantElements =
-        try {
-          dropRedundantElements(pretty, options)
-        } catch (e: ParseError) {
-          throw IllegalStateException("Failed to re-parse code after pretty printing:\n $pretty", e)
+    return FormatChain.root("initial input", code)
+        .map("convertLineSeparators") { StringUtilRt.convertLineSeparators(it) }
+        .map("sortedAndDistinctImports") { sortedAndDistinctImports(it) }
+        .flatMap("first prettyPrint") { prettyPrint(it, options, "\n") }
+        .map("dropRedundantElements") { dropRedundantElements(it, options) }
+        .flatMap("second prettyPrint") {
+          prettyPrint(it, options, Newlines.guessLineSeparator(code)!!)
         }
-    return prettyPrint(noRedundantElements, options, Newlines.guessLineSeparator(code)!!)
+  }
+
+  class FormatChain
+  private constructor(
+      val parent: FormatChain?,
+      val label: String,
+      val code: String,
+      val ops: ImmutableList<Op>?,
+  ) {
+    internal fun map(nextLabel: String, transform: (String) -> String): FormatChain {
+      return flatMap(nextLabel) { dataOnly(transform(code)) }
+    }
+
+    internal fun flatMap(nextLabel: String, transform: (String) -> FormatChain): FormatChain {
+      try {
+        val childData = transform(code)
+        return FormatChain(this, nextLabel, childData.code, childData.ops)
+      } catch (e: ParseError) {
+        e.label = "after $label"
+        throw e
+      }
+    }
+
+    companion object {
+      fun dataOnly(code: String, ops: ImmutableList<Op>? = null) = FormatChain(null, "", code, ops)
+
+      fun root(label: String, code: String) = FormatChain(null, label, code, null)
+    }
   }
 
   /** prettyPrint reflows 'code' using google-java-format's engine. */
-  private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator: String): String {
+  private fun prettyPrint(
+      code: String,
+      options: FormattingOptions,
+      lineSeparator: String
+  ): FormatChain {
     val file = Parser.parse(code)
     val kotlinInput = KotlinInput(code, file)
     val javaOutput =
@@ -103,9 +137,6 @@ object Formatter {
     builder.sync(kotlinInput.text.length)
     builder.drain()
     val ops = builder.build()
-    if (options.debuggingPrintOpsAfterFormatting) {
-      printOps(ops)
-    }
     val doc = DocBuilder().withOps(ops).build()
     doc.computeBreaks(javaOutput.commentsHelper, options.maxWidth, Doc.State(+0, 0))
     doc.write(javaOutput)
@@ -113,8 +144,10 @@ object Formatter {
 
     val tokenRangeSet =
         kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
-    return WhitespaceTombstones.replaceTombstoneWithTrailingWhitespace(
-        JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
+    val code =
+        WhitespaceTombstones.replaceTombstoneWithTrailingWhitespace(
+            JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
+    return FormatChain.dataOnly(code, ops)
   }
 
   private fun createAstVisitor(options: FormattingOptions, builder: OpsBuilder): PsiElementVisitor {

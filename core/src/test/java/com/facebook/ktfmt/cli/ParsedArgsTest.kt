@@ -51,7 +51,6 @@ class ParsedArgsTest {
     assertThat(formattingOptions.blockIndent).isEqualTo(2)
     assertThat(formattingOptions.continuationIndent).isEqualTo(4)
     assertThat(formattingOptions.removeUnusedImports).isTrue()
-    assertThat(formattingOptions.debuggingPrintOpsAfterFormatting).isFalse()
 
     assertThat(parsed.dryRun).isFalse()
     assertThat(parsed.setExitIfChanged).isFalse()

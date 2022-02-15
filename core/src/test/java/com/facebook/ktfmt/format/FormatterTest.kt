@@ -2165,7 +2165,7 @@ class FormatterTest {
       Formatter.format(code)
       fail()
     } catch (e: ParseError) {
-      assertThat(e.errorDescription).contains("\\u0003")
+      assertThat(e.description).contains("\\u0003")
       assertThat(e.lineColumn.line).isEqualTo(1)
       assertThat(e.lineColumn.column).isEqualTo(5)
     }
@@ -3674,7 +3674,7 @@ class FormatterTest {
     } catch (e: ParseError) {
       assertThat(e.lineColumn.line).isEqualTo(6)
       assertThat(e.lineColumn.column).isEqualTo(0)
-      assertThat(e.errorDescription).contains("Expecting an expression")
+      assertThat(e.description).contains("Expecting an expression")
     }
   }
 

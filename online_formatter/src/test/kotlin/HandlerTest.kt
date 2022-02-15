@@ -57,7 +57,7 @@ class HandlerTest {
     val event = APIGatewayProxyRequestEvent()
     event.body = """{"source": "fun foo ( { }","style": "--kotlinlang-style"}"""
     val response = Handler().handleRequest(event, null)
-    assertEquals("""{"err":"1:10: error: Expecting \u0027)\u0027"}""", response)
+    assertEquals("""{"err":"1:10: after initial input error: Expecting \u0027)\u0027"}""", response)
   }
 
   @Test
