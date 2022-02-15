@@ -24,6 +24,7 @@ import com.google.googlejavaformat.Indent
 import com.google.googlejavaformat.Indent.Const.ZERO
 import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.Output
+import com.google.googlejavaformat.Output.BreakTag
 import java.util.ArrayDeque
 import java.util.Optional
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
@@ -136,6 +137,9 @@ class KotlinInputAstVisitor(
    * indentation on purpose
    */
   private val expressionBreakIndent: Indent.Const = Indent.Const.make(options.continuationIndent, 1)
+
+  private val blockPlusExpressionBreakIndent: Indent.Const =
+      Indent.Const.make(options.blockIndent + options.continuationIndent, 1)
 
   private val doubleExpressionBreakIndent: Indent.Const =
       Indent.Const.make(options.continuationIndent, 2)
@@ -875,28 +879,64 @@ class KotlinInputAstVisitor(
 
   /** Example `{ 1 + 1 }` (as lambda) or `{ (x, y) -> x + y }` */
   override fun visitLambdaExpression(lambdaExpression: KtLambdaExpression) {
+    visitLambdaExpression(lambdaExpression, null as BreakTag?)
+  }
+
+  private fun visitLambdaExpression(
+      lambdaExpression: KtLambdaExpression,
+      brokeBeforeBrace: BreakTag?,
+  ) {
     builder.sync(lambdaExpression)
-    builder.token("{")
-    val valueParameters = lambdaExpression.valueParameters
+
+    val valueParams = lambdaExpression.valueParameters
+    val hasParams = valueParams.isNotEmpty()
     val statements = (lambdaExpression.bodyExpression ?: fail()).children
-    val arrow = lambdaExpression.functionLiteral.arrow
-    if (valueParameters.isNotEmpty() || arrow != null) {
+    val hasStatements = statements.isNotEmpty()
+    val hasArrow = lambdaExpression.functionLiteral.arrow != null
+
+    fun ifBrokeBeforeBrace(onTrue: Indent, onFalse: Indent): Indent {
+      if (brokeBeforeBrace == null) return onFalse
+      return Indent.If.make(brokeBeforeBrace, onTrue, onFalse)
+    }
+
+    /**
+     * Enable correct formatting of the `fun foo() = scope {` syntax.
+     *
+     * We can't denote the lambda (+ scope function) as a block, since (for multiline lambdas) the
+     * rectangle rule would force the entire lambda onto a lower line. Instead, we conditionally
+     * indent all the interior levels of the lambda based on whether we had to break before the
+     * opening brace (or scope function). This mimics the look of a block when the break is taken.
+     *
+     * These conditional indents should not be used inside interior blocks, since that would apply
+     * the condition twice.
+     */
+    val bracePlusBlockIndent = ifBrokeBeforeBrace(blockPlusExpressionBreakIndent, blockIndent)
+    val bracePlusExpressionIndent =
+        ifBrokeBeforeBrace(doubleExpressionBreakIndent, expressionBreakIndent)
+    val bracePlusZeroIndent = ifBrokeBeforeBrace(expressionBreakIndent, ZERO)
+
+    builder.token("{")
+
+    if (hasParams || hasArrow) {
       builder.space()
-      builder.block(expressionBreakIndent) { forEachCommaSeparated(valueParameters) { visit(it) } }
-      builder.block(blockIndent) {
+      builder.block(bracePlusExpressionIndent) {
+        forEachCommaSeparated(valueParams) { it.accept(this) }
+      }
+      builder.block(bracePlusBlockIndent) {
         if (lambdaExpression.functionLiteral.valueParameterList?.trailingComma != null) {
           builder.token(",")
           builder.forcedBreak()
-        } else if (valueParameters.isNotEmpty()) {
+        } else if (hasParams) {
           builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
         }
         builder.token("->")
       }
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+      builder.breakOp(Doc.FillMode.UNIFIED, "", bracePlusZeroIndent)
     }
-    if (statements.isNotEmpty()) {
-      builder.breakOp(Doc.FillMode.UNIFIED, " ", blockIndent)
-      builder.block(blockIndent) {
+
+    if (hasStatements) {
+      builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusBlockIndent)
+      builder.block(bracePlusBlockIndent) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
         if (statements.size == 1 &&
             statements.first() !is KtReturnExpression &&
@@ -907,11 +947,18 @@ class KotlinInputAstVisitor(
         }
       }
     }
-    if (valueParameters.isNotEmpty() || statements.isNotEmpty() || arrow != null) {
-      builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+
+    if (hasParams || hasArrow || hasStatements) {
+      // If we had to break in the body, ensure there is a break before the closing brace
+      builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusZeroIndent)
       builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
     }
-    builder.token("}", blockIndent)
+    builder.block(bracePlusZeroIndent) {
+      // If there are closing comments, make sure they and the brace are indented together
+      // The comments will indent themselves, so consume the previous break as a blank line
+      builder.breakOp(Doc.FillMode.INDEPENDENT, "", ZERO)
+      builder.token("}", blockIndent)
+    }
   }
 
   /** Example `this` or `this@Foo` */
@@ -1301,29 +1348,20 @@ class KotlinInputAstVisitor(
   }
 
   /** See [lambdaOrScopingFunction] for examples. */
-  private fun processLambdaOrScopingFunction(initializer: PsiElement?) {
-    val tag = genSym()
+  private fun processLambdaOrScopingFunction(expr: PsiElement?) {
+    val breakToExpr = genSym()
+    builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent, Optional.of(breakToExpr))
 
-    // The use of doubleExpressionBreakIndent is an ugly hack to avoid formatting such as
-    //   fun longName() =
-    //     coroutineScope {
-    //     foo()
-    //       ...
-    //   }
-    // Also see https://github.com/google/google-java-format/issues/556
-    builder.breakOp(
-        Doc.FillMode.INDEPENDENT,
-        " ",
-        if (isGoogleStyle) doubleExpressionBreakIndent else expressionBreakIndent,
-        Optional.of(tag))
-
-    if (initializer is KtLambdaExpression) {
-      visit(initializer)
-    } else {
-      val call = initializer as KtCallExpression
-      visit(call.calleeExpression)
-      builder.space()
-      call.lambdaArguments.forEach { visit(it.getArgumentExpression()) }
+    when (expr) {
+      is KtLambdaExpression -> {
+        visitLambdaExpression(expr, breakToExpr)
+      }
+      is KtCallExpression -> {
+        visit(expr.calleeExpression)
+        builder.space()
+        visitLambdaExpression(expr.lambdaArguments[0].getLambdaExpression()!!, breakToExpr)
+      }
+      else -> throw AssertionError(expr)
     }
   }
 
