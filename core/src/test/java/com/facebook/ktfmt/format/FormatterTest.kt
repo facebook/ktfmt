@@ -2549,6 +2549,12 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
+  fun `annotations on destructuring declaration elements`() =
+      assertFormatted("""
+      |val x = { (@Anno x, @Anno y) -> x }
+      |""".trimMargin())
+
+  @Test
   fun `annotations on exceptions`() =
       assertFormatted(
           """

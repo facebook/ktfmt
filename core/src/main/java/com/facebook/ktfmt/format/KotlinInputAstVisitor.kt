@@ -1926,13 +1926,14 @@ class KotlinInputAstVisitor(
       multiDeclarationEntry: KtDestructuringDeclarationEntry
   ) {
     builder.sync(multiDeclarationEntry)
-    builder.token(multiDeclarationEntry.nameIdentifier?.text ?: fail())
-    val typeReference = multiDeclarationEntry.typeReference
-    if (typeReference != null) {
-      builder.token(":")
-      builder.space()
-      visit(typeReference)
-    }
+    declareOne(
+        initializer = null,
+        kind = DeclarationKind.PARAMETER,
+        modifiers = multiDeclarationEntry.modifierList,
+        name = multiDeclarationEntry.nameIdentifier?.text ?: fail(),
+        type = multiDeclarationEntry.typeReference,
+        valOrVarKeyword = null,
+    )
   }
 
   /** Example `"Hello $world!"` or `"""Hello world!"""` */
