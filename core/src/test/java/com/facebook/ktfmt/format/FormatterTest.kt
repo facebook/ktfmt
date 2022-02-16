@@ -2537,7 +2537,9 @@ class FormatterTest {
   fun `annotations on type constraints`() =
       assertFormatted(
           """
-      |class Foo<T : @Anno Kip, U> where U : @Anno Kip, U : @Anno Qux {
+      |class Foo<T : @Anno Kip, U>
+      |    where U : @Anno Kip, U : @Anno Qux
+      |{
       |  fun <T : @Anno Kip, U> bar() where U : @Anno Kip, U : @Anno Qux {}
       |}
       |""".trimMargin())
@@ -2607,7 +2609,17 @@ class FormatterTest {
   fun `handle compound generic bounds on classes`() =
       assertFormatted(
           """
-      |class Foo<T>(n: Int) where T : Bar, T : FooBar {}
+      |class Foo<T>(n: Int)
+      |    where T : Bar, T : FooBar
+      |{}
+      |
+      |class Foo<T>(n: Int) : Zip
+      |    where T : Bar, T : FooBar
+      |{}
+      |
+      |class Foo<T>(n: Int) : Zip by zip
+      |    where T : Bar, T : FooBar
+      |{}
       |""".trimMargin())
 
   @Test

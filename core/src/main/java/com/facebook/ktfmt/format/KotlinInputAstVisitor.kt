@@ -1395,8 +1395,10 @@ class KotlinInputAstVisitor(
       builder.space()
       val typeConstraintList = classOrObject.typeConstraintList
       if (typeConstraintList != null) {
-        visit(typeConstraintList)
-        builder.space()
+        builder.forcedBreak(expressionBreakIndent)
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
+        builder.block(expressionBreakIndent) { visit(typeConstraintList) }
+        builder.forcedBreak()
       }
       val body = classOrObject.body
       if (classOrObject.hasModifier(KtTokens.ENUM_KEYWORD)) {
