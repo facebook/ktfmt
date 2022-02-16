@@ -4193,6 +4193,10 @@ class FormatterTest {
       |  )
       |
       |  foo<Int>(
+      |      { it },
+      |  )
+      |
+      |  foo<Int>(
       |      3,
       |  )
       |

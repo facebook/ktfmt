@@ -866,14 +866,15 @@ class KotlinInputAstVisitor(
     val isSingleUnnamedLambda =
         arguments.size == 1 &&
             arguments.first().getArgumentExpression() is KtLambdaExpression &&
-            arguments.first().getArgumentName() == null
+            arguments.first().getArgumentName() == null &&
+            list.trailingComma == null
     if (isSingleUnnamedLambda) {
+      // TODO(nreid260): Eliminate this special case and treat if calls can be blocklike.
       builder.block(expressionBreakNegativeIndent) { visit(arguments.first()) }
     } else {
       // Break before args.
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      emitParameterLikeList(
-          list.arguments, list.trailingComma != null, wrapInBlock = !isGoogleStyle)
+      emitParameterLikeList(arguments, list.trailingComma != null, wrapInBlock = !isGoogleStyle)
     }
   }
 
