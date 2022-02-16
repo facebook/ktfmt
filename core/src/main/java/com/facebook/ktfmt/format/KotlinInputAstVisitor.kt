@@ -1125,10 +1125,19 @@ class KotlinInputAstVisitor(
    */
   override fun visitBinaryExpression(expression: KtBinaryExpression) {
     builder.sync(expression)
+    val op = expression.operationToken
+
+    if (KtTokens.ALL_ASSIGNMENTS.contains(op) && lambdaOrScopingFunction(expression.right)) {
+      // Assigments are statements in Kotlin; we don't have to worry about compound assignment.
+      visit(expression.left)
+      builder.space()
+      builder.token(expression.operationReference.text)
+      processLambdaOrScopingFunction(expression.right)
+      return
+    }
 
     val parts =
         ArrayDeque<KtBinaryExpression>().apply {
-          val op = expression.operationToken
           var current: KtExpression? = expression
           while (current is KtBinaryExpression && current.operationToken == op) {
             addFirst(current)

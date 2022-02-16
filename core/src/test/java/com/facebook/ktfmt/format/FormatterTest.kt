@@ -352,6 +352,61 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `assignment expressions with scoping functions are block-like`() =
+      assertFormatted(
+          """
+        |---------------------------
+        |fun f() {
+        |  name.sub = scope { x ->
+        |    //
+        |  }
+        |  name.sub += scope { x ->
+        |    //
+        |  }
+        |  name.sub -= scope { x ->
+        |    //
+        |  }
+        |  name.sub *= scope { x ->
+        |    //
+        |  }
+        |  name.sub /= scope { x ->
+        |    //
+        |  }
+        |  name.sub %= scope { x ->
+        |    //
+        |  }
+        |}
+        |
+        |fun h() {
+        |  long.name.sub =
+        |      scope { x ->
+        |        //
+        |      }
+        |  long.name.sub +=
+        |      scope { x ->
+        |        //
+        |      }
+        |  long.name.sub -=
+        |      scope { x ->
+        |        //
+        |      }
+        |  long.name.sub *=
+        |      scope { x ->
+        |        //
+        |      }
+        |  long.name.sub /=
+        |      scope { x ->
+        |        //
+        |      }
+        |  long.name.sub %=
+        |      scope { x ->
+        |        //
+        |      }
+        |}
+        |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `don't keep adding newlines between these two comments when they're at end of file`() =
       assertFormatted(
           """
