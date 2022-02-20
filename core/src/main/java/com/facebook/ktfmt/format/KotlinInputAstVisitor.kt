@@ -868,7 +868,12 @@ class KotlinInputAstVisitor(
             arguments.first().getArgumentExpression() is KtLambdaExpression &&
             arguments.first().getArgumentName() == null
     if (isSingleUnnamedLambda) {
-      builder.block(expressionBreakNegativeIndent) { visit(arguments.first()) }
+      builder.block(expressionBreakNegativeIndent) {
+        visit(arguments.first())
+        if (list.trailingComma != null) {
+          builder.token(",")
+        }
+      }
     } else {
       // Break before args.
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)

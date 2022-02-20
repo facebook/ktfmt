@@ -4304,6 +4304,17 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `handle trailing commas (after lambda arg)`() =
+      assertFormatted(
+          """
+      |--------------------------
+      |fun foo() {
+      |  foo({ it },)
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `handle trailing commas (other)`() =
       assertFormatted(
           """
