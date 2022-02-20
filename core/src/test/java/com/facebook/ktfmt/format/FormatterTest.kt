@@ -2683,6 +2683,14 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
+  fun `handle compound generic bounds on class with delegate`() =
+      assertFormatted(
+          """
+      |class Foo<T>() : Bar by bar
+      |where T : Qux
+      |""".trimMargin())
+
+  @Test
   fun `explicit type on property getter`() =
       assertFormatted(
           """

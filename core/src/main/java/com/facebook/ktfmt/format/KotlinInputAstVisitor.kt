@@ -1409,6 +1409,9 @@ class KotlinInputAstVisitor(
       builder.space()
       val typeConstraintList = classOrObject.typeConstraintList
       if (typeConstraintList != null) {
+        if (superTypes?.entries?.lastOrNull() is KtDelegatedSuperTypeEntry) {
+          builder.forcedBreak()
+        }
         visit(typeConstraintList)
         builder.space()
       }
