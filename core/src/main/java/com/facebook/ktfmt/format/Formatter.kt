@@ -33,6 +33,7 @@ import com.google.googlejavaformat.java.FormatterException
 import com.google.googlejavaformat.java.JavaOutput
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtilRt
+import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiElementVisitor
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
@@ -144,22 +145,19 @@ object Formatter {
       return code
     }
 
-    fun findNonImportElement(): PsiElement? {
-      var element = importList.firstChild
-      while (element != null) {
-        if (element !is KtImportDirective && element !is PsiWhiteSpace) {
-          return element
-        }
-        element = element.nextSibling
+    val commentList = mutableListOf<PsiElement>()
+    // Find non-import elements; comments are moved, in order, to the top of the import list. Other
+    // non-import elements throw a ParseError.
+    var element = importList.firstChild
+    while (element != null) {
+      if (element is PsiComment) {
+        commentList.add(element)
+      } else if (element !is KtImportDirective && element !is PsiWhiteSpace) {
+        throw ParseError(
+            "Imports not contiguous: " + element.text,
+            StringUtil.offsetToLineColumn(code, element.startOffset))
       }
-      return null
-    }
-
-    val nonImportElement = findNonImportElement()
-    if (nonImportElement != null) {
-      throw ParseError(
-          "Imports not contiguous (perhaps a comment separates them?): " + nonImportElement.text,
-          StringUtil.offsetToLineColumn(code, nonImportElement.startOffset))
+      element = element.nextSibling
     }
     fun canonicalText(importDirective: KtImportDirective) =
         importDirective.importedFqName?.asString() +
@@ -169,10 +167,11 @@ object Formatter {
             if (importDirective.isAllUnder) "*" else ""
 
     val sortedImports = importList.imports.sortedBy(::canonicalText).distinctBy(::canonicalText)
+    val importsWithComments = commentList + sortedImports
 
     return code.replaceRange(
         importList.startOffset,
         importList.endOffset,
-        sortedImports.joinToString(separator = "\n") { imprt -> imprt.text } + "\n")
+        importsWithComments.joinToString(separator = "\n") { imprt -> imprt.text } + "\n")
   }
 }

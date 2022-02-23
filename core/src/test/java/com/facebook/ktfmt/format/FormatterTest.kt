@@ -1031,24 +1031,37 @@ class FormatterTest {
   }
 
   @Test
-  fun `comments between imports are not allowed`() {
+  fun `comments between imports are moved above import list`() {
     val code =
         """
         |package com.facebook.ktfmt
         |
-        |import com.google.common.truth.Subject
-        |/* add */
-        |import com.google.common.truth.FailureMetadata as Foo
+        |/* leading comment */
+        |import com.example.abc
+        |/* internal comment 1 */
+        |import com.example.bcd
+        |// internal comment 2
+        |import com.example.Sample
+        |// trailing comment
+        |
+        |val x = Sample(abc, bcd)
         |""".trimMargin()
-
-    try {
-      Formatter.format(code)
-      fail()
-    } catch (e: ParseError) {
-      assertThat(e.errorDescription).contains("Imports not contiguous")
-      assertThat(e.lineColumn.line).isEqualTo(3)
-      assertThat(e.lineColumn.column).isEqualTo(0)
-    }
+    val expected =
+        """
+        |package com.facebook.ktfmt
+        |
+        |/* leading comment */
+        |/* internal comment 1 */
+        |// internal comment 2
+        |import com.example.Sample
+        |import com.example.abc
+        |import com.example.bcd
+        |
+        |// trailing comment
+        |
+        |val x = Sample(abc, bcd)
+        |""".trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
   }
 
   @Test
