@@ -1,0 +1,468 @@
+<!-- Forked from https://microsoft.github.io/monaco-editor/ -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+
+    <title>ktfmt - the Kotlin code formatter</title>
+
+    <style>/*!
+ * Bootstrap v2.3.0
+ *
+ * Copyright 2012 Twitter, Inc
+ * Licensed under the Apache License v2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Designed and built with all the love in the world @twitter by @mdo and @fat.
+ */footer,nav,section{display:block}html{font-size:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}a:focus{outline:thin dotted #333;outline:5px auto -webkit-focus-ring-color;outline-offset:-2px}a:active,a:hover{outline:0}img{height:auto;max-width:100%;vertical-align:middle;border:0;-ms-interpolation-mode:bicubic}button,input,select{margin:0;font-size:100%;vertical-align:middle}button,input{line-height:normal}button::-moz-focus-inner,input::-moz-focus-inner{padding:0;border:0}button{cursor:pointer;-webkit-appearance:button}button,label,select{cursor:pointer}@media print{*{color:#000!important;text-shadow:none!important;background:0 0!important;box-shadow:none!important}a,a:visited{text-decoration:underline}a[href]:after{content:" (" attr(href) ")"}a[href^="#"]:after{content:""}pre{border:1px solid #999;page-break-inside:avoid}img{page-break-inside:avoid}img{max-width:100%!important}@page{margin:.5cm}h3,p{orphans:3;widows:3}h3{page-break-after:avoid}}body{margin:0;line-height:20px;color:#555;background-color:#fff}a{color:#007fff;text-decoration:none}a:focus,a:hover{color:#06c;text-decoration:underline}.row{margin-left:-20px}.row:after,.row:before{display:table;line-height:0;content:""}.row:after{clear:both}[class*=span]{float:left;min-height:1px;margin-left:20px}.container,.navbar-fixed-top .container{width:940px}.span12{width:940px}.span4{width:300px}.span3{width:220px}[class*=span].pull-right{float:right}.container{margin-right:auto;margin-left:auto}.container:after,.container:before{display:table;line-height:0;content:""}.container:after{clear:both}p{margin:0 0 10px}small{font-size:85%}.text-error{color:#fff}.text-center{text-align:center}h3{margin:10px 0;font-family:inherit;font-weight:300;line-height:20px;color:#080808;text-rendering:optimizelegibility}h3{line-height:40px}h3{font-size:24.5px}ul{padding:0;margin:0 0 10px 25px}li{line-height:20px}hr{margin:20px 0;border:0;border-top:1px solid #eee;border-bottom:1px solid #fff}code,pre{padding:0 3px 2px;font-family:Monaco,Menlo,Consolas,"Courier New",monospace;font-size:12px;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px}code{padding:2px 4px;color:#d14;white-space:nowrap;background-color:#f7f7f9;border:1px solid #e1e1e8}pre{display:block;padding:9.5px;margin:0 0 10px;font-size:13px;line-height:20px;word-break:break-all;word-wrap:break-word;white-space:pre;white-space:pre-wrap;background-color:#f5f5f5;border:1px solid #ccc;border:1px solid rgba(0,0,0,.15);-webkit-border-radius:0;-moz-border-radius:0;border-radius:0}form{margin:0 0 20px}button,input,label,select{font-size:14px;font-weight:400;line-height:20px}button,input,select{font-family:"Open Sans",Calibri,Candara,Arial,sans-serif}label{display:block;margin-bottom:5px}input[type=number],select{display:inline-block;height:20px;padding:4px 6px;margin-bottom:10px;font-size:14px;line-height:20px;color:#bbb;vertical-align:middle;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0}input{width:206px}input[type=number]{background-color:#fff;border:1px solid #bbb;-webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,.075);-moz-box-shadow:inset 0 1px 1px rgba(0,0,0,.075);box-shadow:inset 0 1px 1px rgba(0,0,0,.075);-webkit-transition:border linear .2s,box-shadow linear .2s;-moz-transition:border linear .2s,box-shadow linear .2s;-o-transition:border linear .2s,box-shadow linear .2s;transition:border linear .2s,box-shadow linear .2s}input[type=number]:focus{border-color:rgba(82,168,236,.8);outline:0;-webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(82,168,236,.6);-moz-box-shadow:inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(82,168,236,.6);box-shadow:inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(82,168,236,.6)}select{height:30px;line-height:30px}select{width:220px;background-color:#fff;border:1px solid #bbb}select:focus{outline:thin dotted #333;outline:5px auto -webkit-focus-ring-color;outline-offset:-2px}input:-moz-placeholder{color:#bbb}input:-ms-input-placeholder{color:#bbb}input::-webkit-input-placeholder{color:#bbb}.input-small{width:90px}.input-medium{width:150px}input{margin-left:0}input:focus:invalid,select:focus:invalid{color:#b94a48;border-color:#ee5f5b}input:focus:invalid:focus,select:focus:invalid:focus{border-color:#e9322d;-webkit-box-shadow:0 0 6px #f8b9b7;-moz-box-shadow:0 0 6px #f8b9b7;box-shadow:0 0 6px #f8b9b7}.collapse{position:relative;height:0;overflow:hidden;-webkit-transition:height .35s ease;-moz-transition:height .35s ease;-o-transition:height .35s ease;transition:height .35s ease}.btn{display:inline-block;padding:4px 12px;margin-bottom:0;font-size:14px;line-height:20px;color:#999;text-align:center;text-shadow:0 1px 1px rgba(255,255,255,.75);vertical-align:middle;cursor:pointer;background-color:#dfdfdf;background-image:-moz-linear-gradient(top,#eee,#c8c8c8);background-image:-webkit-gradient(linear,0 0,0 100%,from(#eee),to(#c8c8c8));background-image:-webkit-linear-gradient(top,#eee,#c8c8c8);background-image:-o-linear-gradient(top,#eee,#c8c8c8);background-image:linear-gradient(to bottom,#eee,#c8c8c8);background-repeat:repeat-x;border:1px solid #bbb;border-color:#c8c8c8 #c8c8c8 #a2a2a2;border-color:rgba(0,0,0,.1) rgba(0,0,0,.1) rgba(0,0,0,.25);border-bottom-color:#a2a2a2;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;-webkit-box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 1px 2px rgba(0,0,0,.05);-moz-box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 1px 2px rgba(0,0,0,.05);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 1px 2px rgba(0,0,0,.05)}.btn:active,.btn:focus,.btn:hover{color:#999;background-color:#c8c8c8}.btn:focus,.btn:hover{color:#999;text-decoration:none;background-position:0 -15px;-webkit-transition:background-position .1s linear;-moz-transition:background-position .1s linear;-o-transition:background-position .1s linear;transition:background-position .1s linear}.btn:focus{outline:thin dotted #333;outline:5px auto -webkit-focus-ring-color;outline-offset:-2px}.btn:active{background-image:none;outline:0;-webkit-box-shadow:inset 0 2px 4px rgba(0,0,0,.15),0 1px 2px rgba(0,0,0,.05);-moz-box-shadow:inset 0 2px 4px rgba(0,0,0,.15),0 1px 2px rgba(0,0,0,.05);box-shadow:inset 0 2px 4px rgba(0,0,0,.15),0 1px 2px rgba(0,0,0,.05)}.btn-primary{color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.25);background-color:#0f82f5;background-image:-moz-linear-gradient(top,#1a8cff,#0072e6);background-image:-webkit-gradient(linear,0 0,0 100%,from(#1a8cff),to(#0072e6));background-image:-webkit-linear-gradient(top,#1a8cff,#0072e6);background-image:-o-linear-gradient(top,#1a8cff,#0072e6);background-image:linear-gradient(to bottom,#1a8cff,#0072e6);background-repeat:repeat-x;border-color:#0072e6 #0072e6 #004c99;border-color:rgba(0,0,0,.1) rgba(0,0,0,.1) rgba(0,0,0,.25)}.btn-primary:active,.btn-primary:focus,.btn-primary:hover{color:#fff;background-color:#0072e6}.btn-info{color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.25);background-color:#9b59bb;background-image:-moz-linear-gradient(top,#a466c2,#8d46b0);background-image:-webkit-gradient(linear,0 0,0 100%,from(#a466c2),to(#8d46b0));background-image:-webkit-linear-gradient(top,#a466c2,#8d46b0);background-image:-o-linear-gradient(top,#a466c2,#8d46b0);background-image:linear-gradient(to bottom,#a466c2,#8d46b0);background-repeat:repeat-x;border-color:#8d46b0 #8d46b0 #613079;border-color:rgba(0,0,0,.1) rgba(0,0,0,.1) rgba(0,0,0,.25)}.btn-info:active,.btn-info:focus,.btn-info:hover{color:#fff;background-color:#8d46b0}button.btn::-moz-focus-inner{padding:0;border:0}.nav{margin-bottom:20px;margin-left:0;list-style:none}.nav>li>a{display:block}.nav>li>a:focus,.nav>li>a:hover{text-decoration:none;background-color:#eee}.nav-tabs:after,.nav-tabs:before{display:table;line-height:0;content:""}.nav-tabs:after{clear:both}.nav-tabs>li{float:left}.nav-tabs>li>a{padding-right:12px;padding-left:12px;margin-right:2px;line-height:14px}.nav-tabs{border-bottom:1px solid #ddd}.nav-tabs>li{margin-bottom:-1px}.nav-tabs>li>a{padding-top:8px;padding-bottom:8px;line-height:20px;border:1px solid transparent;-webkit-border-radius:4px 4px 0 0;-moz-border-radius:4px 4px 0 0;border-radius:4px 4px 0 0}.nav-tabs>li>a:focus,.nav-tabs>li>a:hover{border-color:#eee #eee #ddd}.nav-tabs>.active>a,.nav-tabs>.active>a:focus,.nav-tabs>.active>a:hover{color:#bbb;cursor:default;background-color:#fff;border:1px solid #ddd;border-bottom-color:transparent}.tab-content{overflow:auto}.tab-content>.tab-pane{display:none}.tab-content>.active{display:block}.navbar{margin-bottom:20px;overflow:visible}.navbar-inner{min-height:50px;padding-right:20px;padding-left:20px;background-color:#080808;background-image:-moz-linear-gradient(top,#080808,#080808);background-image:-webkit-gradient(linear,0 0,0 100%,from(#080808),to(#080808));background-image:-webkit-linear-gradient(top,#080808,#080808);background-image:-o-linear-gradient(top,#080808,#080808);background-image:linear-gradient(to bottom,#080808,#080808);background-repeat:repeat-x;border:1px solid transparent;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;-webkit-box-shadow:0 1px 4px rgba(0,0,0,.065);-moz-box-shadow:0 1px 4px rgba(0,0,0,.065);box-shadow:0 1px 4px rgba(0,0,0,.065)}.navbar-inner:after,.navbar-inner:before{display:table;line-height:0;content:""}.navbar-inner:after{clear:both}.navbar .container{width:auto}.nav-collapse.collapse{height:auto;overflow:visible}.navbar .btn{margin-top:10px}.navbar-fixed-top{position:fixed;right:0;left:0;z-index:1030;margin-bottom:0}.navbar-fixed-top .navbar-inner{border-width:0 0 1px}.navbar-fixed-top .navbar-inner{padding-right:0;padding-left:0;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0}.navbar-fixed-top .container{width:940px}.navbar-fixed-top{top:0}.navbar-fixed-top .navbar-inner{-webkit-box-shadow:0 1px 10px rgba(0,0,0,.1);-moz-box-shadow:0 1px 10px rgba(0,0,0,.1);box-shadow:0 1px 10px rgba(0,0,0,.1)}.navbar .nav{position:relative;left:0;display:block;float:left;margin:0 10px 0 0}.navbar .nav>li{float:left}.navbar .nav>li>a{float:none;padding:15px 15px 15px;color:#fff;text-decoration:none;text-shadow:0 1px 0 #080808}.navbar .nav>li>a:focus,.navbar .nav>li>a:hover{color:#bbb;text-decoration:none;background-color:rgba(0,0,0,.05)}.navbar .btn-navbar{display:none;float:right;padding:7px 10px;margin-right:5px;margin-left:5px;color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.25);background-color:#000;background-image:-moz-linear-gradient(top,#000,#000);background-image:-webkit-gradient(linear,0 0,0 100%,from(#000),to(#000));background-image:-webkit-linear-gradient(top,#000,#000);background-image:-o-linear-gradient(top,#000,#000);background-image:linear-gradient(to bottom,#000,#000);background-repeat:repeat-x;border-color:#000 #000 #000;border-color:rgba(0,0,0,.1) rgba(0,0,0,.1) rgba(0,0,0,.25);-webkit-box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 1px 0 rgba(255,255,255,.075);-moz-box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 1px 0 rgba(255,255,255,.075);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 1px 0 rgba(255,255,255,.075)}.navbar .btn-navbar:active,.navbar .btn-navbar:focus,.navbar .btn-navbar:hover{color:#fff;background-color:#000}.navbar .btn-navbar .icon-bar{display:block;width:18px;height:2px;background-color:#f5f5f5;-webkit-border-radius:1px;-moz-border-radius:1px;border-radius:1px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.25);-moz-box-shadow:0 1px 0 rgba(0,0,0,.25);box-shadow:0 1px 0 rgba(0,0,0,.25)}.btn-navbar .icon-bar+.icon-bar{margin-top:3px}.navbar-inverse .navbar-inner{background-color:#007fff;background-image:-moz-linear-gradient(top,#007fff,#007fff);background-image:-webkit-gradient(linear,0 0,0 100%,from(#007fff),to(#007fff));background-image:-webkit-linear-gradient(top,#007fff,#007fff);background-image:-o-linear-gradient(top,#007fff,#007fff);background-image:linear-gradient(to bottom,#007fff,#007fff);background-repeat:repeat-x;border-color:transparent}.navbar-inverse .nav>li>a{color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.25)}.navbar-inverse .nav>li>a:focus,.navbar-inverse .nav>li>a:hover{color:#fff}.navbar-inverse .nav>li>a:focus,.navbar-inverse .nav>li>a:hover{color:#fff;background-color:rgba(0,0,0,.05)}.navbar-inverse .btn-navbar{color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.25);background-color:#0072e6;background-image:-moz-linear-gradient(top,#0072e6,#0072e6);background-image:-webkit-gradient(linear,0 0,0 100%,from(#0072e6),to(#0072e6));background-image:-webkit-linear-gradient(top,#0072e6,#0072e6);background-image:-o-linear-gradient(top,#0072e6,#0072e6);background-image:linear-gradient(to bottom,#0072e6,#0072e6);background-repeat:repeat-x;border-color:#0072e6 #0072e6 #004c99;border-color:rgba(0,0,0,.1) rgba(0,0,0,.1) rgba(0,0,0,.25)}.navbar-inverse .btn-navbar:active,.navbar-inverse .btn-navbar:focus,.navbar-inverse .btn-navbar:hover{color:#fff;background-color:#0072e6}@-webkit-keyframes progress-bar-stripes{from{background-position:40px 0}to{background-position:0 0}}@-moz-keyframes progress-bar-stripes{from{background-position:40px 0}to{background-position:0 0}}@-ms-keyframes progress-bar-stripes{from{background-position:40px 0}to{background-position:0 0}}@-o-keyframes progress-bar-stripes{from{background-position:0 0}to{background-position:40px 0}}@keyframes progress-bar-stripes{from{background-position:40px 0}to{background-position:0 0}}.progress{height:20px;margin-bottom:20px;overflow:hidden;background-color:#f7f7f7;background-image:-moz-linear-gradient(top,#f5f5f5,#f9f9f9);background-image:-webkit-gradient(linear,0 0,0 100%,from(#f5f5f5),to(#f9f9f9));background-image:-webkit-linear-gradient(top,#f5f5f5,#f9f9f9);background-image:-o-linear-gradient(top,#f5f5f5,#f9f9f9);background-image:linear-gradient(to bottom,#f5f5f5,#f9f9f9);background-repeat:repeat-x;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;-webkit-box-shadow:inset 0 1px 2px rgba(0,0,0,.1);-moz-box-shadow:inset 0 1px 2px rgba(0,0,0,.1);box-shadow:inset 0 1px 2px rgba(0,0,0,.1)}.progress .bar{float:left;width:0;height:100%;font-size:12px;color:#fff;text-align:center;text-shadow:0 -1px 0 rgba(0,0,0,.25);background-color:#0e90d2;background-image:-moz-linear-gradient(top,#149bdf,#0480be);background-image:-webkit-gradient(linear,0 0,0 100%,from(#149bdf),to(#0480be));background-image:-webkit-linear-gradient(top,#149bdf,#0480be);background-image:-o-linear-gradient(top,#149bdf,#0480be);background-image:linear-gradient(to bottom,#149bdf,#0480be);background-repeat:repeat-x;-webkit-box-shadow:inset 0 -1px 0 rgba(0,0,0,.15);-moz-box-shadow:inset 0 -1px 0 rgba(0,0,0,.15);box-shadow:inset 0 -1px 0 rgba(0,0,0,.15);-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;-webkit-transition:width .6s ease;-moz-transition:width .6s ease;-o-transition:width .6s ease;transition:width .6s ease}.progress-striped .bar{background-color:#149bdf;background-image:-webkit-gradient(linear,0 100%,100% 0,color-stop(.25,rgba(255,255,255,.15)),color-stop(.25,transparent),color-stop(.5,transparent),color-stop(.5,rgba(255,255,255,.15)),color-stop(.75,rgba(255,255,255,.15)),color-stop(.75,transparent),to(transparent));background-image:-webkit-linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);background-image:-moz-linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);background-image:-o-linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);background-image:linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);-webkit-background-size:40px 40px;-moz-background-size:40px 40px;-o-background-size:40px 40px;background-size:40px 40px}.progress.active .bar{-webkit-animation:progress-bar-stripes 2s linear infinite;-moz-animation:progress-bar-stripes 2s linear infinite;-ms-animation:progress-bar-stripes 2s linear infinite;-o-animation:progress-bar-stripes 2s linear infinite;animation:progress-bar-stripes 2s linear infinite}.pull-right{float:right}body{font-weight:300}h3{font-size:26px}.text-error{color:#ff0039}.navbar .navbar-inner{background-image:none;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}.navbar-inverse .nav>li>a{text-shadow:none}.nav-tabs>li>a{-webkit-border-radius:0;-moz-border-radius:0;border-radius:0}.btn{padding:5px 12px;text-shadow:none;background-image:none;border:none;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}input[type=number],select{color:#080808}[class^=icon-]{margin:0 2px;vertical-align:-2px}.progress{height:6px;background-color:#eee;background-image:none;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}.progress .bar{background-color:#007fff}.pull-right{float:right}/*!
+ * Bootstrap Responsive v2.3.0
+ *
+ * Copyright 2012 Twitter, Inc
+ * Licensed under the Apache License v2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Designed and built with all the love in the world @twitter by @mdo and @fat.
+ */@-ms-viewport{width:device-width}@media(min-width:1200px){.row{margin-left:-30px}.row:after,.row:before{display:table;line-height:0;content:""}.row:after{clear:both}[class*=span]{float:left;min-height:1px;margin-left:30px}.container,.navbar-fixed-top .container{width:1170px}.span12{width:1170px}.span4{width:370px}.span3{width:270px}input{margin-left:0}}@media(min-width:768px) and (max-width:979px){.row{margin-left:-20px}.row:after,.row:before{display:table;line-height:0;content:""}.row:after{clear:both}[class*=span]{float:left;min-height:1px;margin-left:20px}.container,.navbar-fixed-top .container{width:724px}.span12{width:724px}.span4{width:228px}.span3{width:166px}input{margin-left:0}}@media(max-width:767px){body{padding-right:20px;padding-left:20px}.navbar-fixed-top{margin-right:-20px;margin-left:-20px}.container{width:auto}.row{margin-left:0}[class*=span]{display:block;float:none;width:100%;margin-left:0;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.span12{width:100%;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}}@media(max-width:480px){.nav-collapse{-webkit-transform:translate3d(0,0,0)}}@media(max-width:979px){body{padding-top:0}.navbar-fixed-top{position:static}.navbar-fixed-top{margin-bottom:20px}.navbar-fixed-top .navbar-inner{padding:5px}.navbar .container{width:auto;padding:0}.nav-collapse{clear:both}.nav-collapse .nav{float:none;margin:0 0 10px}.nav-collapse .nav>li{float:none}.nav-collapse .nav>li>a{margin-bottom:2px}.nav-collapse .nav>li>a{padding:9px 15px;font-weight:700;color:#777;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px}.nav-collapse .nav>li>a:focus,.nav-collapse .nav>li>a:hover{background-color:#f2f2f2}.navbar-inverse .nav-collapse .nav>li>a{color:#999}.navbar-inverse .nav-collapse .nav>li>a:focus,.navbar-inverse .nav-collapse .nav>li>a:hover{background-color:#111}.nav-collapse,.nav-collapse.collapse{height:0;overflow:hidden}.navbar .btn-navbar{display:block}}@media(min-width:980px){.nav-collapse.collapse{height:auto!important;overflow:visible!important}}body{padding:54px 0 40px 0;overflow-y:scroll}body,button,input,select{font:400 14px/1.4em "Segoe UI","Open Sans",Calibri,Candara,Arial,sans-serif}.navbar .nav{float:left;margin-right:0}a{color:#06c;cursor:pointer}h3{letter-spacing:-.01em;margin:0;line-height:normal}h3{font-size:26px}.navbar-inverse .navbar-inner{background-color:#68217a;-webkit-filter:none;filter:none}.navbar-inverse .btn-navbar{background:0 0;margin-top:14px}.navbar-inverse .btn-navbar:active,.navbar-inverse .btn-navbar:focus,.navbar-inverse .btn-navbar:hover{background:#442359}.btn-primary{background-color:#0072c6}.nav-tabs>li>a{color:#999}.nav-tabs>li>a:hover{color:#555}.nav-tabs>.active>a,.nav-tabs>.active>a:focus,.nav-tabs>.active>a:hover{color:#0072c6}body>section>.container{padding-top:12px}.navbar .nav>li>a{text-shadow:none;padding-top:18px;font-size:14px;text-transform:uppercase}.navbar-inverse .nav-collapse .nav>li>a{color:#fff;padding-left:0}.navbar-inverse .nav>li>a.nav-item:focus,.navbar-inverse .nav>li>a.nav-item:hover{background-color:rgba(0,0,0,.12)}.navbar .logo{padding:16px 12px 0 0;height:35px;display:block;float:left;color:#fff;font-size:24px;letter-spacing:-1px}.navbar .logo a{color:#fff;font-size:24px;letter-spacing:-1px}.navbar-fixed-top{z-index:500}#gh-link{display:none;position:fixed;top:0;right:0;border:0;margin:0;z-index:1000}@media (min-width:980px){#gh-link{display:block}}@media (min-width:980px){.navbar .nav{float:right}.navbar-inverse .nav-collapse .nav>li>a{padding-left:15px}}@media (max-width:979px){body{padding:inherit}.navbar-fixed-top{margin-right:inherit;margin-left:inherit;margin-bottom:0}.navbar-fixed-top .navbar-inner{padding:0 20px}.navbar .container{width:724px}}@media (max-width:767px){.navbar .container{width:100%}}@media (max-width:480px){.navbar .logo a{display:none}}.try .editor.row{padding:18px 0}.try .editor.row .control-label{display:inline-block;position:relative;top:-4px;margin-right:4px}.try .editor .editor-frame{position:relative}.try .editor .editor-frame #editor{height:400px;margin-bottom:10px;border:1px solid #eee}.try .editor .editor-frame .loading{position:absolute;height:100%;width:100%;background-color:rgba(255,255,255,.5);margin:0 auto;display:none;z-index:100}.try .editor .editor-frame .progress{width:50%;margin:15% auto 0}.try .editor .editor-frame .progress .bar{width:100%;background-color:#4bb1cf}@media (min-width:1200px){.try .editor .row{margin-left:0}}@media (max-width:767px){.try .container{margin:0 24px}}</style>
+    
+    
+    
+
+    <link data-name="vs/editor/editor.main"
+      rel="stylesheet"
+      href="node_modules/monaco-editor/min/vs/editor/editor.main.css"
+    />
+  </head>
+
+  <body>
+    <a id="gh-link" href="https://github.com/facebookincubator/ktfmt"
+      ><img
+        loading="lazy"
+        width="149"
+        height="149"
+        src="https://github.blog/wp-content/uploads/2008/12/forkme_right_white_ffffff.png?resize=149%2C149"
+        class="attachment-full size-full"
+        alt="Fork me on GitHub"
+        data-recalc-dims="1"
+    /></a>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <div class="logo">
+            ktfmt
+          </div>
+          <div class="logo">
+            <a href="index.html">- the Kotlin code formatter</a>
+          </div>
+          <!-- collapse button for smaller screens -->
+          <button
+            type="button"
+            class="btn btn-navbar"
+            data-toggle="collapse"
+            data-target=".nav-collapse"
+          >
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+
+          <!-- navbar title -->
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li>
+                <a
+                  class="nav-item"
+                  href="https://github.com/facebookincubator/ktfmt"
+                  >GitHub</a
+                >
+              </li>
+              <li>
+                <a
+                  class="nav-item"
+                  href="https://kotlinlang.slack.com/archives/C01GZCU0QNB"
+                  >Slack</a
+                >
+              </li>
+              <li>
+                <a
+                  class="nav-item"
+                  href="https://search.maven.org/artifact/com.facebook/ktfmt/0.33-SNAPSHOT/jar"
+                  >Maven Central</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <section class="try">
+      <div class="container">
+        <h3>About</h3>
+        <div class="row">
+          <div class="span12">
+            <br />
+            <p>
+              <code>ktfmt</code> is a program that pretty-prints (formats)
+              Kotlin code.
+            </p>
+            <p>
+              It always produces the same result, regardless of how the code
+              looks initially, freeing developers to focus on essence.
+            </p>
+            <p>
+                It is by design non-customizable in order to promote consistency.
+              </p>
+            </div>
+        </div>
+        <hr />
+        <h3>Usage</h3>
+        <div class="row">
+          <div class="span12">
+            <br />
+            <ul class="nav nav-tabs" id="usage_tab">
+              <li class="active">
+                <a href="#usage_intellij" data-toggle="tab"
+                  >IntelliJ / Android Studio</a
+                >
+              </li>
+              <li>
+                <a href="#usage_gradle" data-toggle="tab">Gradle</a>
+              </li>
+              <li><a href="#usage_maven" data-toggle="tab">Maven</a></li>
+              <li><a href="#usage_cli" data-toggle="tab">Command line</a></li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane active" id="usage_intellij">
+                <p>
+                  A ktfmt plugin that augments the Reformat Code action (<code>⌥⌘L</code>) is available from JetBrains Marketplace.
+                </p>
+                <a class="btn btn-info" href="https://plugins.jetbrains.com/plugin/14912-ktfmt" target="_blank">Install</a>
+              </div>
+              <div class="tab-pane" id="usage_gradle">
+                <p>
+                  <u><b>Spotless</b></u> (<a
+                    href="https://github.com/diffplug/spotless/tree/main/plugin-gradle#ktfmt"
+                    >details</a
+                  >):
+                </p>
+
+                <pre>
+# build.gradle.kts
+plugins { id("com.diffplug.spotless") }
+    
+// version and style are optional
+spotless { kotlin { ktfmt('0.33-SNAPSHOT').kotlinlangStyle() } }
+</pre
+                >
+
+                <p>or,</p>
+                <p>
+                  <u><b>ktfmt-gradle</b></u> (<a
+                    href="https://github.com/cortinico/ktfmt-gradle#how-to-use-"
+                    >details</a
+                  >):
+                </p>
+                <pre>
+# build.gradle.kts
+plugins { id("com.ncorti.ktfmt.gradle") }
+
+ktfmt { kotlinLangStyle() }
+</pre
+                >
+              </div>
+              <div class="tab-pane" id="usage_maven">
+                <p>
+                  <u><b>Spotless</b></u> (<a
+                    href="https://github.com/diffplug/spotless/tree/main/plugin-maven#ktfmt"
+                    >details</a
+                  >):
+                </p>
+
+                <pre>
+# pom.xml
+&lt;configuration&gt;
+  &lt;kotlin&gt;
+    &lt;ktfmt&gt;
+      &lt;version&gt;0.33-SNAPSHOT&lt;/version&gt;
+    &lt;/ktfmt&gt;
+  &lt;/kotlin&gt;
+&lt;/configuration&gt;
+</pre
+                >
+              </div>
+              <div class="tab-pane" id="usage_cli">
+                <p>
+                  Download the jar from Maven Central and invoke it using
+                  <code>java</code>:
+                </p>
+                <pre>
+$ wget https://repo1.maven.org/maven2/com/facebook/ktfmt/0.33-SNAPSHOT/ktfmt-0.33-SNAPSHOT-jar-with-dependencies.jar
+$ java -jar ktfmt-0.33-SNAPSHOT-jar-with-dependencies.jar [--kotlinlang-style] [files...]
+</pre
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr />
+        <h3>Try It Online</h3>
+        <small>Running v0.33-SNAPSHOT</small>
+        <div class="editor row">
+          <div class="span12">
+            <div class="row">
+              <form id="editorForm" name="editorForm">
+                <div class="span3">
+                  <label class="control-label">Style</label>
+                  <select class="style-picker input-medium">
+                    <option>kotlinlang</option>
+                    <option>Java-like</option>
+                  </select>
+                </div>
+                <div class="span3">
+                  <label class="control-label">Column Limit</label>
+                  <input
+                    class="input-small column-limit-picker"
+                    type="number"
+                    min="50"
+                    max="140"
+                    class="form-control"
+                    id="column_limit"
+                    value="100"
+                    required
+                  />
+                </div>
+                <div class="span4 pull-right">
+                  <button class="btn btn-primary pull-right" type="submit">
+                    Format
+                  </button>
+                  <p
+                    id="error-message"
+                    class="text-error"
+                    style="display: none"
+                  >
+                    Donec ullamcorper nulla non metus auctor fringilla.
+                  </p>
+                </div>
+              </form>
+            </div>
+            <div class="editor-frame">
+              <div class="loading editor" style="display: none">
+                <div class="progress progress-striped active">
+                  <div class="bar"></div>
+                </div>
+              </div>
+              <div id="editor"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="container">
+      <hr />
+      <p class="text-center">
+        [
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://opensource.facebook.com/legal/privacy/"
+          >Privacy</a
+        >
+        ] [
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://opensource.facebook.com/legal/terms/"
+          >Terms</a
+        >
+        ] [
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://opensource.facebook.com/legal/data-policy/"
+          >Data Policy</a
+        >
+        ] [
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://opensource.facebook.com/legal/cookie-policy/"
+          >Cookie Policy</a
+        >
+        ]
+      </p>
+      <p class="text-center">
+        <a href="https://opensource.facebook.com/" title="Facebook Open Source">
+          <img
+            src="img/oss_logo.png"
+            alt="Facebook Open Source"
+            style="max-height: 50px; margin-bottom: 12px"
+          />
+        </a>
+        <br />
+        <small>&copy; 2022 Facebook, Inc. Based on <a href="https://microsoft.github.io/monaco-editor">https://microsoft.github.io/monaco-editor</a></small>
+      </p>
+    </footer>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"
+      integrity="sha256-wS9gmOZBqsqWxgIVgA8Y9WcQOa7PgSIX+rPA0VL2rbQ="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.0/bootstrap.min.js"
+      integrity="sha256-u+l2mGjpmGK/mFgUncmMcFKdMijvV+J3odlDJZSNUu8="
+      crossorigin="anonymous"
+    ></script>
+
+    <script src="node_modules/monaco-editor/min/vs/loader.js"></script>
+    <script src="node_modules/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
+    <script src="node_modules/monaco-editor/min/vs/editor/editor.main.js"></script>
+    <script>/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Forked from https://microsoft.github.io/monaco-editor/ */
+
+"use strict";
+
+var editor = null;
+var style = "--kotlinlang-style";
+var columnLimit = 100;
+var options = null;
+
+require.config({ paths: { vs: "node_modules/monaco-editor/min/vs" } });
+
+$(document).ready(function () {
+  require(["vs/editor/editor.main"], function () {
+    editor = monaco.editor.create(document.getElementById("editor"), {
+      value: [
+        "/**",
+        " * Formats the given Javadoc comment, which must start with /** and end with */. The output will",
+        " * start and end with the same characters.",
+        " */",
+        "class Handler : RequestHandler<APIGatewayProxyRequestEvent, String> {",
+        "    override fun handleRequest(event: APIGatewayProxyRequestEvent, context: Context?): String {",
+        "        for ((i, item) in items.withIndex()) {",
+        "            if (needDot) {",
+        "                // fillMode is bla bla",
+        "                val fillMode =",
+        "                    if (unconsumedPrefixes.isNotEmpty() && i <= unconsumedPrefixes.peekFirst()) {",
+        "                        prefixFillMode /* bla bla */",
+        "                    } else {",
+        "                        Doc.FillMode.UNIFIED",
+        "                    }",
+        '                builder.breakOp(fillMode, "", ZERO, Optional.of(nameTag))',
+        "                builder.token((item as KtQualifiedExpression).operationSign.value)",
+        "            }",
+        "            emitSelectorUpToParenthesis(item)",
+        "            if (unconsumedPrefixes.isNotEmpty() && i == unconsumedPrefixes.peekFirst()) {",
+        "                builder.close()",
+        "                unconsumedPrefixes.removeFirst()",
+        "            }",
+        "            if (i == items.size - 1 && hasTrailingLambda) {",
+        "                builder.close()",
+        "            }",
+        "            val argsIndent =",
+        "                Indent.If.make(",
+        "                    nameTag,",
+        "                    expressionBreakIndent,",
+        "                    if (trailingDereferences) expressionBreakIndent else ZERO",
+        "                )",
+        "        }",
+        "    }",
+        "}",
+      ].join("\n"),
+      language: "kotlin",
+      rulers: [columnLimit],
+      scrollBeyondLastLine: false,
+    });
+  });
+  options = editor.getOptions();
+  window.onresize = function () {
+    editor.layout();
+  };
+
+  $(".style-picker").change(function () {
+    changeStyle(this.selectedIndex);
+  });
+
+  $(".column-limit-picker").change(function () {
+    columnLimit = parseInt(this.value);
+    editor.updateOptions({'rulers': [columnLimit]});
+    reformatEditor();
+  });
+
+  $("#editorForm").submit(function (event) {
+    event.preventDefault();
+    reformatEditor();
+  });
+});
+
+function changeStyle(newStyle) {
+  style = newStyle === 0 ? "--kotlinlang-style" : undefined;
+  reformatEditor();
+}
+
+function reformatEditor() {
+    disableDemoUi();
+  $.ajax({
+    type: "POST",
+    url: "https://8uj6xa47qa.execute-api.us-east-2.amazonaws.com/ktfmt",
+    contentType: "application/json",
+    data: JSON.stringify({
+      source: editor.getValue(),
+      maxWidth: columnLimit,
+      style: style,
+    }),
+    dataType: "json",
+    error: function (xhr, errorType, errorThrown) {
+      showError(errorThrown);
+    },
+  })
+    .done(function (data) {
+      if (data.err) {
+        showError(data.err);
+      } else {
+        $("#error-message").hide();
+        editor.setValue(data.source);
+      }
+    })
+    .always(function () {
+        enableDemoUi();
+    });
+}
+
+function disableDemoUi() {
+    $('.loading.editor').show();
+    $("#editorForm :input").prop("disabled", true);
+    editor.updateOptions({ readOnly: true, language: 'text' });
+}
+
+function enableDemoUi() {
+    $("#editorForm :input").prop("disabled", false);
+    editor.updateOptions({ readOnly: false });
+    $('.loading.editor').fadeOut({ duration: 300 });
+}
+
+function showError(error) {
+  var errorMessage = $("#error-message");
+  errorMessage.text("Error: " + error);
+  errorMessage.show();
+}
+</script>
+  </body>
+</html>
