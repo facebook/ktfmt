@@ -23,8 +23,6 @@ import com.facebook.ktfmt.kdoc.KDocToken.Type.CODE_BLOCK_MARKER
 import com.facebook.ktfmt.kdoc.KDocToken.Type.HEADER_OPEN_TAG
 import com.facebook.ktfmt.kdoc.KDocToken.Type.LIST_ITEM_OPEN_TAG
 import com.facebook.ktfmt.kdoc.KDocToken.Type.PARAGRAPH_OPEN_TAG
-import com.facebook.ktfmt.kdoc.KDocWriter.AutoIndent.AUTO_INDENT
-import com.facebook.ktfmt.kdoc.KDocWriter.AutoIndent.NO_AUTO_INDENT
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.BLANK_LINE
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.CONDITIONAL_WHITESPACE
 import com.facebook.ktfmt.kdoc.KDocWriter.RequestedWhitespace.NEWLINE
@@ -41,7 +39,7 @@ import com.google.common.collect.Sets.immutableEnumSet
  * must compute and store the answer to questions like "How many levels of nested HTML list are we
  * inside?"
  */
-internal class KDocWriter(private val blockIndent: Int, private val maxLineLength: Int) {
+internal class KDocWriter(blockIndentCount: Int, private val maxLineLength: Int) {
 
   /**
    * Tokens that are always pinned to the following token. For example, `<p>` in `<p>Foo bar` (never
@@ -55,19 +53,12 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
       immutableEnumSet(LIST_ITEM_OPEN_TAG, PARAGRAPH_OPEN_TAG, HEADER_OPEN_TAG)
 
   private val output = StringBuilder()
-  /**
-   * Whether we are inside an `<li>` element, excluding the case in which the `<li>` contains a
-   * `<ul>` or `<ol>` that we are also inside -- unless of course we're inside an `<li>` element in
-   * that inner list :)
-   */
-  private var continuingListItemOfInnermostList: Boolean = false
+  private val blockIndent = Strings.repeat(" ", blockIndentCount + 1)
 
-  private val continuingListItemCount = NestingCounter()
-  private val continuingListCount = NestingCounter()
   private var remainingOnLine: Int = 0
   private var atStartOfLine: Boolean = false
+  private var inCodeBlock: Boolean = false
   private var requestedWhitespace = NONE
-  private var inCodeBlock = false
 
   /**
    * Requests whitespace between the previously written token and the next written token. The
@@ -83,27 +74,20 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
      * JavaCommentsHelper will make sure this is indented right. But it seems sensible enough that,
      * if our input starts with ∕✱✱, so too does our output.
      */
-    output.append("/**")
+    appendTrackingLength("/**")
   }
 
   fun writeEndJavadoc() {
     requestCloseCodeBlockMarker()
     output.append("\n")
-    appendSpaces(blockIndent + 1)
-    output.append("*/")
+    appendTrackingLength(blockIndent)
+    appendTrackingLength("*/")
   }
 
   fun writeListItemOpen(token: KDocToken) {
     requestCloseCodeBlockMarker()
     requestNewline()
-
-    if (continuingListItemOfInnermostList) {
-      continuingListItemOfInnermostList = false
-      continuingListItemCount.decrementIfPositive()
-    }
     writeToken(token)
-    continuingListItemOfInnermostList = true
-    continuingListItemCount.increment()
   }
 
   fun writePreOpen(token: KDocToken) {
@@ -138,10 +122,6 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
     requestBlankLine()
   }
 
-  fun writeLineBreakNoAutoIndent() {
-    writeNewline(NO_AUTO_INDENT)
-  }
-
   fun writeTag(token: KDocToken) {
     requestNewline()
     writeToken(token)
@@ -160,7 +140,6 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
     if (inCodeBlock) {
       this.requestedWhitespace = NEWLINE
       writeExplicitCodeBlockMarker(KDocToken(CODE_BLOCK_MARKER, "```"))
-      inCodeBlock = false
     }
   }
 
@@ -169,7 +148,6 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
     if (!inCodeBlock) {
       this.requestedWhitespace = NEWLINE
       writeExplicitCodeBlockMarker(KDocToken(CODE_BLOCK_MARKER, "```"))
-      inCodeBlock = true
     }
   }
 
@@ -234,24 +212,19 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
 
   private fun writeToken(token: KDocToken) {
     if (requestedWhitespace == BLANK_LINE) {
-      // A blank line means all lists are terminated
-      if (continuingListItemCount.isPositive) {
-        continuingListCount.reset()
-        continuingListItemCount.reset()
-      }
-    }
-
-    if (requestedWhitespace == BLANK_LINE) {
       writeBlankLine()
       requestedWhitespace = NONE
     } else if (requestedWhitespace == NEWLINE) {
       writeNewline()
       requestedWhitespace = NONE
     }
-    val needWhitespace =
-        requestedWhitespace == WHITESPACE ||
-            requestedWhitespace == CONDITIONAL_WHITESPACE && token.value.first().isLetterOrDigit()
 
+    val needWhitespace =
+        when (requestedWhitespace) {
+          WHITESPACE -> true
+          CONDITIONAL_WHITESPACE -> token.value.first().isLetterOrDigit()
+          else -> false
+        }
     /*
      * Write a newline if necessary to respect the line limit. (But if we're at the beginning of the
      * line, a newline won't help. Or it might help but only by separating "<p>veryverylongword,"
@@ -261,61 +234,44 @@ internal class KDocWriter(private val blockIndent: Int, private val maxLineLengt
       writeNewline()
     }
     if (!atStartOfLine && needWhitespace) {
-      output.append(" ")
-      remainingOnLine--
+      appendTrackingLength(" ")
     }
 
-    output.append(token.value)
+    appendTrackingLength(token.value)
+    requestedWhitespace = NONE
 
     if (!START_OF_LINE_TOKENS.contains(token.type)) {
       atStartOfLine = false
     }
-
-    /*
-     * TODO(cpovirk): We really want the number of "characters," not chars. Figure out what the
-     * right way of measuring that is (grapheme count (with BreakIterator?)? sum of widths of all
-     * graphemes? I don't think that our style guide is specific about this.). Moreover, I am
-     * probably brushing other problems with surrogates, etc. under the table. Hopefully I mostly
-     * get away with it by joining all non-space, non-tab characters together.
-     *
-     * Possibly the "width" question has no right answer:
-     * http://denisbider.blogspot.com/2015/09/when-monospace-fonts-arent-unicode.html
-     */
-    remainingOnLine -= token.length()
-    requestedWhitespace = NONE
   }
 
   private fun writeBlankLine() {
     output.append("\n")
-    appendSpaces(blockIndent + 1)
-    output.append("*")
+    appendTrackingLength(blockIndent)
+    appendTrackingLength("*")
     writeNewline()
   }
 
-  private fun writeNewline(autoIndent: AutoIndent = AUTO_INDENT) {
+  private fun writeNewline() {
     output.append("\n")
-    appendSpaces(blockIndent + 1)
-    output.append("*")
-    appendSpaces(1)
-    remainingOnLine = maxLineLength - blockIndent - 3
-    if (autoIndent == AUTO_INDENT) {
-      appendSpaces(innerIndent())
-      remainingOnLine -= innerIndent()
-    }
+    remainingOnLine = maxLineLength
+    appendTrackingLength(blockIndent)
+    appendTrackingLength("* ")
     atStartOfLine = true
   }
 
-  internal enum class AutoIndent {
-    AUTO_INDENT,
-    NO_AUTO_INDENT
-  }
-
-  private fun innerIndent(): Int {
-    return 0
-  }
-
-  // If this is a hotspot, keep a String of many spaces around, and call append(string, start, end).
-  private fun appendSpaces(count: Int) {
-    output.append(Strings.repeat(" ", count))
+  /*
+   * TODO(cpovirk): We really want the number of "characters," not chars. Figure out what the
+   * right way of measuring that is (grapheme count (with BreakIterator?)? sum of widths of all
+   * graphemes? I don't think that our style guide is specific about this.). Moreover, I am
+   * probably brushing other problems with surrogates, etc. under the table. Hopefully I mostly
+   * get away with it by joining all non-space, non-tab characters together.
+   *
+   * Possibly the "width" question has no right answer:
+   * http://denisbider.blogspot.com/2015/09/when-monospace-fonts-arent-unicode.html
+   */
+  private fun appendTrackingLength(str: String) {
+    output.append(str)
+    remainingOnLine -= str.length
   }
 }
