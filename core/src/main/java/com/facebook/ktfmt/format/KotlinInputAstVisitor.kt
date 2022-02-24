@@ -462,6 +462,7 @@ class KotlinInputAstVisitor(
    */
   override fun visitQualifiedExpression(expression: KtQualifiedExpression) {
     builder.sync(expression)
+
     val receiver = expression.receiverExpression
     if (inImport) {
       visit(receiver)
@@ -472,6 +473,8 @@ class KotlinInputAstVisitor(
       }
       return
     }
+
+    if (interceptFluentChainForGoogleStyle(expression)) return
 
     if (receiver is KtWhenExpression || receiver is KtStringTemplateExpression) {
       builder.block(ZERO) {
@@ -637,6 +640,83 @@ class KotlinInputAstVisitor(
       }
     }
     return simpleNames
+  }
+
+  private fun interceptFluentChainForGoogleStyle(expr: KtExpression): Boolean {
+    if (!isGoogleStyle) return false
+
+    val chain = FluentChain.tryExtract(expr)
+    if (chain != null) {
+      emitFluentChain(chain)
+      return true
+    } else {
+      return false
+    }
+  }
+
+  private fun emitFluentChain(chain: FluentChain) {
+    var blocklikeBreak = Optional.empty<BreakTag>()
+    if (chain.tailCallLink != null) {
+      builder.open(ZERO)
+      blocklikeBreak = Optional.of(genSym())
+    }
+
+    builder.block(expressionBreakIndent) {
+      builder.block(ZERO) {
+        visit(chain.root)
+        for (i in 0 until chain.staticLinkCount) {
+          emitFluentLink(chain.links[i], blocklikeBreak)
+        }
+      }
+      for (i in chain.staticLinkCount until chain.links.size) {
+        emitFluentLink(chain.links[i], blocklikeBreak)
+      }
+      chain.tailCallLink?.let {
+        builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO, blocklikeBreak)
+        builder.token(it.dot.operationSign.value)
+      }
+    }
+
+    /**
+     * Make tail calls behave block-like.
+     *
+     * This is pretty hacky. It basically works by not giving the tail call a place to break, such
+     * that if it's too long for one line, it's forced to violate the rectangle rule. In this way,
+     * long lists of args can wrap like a block.
+     *
+     * If the chain is too long, conditional indenting moves the tail call to the right indent.
+     *
+     * Part of the trick is that wrapping the tail in a level isolates breaks inside the call from
+     * those in the chain. Otherwise long tail calls would trigger breaks in the chain.
+     */
+    chain.tailCallLink?.let {
+      builder.block(Indent.If.make(blocklikeBreak.get(), expressionBreakIndent, ZERO)) {
+        emitCallExpression(it.asSimpleCall()!!, visitCallee = true)
+      }
+      builder.close()
+    }
+  }
+
+  private fun emitFluentLink(link: FluentChain.Link, blocklikeBreak: Optional<BreakTag>) {
+    builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO, blocklikeBreak)
+    builder.block(ZERO) {
+      builder.token(link.dot.operationSign.value)
+      builder.token(link.name.text)
+
+      for (op in link.operators) {
+        when (op) {
+          is FluentChain.Link.Operator.Call -> {
+            emitCallExpression(op.call, visitCallee = false)
+          }
+          is FluentChain.Link.Operator.Postfix -> {
+            emitUnaryExpression(op.postfix, visitBase = false)
+          }
+          is FluentChain.Link.Operator.ArrayAccess -> {
+            emitArrayAccessExpression(op.arrayAccess, visitArray = false)
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -807,10 +887,15 @@ class KotlinInputAstVisitor(
   }
 
   override fun visitCallExpression(callExpression: KtCallExpression) {
+    if (interceptFluentChainForGoogleStyle(callExpression)) return
+    emitCallExpression(callExpression, visitCallee = true)
+  }
+
+  private fun emitCallExpression(callExpression: KtCallExpression, visitCallee: Boolean) {
     builder.sync(callExpression)
     with(callExpression) {
       visitCallElement(
-          calleeExpression,
+          if (visitCallee) calleeExpression else null,
           typeArgumentList,
           valueArgumentList,
           lambdaArguments,
@@ -1174,9 +1259,14 @@ class KotlinInputAstVisitor(
   }
 
   override fun visitUnaryExpression(expression: KtUnaryExpression) {
+    if (interceptFluentChainForGoogleStyle(expression)) return
+    emitUnaryExpression(expression, visitBase = true)
+  }
+
+  private fun emitUnaryExpression(expression: KtUnaryExpression, visitBase: Boolean) {
     builder.sync(expression)
     builder.block(ZERO) {
-      visit(expression.baseExpression)
+      if (visitBase) visit(expression.baseExpression)
       builder.token(expression.operationReference.text)
     }
   }
@@ -1894,8 +1984,13 @@ class KotlinInputAstVisitor(
 
   /** Example `a[3]` or `b["a", 5]` */
   override fun visitArrayAccessExpression(expression: KtArrayAccessExpression) {
+    if (interceptFluentChainForGoogleStyle(expression)) return
+    emitArrayAccessExpression(expression, visitArray = true)
+  }
+
+  private fun emitArrayAccessExpression(expression: KtArrayAccessExpression, visitArray: Boolean) {
     builder.sync(expression)
-    visit(expression.arrayExpression)
+    if (visitArray) visit(expression.arrayExpression)
     builder.block(ZERO) {
       builder.token("[")
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
@@ -1903,6 +1998,7 @@ class KotlinInputAstVisitor(
         emitParameterLikeList(
             expression.indexExpressions, expression.trailingComma != null, wrapInBlock = true)
       }
+      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
     }
     builder.token("]")
   }

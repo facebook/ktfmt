@@ -16,7 +16,6 @@
 
 package com.facebook.ktfmt.format
 
-import com.facebook.ktfmt.testutil.assertFormatted
 import com.facebook.ktfmt.testutil.assertThatFormatting
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,6 +24,11 @@ import org.junit.runners.JUnit4
 @Suppress("FunctionNaming")
 @RunWith(JUnit4::class)
 class GoogleStyleFormatterKtTest {
+
+  fun assertFormatted(code: String, deduceMaxWidth: Boolean = false) {
+    com.facebook.ktfmt.testutil.assertFormatted(
+        code, formattingOptions = Formatter.GOOGLE_FORMAT, deduceMaxWidth = deduceMaxWidth)
+  }
 
   @Test
   fun `kitchen sink of tests`() {
@@ -141,7 +145,6 @@ class GoogleStyleFormatterKtTest {
       |  //
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -189,7 +192,6 @@ class GoogleStyleFormatterKtTest {
       |  //
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -213,7 +215,6 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -223,7 +224,8 @@ class GoogleStyleFormatterKtTest {
       |---------------------------
       |class C {
       |  fun method() {
-      |    Foo.FooBar(
+      |    Foo
+      |      .FooBar(
       |        param1,
       |        param2
       |      )
@@ -234,7 +236,6 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -250,8 +251,7 @@ class GoogleStyleFormatterKtTest {
       |    123456789012345678901234567890
       |  )
       |}
-      |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT)
+      |""".trimMargin())
 
   @Test
   fun `line breaks inside when expressions and conditions`() =
@@ -265,7 +265,8 @@ class GoogleStyleFormatterKtTest {
       |          Toast.makeText(it.view.context, "Down!", Toast.LENGTH_SHORT, blablabla).show()
       |        ACTION_UP -> Toast.makeText(it.view.context, "Up!", Toast.LENGTH_SHORT).show()
       |        ACTION_DOWN ->
-      |          Toast.makeText(
+      |          Toast
+      |            .makeText(
       |              it.view.context,
       |              "Down!",
       |              Toast.LENGTH_SHORT,
@@ -281,7 +282,6 @@ class GoogleStyleFormatterKtTest {
       |    .build()
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
   @Test
@@ -296,7 +296,6 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
   @Test
@@ -313,7 +312,6 @@ class GoogleStyleFormatterKtTest {
       |  ) { it.doIt() }
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
   @Test
@@ -328,7 +326,6 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
   @Test
@@ -344,8 +341,7 @@ class GoogleStyleFormatterKtTest {
       |    c = 3456789012345678901234567890
       |  )
       |}
-      |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT)
+      |""".trimMargin())
 
   @Test
   fun `Arguments are blocks`() =
@@ -373,7 +369,6 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -393,7 +388,6 @@ class GoogleStyleFormatterKtTest {
       |    )
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -410,8 +404,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |  return if (b) 1 else 2
       |}
-      |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT)
+      |""".trimMargin())
 
   @Test
   fun `named arguments indent their value expression`() =
@@ -426,8 +419,7 @@ class GoogleStyleFormatterKtTest {
       |      },
       |    duration = duration
       |  )
-      |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT)
+      |""".trimMargin())
 
   @Test
   fun `breaking long binary operations`() =
@@ -450,7 +442,6 @@ class GoogleStyleFormatterKtTest {
       |      value9
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -487,7 +478,6 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -518,7 +508,6 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   // TODO: there's a bug here - the last case shouldn't break after 'foo'.
@@ -547,7 +536,6 @@ class GoogleStyleFormatterKtTest {
       |    .doThat()
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -572,7 +560,6 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -588,7 +575,6 @@ class GoogleStyleFormatterKtTest {
       |    )
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -631,7 +617,6 @@ class GoogleStyleFormatterKtTest {
       |  )
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -646,18 +631,14 @@ class GoogleStyleFormatterKtTest {
       |
       |  // a series of field accesses followed by a single call expression
       |  // is kept together.
-      |  abcdefghijkl.abcdefghijkl
+      |  abcdefghijkl
+      |    .abcdefghijkl
       |    ?.methodName2()
       |
       |  // Similar to above.
-      |  abcdefghijkl.abcdefghijkl
-      |    ?.methodName3?.abcdefghijkl()
-      |
-      |  // Multiple call expressions cause each part of the expression
-      |  // to be placed on its own line.
       |  abcdefghijkl
-      |    ?.abcdefghijkl
-      |    ?.methodName4()
+      |    .abcdefghijkl
+      |    ?.methodName3
       |    ?.abcdefghijkl()
       |
       |  // Don't break first call expression if it fits.
@@ -666,7 +647,8 @@ class GoogleStyleFormatterKtTest {
       |
       |  // Break after `longerThanFour(` because it's longer than 4 chars
       |  longerThanFour(
-      |      something.somethingBlaBla
+      |      something
+      |        .somethingBlaBla
       |        .happens()
       |    )
       |    .thenReturn(result)
@@ -674,18 +656,13 @@ class GoogleStyleFormatterKtTest {
       |  // Similarly to above, when part of qualified expression.
       |  foo
       |    .longerThanFour(
-      |      something.somethingBlaBla
+      |      something
+      |        .somethingBlaBla
       |        .happens()
       |    )
       |    .thenReturn(result)
-      |
-      |  // Keep 'super' attached to the method name
-      |  super.abcdefghijkl
-      |    .methodName4()
-      |    .abcdefghijkl()
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -707,8 +684,7 @@ class GoogleStyleFormatterKtTest {
       |    }
       |  )
       |}
-      |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT)
+      |""".trimMargin())
 
   @Test
   fun `chained calls that don't fit in one line`() =
@@ -726,7 +702,6 @@ class GoogleStyleFormatterKtTest {
       |    )
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -769,7 +744,6 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -797,7 +771,6 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
   @Test
@@ -819,6 +792,223 @@ class GoogleStyleFormatterKtTest {
       |    )
       |}
       |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `fluent chain with indexing operator `() =
+      assertFormatted(
+          """
+      |---------------------------------
+      |fun f() {
+      |  qualified.name[first]
+      |  qualified
+      |    .name[tooLongForFirstLine]
+      |    .moreStuff
+      |  qualified
+      |    .name[
+      |      wouldFit,
+      |      tooLongForSecondLine
+      |    ]
+      |    .moreStuff
+      |
+      |  qualified.name[first][second]
+      |  qualified
+      |    .name[firstTooLong][second]
+      |    .moreStuff
+      |  qualified
+      |    .name[firstTooLong][
+      |      secondTooLong
+      |    ]
+      |    .moreStuff
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `fluent chain with curryed functions `() =
+      assertFormatted(
+          """
+      |---------------------------------
+      |fun f() {
+      |  qualified.name(first)(second)
+      |  qualified
+      |    .name(firstTooLong)(second)
+      |    .moreStuff
+      |  qualified
+      |    .name(firstTooLong)(
+      |      secondTooLong
+      |    )
+      |    .moreStuff
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `fluent chain with notnull operator `() =
+      assertFormatted(
+          """
+      |-----------------------------------
+      |fun f() {
+      |  qualified.name!!
+      |  qualified
+      |    .nameTooLongForFirstLine!!
+      |    .moreStuff
+      |
+      |  qualified.name!!!!
+      |  qualified
+      |    .nameWouldFitFirstPair!!!!
+      |    .moreStuff
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `fluent chain with postinc operator `() =
+      assertFormatted(
+          """
+      |-----------------------------------
+      |fun f() {
+      |  qualified.name++
+      |  qualified
+      |    .nameTooLongForFirstLine++
+      |    .moreStuff
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `fluent chain with mix of operators`() =
+      assertFormatted(
+          """
+      |-------------------------------
+      |fun f() {
+      |  qualifiedLongRoot
+      |    ?.nameTooForLine[a]++
+      |    .nameTooForLine[a]!!
+      |    .nameTooForLine!![a]
+      |    ?.nameTooForLine!!(a)
+      |    .nameTooForLine(a)[a](a)
+      |    .nameTooForLine(a)!!(a)
+      |    ?.moreStuff
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `fluent chain with blocklike tail`() =
+      assertFormatted(
+          """
+      |---------------------------------
+      |fun f() {
+      |  qualified.fits(includingArgs)
+      |
+      |  qualified.long[1].root(a).fits(
+      |    but = args,
+      |    would = not,
+      |  )
+      |
+      |  qualified
+      |    .long[1]
+      |    .root(a)
+      |    .tailDoesNotFit(
+      |      and = args,
+      |      would = notEither,
+      |    )
+      |
+      |  qualified.fitsButNotLambda(a) {
+      |    soItBreaks = blockLike
+      |  }
+      |
+      |  qualified
+      |    .long[1]
+      |    .root(a)
+      |    .tailLambdaDoesNotFit {
+      |      soItBreaks = sxprLike
+      |    }
+      |
+      |  qualified.long[1].fits<
+      |    ButTypeParamDoesnt>(
+      |    but = args,
+      |    would = not,
+      |  )
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `fluent chain with static links and blocklike tail`() =
+      assertFormatted(
+          """
+      |------------------------------------
+      |fun f() {
+      |  my.pkg.Class[1].staticFits(
+      |    but = args,
+      |    would = not,
+      |  )
+      |
+      |  my.pkg.Class[1]
+      |    .staticDoesNotFitButIsTailCall(
+      |      and = args,
+      |      would = notEither,
+      |    )
+      |
+      |  my
+      |    .pkg
+      |    .Class[1]
+      |    .staticDoesNotFitAndIsProperty
+      |
+      |  my.pkg.Class[1].static(a).fits(
+      |    but = args,
+      |    would = not,
+      |  )
+      |
+      |  my.pkg.Class[1].static(a)
+      |    .tailDoesNotFit(
+      |      and = args,
+      |      would = notEither,
+      |    )
+      |
+      |  my.pkg.Class[1].static(a)
+      |    .tail
+      |    .does
+      |    .not
+      |    .fit(
+      |      and = args,
+      |      would = notEither,
+      |    )
+      |
+      |  my.pkg.Class[1].Inner.static(a)
+      |    .tail
+      |    .does
+      |    .not
+      |    .fit(
+      |      and = args,
+      |      would = notEither,
+      |    )
+      |
+      |  my.pkg.CtorFits(
+      |    but = args,
+      |    would = not,
+      |  )
+      |
+      |  // Tail calls are trimmed before
+      |  // identifying static links so
+      |  // none of this appears static
+      |  my
+      |    .pkg
+      |    .but
+      |    .ctorIs
+      |    .TailCtorThatDoesNotFit(
+      |      and = args,
+      |      would = notEither,
+      |    )
+      |
+      |  my.pkg.Class[0]
+      |    .TailCtorThatDoesNotFit(
+      |      and = args,
+      |      would = notEither,
+      |    )
+      |}
+      |""".trimMargin(),
           deduceMaxWidth = true)
 }

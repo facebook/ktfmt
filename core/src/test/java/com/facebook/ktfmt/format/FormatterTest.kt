@@ -619,6 +619,34 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `fluent chain with mix of operators`() =
+      assertFormatted(
+          """
+      |-------------------------------
+      |// TODO: This is clearly a bug
+      |fun f() {
+      |  qualifiedLongRoot
+      |                              ?.nameTooForLine[
+      |                              a
+      |                          ]++
+      |                          .nameTooForLine[
+      |                          a
+      |                      ]!!
+      |                      .nameTooForLine!![
+      |                      a
+      |                  ]
+      |                  ?.nameTooForLine!!(
+      |                  a)
+      |              .nameTooForLine(
+      |                  a)[a](a)
+      |          .nameTooForLine(a)!!(
+      |          a)
+      |      ?.moreStuff
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `an assortment of tests for emitQualifiedExpression with lambdas`() =
       assertFormatted(
           """
