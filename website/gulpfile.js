@@ -20,6 +20,7 @@ const gulp = require("gulp");
 const es = require("event-stream");
 const path = require("path");
 const fs = require("fs");
+const os = require('os');
 const rimraf = require("rimraf");
 const cp = require("child_process");
 const CleanCSS = require("clean-css");
@@ -27,48 +28,15 @@ const uncss = require("uncss");
 
 const VERSION = fs.readFileSync("../version.txt", "utf-8").trim();
 
-async function _execute(task) {
-  // Always invoke as if it were a callback task
-  return new Promise((resolve, reject) => {
-    if (task.length === 1) {
-      // this is a calback task
-      task((err) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve();
-      });
-      return;
-    }
-    const taskResult = task();
-    if (typeof taskResult === "undefined") {
-      // this is a sync task
-      resolve();
-      return;
-    }
-    if (typeof taskResult.then === "function") {
-      // this is a promise returning task
-      taskResult.then(resolve, reject);
-      return;
-    }
-    // this is a stream returning task
-    taskResult.on("end", (_) => resolve());
-    taskResult.on("error", (err) => reject(err));
-  });
-}
+allow_deploy_to_github = process.env.KTFMT_WEBSITE_ALLOW_DEPLOY_TO_GITHUB == '1';
+outdir = process.env.KTFMT_WEBSITE_OUTPUT_DIR || path.join(__dirname, '../release-ktfmt-website');
+console.log('Using output dir: ' + outdir)
 
-function taskSeries(...tasks) {
-  return async () => {
-    for (let i = 0; i < tasks.length; i++) {
-      await _execute(tasks[i]);
-    }
-  };
-}
 // --- website
 const cleanWebsiteTask = function (cb) {
-  rimraf("../release-ktfmt-website", { maxBusyTries: 1 }, cb);
+  rimraf(outdir, { maxBusyTries: 1 }, cb);
 };
-const buildWebsiteTask = taskSeries(cleanWebsiteTask, function () {
+const buildWebsiteTask = function () {
   function replaceWithRelativeResource(dataPath, contents, regex, callback) {
     return contents.replace(regex, function (_, m0) {
       var filePath = path.join(path.dirname(dataPath), m0);
@@ -172,7 +140,7 @@ const buildWebsiteTask = taskSeries(cleanWebsiteTask, function () {
             }
           )
         )
-        .pipe(gulp.dest("../release-ktfmt-website"))
+        .pipe(gulp.dest(outdir))
     )
     .pipe(
       es.through(
@@ -181,34 +149,19 @@ const buildWebsiteTask = taskSeries(cleanWebsiteTask, function () {
         },
         function () {
           // temporarily create package.json so that npm install doesn't bark
-          fs.writeFileSync('../release-ktfmt-website/package.json', '{}');
-          fs.writeFileSync('../release-ktfmt-website/.nojekyll', '');
+          fs.writeFileSync(path.join(outdir, 'package.json'), '{}');
+          fs.writeFileSync(path.join(outdir, '.nojekyll'), '');
           cp.execSync('npm install monaco-editor@0.23', {
-            cwd: path.join(__dirname, '../release-ktfmt-website')
+            cwd: outdir
           });
-          rimraf('../release-ktfmt-website/node_modules/monaco-editor/dev', function() {});
-          rimraf('../release-ktfmt-website/node_modules/monaco-editor/esm', function() {});
-          fs.unlinkSync('../release-ktfmt-website/package.json');
+          rimraf.sync(path.join(outdir, 'node_modules/monaco-editor/dev'));
+          rimraf.sync(path.join(outdir, 'node_modules/monaco-editor/esm'));
+          fs.unlinkSync(path.join(outdir, 'package.json'));
 
           this.emit("end");
         }
       )
     );
-});
-gulp.task("build-website", buildWebsiteTask);
-
-gulp.task("prepare-website-branch", async function () {
-  cp.execSync("git init", {
-    cwd: path.join(__dirname, "../release-ktfmt-website"),
-  });
-  cp.execSync("git checkout -b gh-pages", {
-    cwd: path.join(__dirname, "../release-ktfmt-website"),
-  });
-  cp.execSync("git add .", {
-    cwd: path.join(__dirname, "../release-ktfmt-website"),
-  });
-  cp.execSync('git commit -m "Publish website"', {
-    cwd: path.join(__dirname, "../release-ktfmt-website"),
-  });
-  console.log("To push, cd into ../release-ktfmt-website and run `git push https://github.com/facebookincubator/ktfmt.git gh-pages --force`");
-});
+}
+buildWebsiteSeries = gulp.series(cleanWebsiteTask, buildWebsiteTask);
+gulp.task("build-website", buildWebsiteSeries);
