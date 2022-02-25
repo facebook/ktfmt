@@ -7,12 +7,13 @@ npm install .
 npm run simpleserver
 ```
 
-## Prepare for release
+## Build for deployment
 
 ```
 npm install .
-gulp build-website
-glup prepare-website-branch
-…
-git push https://github.com/facebookincubator/ktfmt.git gh-pages --force
+KTFMT_TMP_DIR=$(mktemp -d)
+KTFMT_WEBSITE_OUTPUT_DIR=$KTFMT_TMP_DIR gulp build-website
+
+# Clean up:
+rm -rf "$KTFMT_TMP_DIR"
 ```
