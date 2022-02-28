@@ -2,6 +2,8 @@
 We want to make contributing to this project as easy and transparent as
 possible.
 
+**If you plan a significant change, please first start a discussion as a GitHub Issue.**
+
 ## Pull Requests
 We actively welcome your pull requests.
 
