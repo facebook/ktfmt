@@ -20,7 +20,10 @@ import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
 import com.google.common.truth.Truth.assertThat
 import java.io.ByteArrayOutputStream
+import java.io.FileNotFoundException
 import java.io.PrintStream
+import junit.framework.Assert.fail
+import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -28,6 +31,13 @@ import org.junit.runners.JUnit4
 @Suppress("FunctionNaming")
 @RunWith(JUnit4::class)
 class ParsedArgsTest {
+
+  private val root = createTempDir()
+
+  @After
+  fun tearDown() {
+    root.deleteRecursively()
+  }
 
   @Test
   fun `files to format are returned and unknown flags are reported`() {
@@ -37,6 +47,16 @@ class ParsedArgsTest {
 
     assertThat(fileNames).containsExactly("foo.kt")
     assertThat(out.toString()).isEqualTo("Unexpected option: --unknown\n")
+  }
+
+  @Test
+  fun `files to format are returned and flags starting with @ are reported`() {
+    val out = ByteArrayOutputStream()
+
+    val (fileNames, _) = ParsedArgs.parseOptions(PrintStream(out), arrayOf("foo.kt", "@unknown"))
+
+    assertThat(fileNames).containsExactly("foo.kt")
+    assertThat(out.toString()).isEqualTo("Unexpected option: @unknown\n")
   }
 
   @Test
@@ -106,5 +126,31 @@ class ParsedArgsTest {
         ParsedArgs.parseOptions(PrintStream(out), arrayOf("--set-exit-if-changed", "foo.kt"))
 
     assertThat(parsed.setExitIfChanged).isTrue()
+  }
+
+  @Test
+  fun `processArgs use the @file option with non existing file`() {
+    val out = ByteArrayOutputStream()
+
+    try {
+      ParsedArgs.processArgs(PrintStream(out), arrayOf("@non-existing-file"))
+      fail("expected an exception of type FileNotFoundException but nothing was thrown")
+    } catch (e: FileNotFoundException) {
+      assertThat(e.message).contains("non-existing-file (No such file or directory)")
+    }
+  }
+
+  @Test
+  fun `processArgs use the @file option with file containing arguments`() {
+    val out = ByteArrayOutputStream()
+    val file = root.resolve("existing-file")
+    file.writeText("--google-style\n--dry-run\n--set-exit-if-changed\nFile1.kt\nFile2.kt\n")
+
+    val parsed = ParsedArgs.processArgs(PrintStream(out), arrayOf("@" + file.absolutePath))
+
+    assertThat(parsed.formattingOptions).isEqualTo(Formatter.GOOGLE_FORMAT)
+    assertThat(parsed.dryRun).isTrue()
+    assertThat(parsed.setExitIfChanged).isTrue()
+    assertThat(parsed.fileNames).containsExactlyElementsIn(listOf("File1.kt", "File2.kt"))
   }
 }
