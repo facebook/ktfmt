@@ -150,7 +150,8 @@ class MainTest {
                       emptyInput,
                       PrintStream(out),
                       PrintStream(err),
-                      arrayOf(file1.toString(), file2Broken.toString(), file3.toString()))
+                      arrayOf(file1.toString(), file2Broken.toString(), file3.toString())
+                  )
                   .run()
             }
             .get()
@@ -178,7 +179,8 @@ class MainTest {
             emptyInput,
             PrintStream(out),
             PrintStream(err),
-            arrayOf("--dropbox-style", fooBar.toString()))
+            arrayOf("--dropbox-style", fooBar.toString())
+        )
         .run()
 
     assertThat(fooBar.readText()).isEqualTo(code)
@@ -193,7 +195,8 @@ class MainTest {
           |println(child)
           |}
           |}
-          |""".trimMargin()
+          |""".trimMargin(
+    )
     val formatted =
         """fun f() {
           |    for (child in
@@ -201,12 +204,14 @@ class MainTest {
           |        println(child)
           |    }
           |}
-          |""".trimMargin()
+          |""".trimMargin(
+    )
     Main(
             code.byteInputStream(),
             PrintStream(out),
             PrintStream(err),
-            arrayOf("--dropbox-style", "-"))
+            arrayOf("--dropbox-style", "-")
+        )
         .run()
 
     assertThat(out.toString("UTF-8")).isEqualTo(formatted)
@@ -241,7 +246,8 @@ class MainTest {
             """fun f (   ) =    println("hello, world")""".byteInputStream(),
             PrintStream(out),
             PrintStream(err),
-            arrayOf("-"))
+            arrayOf("-")
+        )
         .run()
     assertThat(out.toString("UTF-8")).isEqualTo(expected)
 
@@ -251,7 +257,8 @@ class MainTest {
             """fun f () = println("hello, world")""".byteInputStream(),
             PrintStream(out),
             PrintStream(err),
-            arrayOf("-"))
+            arrayOf("-")
+        )
         .run()
     assertThat(out.toString("UTF-8")).isEqualTo(expected)
   }
@@ -335,7 +342,8 @@ class MainTest {
                 emptyInput,
                 PrintStream(out),
                 PrintStream(err),
-                arrayOf("--set-exit-if-changed", file.toString()))
+                arrayOf("--set-exit-if-changed", file.toString())
+            )
             .run()
 
     assertThat(exitCode).isEqualTo(1)
@@ -350,7 +358,8 @@ class MainTest {
                 code.byteInputStream(),
                 PrintStream(out),
                 PrintStream(err),
-                arrayOf("--set-exit-if-changed", "-"))
+                arrayOf("--set-exit-if-changed", "-")
+            )
             .run()
 
     assertThat(exitCode).isEqualTo(1)
@@ -367,7 +376,8 @@ class MainTest {
                 emptyInput,
                 PrintStream(out),
                 PrintStream(err),
-                arrayOf("--dry-run", "--set-exit-if-changed", file.toString()))
+                arrayOf("--dry-run", "--set-exit-if-changed", file.toString())
+            )
             .run()
 
     assertThat(file.readText()).isEqualTo(code)
@@ -384,7 +394,8 @@ class MainTest {
                 code.byteInputStream(),
                 PrintStream(out),
                 PrintStream(err),
-                arrayOf("--dry-run", "--set-exit-if-changed", "-"))
+                arrayOf("--dry-run", "--set-exit-if-changed", "-")
+            )
             .run()
 
     assertThat(out.toString("UTF-8")).doesNotContain("hello, world")

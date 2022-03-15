@@ -54,7 +54,8 @@ class GoogleStyleFormatterKtTest {
         |
         |          ImmutableList.newBuilder().add(1).add(1).add(1).add(1).add(1).add(1).add(1).add(1).add(1).add(1).build()
         |     }
-        |""".trimMargin()
+        |""".trimMargin(
+    )
 
     val expected =
         """
@@ -96,7 +97,8 @@ class GoogleStyleFormatterKtTest {
         |    .add(1)
         |    .build()
         |}
-        |""".trimMargin()
+        |""".trimMargin(
+    )
 
     assertThatFormatting(code).withOptions(Formatter.GOOGLE_FORMAT).isEqualTo(expected)
     // Don't add more tests here
@@ -140,9 +142,11 @@ class GoogleStyleFormatterKtTest {
       |class C(a: Int, var b: Int, val c: Int) {
       |  //
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `function params are placed each in their own line`() =
@@ -188,9 +192,11 @@ class GoogleStyleFormatterKtTest {
       |fun c12(a: Int, var b: Int, val c: Int) {
       |  //
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `return type doesn't fit in one line`() =
@@ -212,9 +218,11 @@ class GoogleStyleFormatterKtTest {
       |    //
       |  }
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `indent parameters after a break when there's a lambda afterwards`() =
@@ -233,9 +241,11 @@ class GoogleStyleFormatterKtTest {
       |      }
       |  }
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `function calls with multiple arguments`() =
@@ -250,8 +260,10 @@ class GoogleStyleFormatterKtTest {
       |    123456789012345678901234567890
       |  )
       |}
-      |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT)
+      |""".trimMargin(
+      ),
+          formattingOptions = Formatter.GOOGLE_FORMAT
+      )
 
   @Test
   fun `line breaks inside when expressions and conditions`() =
@@ -280,7 +292,8 @@ class GoogleStyleFormatterKtTest {
       |    }
       |    .build()
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
@@ -295,7 +308,8 @@ class GoogleStyleFormatterKtTest {
       |    }
       |  )
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
@@ -312,7 +326,8 @@ class GoogleStyleFormatterKtTest {
       |    }
       |  ) { it.doIt() }
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
@@ -327,7 +342,8 @@ class GoogleStyleFormatterKtTest {
       |    }
       |  )
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
@@ -344,8 +360,10 @@ class GoogleStyleFormatterKtTest {
       |    c = 3456789012345678901234567890
       |  )
       |}
-      |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT)
+      |""".trimMargin(
+      ),
+          formattingOptions = Formatter.GOOGLE_FORMAT
+      )
 
   @Test
   fun `Arguments are blocks`() =
@@ -372,9 +390,11 @@ class GoogleStyleFormatterKtTest {
       |    )
       |  }
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `keep last expression in qualified indented`() =
@@ -392,9 +412,11 @@ class GoogleStyleFormatterKtTest {
       |        .doThat()
       |    )
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `if expression with else`() =
@@ -410,8 +432,10 @@ class GoogleStyleFormatterKtTest {
       |  )
       |  return if (b) 1 else 2
       |}
-      |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT)
+      |""".trimMargin(
+      ),
+          formattingOptions = Formatter.GOOGLE_FORMAT
+      )
 
   @Test
   fun `named arguments indent their value expression`() =
@@ -426,8 +450,10 @@ class GoogleStyleFormatterKtTest {
       |      },
       |    duration = duration
       |  )
-      |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT)
+      |""".trimMargin(
+      ),
+          formattingOptions = Formatter.GOOGLE_FORMAT
+      )
 
   @Test
   fun `breaking long binary operations`() =
@@ -449,9 +475,11 @@ class GoogleStyleFormatterKtTest {
       |      ) +
       |      value9
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `handle casting with breaks`() =
@@ -486,9 +514,11 @@ class GoogleStyleFormatterKtTest {
       |      b is String
       |  )
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `line breaks in function arguments`() =
@@ -517,9 +547,11 @@ class GoogleStyleFormatterKtTest {
       |    State(0)
       |  )
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   // TODO: there's a bug here - the last case shouldn't break after 'foo'.
   @Test
@@ -546,9 +578,11 @@ class GoogleStyleFormatterKtTest {
       |    )
       |    .doThat()
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `a secondary constructor with many arguments passed to delegate`() =
@@ -571,9 +605,11 @@ class GoogleStyleFormatterKtTest {
       |    offspring
       |  )
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `a secondary constructor with no arguments passed to delegate`() =
@@ -587,9 +623,11 @@ class GoogleStyleFormatterKtTest {
       |      Foo.createSpeciallyDesignedParameter(),
       |    )
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `handle trailing commas (function calls)`() =
@@ -630,9 +668,11 @@ class GoogleStyleFormatterKtTest {
       |    3,
       |  )
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `an assortment of tests for emitQualifiedExpression`() =
@@ -684,9 +724,11 @@ class GoogleStyleFormatterKtTest {
       |    .methodName4()
       |    .abcdefghijkl()
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `keep parenthesis and braces together when there's only one lambda argument`() =
@@ -707,8 +749,10 @@ class GoogleStyleFormatterKtTest {
       |    }
       |  )
       |}
-      |""".trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT)
+      |""".trimMargin(
+      ),
+          formattingOptions = Formatter.GOOGLE_FORMAT
+      )
 
   @Test
   fun `chained calls that don't fit in one line`() =
@@ -725,9 +769,87 @@ class GoogleStyleFormatterKtTest {
       |      println("b")
       |    )
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
+
+  @Test
+  fun `function calls propagrate breaks type args to value args to trailing lambda`() =
+      assertFormatted(
+          """
+      |------------------------------------------
+      |noBreak<AA, BB, CC>(aa, bb, cc) { x = 0 }
+      |
+      |lambdaBreak<AA, BB, CC>(aa, bb, cc) {
+      |  x = 0
+      |}
+      |
+      |lambdaAndValueArgsBreak<AA, BB, CC>(
+      |  aa,
+      |  bb,
+      |  cc
+      |) {
+      |  x = 0
+      |}
+      |
+      |lambdaAndValueArgsAndTypeArgsBreak<
+      |  AA,
+      |  BB,
+      |  CC
+      |>(
+      |  aa,
+      |  bb,
+      |  cc
+      |) {
+      |  x = 0
+      |}
+      |
+      |allTheBreaks_withComments<
+      |  AA,
+      |  BB,
+      |  CC
+      |  //
+      |>(
+      |  aa,
+      |  bb,
+      |  cc
+      |  //
+      |) {
+      |  x = 0
+      |  //
+      |}
+      |
+      |allTheBreaks.inFluentChain.fitsOnOneLine<
+      |  AA,
+      |  BB,
+      |  CC
+      |>(
+      |  aa,
+      |  bb,
+      |  cc
+      |) {
+      |  x = 0
+      |}
+      |
+      |allTheBreaks.inFluentChain
+      |  .withNameSoLongItIsForcedToWrap<
+      |    AA,
+      |    BB,
+      |    CC
+      |  >(
+      |    aa,
+      |    bb,
+      |    cc
+      |  ) {
+      |    x = 0
+      |  }
+      |""".trimMargin(
+      ),
+          deduceMaxWidth = true,
+          formattingOptions = Formatter.GOOGLE_FORMAT
+      )
 
   @Test
   fun `lambda assigned to variable does not break before brace`() =
@@ -744,7 +866,9 @@ class GoogleStyleFormatterKtTest {
       |  doItOnce()
       |  doItTwice()
       |}
-      |""".trimMargin())
+      |""".trimMargin(
+      )
+      )
 
   @Test
   fun `if expression with multiline condition`() =
@@ -768,9 +892,11 @@ class GoogleStyleFormatterKtTest {
       |    bar()
       |  }
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `when() expression with multiline condition`() =
@@ -796,9 +922,11 @@ class GoogleStyleFormatterKtTest {
       |    2 -> print(2)
       |  }
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 
   @Test
   fun `handle destructuring declaration`() =
@@ -818,7 +946,9 @@ class GoogleStyleFormatterKtTest {
       |      boo
       |    )
       |}
-      |""".trimMargin(),
+      |""".trimMargin(
+      ),
           formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = true)
+          deduceMaxWidth = true
+      )
 }

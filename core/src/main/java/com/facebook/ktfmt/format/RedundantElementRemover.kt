@@ -34,30 +34,33 @@ object RedundantElementRemover {
     val redundantSemicolonDetector = RedundantSemicolonDetector()
 
     file.accept(
-        object : KtTreeVisitorVoid() {
-          override fun visitElement(element: PsiElement) {
-            if (element is KDocImpl) {
-              redundantImportDetector.takeKdoc(element)
-            } else {
-              redundantSemicolonDetector.takeElement(element) { super.visitElement(element) }
+            object : KtTreeVisitorVoid() {
+              override fun visitElement(element: PsiElement) {
+                if (element is KDocImpl) {
+                  redundantImportDetector.takeKdoc(element)
+                } else {
+                  redundantSemicolonDetector.takeElement(element) { super.visitElement(element) }
+                }
+              }
+
+              override fun visitPackageDirective(directive: KtPackageDirective) {
+                redundantImportDetector.takePackageDirective(directive) {
+                  super.visitPackageDirective(directive)
+                }
+              }
+
+              override fun visitImportList(importList: KtImportList) {
+                redundantImportDetector.takeImportList(importList) {
+                  super.visitImportList(importList)
+                }
+              }
+
+              override fun visitReferenceExpression(expression: KtReferenceExpression) {
+                redundantImportDetector.takeReferenceExpression(expression)
+                super.visitReferenceExpression(expression)
+              }
             }
-          }
-
-          override fun visitPackageDirective(directive: KtPackageDirective) {
-            redundantImportDetector.takePackageDirective(directive) {
-              super.visitPackageDirective(directive)
-            }
-          }
-
-          override fun visitImportList(importList: KtImportList) {
-            redundantImportDetector.takeImportList(importList) { super.visitImportList(importList) }
-          }
-
-          override fun visitReferenceExpression(expression: KtReferenceExpression) {
-            redundantImportDetector.takeReferenceExpression(expression)
-            super.visitReferenceExpression(expression)
-          }
-        })
+        )
 
     val result = StringBuilder(code)
     val elementsToRemove =

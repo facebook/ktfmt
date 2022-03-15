@@ -190,7 +190,8 @@ class KotlinInputAstVisitor(
           function.bodyBlockExpression,
           function.bodyExpression,
           function.typeReference,
-          function.bodyBlockExpression?.lBrace != null)
+          function.bodyBlockExpression?.lBrace != null
+      )
     }
   }
 
@@ -251,17 +252,9 @@ class KotlinInputAstVisitor(
   }
 
   /** Example `<Int, String>` in `List<Int, String>` */
-  override fun visitTypeArgumentList(typeArgumentList: KtTypeArgumentList) {
-    builder.sync(typeArgumentList)
-    builder.block(ZERO) {
-      builder.token("<")
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      builder.block(ZERO) {
-        emitParameterLikeList(
-            typeArgumentList.arguments, typeArgumentList.trailingComma != null, wrapInBlock = true)
-      }
-    }
-    builder.token(">")
+  override fun visitTypeArgumentList(list: KtTypeArgumentList) {
+    builder.sync(list)
+    emitCommaSeparatedList(list.arguments, "<>", list.trailingComma)
   }
 
   override fun visitTypeProjection(typeProjection: KtTypeProjection) {
@@ -445,7 +438,8 @@ class KotlinInputAstVisitor(
           typeConstraintList = property.typeConstraintList,
           delegate = property.delegate,
           initializer = property.initializer,
-          accessors = property.accessors)
+          accessors = property.accessors
+      )
     }
     builder.guessToken(";")
     if (property.parent !is KtWhenExpression) {
@@ -545,11 +539,12 @@ class KotlinInputAstVisitor(
 
     if ((singleInvocation || singleInvocationWithTrailingLambda) && firstInvocationIndex > 0) {
       prefixes.add(
-          if (firstInvocationIndex != parts.size - 1 && isFirstInvocationLambda) {
-            firstInvocationIndex - 1
-          } else {
-            firstInvocationIndex
-          })
+              if (firstInvocationIndex != parts.size - 1 && isFirstInvocationLambda) {
+                firstInvocationIndex - 1
+              } else {
+                firstInvocationIndex
+              }
+          )
     }
 
     // keep `super` and `this` attached to the first dereference
@@ -783,7 +778,8 @@ class KotlinInputAstVisitor(
                 valueArgumentList,
                 lambdaArguments,
                 argumentsIndent = Indent.If.make(nameTag, expressionBreakIndent, argsIndentElse),
-                lambdaIndent = Indent.If.make(nameTag, ZERO, lambdaIndentElse))
+                lambdaIndent = Indent.If.make(nameTag, ZERO, lambdaIndentElse)
+            )
           }
 
           textLength += item.text.length
@@ -814,7 +810,8 @@ class KotlinInputAstVisitor(
           typeArgumentList,
           valueArgumentList,
           lambdaArguments,
-          lambdaIndent = ZERO)
+          lambdaIndent = ZERO
+      )
     }
   }
 
@@ -829,32 +826,64 @@ class KotlinInputAstVisitor(
   ) {
     builder.block(ZERO) {
       visit(callee)
-      val arguments = argumentList?.arguments.orEmpty()
-      builder.block(argumentsIndent) { visit(typeArgumentList) }
-      builder.block(argumentsIndent) {
-        if (argumentList != null) {
-          builder.token("(")
-        }
-        if (arguments.isNotEmpty()) {
-          if (isGoogleStyle) {
-            visit(argumentList)
-            val first = arguments.first()
-            if (arguments.size != 1 ||
-                first?.isNamed() != false ||
-                first.getArgumentExpression() !is KtLambdaExpression) {
-              builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
-            }
-          } else {
-            builder.block(ZERO) { visit(argumentList) }
+
+      builder.block(lambdaIndent) {
+        builder.block(expressionBreakIndent) {
+          builder.block(ZERO) {
+            visit(typeArgumentList) //
           }
+          visit(argumentList)
         }
-        if (argumentList != null) {
-          builder.token(")")
+        if (lambdaArguments.isNotEmpty()) {
+          builder.space()
+          visit(lambdaArguments[0].getArgumentExpression())
         }
       }
-      if (lambdaArguments.isNotEmpty()) {
-        builder.space()
-        builder.block(lambdaIndent) { lambdaArguments.forEach { visit(it) } }
+    }
+  }
+
+  private fun emitCommaSeparatedList(
+      elements: List<out KtElement>,
+      parens: String? = null,
+      trailingComma: PsiElement? = null,
+      wrapElements: Boolean = false
+  ) {
+    if (parens != null) {
+      builder.token(parens.substring(0, 1))
+    }
+
+    if (elements.isNotEmpty()) {
+      val breakMode = if (trailingComma == null) Doc.FillMode.UNIFIED else Doc.FillMode.FORCED
+
+      builder.block(expressionBreakIndent, wrapElements) {
+        builder.breakOp(breakMode, "", ZERO)
+        visit(elements[0])
+
+        for (element in elements.drop(1)) {
+          builder.token(",")
+          builder.breakOp(breakMode, " ", ZERO)
+
+          visit(element)
+        }
+
+        if (trailingComma != null) {
+          builder.token(",")
+        }
+        // This break must be inside the block so that it triggers as part of the unified group,
+        // but we don't want the next line to be indented.
+        builder.breakOp(breakMode, "", expressionBreakNegativeIndent)
+      }
+    }
+
+    if (parens != null) {
+      // Pull the closing paren back to the base indent
+      builder.block(if (wrapElements) ZERO else expressionBreakNegativeIndent) {
+        // Force GJF to put the comments inside this block, by default it puts them outside.
+        builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
+
+        // Indent any leading comments to match the inside of the parens.
+        builder.token(parens.substring(1, 2), expressionBreakIndent)
       }
     }
   }
@@ -862,24 +891,7 @@ class KotlinInputAstVisitor(
   /** Example (`1, "hi"`) in a function call */
   override fun visitValueArgumentList(list: KtValueArgumentList) {
     builder.sync(list)
-    val arguments = list.arguments
-    val isSingleUnnamedLambda =
-        arguments.size == 1 &&
-            arguments.first().getArgumentExpression() is KtLambdaExpression &&
-            arguments.first().getArgumentName() == null
-    if (isSingleUnnamedLambda) {
-      builder.block(expressionBreakNegativeIndent) {
-        visit(arguments.first())
-        if (list.trailingComma != null) {
-          builder.token(",")
-        }
-      }
-    } else {
-      // Break before args.
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      emitParameterLikeList(
-          list.arguments, list.trailingComma != null, wrapInBlock = !isGoogleStyle)
-    }
+    emitCommaSeparatedList(list.arguments, "()", list.trailingComma)
   }
 
   /** Example `{ 1 + 1 }` (as lambda) or `{ (x, y) -> x + y }` */
@@ -1322,7 +1334,8 @@ class KotlinInputAstVisitor(
                 accessor.bodyBlockExpression,
                 accessor.bodyExpression,
                 accessor.returnTypeReference,
-                accessor.bodyBlockExpression?.lBrace != null)
+                accessor.bodyBlockExpression?.lBrace != null
+            )
           }
         }
       }
@@ -1513,7 +1526,8 @@ class KotlinInputAstVisitor(
         bodyExpression,
         null,
         if (!delegationCall.isImplicit) delegationCall else null,
-        true)
+        true
+    )
   }
 
   override fun visitConstructorDelegationCall(call: KtConstructorDelegationCall) {
@@ -1526,7 +1540,8 @@ class KotlinInputAstVisitor(
           call.typeArgumentList,
           call.valueArgumentList,
           call.lambdaArguments,
-          lambdaIndent = ZERO)
+          lambdaIndent = ZERO
+      )
     }
   }
 
@@ -1730,7 +1745,8 @@ class KotlinInputAstVisitor(
         annotationEntry.calleeExpression,
         null, // Type-arguments are included in the annotation's callee expression.
         annotationEntry.valueArgumentList,
-        listOf())
+        listOf()
+    )
   }
 
   override fun visitFileAnnotationList(
@@ -1901,7 +1917,10 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
       builder.block(expressionBreakIndent) {
         emitParameterLikeList(
-            expression.indexExpressions, expression.trailingComma != null, wrapInBlock = true)
+            expression.indexExpressions,
+            expression.trailingComma != null,
+            wrapInBlock = true
+        )
       }
     }
     builder.token("]")
@@ -1921,7 +1940,10 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
       builder.block(expressionBreakIndent) {
         emitParameterLikeList(
-            destructuringDeclaration.entries, hasTrailingComma, wrapInBlock = true)
+            destructuringDeclaration.entries,
+            hasTrailingComma,
+            wrapInBlock = true
+        )
       }
     }
     builder.token(")")
@@ -2095,7 +2117,8 @@ class KotlinInputAstVisitor(
             valOrVarKeyword = parameter.valOrVarKeyword?.text,
             name = parameter.nameIdentifier?.text,
             type = parameter.typeReference,
-            initializer = parameter.defaultValue)
+            initializer = parameter.defaultValue
+        )
       }
     }
   }
@@ -2124,7 +2147,8 @@ class KotlinInputAstVisitor(
           receiverExpression.calleeExpression,
           receiverExpression.typeArgumentList,
           receiverExpression.valueArgumentList,
-          receiverExpression.lambdaArguments)
+          receiverExpression.lambdaArguments
+      )
     } else {
       visit(receiverExpression)
     }
@@ -2189,7 +2213,10 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
       builder.block(expressionBreakIndent) {
         emitParameterLikeList(
-            expression.getInnerExpressions(), expression.trailingComma != null, wrapInBlock = true)
+            expression.getInnerExpressions(),
+            expression.trailingComma != null,
+            wrapInBlock = true
+        )
       }
     }
     builder.token("]")
@@ -2367,7 +2394,8 @@ class KotlinInputAstVisitor(
         token,
         Doc.Token.RealOrImaginary.REAL,
         plusIndentCommentsBefore,
-        /* breakAndIndentTrailingComment */ Optional.empty())
+        /* breakAndIndentTrailingComment */ Optional.empty()
+    )
   }
 
   /**

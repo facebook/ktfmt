@@ -20,4 +20,5 @@ import org.jetbrains.kotlin.com.intellij.openapi.util.text.LineColumn
 
 class ParseError(val errorDescription: String, val lineColumn: LineColumn) :
     IllegalArgumentException(
-        "${lineColumn.line + 1}:${lineColumn.column + 1}: error: $errorDescription")
+        "${lineColumn.line + 1}:${lineColumn.column + 1}: error: $errorDescription"
+    )

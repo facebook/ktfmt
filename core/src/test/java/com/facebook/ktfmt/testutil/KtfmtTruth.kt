@@ -50,14 +50,16 @@ fun assertFormatted(
   if (deduceMaxWidth) {
     if (!isFirstLineAMaxWidthMarker) {
       throw RuntimeException(
-          "deduceMaxWidth is false, please remove the first dashes only line from the code (i.e. ---)")
+          "deduceMaxWidth is false, please remove the first dashes only line from the code (i.e. ---)"
+      )
     }
     deducedCode = code.substring(code.indexOf('\n') + 1)
     maxWidth = first.length
   } else {
     if (isFirstLineAMaxWidthMarker) {
       throw RuntimeException(
-          "When deduceMaxWidth is true the first line need to be all dashes only (i.e. ---)")
+          "When deduceMaxWidth is true the first line need to be all dashes only (i.e. ---)"
+      )
     }
   }
   assertThatFormatting(deducedCode)
@@ -95,7 +97,8 @@ class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) 
               expectedFormatting
                   .lines()
                   .map { if (it.endsWith(" ")) "[$it]" else it }
-                  .joinToString("\n"))
+                  .joinToString("\n")
+      )
     }
     val actualFormatting: String
     try {
