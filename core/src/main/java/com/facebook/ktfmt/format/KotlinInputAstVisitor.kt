@@ -315,12 +315,15 @@ class KotlinInputAstVisitor(
       if (name != null || receiverTypeReference != null) {
         builder.space()
       }
-      if (receiverTypeReference != null) {
-        visit(receiverTypeReference)
-        builder.token(".")
-      }
-      if (name != null) {
-        builder.token(name)
+      builder.block(ZERO) {
+        if (receiverTypeReference != null) {
+          visit(receiverTypeReference)
+          builder.breakOp(Doc.FillMode.INDEPENDENT, "", expressionBreakIndent)
+          builder.token(".")
+        }
+        if (name != null) {
+          builder.token(name)
+        }
       }
       if (emitParenthesis) {
         builder.token("(")

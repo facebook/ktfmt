@@ -2791,6 +2791,21 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
+  fun `handle extension methods with very long names`() =
+      assertFormatted(
+          """
+      |------------------------------------------
+      |fun LongReceiverNameThatRequiresBreaking
+      |    .doIt() {}
+      |
+      |fun LongButNotTooLong.doIt(
+      |    n: Int,
+      |    f: Float
+      |) {}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `handle extension properties`() =
       assertFormatted(
           """
