@@ -298,7 +298,7 @@ class KotlinInputAstVisitor(
       parameterList: KtParameterList?,
       typeConstraintList: KtTypeConstraintList?,
       bodyBlockExpression: KtBlockExpression?,
-      nonBlockBodyExpressions: PsiElement?,
+      nonBlockBodyExpressions: KtExpression?,
       typeOrDelegationCall: KtElement?,
       emitBraces: Boolean
   ) {
@@ -376,8 +376,8 @@ class KotlinInputAstVisitor(
         builder.space()
         builder.block(ZERO) {
           builder.token("=")
-          if (lambdaOrScopingFunction(nonBlockBodyExpressions)) {
-            processLambdaOrScopingFunction(nonBlockBodyExpressions)
+          if (isLambdaOrScopingFunction(nonBlockBodyExpressions)) {
+            visitLambdaOrScopingFunction(nonBlockBodyExpressions)
           } else {
             builder.block(expressionBreakIndent) {
               builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
@@ -1135,12 +1135,12 @@ class KotlinInputAstVisitor(
     builder.sync(expression)
     val op = expression.operationToken
 
-    if (KtTokens.ALL_ASSIGNMENTS.contains(op) && lambdaOrScopingFunction(expression.right)) {
-      // Assigments are statements in Kotlin; we don't have to worry about compound assignment.
+    if (KtTokens.ALL_ASSIGNMENTS.contains(op) && isLambdaOrScopingFunction(expression.right)) {
+      // Assignments are statements in Kotlin; we don't have to worry about compound assignment.
       visit(expression.left)
       builder.space()
       builder.token(expression.operationReference.text)
-      processLambdaOrScopingFunction(expression.right)
+      visitLambdaOrScopingFunction(expression.right)
       return
     }
 
@@ -1223,7 +1223,7 @@ class KotlinInputAstVisitor(
       name: String?,
       type: KtTypeReference?,
       typeConstraintList: KtTypeConstraintList? = null,
-      initializer: PsiElement?,
+      initializer: KtExpression?,
       delegate: KtPropertyDelegate? = null,
       accessors: List<KtPropertyAccessor>? = null
   ): Int {
@@ -1284,7 +1284,7 @@ class KotlinInputAstVisitor(
     if (delegate != null) {
       builder.space()
       builder.token("by")
-      if (lambdaOrScopingFunction(delegate.expression)) {
+      if (isLambdaOrScopingFunction(delegate.expression)) {
         builder.space()
         visit(delegate)
       } else {
@@ -1294,8 +1294,8 @@ class KotlinInputAstVisitor(
     } else if (initializer != null) {
       builder.space()
       builder.token("=")
-      if (lambdaOrScopingFunction(initializer)) {
-        processLambdaOrScopingFunction(initializer)
+      if (isLambdaOrScopingFunction(initializer)) {
+        visitLambdaOrScopingFunction(initializer)
       } else {
         builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
         builder.block(expressionBreakIndent) { visit(initializer) }
@@ -1341,31 +1341,34 @@ class KotlinInputAstVisitor(
   }
 
   /**
+   * Returns whether an expression is a lambda or initializer expression in which case we will want
+   * to avoid indenting the lambda block
+   *
    * Examples:
-   * 1. '... = { ... }'
-   * 2. '... = Runnable { ... }'
-   * 3. '... = scope { ... }' '... = apply { ... }'
+   * 1. '... = { ... }' is a lambda expression
+   * 2. '... = Runnable { ... }' is considered a scoping function
+   * 3. '... = scope { ... }' '... = apply { ... }' is a scoping function
    *
    * but not:
-   * 1. '... = foo() { ... }'
-   * 2. '... = Runnable @Annotation { ... }'
+   * 1. '... = foo() { ... }' due to the empty parenthesis
+   * 2. '... = Runnable @Annotation { ... }' due to the annotation
    */
-  private fun lambdaOrScopingFunction(initializer: PsiElement?): Boolean {
-    if (initializer is KtLambdaExpression) {
+  private fun isLambdaOrScopingFunction(expression: KtExpression?): Boolean {
+    if (expression is KtLambdaExpression) {
       return true
     }
-    if (initializer is KtCallExpression &&
-        initializer.valueArgumentList?.leftParenthesis == null &&
-        initializer.lambdaArguments.isNotEmpty() &&
-        initializer.typeArgumentList?.arguments.isNullOrEmpty() &&
-        initializer.lambdaArguments.first().getArgumentExpression() is KtLambdaExpression) {
+    if (expression is KtCallExpression &&
+        expression.valueArgumentList?.leftParenthesis == null &&
+        expression.lambdaArguments.isNotEmpty() &&
+        expression.typeArgumentList?.arguments.isNullOrEmpty() &&
+        expression.lambdaArguments.first().getArgumentExpression() is KtLambdaExpression) {
       return true
     }
     return false
   }
 
-  /** See [lambdaOrScopingFunction] for examples. */
-  private fun processLambdaOrScopingFunction(expr: PsiElement?) {
+  /** See [isLambdaOrScopingFunction] for examples. */
+  private fun visitLambdaOrScopingFunction(expr: PsiElement?) {
     val breakToExpr = genSym()
     builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent, Optional.of(breakToExpr))
 
@@ -1376,7 +1379,7 @@ class KotlinInputAstVisitor(
       is KtCallExpression -> {
         visit(expr.calleeExpression)
         builder.space()
-        visitLambdaExpression(expr.lambdaArguments[0].getLambdaExpression()!!, breakToExpr)
+        visitLambdaExpression(expr.lambdaArguments[0].getLambdaExpression() ?: fail(), breakToExpr)
       }
       else -> throw AssertionError(expr)
     }
