@@ -81,8 +81,15 @@ object Formatter {
     checkEscapeSequences(code)
 
     val lfCode = StringUtilRt.convertLineSeparators(code)
-    val sortedImports = sortedAndDistinctImports(lfCode)
-    val pretty = prettyPrint(sortedImports, options, "\n")
+
+    val sortedImports = sortedAndDistinctImports(lfCode, options.sortImports, options.uniqueImports)
+
+    val pretty = if (options.prettyPrint) {
+      prettyPrint(sortedImports, options, "\n")
+    } else {
+      sortedImports
+    }
+
     val noRedundantElements =
         try {
           dropRedundantElements(pretty, options)
@@ -137,7 +144,7 @@ object Formatter {
     }
   }
 
-  private fun sortedAndDistinctImports(code: String): String {
+  private fun sortedAndDistinctImports(code: String, sortImports: Boolean, uniqueImports: Boolean): String {
     val file = Parser.parse(code)
 
     val importList = file.importList ?: return code
@@ -166,8 +173,15 @@ object Formatter {
             " " +
             if (importDirective.isAllUnder) "*" else ""
 
-    val sortedImports = importList.imports.sortedBy(::canonicalText).distinctBy(::canonicalText)
-    val importsWithComments = commentList + sortedImports
+    var imports = importList.imports
+    if (sortImports){
+      imports = imports.sortedBy(::canonicalText)
+    }
+    if (uniqueImports) {
+      imports = imports.distinctBy(::canonicalText)
+    }
+
+    val importsWithComments = commentList + imports
 
     return code.replaceRange(
         importList.startOffset,

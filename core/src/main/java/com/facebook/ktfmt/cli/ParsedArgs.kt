@@ -18,8 +18,23 @@ package com.facebook.ktfmt.cli
 
 import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
+import com.facebook.ktfmt.format.FormattingOptions.Style
+import org.ec4j.core.Cache
+import org.ec4j.core.Cache.Caches
+import org.ec4j.core.EditorConfigLoader
+import org.ec4j.core.Resource.Resources
+import org.ec4j.core.ResourcePath.ResourcePaths
+import org.ec4j.core.ResourceProperties
+import org.ec4j.core.ResourcePropertiesService
+import org.ec4j.core.model.Property
+import org.ec4j.core.model.PropertyType
+import org.ec4j.core.model.PropertyType.IndentStyleValue
+import org.ec4j.core.model.PropertyType.IndentStyleValue.space
 import java.io.File
 import java.io.PrintStream
+import java.nio.charset.StandardCharsets
+import java.nio.file.Paths
+import kotlin.math.absoluteValue
 
 /** ParsedArgs holds the arguments passed to ktfmt on the command-line, after parsing. */
 data class ParsedArgs(
@@ -50,19 +65,71 @@ data class ParsedArgs(
       var formattingOptions = FormattingOptions()
       var dryRun = false
       var setExitIfChanged = false
-
+      var setEditorConfigFile = false
+      var setRootDir = false
+      var rootDir: String? = null
+      var editorConfigFileString: String? = null
       for (arg in args) {
+        if (setRootDir) {
+          rootDir = arg
+          setRootDir = false
+        }
+        if (setEditorConfigFile) {
+          editorConfigFileString = arg
+          setEditorConfigFile = false
+        }
         when {
           arg == "--dropbox-style" -> formattingOptions = Formatter.DROPBOX_FORMAT
           arg == "--google-style" -> formattingOptions = Formatter.GOOGLE_FORMAT
           arg == "--kotlinlang-style" -> formattingOptions = Formatter.KOTLINLANG_FORMAT
+          arg == "--editorconfig-style" -> setEditorConfigFile = true
           arg == "--dry-run" || arg == "-n" -> dryRun = true
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
+          arg == "--rootDir" -> setRootDir = true
           arg.startsWith("--") -> err.println("Unexpected option: $arg")
           arg.startsWith("@") -> err.println("Unexpected option: $arg")
           else -> fileNames.add(arg)
         }
       }
+
+      if (editorConfigFileString != null && rootDir != null) {
+
+        val myCache: Cache = Caches.permanent()
+        val myLoader: EditorConfigLoader = EditorConfigLoader.default_()
+
+        val propService: ResourcePropertiesService = ResourcePropertiesService.builder()
+          .cache(myCache)
+          .loader(myLoader)
+          .rootDirectory(ResourcePaths.ofPath(Paths.get(rootDir), StandardCharsets.UTF_8))
+          .build();
+
+        val props: ResourceProperties = propService.queryProperties(Resources.ofPath(Paths.get(fileNames.get(0)), StandardCharsets.UTF_8));
+
+        println("$props")
+        props.properties.entries.map {
+          println("${it.key}")
+          println("    ${it.value}")
+          println("    ${it.value.type}")
+        }
+
+        println("charset ${props.properties["charset"]}")
+        println("max_line_length ${props.properties["max_line_length"]}")
+        val maxLineLength: Property? = props.properties["max_line_length"]
+        val maxWith = maxLineLength?.sourceValue?.toInt() ?: 160
+        val tabWith = props.properties["tab_width"]?.sourceValue?.toInt() ?: 4
+
+        val indentStyleValue: IndentStyleValue = props.getValue(PropertyType.indent_style, space, true)
+
+
+        formattingOptions = FormattingOptions(
+          style = Style.EDITORCONFIG,
+          maxWidth = maxWith,
+          blockIndent = tabWith,
+          continuationIndent = 2
+        )
+
+      }
+
       return ParsedArgs(fileNames, formattingOptions, dryRun, setExitIfChanged)
     }
   }

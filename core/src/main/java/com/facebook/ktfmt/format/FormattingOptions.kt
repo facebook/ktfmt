@@ -56,13 +56,20 @@ data class FormattingOptions(
     val debuggingPrintOpsAfterFormatting: Boolean = false
 ) {
 
-  companion object {
+    var prettyPrint: Boolean = true
+
+    var sortImports: Boolean = false
+
+    var uniqueImports: Boolean = true
+
+    companion object {
     const val DEFAULT_MAX_WIDTH: Int = 100
   }
 
   enum class Style {
     FACEBOOK,
     DROPBOX,
-    GOOGLE
+    GOOGLE,
+    EDITORCONFIG
   }
 }
