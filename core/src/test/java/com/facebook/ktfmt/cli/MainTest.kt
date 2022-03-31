@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
 import java.lang.IllegalStateException
+import java.nio.file.Files
 import java.util.concurrent.ForkJoinPool
 import org.junit.After
 import org.junit.Assert.fail
@@ -159,6 +160,40 @@ class MainTest {
     assertThat(err.toString("UTF-8")).contains("Done formatting $file1")
     assertThat(err.toString("UTF-8")).contains("file2.kt:1:14: error: ")
     assertThat(err.toString("UTF-8")).contains("Done formatting $file3")
+  }
+
+  @Test
+  fun `file is not modified if it is already formatted`() {
+    val code = """fun f() = println("hello, world")""" + "\n"
+    val formatted_file = root.resolve("formatted_file.kt")
+    formatted_file.writeText(code)
+    val formatted_file_path = formatted_file.toPath()
+
+    val last_modified_time_before_running_formatter =
+        Files.getLastModifiedTime(formatted_file_path).toMillis()
+    Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf(formatted_file.toString())).run()
+    val last_modified_time_after_running_formatter =
+        Files.getLastModifiedTime(formatted_file_path).toMillis()
+
+    assertThat(last_modified_time_before_running_formatter)
+        .isEqualTo(last_modified_time_after_running_formatter)
+  }
+
+  @Test
+  fun `file is modified if it is not formatted`() {
+    val code = """fun f() =   println(  "hello, world")""" + "\n"
+    val unformatted_file = root.resolve("unformatted_file.kt")
+    unformatted_file.writeText(code)
+    val unformatted_file_path = unformatted_file.toPath()
+
+    val last_modified_time_before_running_formatter =
+        Files.getLastModifiedTime(unformatted_file_path).toMillis()
+    Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf(unformatted_file.toString())).run()
+    val last_modified_time_after_running_formatter =
+        Files.getLastModifiedTime(unformatted_file_path).toMillis()
+
+    assertThat(
+        last_modified_time_before_running_formatter < last_modified_time_after_running_formatter)
   }
 
   @Test
