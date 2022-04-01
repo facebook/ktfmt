@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
 import java.lang.IllegalStateException
+import java.nio.file.Files
 import java.util.concurrent.ForkJoinPool
 import org.junit.After
 import org.junit.Assert.fail
@@ -159,6 +160,40 @@ class MainTest {
     assertThat(err.toString("UTF-8")).contains("Done formatting $file1")
     assertThat(err.toString("UTF-8")).contains("file2.kt:1:14: error: ")
     assertThat(err.toString("UTF-8")).contains("Done formatting $file3")
+  }
+
+  @Test
+  fun `file is not modified if it is already formatted`() {
+    val code = """fun f() = println("hello, world")""" + "\n"
+    val formattedFile = root.resolve("formatted_file.kt")
+    formattedFile.writeText(code)
+    val formattedFilePath = formattedFile.toPath()
+
+    val lastModifiedTimeBeforeRunningFormatter =
+        Files.getLastModifiedTime(formattedFilePath).toMillis()
+    Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf(formattedFile.toString())).run()
+    val lastModifiedTimeAfterRunningFormatter =
+        Files.getLastModifiedTime(formattedFilePath).toMillis()
+
+    assertThat(lastModifiedTimeBeforeRunningFormatter)
+        .isEqualTo(lastModifiedTimeAfterRunningFormatter)
+  }
+
+  @Test
+  fun `file is modified if it is not formatted`() {
+    val code = """fun f() =   println(  "hello, world")""" + "\n"
+    val unformattedFile = root.resolve("unformatted_file.kt")
+    unformattedFile.writeText(code)
+    val unformattedFilePath = unformattedFile.toPath()
+
+    val lastModifiedTimeBeforeRunningFormatter =
+        Files.getLastModifiedTime(unformattedFilePath).toMillis()
+    Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf(unformattedFile.toString())).run()
+    val lastModifiedTimeAfterRunningFormatter =
+        Files.getLastModifiedTime(unformattedFilePath).toMillis()
+
+    assertThat(lastModifiedTimeBeforeRunningFormatter)
+        .isLessThan(lastModifiedTimeAfterRunningFormatter)
   }
 
   @Test
