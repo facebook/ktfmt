@@ -2064,8 +2064,10 @@ class KotlinInputAstVisitor(
     builder.sync(expression)
     builder.token("do")
     builder.space()
-    visit(expression.body)
-    builder.space()
+    if (expression.body != null) {
+      visit(expression.body)
+      builder.space()
+    }
     builder.token("while")
     builder.space()
     builder.token("(")
