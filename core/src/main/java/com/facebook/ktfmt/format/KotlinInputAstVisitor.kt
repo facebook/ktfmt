@@ -2015,20 +2015,24 @@ class KotlinInputAstVisitor(
     }
   }
 
+  /** Example `String::isNullOrEmpty` */
   override fun visitCallableReferenceExpression(expression: KtCallableReferenceExpression) {
     builder.sync(expression)
     visit(expression.receiverExpression)
 
-    // For some reason, expression.receiverExpression doesn't contain the question-mark
-    // token in case of a nullable type, e.g., in String?::isNullOrEmpty.
-    // Instead, KtCallableReferenceExpression exposes a method that looks for the QUEST token in its
-    // children.
+    // For some reason, expression.receiverExpression doesn't contain the question-mark token in
+    // case of a nullable type, e.g., in String?::isNullOrEmpty.
+    // Instead, KtCallableReferenceExpression exposes a method that looks for the QUEST token in
+    // its children.
     if (expression.hasQuestionMarks) {
       builder.token("?")
     }
 
-    builder.token("::")
-    visit(expression.callableReference)
+    builder.block(expressionBreakIndent) {
+      builder.token("::")
+      builder.breakOp(Doc.FillMode.INDEPENDENT, "", ZERO)
+      visit(expression.callableReference)
+    }
   }
 
   override fun visitClassLiteralExpression(expression: KtClassLiteralExpression) {
