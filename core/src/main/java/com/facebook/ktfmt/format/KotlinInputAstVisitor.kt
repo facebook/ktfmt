@@ -56,6 +56,7 @@ import org.jetbrains.kotlin.psi.KtDelegatedSuperTypeEntry
 import org.jetbrains.kotlin.psi.KtDestructuringDeclaration
 import org.jetbrains.kotlin.psi.KtDestructuringDeclarationEntry
 import org.jetbrains.kotlin.psi.KtDoWhileExpression
+import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
 import org.jetbrains.kotlin.psi.KtDynamicType
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtEnumEntry
@@ -80,6 +81,7 @@ import org.jetbrains.kotlin.psi.KtPackageDirective
 import org.jetbrains.kotlin.psi.KtParameter
 import org.jetbrains.kotlin.psi.KtParameterList
 import org.jetbrains.kotlin.psi.KtParenthesizedExpression
+import org.jetbrains.kotlin.psi.KtPostfixExpression
 import org.jetbrains.kotlin.psi.KtPrefixExpression
 import org.jetbrains.kotlin.psi.KtPrimaryConstructor
 import org.jetbrains.kotlin.psi.KtProjectionKind
@@ -152,27 +154,6 @@ class KotlinInputAstVisitor(
 
   /** Tracks whether we are handling an import directive */
   private var inImport = false
-
-  /**
-   * Represents a logical "chunk" of [expressions], and whether or not they should be kept on the
-   * same line
-   *
-   * As an example, consider the expression:
-   * ```
-   *     rainbow.red.orange.shine().yellow
-   * ```
-   * This might be split into chunks as such:
-   * ```
-   *     chunks: [
-   *         chunk(expressions=[rainbow, red, orange, shine()], shouldKeepOnSameLine=true),
-   *         chunk(expressions=[yellow], shouldKeepOnSameLine=false)
-   *     ]
-   * ```
-   */
-  data class Chunk(
-      val expressions: List<KtExpression>,
-      val shouldKeepOnSameLine: Boolean,
-  )
 
   /** Example: `fun foo(n: Int) { println(n) }` */
   override fun visitNamedFunction(function: KtNamedFunction) {
@@ -485,102 +466,87 @@ class KotlinInputAstVisitor(
       return
     }
 
-    emitQualifiedExpression(breakIntoChunks(expression))
+    emitQualifiedExpression(expression)
+  }
+
+  /** Extra data to help [emitQualifiedExpression] know when to open and close a group */
+  private class GroupingInfo {
+    var groupOpenCount = 0
+    var shouldCloseGroup = false
   }
 
   /**
-   * Decomposes a qualified expression into chunks.
+   * Handles a chain of qualified expressions, i.e. `a[5].b!!.c()[4].f()`
    *
-   * So this expression:
-   * ```
-   *     rainbow.red.orange.shine().yellow
-   * ```
+   * This is by far the most complicated part of this formatter. We start by breaking the expression
+   * to the steps it is executed in (which are in the opposite order of how the syntax tree is
+   * built).
    *
-   * Becomes:
-   * ```
-   *     chunks: [
-   *         chunk(expressions=[rainbow, red, orange, shine()], shouldKeepOnSameLine=true),
-   *         chunk(expressions=[yellow], shouldKeepOnSameLine=false)
-   *     ]
-   * ```
+   * We then calculate information to know which parts need to be groups, and finally go part by
+   * part, emitting it to the [builder] while closing and opening groups.
    */
-  private fun breakIntoChunks(expression: KtExpression): List<Chunk> {
+  private fun emitQualifiedExpression(expression: KtExpression) {
     val parts = breakIntoParts(expression)
-
-    val prefixes = mutableSetOf<Int>()
-
-    // Check if the dot chain has a prefix that looks like a type name, so we can
-    // treat the type name-shaped part as a single syntactic unit.
-    TypeNameClassifier.typePrefixLength(simpleNames(parts)).ifPresent { prefixes.add(it) }
-
-    val invocationCount = parts.count { it.isCallExpression() }
-    val firstInvocationIndex = parts.indexOfFirst { it.isCallExpression() }
-    val isFirstInvocationLambda = parts.getOrNull(firstInvocationIndex)?.isLambda() ?: false
     val hasTrailingLambda = parts.last().isLambda()
-
-    // If there's only one invocation, treat leading field accesses as a single
-    // unit. In the normal case we want to preserve the alignment of subsequent
-    // method calls, and would emit e.g.:
-    //
-    // myField
-    //     .foo()
-    //     .bar();
-    //
-    // But if there's no 'bar()' to worry about the alignment of we prefer:
-    //
-    // myField.foo();
-    //
-    // to:
-    //
-    // myField
-    //     .foo();
-    //
-    val singleInvocation = invocationCount == 1
-
-    // For this case, don't count trailing lambdas as call expressions so they look like:
-    // ```
-    // blah.foo().bar().map {
-    //   // blah
-    // }
-    // ```
-    //
-    val singleInvocationWithTrailingLambda = invocationCount == 2 && hasTrailingLambda
-
-    if ((singleInvocation || singleInvocationWithTrailingLambda) && firstInvocationIndex > 0) {
-      prefixes.add(
-          if (firstInvocationIndex != parts.size - 1 && isFirstInvocationLambda) {
-            firstInvocationIndex - 1
-          } else {
-            firstInvocationIndex
-          })
-    }
-
-    // keep `super` and `this` attached to the first dereference
-    if (prefixes.isEmpty() &&
-        (parts.first() is KtSuperExpression || parts.first() is KtThisExpression)) {
-      prefixes.add(1)
-    }
-
-    // now that we've found the prefixes, break the parts into chunks
-    val chunks = mutableListOf<Chunk>()
-    val currentChunk = mutableListOf<KtExpression>()
-    val unconsumedPrefixes = ArrayDeque(prefixes.sorted())
-
-    parts.forEachIndexed { index, part ->
-      currentChunk.add(part)
-      if (!unconsumedPrefixes.isEmpty() && index == unconsumedPrefixes.peekFirst()) {
-        unconsumedPrefixes.removeFirst()
-        chunks.add(Chunk(currentChunk.toList(), shouldKeepOnSameLine = true))
-        currentChunk.clear()
+    val groupingInfos = computeGroupingInfo(parts, hasTrailingLambda)
+    builder.block(expressionBreakIndent) {
+      val nameTag = genSym() // allows adjusting arguments indentation if a break will be made
+      for ((index, ktExpression) in parts.withIndex()) {
+        if (ktExpression is KtQualifiedExpression) {
+          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO, Optional.of(nameTag))
+        }
+        repeat(groupingInfos[index].groupOpenCount) { builder.open(ZERO) }
+        when (ktExpression) {
+          is KtQualifiedExpression -> {
+            builder.token(ktExpression.operationSign.value)
+            val selectorExpression = ktExpression.selectorExpression
+            if (selectorExpression !is KtCallExpression) {
+              // selector is a simple field access
+              visit(selectorExpression)
+              if (groupingInfos[index].shouldCloseGroup) {
+                builder.close()
+              }
+            } else {
+              // selector is a function call, we may close a group after its name
+              // emit `doIt` from `doIt(1, 2) { it }`
+              visit(selectorExpression.calleeExpression)
+              // close groups according to instructions
+              if (groupingInfos[index].shouldCloseGroup) {
+                builder.close()
+              }
+              // close group due to last lambda to allow block-like style in `as.forEach { ... }`
+              val isTrailingLambda = hasTrailingLambda && index == parts.size - 1
+              if (isTrailingLambda) {
+                builder.close()
+              }
+              val argsIndentElse = if (index == parts.size - 1) ZERO else expressionBreakIndent
+              val lambdaIndentElse = if (isTrailingLambda) expressionBreakNegativeIndent else ZERO
+              // emit `(1, 2) { it }` from `doIt(1, 2) { it }`
+              visitCallElement(
+                  null,
+                  selectorExpression.typeArgumentList,
+                  selectorExpression.valueArgumentList,
+                  selectorExpression.lambdaArguments,
+                  argumentsIndent = Indent.If.make(nameTag, expressionBreakIndent, argsIndentElse),
+                  lambdaIndent = Indent.If.make(nameTag, ZERO, lambdaIndentElse),
+              )
+            }
+          }
+          is KtArrayAccessExpression -> {
+            visitArrayAccessBrackets(ktExpression)
+            builder.close()
+          }
+          is KtPostfixExpression -> {
+            builder.token(ktExpression.operationReference.text)
+            builder.close()
+          }
+          else -> {
+            check(index == 0)
+            visit(ktExpression)
+          }
+        }
       }
     }
-
-    // the last chunk is part of a prefix, so it's not grouped
-    if (currentChunk.isNotEmpty()) {
-      chunks.add(Chunk(currentChunk.toList(), shouldKeepOnSameLine = false))
-    }
-
-    return chunks
   }
 
   /**
@@ -591,20 +557,137 @@ class KotlinInputAstVisitor(
     val parts = ArrayDeque<KtExpression>()
 
     // use an ArrayDeque and add elements to the beginning so the innermost expression comes first
+    // foo.bar.yay -> [yay, bar.yay, foo.bar.yay]
     parts.addFirst(expression)
 
-    var node = expression
-    while (node is KtQualifiedExpression) {
-      node = node.receiverExpression
-      parts.addFirst(node)
+    var node: KtExpression? = expression
+    while (node != null) {
+      node =
+          when (node) {
+            is KtQualifiedExpression -> node.receiverExpression
+            is KtArrayAccessExpression -> node.arrayExpression
+            is KtPostfixExpression -> node.baseExpression
+            else -> null
+          }
+      if (node != null) {
+        parts.addFirst(node)
+      }
     }
 
     return parts.toList()
   }
 
-  /** Returns true if the expression represents an invocation */
-  private fun KtExpression.isCallExpression(): Boolean {
-    return extractCallExpression(this) != null
+  /**
+   * Generates the [GroupingInfo] array to go with an array of [KtQualifiedExpression] parts
+   *
+   * For example, the expression `a.b[2].c.d()` is made of four expressions:
+   * 1. [KtQualifiedExpression] `a.b[2].c . d()` (this will be `parts[4]`)
+   * 1. [KtQualifiedExpression] `a.b[2] . c` (this will be `parts[3]`)
+   * 2. [KtArrayAccessExpression] `a.b [2]` (this will be `parts[2]`)
+   * 3. [KtQualifiedExpression] `a . b` (this will be `parts[1]`)
+   * 4. [KtSimpleNameExpression] `a` (this will be `parts[0]`)
+   *
+   * Once in parts, these are in the reverse order. To render the array correct we need to make sure
+   * `b` and [2] are in a group so we avoid splitting them. To do so we need to open a group for `b`
+   * (that will be done in part 2), and always close a group for an array.
+   *
+   * Here is the same expression, with justified braces marking the groupings it will get:
+   * ```
+   *  a . b [2] . c . d ()
+   * {a . b} --> Grouping `a.b` because it can be a package name or simple field access so we add 1
+   *             to the number of groups to open at groupingInfos[0], and mark to close a group at
+   *             groupingInfos[1]
+   * {a . b [2]} --> Grouping `a.b` with `[2]`, since otherwise we may break inside the brackets
+   *                 instead of preferring breaks before dots. So we open a group at [0], but since
+   *                 we always close a group after brackets, we don't store that information.
+   *             {c . d} --> another group to attach the first function name to the fields before it
+   *                         this time we don't start the group in the beginning, and use
+   *                         lastIndexToOpen to track the spot after the last time we stopped
+   *                         grouping.
+   * ```
+   * The final expression with groupings:
+   * ```
+   * {{a.b}[2]}.{c.d}()
+   * ```
+   */
+  private fun computeGroupingInfo(
+      parts: List<KtExpression>,
+      hasTrailingLambda: Boolean
+  ): List<GroupingInfo> {
+    val groupingInfos = List(parts.size) { GroupingInfo() }
+    var lastIndexToOpen = 0
+    for ((index, part) in parts.withIndex()) {
+      when (part) {
+        is KtQualifiedExpression -> {
+          val receiverExpression = part.receiverExpression
+          val previous =
+              (receiverExpression as? KtQualifiedExpression)?.selectorExpression
+                  ?: receiverExpression
+          val current = checkNotNull(part.selectorExpression)
+          if (shouldGroupPartWithPrevious(parts, part, index, previous, current)) {
+            // this and the previous items should be grouped for better style
+            // we add another group to open in the current index we have been using
+            groupingInfos[lastIndexToOpen].groupOpenCount++
+            // we don't always close a group when emitting this node, so we need this flag to
+            // mark if we need to close a group
+            groupingInfos[index].shouldCloseGroup = true
+          } else {
+            // use this index in to open future groups
+            lastIndexToOpen = index
+          }
+        }
+        is KtArrayAccessExpression, is KtPostfixExpression -> {
+          // we group these with the last item with a name, and we always close them
+          groupingInfos[lastIndexToOpen].groupOpenCount++
+        }
+      }
+    }
+    if (hasTrailingLambda) {
+      // a trailing lambda adds a group that we stop before emitting the lambda
+      groupingInfos[0].groupOpenCount++
+    }
+    return groupingInfos
+  }
+
+  /** Decide whether a [KtQualifiedExpression] part should be grouped with the previous part */
+  private fun shouldGroupPartWithPrevious(
+      parts: List<KtExpression>,
+      part: KtExpression,
+      index: Int,
+      previous: KtExpression,
+      current: KtExpression
+  ): Boolean {
+    // this is the second, and the first is short, avoid `.` "hanging in air"
+    if (index == 1 && previous.text.length < options.continuationIndent) {
+      return true
+    }
+    // the previous part is `this` or `super`
+    if (previous is KtSuperExpression || previous is KtThisExpression) {
+      return true
+    }
+    // this and the previous part are a package name, type name, or property
+    if (previous is KtSimpleNameExpression &&
+        current is KtSimpleNameExpression &&
+        part is KtDotQualifiedExpression) {
+      return true
+    }
+    // this is `Foo` in `com.facebook.Foo`, so everything before it is a package name
+    if (current.text.first().isUpperCase() &&
+        current is KtSimpleNameExpression &&
+        part is KtDotQualifiedExpression) {
+      return true
+    }
+    // this is the `foo()` in `com.facebook.Foo.foo()` or in `Foo.foo()`
+    if (current is KtCallExpression &&
+        (previous !is KtCallExpression) &&
+        previous.text?.firstOrNull()?.isUpperCase() == true) {
+      return true
+    }
+    // this is an invocation and the last item, and the previous it not, i.e. `a.b.c()`
+    // keeping it grouped and splitting the arguments makes `a.b(...)` feel like `aab()`
+    return current is KtCallExpression &&
+        previous !is KtCallExpression &&
+        index == parts.indices.last
   }
 
   /** Returns true if the expression represents an invocation that is also a lambda */
@@ -619,194 +702,6 @@ class KotlinInputAstVisitor(
   private fun extractCallExpression(expression: KtExpression): KtCallExpression? {
     val ktExpression = (expression as? KtQualifiedExpression)?.selectorExpression ?: expression
     return ktExpression as? KtCallExpression
-  }
-
-  /**
-   * Returns the simple names of expressions in a "." chain, e.g., "foo.bar().zed[5]" --> [foo, bar,
-   * zed]
-   */
-  private fun simpleNames(stack: List<KtExpression>): List<String> {
-    val simpleNames = mutableListOf<String>()
-    loop@ for (expression in stack) {
-      val callExpression = extractCallExpression(expression)
-      if (callExpression != null) {
-        callExpression.calleeExpression?.text?.let { simpleNames.add(it) }
-        break@loop
-      }
-      when (expression) {
-        is KtQualifiedExpression -> expression.selectorExpression?.let { simpleNames.add(it.text) }
-        is KtReferenceExpression -> simpleNames.add(expression.text)
-        else -> break@loop
-      }
-    }
-    return simpleNames
-  }
-
-  /**
-   * Output a chain of dereferences, some of which should be grouped together.
-   *
-   * Example 1:
-   * ```
-   * field1.field2.field3.field4
-   *     .method1(...)
-   * ```
-   *
-   * Example 2:
-   * ```
-   * com.facebook.ktfmt.KotlinInputAstVisitor
-   *     .method1()
-   * ```
-   */
-  private fun emitQualifiedExpression(
-      chunks: List<Chunk>,
-  ) {
-    // Keeps track of how much text we've emitted so far, and is used to avoid line breaks that are
-    // shorter than the indentation length. For example:
-    // ```
-    //    user.field1
-    //        .field2
-    //          ...
-    //        .field9
-    // ```
-    // Since `user` is less than or equal to 4 characters (the indentation length here), `field1` is
-    // kept on the same line.
-    var textLength = 0
-
-    // is the last expression a lambda? e.g.`foo.bar.apply { ... }`
-    val hasTrailingLambda = chunks.last().expressions.last().isLambda()
-
-    // When the last chunk is meant to be on one line, reduce the indentation of arguments:
-    // ```
-    // rainbow.shine(
-    //     infrared,
-    //     ultraviolet,
-    // )
-    // ```
-    // Here's an example of the line being broken, so we don't reduce the indentation:
-    // ```
-    // rainbow.red.orange.yellow
-    //     .shine(
-    //         infrared,
-    //         ultraviolet,
-    //     )
-    // ```
-    // Here's a negative side effect, can't be fixed unless we can detect that the invocation is not
-    // on the same line as the first reference (not currently possible):
-    // ```
-    // rainbow.red.orange.yellow
-    //     .key.shine(
-    //     infrared,
-    //     ultraviolet,
-    // )
-    // ```
-    val argsIndentElse = if (chunks.last().shouldKeepOnSameLine) ZERO else expressionBreakIndent
-
-    // When we have a trailing lambda and the line it's on isn't broken, reduce its indentation:
-    // ```
-    // rainbow.let {
-    //   it.shine()
-    // }
-    // ```
-    // Here's an example of the line being broken, so we don't reduce the indentation:
-    // ```
-    // rainbow
-    //     .red
-    //     .orange
-    //     .let {
-    //       it.shine()
-    //     }
-    // ```
-    // Here's a negative side effect, can't be fixed unless we can detect that the lambda is not on
-    // the same line as the first reference (not currently possible):
-    // ```
-    // rainbow.red.orange
-    //     .yellow.let {
-    //   it.shine()
-    // }
-    // ```
-    val lambdaIndentElse = if (hasTrailingLambda) expressionBreakNegativeIndent else ZERO
-
-    builder.block(expressionBreakIndent) {
-      // trailing lambdas get their own block, so wrap everything before it in a block
-      if (hasTrailingLambda) {
-        builder.open(ZERO)
-      }
-
-      // chunks that are grouped get their own block
-      chunks.filter { it.shouldKeepOnSameLine }.forEach { builder.open(ZERO) }
-
-      // each chunk represents a list of related expressions.
-      // if the expressions are "grouped", they'll be in the same block and be on the same line.
-      // otherwise they'll be broken onto several lines (assuming they don't fit on one).
-      for ((chunkIndex, chunk) in chunks.withIndex()) {
-        // get a unique name for this chunk, used for keeping track of indents and line breaks
-        val nameTag = genSym()
-
-        // each item represents a dereference or a call invocation
-        val items = chunk.expressions
-        for ((itemIndex, item) in items.withIndex()) {
-
-          // for everything after the very first element, emit a break and a dot
-          if (chunkIndex > 0 || itemIndex > 0) {
-
-            // break if there's a lambda, or the line is long enough
-            if (textLength > options.continuationIndent || item.isLambda()) {
-              val fillMode =
-                  if (chunk.shouldKeepOnSameLine) Doc.FillMode.INDEPENDENT else Doc.FillMode.UNIFIED
-              builder.breakOp(fillMode, "", ZERO, Optional.of(nameTag))
-            }
-
-            val operator = (item as KtQualifiedExpression).operationSign.value
-            builder.token(operator)
-            textLength += operator.length
-          }
-
-          // emit the reference or method name
-          emitSelectorUpToParenthesis(item)
-
-          // we've reached the last element of this chunk
-          if (itemIndex == items.indices.last()) {
-
-            // close the grouping block before visiting the call expression body (if any)
-            if (chunk.shouldKeepOnSameLine) {
-              builder.close()
-            }
-
-            // we've reached the trailing lambda, close its block before visiting the body
-            if (chunkIndex == chunks.indices.last && hasTrailingLambda) {
-              builder.close()
-            }
-          }
-
-          // visit the call expression body (if any)
-          extractCallExpression(item)?.apply {
-            visitCallElement(
-                null,
-                typeArgumentList,
-                valueArgumentList,
-                lambdaArguments,
-                argumentsIndent = Indent.If.make(nameTag, expressionBreakIndent, argsIndentElse),
-                lambdaIndent = Indent.If.make(nameTag, ZERO, lambdaIndentElse))
-          }
-
-          textLength += item.text.length
-        }
-      }
-    }
-  }
-
-  /**
-   * Emits a method name up to its parenthesis and arguments.
-   *
-   * More generally, emits the selector excluding its parameters if it's a method call.
-   */
-  private fun emitSelectorUpToParenthesis(e: KtExpression) {
-    val callExpression = extractCallExpression(e)
-    when {
-      callExpression != null -> visit(callExpression.calleeExpression)
-      e is KtQualifiedExpression -> visit(e.selectorExpression)
-      else -> visit(e)
-    }
   }
 
   override fun visitCallExpression(callExpression: KtCallExpression) {
@@ -1898,10 +1793,22 @@ class KotlinInputAstVisitor(
     }
   }
 
-  /** Example `a[3]` or `b["a", 5]` */
+  /** Example `a[3]`, `b["a", 5]` or `a.b.c[4]` */
   override fun visitArrayAccessExpression(expression: KtArrayAccessExpression) {
     builder.sync(expression)
-    visit(expression.arrayExpression)
+    if (expression.arrayExpression is KtQualifiedExpression) {
+      emitQualifiedExpression(expression)
+    } else {
+      visit(expression.arrayExpression)
+      visitArrayAccessBrackets(expression)
+    }
+  }
+
+  /**
+   * Example `[3]` in `a[3]` or `a[3].b` Separated since it needs to be used from a top level array
+   * expression (`a[3]`) and from within a qualified chain (`a[3].b)
+   */
+  private fun visitArrayAccessBrackets(expression: KtArrayAccessExpression) {
     builder.block(ZERO) {
       builder.token("[")
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)

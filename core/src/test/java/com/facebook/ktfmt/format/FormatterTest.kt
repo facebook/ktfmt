@@ -660,14 +660,14 @@ class FormatterTest {
       |        foo
       |      }
       |
-      |  // The following is arguably a bug: we might want the lambda body to be
-      |  // indented 4 more columns, but the following formatting makes sense as well.
+      |  // the lambda is indented properly with the break before it
       |  val items =
       |      items.fieldName.sdfkjsdf.sdfjksdflk.sdlfkjsldfj.sdfjksdflk.sdlfkjsldfj
-      |          .sdlfkjsldfj.apply {
-      |        //
-      |        foo
-      |      }
+      |          .sdlfkjsldfj
+      |          .apply {
+      |            //
+      |            foo
+      |          }
       |  items.fieldName.sdfkjsdf.sdfjksdflk.sdlfkjsldfj.sdfjksdflk.sdlfkjsldfj
       |      .apply {
       |        //
@@ -2052,6 +2052,50 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
+  fun `keep array indexing grouped with expression is possible`() =
+      assertFormatted(
+          """
+      |-----------------------
+      |fun f(a: Magic) {
+      |  foo.bar()
+      |      .foobar[1, 2, 3]
+      |  foo.bar()
+      |      .foobar[
+      |          1,
+      |          2,
+      |          3,
+      |          4,
+      |          5]
+      |  foo.bar()
+      |      .foobar[1, 2, 3]
+      |      .barfoo[3, 2, 1]
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `mixed chains`() =
+      assertFormatted(
+          """
+      |-----------------------
+      |fun f(a: Magic) {
+      |  foo.bar()
+      |      .foobar[1, 2, 3]
+      |  foo.bar()
+      |      .foobar[
+      |          1,
+      |          2,
+      |          3,
+      |          4,
+      |          5]
+      |  foo.bar()
+      |      .foobar[1, 2, 3]
+      |      .barfoo[3, 2, 1]
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `handle destructuring declaration`() =
       assertFormatted(
           """
@@ -2064,6 +2108,122 @@ class FormatterTest {
       |  val (accountType, accountId) =
       |      oneTwoThreeFourFiveSixSeven(
       |          foo, bar, zed, boo)
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+  @Test
+  fun `chains with derferences and array indexing`() =
+      assertFormatted(
+          """
+      |-----------------------
+      |fun f() {
+      |  foo.bam()
+      |      .uber!![0, 1, 2]
+      |      .boom()[1, 3, 5]
+      |      .lah
+      |      .doo { it }
+      |      .feep[1] as
+      |      Boo
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `block like syntax after dereferences and indexing with short lines`() =
+      assertFormatted(
+          """
+      |-----------------------
+      |fun f() {
+      |  foo.bam()
+      |      .uber!![0, 1, 2]
+      |      .forEach {
+      |        println(it)
+      |      }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `block like syntax after dereferences and indexing with long lines`() =
+      assertFormatted(
+          """
+      |----------------------------------
+      |fun f() {
+      |  foo.uber!![0, 1, 2].forEach {
+      |    println(it)
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `try to keep type names together`() =
+      assertFormatted(
+          """
+      |-----------------------
+      |fun f() {
+      |  com.facebook.foo.Foo(
+      |      1, 2)
+      |  com.facebook.foo
+      |      .Foo(1, 2)
+      |      .andAlsoThis()
+      |  com.facebook.Foo.foo(
+      |      1, 2)
+      |  com.facebook
+      |      .foobarFoo
+      |      .foo(1, 2)
+      |  foo.invoke(
+      |      foo, bar, bar)
+      |  foo.invoke(foo, bar)
+      |      .invoke()
+      |  FooFoo.foooooooo()
+      |      .foooooooo()
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `avoid breaking brackets and keep them with array name`() =
+      assertFormatted(
+          """
+      |-------------------------------------------------------------------------
+      |fun f() {
+      |  val a =
+      |      invokeIt(context.packageName)
+      |          .getInternalMutablePackageInfo(context.packageName)
+      |          .someItems[0]
+      |          .getInternalMutablePackageInfo(context.packageName)
+      |          .someItems[0].doIt()
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `keep function call with type name even if array expression is next`() =
+      assertFormatted(
+          """
+      |class f {
+      |  private val somePropertyWithBackingOne
+      |    get() =
+      |        _somePropertyWithBackingOne
+      |            ?: Classname.getStuff<SomePropertyRelatedClassProvider>(requireContext())[
+      |                    somePropertiesProvider, somePropertyCallbacks]
+      |                .also { _somePropertyWithBackingOne = it }
+      |}
+      |""".trimMargin())
+
+  @Test
+  fun `array access in middle of chain and end of it behaves similarly`() =
+      assertFormatted(
+          """
+      |--------------------------------------
+      |fun f() {
+      |  if (aaaaa == null ||
+      |      aaaaa.bbbbb[0] == null ||
+      |      aaaaa.bbbbb[0].cc == null ||
+      |      aaaaa.bbbbb[0].dddd == null) {
+      |    println()
+      |  }
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -2409,7 +2569,7 @@ class FormatterTest {
           """
       |--------------------
       |fun f() {
-      |  foo
+      |  foofoo
       |      .doIt {
       |        doStuff()
       |      }
@@ -3444,7 +3604,7 @@ class FormatterTest {
       assertFormatted(
           """
       |fun f() {
-      |  bob
+      |  bobby
       |      .map { x -> x * x }
       |      .map { x -> x * x }
       |      ?.map { x ->
@@ -4721,10 +4881,7 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |rainbow
-      |    .red
-      |    .orange
-      |    .yellow
+      |rainbow.red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
@@ -4750,9 +4907,14 @@ class FormatterTest {
           """
       |-------------------------
       |rainbow.red.orange.yellow
-      |    .green.blue.indigo
-      |    .violet.cyan.magenta
-      |    .key.build()
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build()
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -4770,10 +4932,7 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |rainbow
-      |    .red
-      |    .orange
-      |    .yellow
+      |rainbow.red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
@@ -4792,10 +4951,10 @@ class FormatterTest {
           """
       |-------------------------
       |rainbow.red.orange.yellow
-      |    .green.blue.shine()
-      |    .indigo
-      |    .violet
-      |    .cyan
+      |    .green
+      |    .blue
+      |    .shine()
+      |    .indigo.violet.cyan
       |    .magenta
       |    .key
       |""".trimMargin(),
@@ -4806,18 +4965,13 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |rainbow
-      |    .red
-      |    .orange
-      |    .yellow
+      |rainbow.red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
       |    .shine()
       |    .bright()
-      |    .violet
-      |    .cyan
-      |    .magenta
+      |    .violet.cyan.magenta
       |    .key
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -4828,11 +4982,14 @@ class FormatterTest {
           """
       |-------------------------
       |rainbow.red.orange.yellow
-      |    .green.blue.indigo
-      |    .violet.cyan.magenta
-      |    .key.build {
-      |  it.appear
-      |}
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build { it.appear }
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -4842,9 +4999,14 @@ class FormatterTest {
           """
       |-------------------------
       |rainbow.red.orange.yellow
-      |    .green.blue.indigo
-      |    .violet.cyan.magenta
-      |    .key.z { it }
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .z { it }
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -4854,12 +5016,17 @@ class FormatterTest {
           """
       |-------------------------
       |rainbow.red.orange.yellow
-      |    .green.blue.indigo
-      |    .violet.cyan.magenta
-      |    .key.z {
-      |  it
-      |  it
-      |}
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .z {
+      |      it
+      |      it
+      |    }
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -4869,11 +5036,10 @@ class FormatterTest {
           """
       |-------------------------
       |rainbow.red.orange.yellow
-      |    .green.blue
+      |    .green
+      |    .blue
       |    .z { it }
-      |    .indigo
-      |    .violet
-      |    .cyan
+      |    .indigo.violet.cyan
       |    .magenta
       |    .key
       |""".trimMargin(),
@@ -4885,14 +5051,13 @@ class FormatterTest {
           """
       |-------------------------
       |rainbow.red.orange.yellow
-      |    .green.blue
+      |    .green
+      |    .blue
       |    .z {
       |      it
       |      it
       |    }
-      |    .indigo
-      |    .violet
-      |    .cyan
+      |    .indigo.violet.cyan
       |    .magenta
       |    .key
       |""".trimMargin(),
@@ -4908,11 +5073,7 @@ class FormatterTest {
       |      it
       |      it
       |    }
-      |    .indigo
-      |    .violet
-      |    .cyan
-      |    .magenta
-      |    .key
+      |    .indigo.violet.cyan.magenta.key
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -4921,23 +5082,14 @@ class FormatterTest {
       assertFormatted(
           """
       |-----------------------------------------------------------------------------------------
-      |rainbow
-      |    .red
-      |    .orange
-      |    .yellow
-      |    .green
-      |    .blue
+      |rainbow.red.orange.yellow.green.blue
       |    .z {
       |      it
       |      it
       |    }
       |    .shine()
       |    .bright()
-      |    .indigo
-      |    .violet
-      |    .cyan
-      |    .magenta
-      |    .key
+      |    .indigo.violet.cyan.magenta.key
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -4946,10 +5098,7 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |rainbow
-      |    .red
-      |    .orange
-      |    .yellow
+      |rainbow.red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
@@ -4967,10 +5116,7 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |rainbow
-      |    .red
-      |    .orange
-      |    .yellow
+      |rainbow.red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
@@ -4992,9 +5138,14 @@ class FormatterTest {
           """
       |-------------------------
       |rainbow.red.orange.yellow
-      |    .green.blue.indigo
-      |    .violet.cyan.magenta
-      |    .key.shine()
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .shine()
       |    .z { it }
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -5004,18 +5155,13 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |rainbow
-      |    .red
-      |    .orange
-      |    .yellow
+      |rainbow.red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
       |    .z { it }
       |    .shine()
-      |    .violet
-      |    .cyan
-      |    .magenta
+      |    .violet.cyan.magenta
       |    .key
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -5025,18 +5171,13 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |rainbow
-      |    .red
-      |    .orange
-      |    .yellow
+      |rainbow.red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
       |    .shine()
       |    .z { it }
-      |    .violet
-      |    .cyan
-      |    .magenta
+      |    .violet.cyan.magenta
       |    .key
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -5046,9 +5187,7 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |this.red
-      |    .orange
-      |    .yellow
+      |this.red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
@@ -5065,9 +5204,14 @@ class FormatterTest {
           """
       |-------------------------
       |this.red.orange.yellow
-      |    .green.blue.indigo
-      |    .violet.cyan.magenta
-      |    .key.build()
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build()
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -5076,9 +5220,7 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |super.red
-      |    .orange
-      |    .yellow
+      |super.red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
@@ -5095,9 +5237,14 @@ class FormatterTest {
           """
       |-------------------------
       |super.red.orange.yellow
-      |    .green.blue.indigo
-      |    .violet.cyan.magenta
-      |    .key.build()
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build()
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -5106,9 +5253,7 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |z123.red
-      |    .orange
-      |    .yellow
+      |z123.red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
@@ -5125,9 +5270,14 @@ class FormatterTest {
           """
       |-------------------------
       |z123.red.orange.yellow
-      |    .green.blue.indigo
-      |    .violet.cyan.magenta
-      |    .key.build()
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build()
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -5136,11 +5286,8 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |z123
-      |    .z { it }
-      |    .red
-      |    .orange
-      |    .yellow
+      |z12.z { it }
+      |    .red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
@@ -5158,9 +5305,7 @@ class FormatterTest {
           """
       |-------------------------
       |this.z { it }
-      |    .red
-      |    .orange
-      |    .yellow
+      |    .red.orange.yellow
       |    .green
       |    .blue
       |    .indigo
@@ -5216,7 +5361,7 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------
-      |z123.shine()
+      |z12.shine()
       |    .bright()
       |    .z { it }
       |""".trimMargin(),
@@ -5339,10 +5484,11 @@ class FormatterTest {
           """
       |-------------------------
       |rainbow.red.orange.yellow
-      |    .key.longLambdaName {
-      |  it
-      |  it
-      |}
+      |    .key
+      |    .longLambdaName {
+      |      it
+      |      it
+      |    }
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -5363,7 +5509,8 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |rainbow.shine(
+      |rainbow
+      |    .shine(
       |        infrared,
       |        ultraviolet,
       |    )
@@ -5390,10 +5537,11 @@ class FormatterTest {
           """
       |-------------------------
       |rainbow.red.orange.yellow
-      |    .key.shine(
-      |    infrared,
-      |    ultraviolet,
-      |)
+      |    .key
+      |    .shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -5403,7 +5551,8 @@ class FormatterTest {
           """
       |-------------------------
       |rainbow.red.orange.yellow
-      |    .key.shine(
+      |    .key
+      |    .shine(
       |        infrared,
       |        ultraviolet,
       |    )
@@ -5430,7 +5579,8 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |rainbow.shine(
+      |rainbow
+      |    .shine(
       |        infrared,
       |        ultraviolet,
       |    )
@@ -5456,7 +5606,7 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |z123.shine(
+      |z12.shine(
       |        infrared,
       |        ultraviolet,
       |    )
