@@ -447,26 +447,26 @@ class KotlinInputAstVisitor(
   override fun visitQualifiedExpression(expression: KtQualifiedExpression) {
     builder.sync(expression)
     val receiver = expression.receiverExpression
-    if (inImport) {
-      visit(receiver)
-      val selectorExpression = expression.selectorExpression
-      if (selectorExpression != null) {
-        builder.token(".")
-        visit(selectorExpression)
-      }
-      return
-    }
-
-    if (receiver is KtWhenExpression || receiver is KtStringTemplateExpression) {
-      builder.block(ZERO) {
+    when {
+      inImport -> {
         visit(receiver)
-        builder.token(expression.operationSign.value)
-        visit(expression.selectorExpression)
+        val selectorExpression = expression.selectorExpression
+        if (selectorExpression != null) {
+          builder.token(".")
+          visit(selectorExpression)
+        }
       }
-      return
+      receiver is KtWhenExpression || receiver is KtStringTemplateExpression -> {
+        builder.block(ZERO) {
+          visit(receiver)
+          builder.token(expression.operationSign.value)
+          visit(expression.selectorExpression)
+        }
+      }
+      else -> {
+        emitQualifiedExpression(expression)
+      }
     }
-
-    emitQualifiedExpression(expression)
   }
 
   /** Extra data to help [emitQualifiedExpression] know when to open and close a group */
