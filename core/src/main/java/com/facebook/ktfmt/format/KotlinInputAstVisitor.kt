@@ -558,10 +558,10 @@ class KotlinInputAstVisitor(
 
     // use an ArrayDeque and add elements to the beginning so the innermost expression comes first
     // foo.bar.yay -> [yay, bar.yay, foo.bar.yay]
-    parts.addFirst(expression)
 
     var node: KtExpression? = expression
     while (node != null) {
+      parts.addFirst(node)
       node =
           when (node) {
             is KtQualifiedExpression -> node.receiverExpression
@@ -569,9 +569,6 @@ class KotlinInputAstVisitor(
             is KtPostfixExpression -> node.baseExpression
             else -> null
           }
-      if (node != null) {
-        parts.addFirst(node)
-      }
     }
 
     return parts.toList()
