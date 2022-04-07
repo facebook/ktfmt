@@ -2653,7 +2653,8 @@ class FormatterTest {
       |  a.map(String?::isNullOrEmpty)
       |  a.map(
       |      SuperLongClassName?::
-      |          functionName)
+      |          functionName
+      |  )
       |  val f =
       |      SuperLongClassName::
       |          functionName
