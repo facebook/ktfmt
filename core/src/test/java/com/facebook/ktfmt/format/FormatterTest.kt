@@ -96,15 +96,19 @@ class FormatterTest {
       |  computeBreaks(
       |      javaOutput.commentsHelper,
       |      maxWidth,
-      |      Doc.State(+0, 0))
+      |      Doc.State(+0, 0)
+      |  )
       |  computeBreaks(
-      |      output.commentsHelper, maxWidth, State(0))
+      |      output.commentsHelper, maxWidth, State(0)
+      |  )
       |  doc.computeBreaks(
       |      javaOutput.commentsHelper,
       |      maxWidth,
-      |      Doc.State(+0, 0))
+      |      Doc.State(+0, 0)
+      |  )
       |  doc.computeBreaks(
-      |      output.commentsHelper, maxWidth, State(0))
+      |      output.commentsHelper, maxWidth, State(0)
+      |  )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -186,7 +190,8 @@ class FormatterTest {
         |          .add(1)
         |          .add(1)
         |          .add(1)
-        |          .build())
+        |          .build()
+        |  )
         |
         |  ImmutableList.newBuilder()
         |      .add(1)
@@ -297,7 +302,8 @@ class FormatterTest {
       |          (1 + 2) +
       |          function(
       |              value7,
-      |              value8) +
+      |              value8
+      |          ) +
       |          value9
       |}
       |""".trimMargin(),
@@ -601,13 +607,15 @@ class FormatterTest {
       |  // Break after `longerThanFour(` because it's longer than 4 chars
       |  longerThanFour(
       |          something.something
-      |              .happens())
+      |              .happens()
+      |      )
       |      .thenReturn(result)
       |
       |  // Similarly to above, when part of qualified expression.
       |  foo.longerThanFour(
       |          something.something
-      |              .happens())
+      |              .happens()
+      |      )
       |      .thenReturn(result)
       |
       |  // Keep 'super' attached to the method name
@@ -700,7 +708,8 @@ class FormatterTest {
       |class C {
       |  fun method() {
       |    Foo.FooBar(
-      |            param1, param2)
+      |            param1, param2
+      |        )
       |        .apply {
       |          //
       |          foo
@@ -1096,9 +1105,8 @@ class FormatterTest {
       |  foo(1, 2, 3)
       |
       |  foo(
-      |      123456789012345678901234567890,
-      |      123456789012345678901234567890,
-      |      123456789012345678901234567890)
+      |      123456789012345678901234567890, 123456789012345678901234567890, 123456789012345678901234567890
+      |  )
       |}
       |""".trimMargin())
 
@@ -1112,7 +1120,8 @@ class FormatterTest {
       |  foo(
       |      123456789012345678901234567890,
       |      b = 23456789012345678901234567890,
-      |      c = 3456789012345678901234567890)
+      |      c = 3456789012345678901234567890
+      |  )
       |}
       |""".trimMargin())
 
@@ -1127,7 +1136,8 @@ class FormatterTest {
       |              // Printing
       |              print()
       |            },
-      |        duration = duration)
+      |        duration = duration
+      |    )
       |""".trimMargin())
 
   @Test
@@ -1151,7 +1161,8 @@ class FormatterTest {
       |        typeConstraintList =
       |            property.typeConstraintList,
       |        delegate = property.delegate,
-      |        initializer = property.initializer)
+      |        initializer = property.initializer
+      |    )
       |  }
       |}
       |""".trimMargin(),
@@ -1165,7 +1176,8 @@ class FormatterTest {
       |  setListener(
       |      fun(number: Int) {
       |        println(number)
-      |      })
+      |      }
+      |  )
       |}
       |""".trimMargin())
 
@@ -1177,7 +1189,8 @@ class FormatterTest {
       |  setListener(
       |      fun View.() {
       |        println(this)
-      |      })
+      |      }
+      |  )
       |}
       |""".trimMargin())
 
@@ -1285,7 +1298,8 @@ class FormatterTest {
       |  when (foo(
       |      expressions1 &&
       |          expression2 &&
-      |          expression3)) {
+      |          expression3
+      |  )) {
       |    1 -> print(1)
       |    2 -> print(2)
       |  }
@@ -1335,7 +1349,8 @@ class FormatterTest {
       |          ACTION_UP -> Toast.makeText(it.view.context, "Up!", Toast.LENGTH_SHORT).show()
       |          ACTION_DOWN ->
       |              Toast.makeText(
-      |                      it.view.context, "Down!", Toast.LENGTH_SHORT, blablabla, blablabl, blabla)
+      |                      it.view.context, "Down!", Toast.LENGTH_SHORT, blablabla, blablabl, blabla
+      |                  )
       |                  .show()
       |        }
       |      }
@@ -1689,7 +1704,8 @@ class FormatterTest {
       |      if (b) {
       |        val a = 1 + 1
       |        2 * a
-      |      } else 2)
+      |      } else 2
+      |  )
       |  return if (b) 1 else 2
       |}
       |""".trimMargin())
@@ -1760,7 +1776,8 @@ class FormatterTest {
       |  if (foo(
       |      expressions1 &&
       |          expression2 &&
-      |          expression3)) {
+      |          expression3
+      |  )) {
       |    bar()
       |  }
       |}
@@ -1937,7 +1954,8 @@ class FormatterTest {
       |      age,
       |      title,
       |      offspring,
-      |      offspring)
+      |      offspring
+      |  )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -2061,11 +2079,8 @@ class FormatterTest {
       |      .foobar[1, 2, 3]
       |  foo.bar()
       |      .foobar[
-      |          1,
-      |          2,
-      |          3,
-      |          4,
-      |          5]
+      |          1, 2, 3, 4, 5
+      |      ]
       |  foo.bar()
       |      .foobar[1, 2, 3]
       |      .barfoo[3, 2, 1]
@@ -2083,11 +2098,8 @@ class FormatterTest {
       |      .foobar[1, 2, 3]
       |  foo.bar()
       |      .foobar[
-      |          1,
-      |          2,
-      |          3,
-      |          4,
-      |          5]
+      |          1, 2, 3, 4, 5
+      |      ]
       |  foo.bar()
       |      .foobar[1, 2, 3]
       |      .barfoo[3, 2, 1]
@@ -2107,7 +2119,8 @@ class FormatterTest {
       |
       |  val (accountType, accountId) =
       |      oneTwoThreeFourFiveSixSeven(
-      |          foo, bar, zed, boo)
+      |          foo, bar, zed, boo
+      |      )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -2163,17 +2176,20 @@ class FormatterTest {
       |-----------------------
       |fun f() {
       |  com.facebook.foo.Foo(
-      |      1, 2)
+      |      1, 2
+      |  )
       |  com.facebook.foo
       |      .Foo(1, 2)
       |      .andAlsoThis()
       |  com.facebook.Foo.foo(
-      |      1, 2)
+      |      1, 2
+      |  )
       |  com.facebook
       |      .foobarFoo
       |      .foo(1, 2)
       |  foo.invoke(
-      |      foo, bar, bar)
+      |      foo, bar, bar
+      |  )
       |  foo.invoke(foo, bar)
       |      .invoke()
       |  FooFoo.foooooooo()
@@ -2435,10 +2451,12 @@ class FormatterTest {
       |  Stuff()
       |      .doIt(
       |          Foo.doIt()
-      |              .doThat())
+      |              .doThat()
+      |      )
       |      .doIt(
       |          Foo.doIt()
-      |              .doThat())
+      |              .doThat()
+      |      )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -2553,11 +2571,14 @@ class FormatterTest {
       |---------------------------
       |fun f() {
       |  fooDdoIt(
-      |      foo1, foo2, foo3)
+      |      foo1, foo2, foo3
+      |  )
       |  foo.doIt(
-      |      foo1, foo2, foo3)
+      |      foo1, foo2, foo3
+      |  )
       |  foo.doIt(
-      |          foo1, foo2, foo3)
+      |          foo1, foo2, foo3
+      |      )
       |      .doThat()
       |}
       |""".trimMargin(),
@@ -2596,7 +2617,8 @@ class FormatterTest {
       |      functor = {
       |        val a = it
       |        a + a
-      |      })
+      |      }
+      |  )
       |}
       |""".trimMargin())
 
@@ -2942,7 +2964,8 @@ class FormatterTest {
       |      lambdaArgument = {
       |        step1()
       |        step2()
-      |      }) { it.doIt() }
+      |      }
+      |  ) { it.doIt() }
       |}
       |""".trimMargin())
 
@@ -3124,23 +3147,30 @@ class FormatterTest {
       |) {
       |  println(
       |      something is
-      |          List<String>)
+      |          List<String>
+      |  )
       |  doIt(
       |      something as
-      |          List<String>)
+      |          List<String>
+      |  )
       |  println(
       |      something is
       |          PairList<
       |              String,
-      |              Int>)
+      |              Int
+      |          >
+      |  )
       |  doIt(
       |      something as
       |          PairList<
       |              String,
-      |              Int>)
+      |              Int
+      |          >
+      |  )
       |  println(
       |      a is Int &&
-      |          b is String)
+      |          b is String
+      |  )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -3556,7 +3586,9 @@ class FormatterTest {
       |        com.example.interesting.SomeType<
       |            com.example.interesting.SomeType<
       |                Int, Nothing>,
-      |            Nothing>> =
+      |            Nothing
+      |        >
+      |    > =
       |    DUMMY
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -4506,7 +4538,8 @@ class FormatterTest {
       |  )
       |
       |  foo<Int>(
-      |      "asdf", "asdf")
+      |      "asdf", "asdf"
+      |  )
       |
       |  foo<
       |      Int,
@@ -4580,14 +4613,16 @@ class FormatterTest {
       |      x: Int,
       |  ) = foo(
       |      blablablablFoobar,
-      |      alskdjasld)
+      |      alskdjasld
+      |  )
       |
       |  val (
       |      x: Int,
       |      y: Int,
       |  ) = foo(
       |      blablablablFoobar,
-      |      asldkalsd)
+      |      asldkalsd
+      |  )
       |
       |  a[
       |      0,
@@ -5386,7 +5421,8 @@ class FormatterTest {
           """
       |---------------------
       |getRainbow(
-      |        aa, bb, cc)
+      |        aa, bb, cc
+      |    )
       |    .z { it }
       |""".trimMargin(),
           deduceMaxWidth = true)
