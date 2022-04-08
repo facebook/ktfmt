@@ -472,14 +472,14 @@ class GoogleStyleFormatterKtTest {
       |  println(
       |    something is
       |      PairList<
-      |        String,
-      |        Int>
+      |        String, Int
+      |      >
       |  )
       |  doIt(
       |    something as
       |      PairList<
-      |        String,
-      |        Int>
+      |        String, Int
+      |      >
       |  )
       |  println(
       |    a is Int &&
@@ -821,4 +821,53 @@ class GoogleStyleFormatterKtTest {
       |""".trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
+
+  @Test
+  fun `trailing break argument list`() =
+      assertFormatted(
+          """
+      |-------------------
+      |fun method() {
+      |  Foo.FooBar(
+      |    longParameter
+      |  )
+      |  Foo.FooBar(
+      |    param1,
+      |    param2
+      |  )
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `trailing break chains`() =
+      assertFormatted(
+          """
+      |-------------
+      |bar(
+      |  FooOpClass
+      |    .doOp(1)
+      |    .doOp(2)
+      |)
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `wrapping for long function types`() =
+      assertFormatted(
+          """
+      |------------------------
+      |var listener:
+      |  (
+      |    a: String,
+      |    b: String,
+      |    c: String,
+      |    d: String
+      |  ) -> Unit
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
 }

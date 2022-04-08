@@ -907,7 +907,9 @@ class KotlinInputAstVisitor(
       return
     }
 
-    forEachCommaSeparated(list, hasTrailingComma, wrapInBlock) { visit(it) }
+    forEachCommaSeparated(list, hasTrailingComma, wrapInBlock, trailingBreak = isGoogleStyle) {
+      visit(it)
+    }
     if (hasTrailingComma) {
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
     }
@@ -944,6 +946,7 @@ class KotlinInputAstVisitor(
       list: Iterable<T>,
       hasTrailingComma: Boolean = false,
       wrapInBlock: Boolean = true,
+      trailingBreak: Boolean = false,
       function: (T) -> Unit
   ) {
     if (hasTrailingComma) {
@@ -970,6 +973,9 @@ class KotlinInputAstVisitor(
 
         function(value)
       }
+    }
+    if (trailingBreak) {
+      builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
     }
   }
 
