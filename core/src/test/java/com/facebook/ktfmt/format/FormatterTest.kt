@@ -2122,8 +2122,8 @@ class FormatterTest {
       |      .boom()[1, 3, 5]
       |      .lah
       |      .doo { it }
-      |      .feep[1] as
-      |      Boo
+      |      .feep[1]
+      |      as Boo
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -3122,19 +3122,29 @@ class FormatterTest {
       |fun castIt(
       |    something: Any
       |) {
+      |  doIt(
+      |      something
+      |          as List<*>)
+      |  doIt(
+      |      something
+      |          is List<*>)
       |  println(
-      |      something is
+      |      something
+      |          is
       |          List<String>)
       |  doIt(
-      |      something as
+      |      something
+      |          as
       |          List<String>)
       |  println(
-      |      something is
+      |      something
+      |          is
       |          PairList<
       |              String,
       |              Int>)
       |  doIt(
-      |      something as
+      |      something
+      |          as
       |          PairList<
       |              String,
       |              Int>)

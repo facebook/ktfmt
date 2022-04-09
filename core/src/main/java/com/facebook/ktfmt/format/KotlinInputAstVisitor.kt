@@ -2068,26 +2068,30 @@ class KotlinInputAstVisitor(
 
   /** Example `a is Int` or `b !is Int` */
   override fun visitIsExpression(expression: KtIsExpression) {
-    builder.block(ZERO) {
-      builder.sync(expression)
-      visit(expression.leftHandSide)
-      builder.space()
-      visit(expression.operationReference)
-      builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-      builder.block(expressionBreakIndent) { visit(expression.typeReference) }
-    }
+    builder.sync(expression)
+    val openGroupBeforeLeft = expression.leftHandSide !is KtQualifiedExpression
+    if (openGroupBeforeLeft) builder.open(ZERO)
+    visit(expression.leftHandSide)
+    if (!openGroupBeforeLeft) builder.open(ZERO)
+    builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+    visit(expression.operationReference)
+    builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+    builder.block(expressionBreakIndent) { visit(expression.typeReference) }
+    builder.close()
   }
 
   /** Example `a as Int` or `a as? Int` */
   override fun visitBinaryWithTypeRHSExpression(expression: KtBinaryExpressionWithTypeRHS) {
-    builder.block(ZERO) {
-      builder.sync(expression)
-      visit(expression.left)
-      builder.space()
-      visit(expression.operationReference)
-      builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-      builder.block(expressionBreakIndent) { visit(expression.right) }
-    }
+    builder.sync(expression)
+    val openGroupBeforeLeft = expression.left !is KtQualifiedExpression
+    if (openGroupBeforeLeft) builder.open(ZERO)
+    visit(expression.left)
+    if (!openGroupBeforeLeft) builder.open(ZERO)
+    builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+    visit(expression.operationReference)
+    builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
+    builder.block(expressionBreakIndent) { visit(expression.right) }
+    builder.close()
   }
 
   /**

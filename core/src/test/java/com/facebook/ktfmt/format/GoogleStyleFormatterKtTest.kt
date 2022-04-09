@@ -461,22 +461,34 @@ class GoogleStyleFormatterKtTest {
       |fun castIt(
       |  something: Any
       |) {
+      |  doIt(
+      |    something
+      |      as List<*>
+      |  )
+      |  doIt(
+      |    something
+      |      is List<*>
+      |  )
       |  println(
-      |    something is
+      |    something
+      |      is
       |      List<String>
       |  )
       |  doIt(
-      |    something as
+      |    something
+      |      as
       |      List<String>
       |  )
       |  println(
-      |    something is
+      |    something
+      |      is
       |      PairList<
       |        String,
       |        Int>
       |  )
       |  doIt(
-      |    something as
+      |    something
+      |      as
       |      PairList<
       |        String,
       |        Int>
