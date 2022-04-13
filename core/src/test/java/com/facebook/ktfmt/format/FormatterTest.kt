@@ -652,13 +652,16 @@ class FormatterTest {
       |        foo
       |      }
       |
-      |  // All method calls with lambdas are on one line (because they fit),
-      |  // even though the apply() at the end requires a line break.
+      |  // All method calls with lambdas could fit, but we avoid a block like syntax
+      |  // and break to one call per line
       |  val items =
-      |      items.map { it + 1 }.filter { it > 0 }.apply {
-      |        //
-      |        foo
-      |      }
+      |      items
+      |          .map { it + 1 }
+      |          .filter { it > 0 }
+      |          .apply {
+      |            //
+      |            foo
+      |          }
       |
       |  // the lambda is indented properly with the break before it
       |  val items =
@@ -691,6 +694,27 @@ class FormatterTest {
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
+
+  @Test
+  fun `when two lambdas are in a chain, avoid block syntax`() =
+      assertFormatted(
+          """
+      |class Foo : Bar() {
+      |  fun doIt() {
+      |    fruit.onlyBananas().forEach { banana ->
+      |      val seeds = banana.find { it.type == SEED }
+      |      println(seeds)
+      |    }
+      |
+      |    fruit
+      |        .filter { isBanana(it, Bananas.types) }
+      |        .forEach { banana ->
+      |          val seeds = banana.find { it.type == SEED }
+      |          println(seeds)
+      |        }
+      |  }
+      |}
+      |""".trimMargin())
 
   @Test
   fun `indent parameters after a break when there's a lambda afterwards`() =

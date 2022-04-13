@@ -487,8 +487,9 @@ class KotlinInputAstVisitor(
    */
   private fun emitQualifiedExpression(expression: KtExpression) {
     val parts = breakIntoParts(expression)
-    val hasTrailingLambda = parts.last().isLambda()
-    val groupingInfos = computeGroupingInfo(parts, hasTrailingLambda)
+    // whether we want to make a lambda look like a block, this make Kotlin DSLs look as expected
+    val useBlockLikeLambdaStyle = parts.last().isLambda() && parts.count { it.isLambda() } == 1
+    val groupingInfos = computeGroupingInfo(parts, useBlockLikeLambdaStyle)
     builder.block(expressionBreakIndent) {
       val nameTag = genSym() // allows adjusting arguments indentation if a break will be made
       for ((index, ktExpression) in parts.withIndex()) {
@@ -515,7 +516,7 @@ class KotlinInputAstVisitor(
                 builder.close()
               }
               // close group due to last lambda to allow block-like style in `as.forEach { ... }`
-              val isTrailingLambda = hasTrailingLambda && index == parts.size - 1
+              val isTrailingLambda = useBlockLikeLambdaStyle && index == parts.size - 1
               if (isTrailingLambda) {
                 builder.close()
               }
@@ -609,7 +610,7 @@ class KotlinInputAstVisitor(
    */
   private fun computeGroupingInfo(
       parts: List<KtExpression>,
-      hasTrailingLambda: Boolean
+      useBlockLikeLambdaStyle: Boolean
   ): List<GroupingInfo> {
     val groupingInfos = List(parts.size) { GroupingInfo() }
     var lastIndexToOpen = 0
@@ -639,7 +640,7 @@ class KotlinInputAstVisitor(
         }
       }
     }
-    if (hasTrailingLambda) {
+    if (useBlockLikeLambdaStyle) {
       // a trailing lambda adds a group that we stop before emitting the lambda
       groupingInfos[0].groupOpenCount++
     }
