@@ -188,6 +188,8 @@ class MainTest {
 
     val lastModifiedTimeBeforeRunningFormatter =
         Files.getLastModifiedTime(unformattedFilePath).toMillis()
+    // The test may run under 1ms, and we need to make sure the new file timestamp will be different
+    Thread.sleep(1)
     Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf(unformattedFile.toString())).run()
     val lastModifiedTimeAfterRunningFormatter =
         Files.getLastModifiedTime(unformattedFilePath).toMillis()
