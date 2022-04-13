@@ -65,12 +65,13 @@ class Main(
     }
   }
 
-  private val parsedArgs: ParsedArgs = ParsedArgs.parseOptions(err, args)
+  private val parsedArgs: ParsedArgs = ParsedArgs.processArgs(err, args)
 
   fun run(): Int {
     if (parsedArgs.fileNames.isEmpty()) {
       err.println(
           "Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] File1.kt File2.kt ...")
+      err.println("Or: ktfmt @file")
       return 1
     }
 

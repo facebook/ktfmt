@@ -33,37 +33,42 @@ import org.jetbrains.kotlin.psi.psiUtil.collectDescendantsOfType
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 /** Parser parses a Kotlin file given as a string and returns its parse tree. */
-open class Parser {
-  fun parse(code: String): KtFile {
+object Parser {
+
+  /**
+   * The environment used to open a KtFile
+   *
+   * We allocate it once, and ignore the Diposable. This causes a memory leak, but it was also
+   * causing a worse memory leak before when we created new ones and disposed them. This leak comes
+   * from [KotlinCoreEnvironment.createForProduction]:
+   * https://github.com/JetBrains/kotlin/blob/master/compiler/cli/src/org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreEnvironment.kt#L544
+   */
+  val env: KotlinCoreEnvironment
+
+  init {
+    // To hide annoying warning on Windows
+    System.setProperty("idea.use.native.fs.for.win", "false")
     val disposable = Disposer.newDisposable()
-    try {
-      val configuration = CompilerConfiguration()
-      configuration.put(
-          CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
-          PrintingMessageCollector(System.err, PLAIN_RELATIVE_PATHS, false))
-      val env =
-          KotlinCoreEnvironment.createForProduction(
-              disposable, configuration, EnvironmentConfigFiles.JVM_CONFIG_FILES)
-      val virtualFile = LightVirtualFile("temp.kts", KotlinFileType.INSTANCE, code)
-      val ktFile = PsiManager.getInstance(env.project).findFile(virtualFile) as KtFile
-      ktFile.collectDescendantsOfType<PsiErrorElement>().let {
-        if (it.isNotEmpty()) throwParseError(code, it[0])
-      }
-      return ktFile
-    } finally {
-      disposable.dispose()
+    val configuration = CompilerConfiguration()
+    configuration.put(
+        CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
+        PrintingMessageCollector(System.err, PLAIN_RELATIVE_PATHS, false))
+    env =
+        KotlinCoreEnvironment.createForProduction(
+            disposable, configuration, EnvironmentConfigFiles.JVM_CONFIG_FILES)
+  }
+
+  fun parse(code: String): KtFile {
+    val virtualFile = LightVirtualFile("temp.kts", KotlinFileType.INSTANCE, code)
+    val ktFile = PsiManager.getInstance(env.project).findFile(virtualFile) as KtFile
+    ktFile.collectDescendantsOfType<PsiErrorElement>().let {
+      if (it.isNotEmpty()) throwParseError(code, it[0])
     }
+    return ktFile
   }
 
   private fun throwParseError(fileContents: String, error: PsiErrorElement): Nothing {
     throw ParseError(
         error.errorDescription, StringUtil.offsetToLineColumn(fileContents, error.startOffset))
-  }
-
-  companion object : Parser() {
-    init {
-      // To hide annoying warning on Windows
-      System.setProperty("idea.use.native.fs.for.win", "false")
-    }
   }
 }

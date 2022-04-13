@@ -17,7 +17,6 @@
 package com.facebook.ktfmt.format
 
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
-import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
 import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.psi.KtEnumEntry
@@ -49,6 +48,7 @@ internal class RedundantSemicolonDetector {
     if (element.text != ";") {
       return false
     }
+
     val parent = element.parent
     if (parent is KtStringTemplateExpression || parent is KtStringTemplateEntry) {
       return false
@@ -57,6 +57,7 @@ internal class RedundantSemicolonDetector {
         parent.siblings(forward = true, withItself = false).any { it is KtDeclaration }) {
       return false
     }
+
     val prevLeaf = element.prevLeaf(false)
     val prevConcreteSibling = element.getPrevSiblingIgnoringWhitespaceAndComments()
     if ((prevConcreteSibling is KtIfExpression || prevConcreteSibling is KtWhileExpression) &&
@@ -64,9 +65,17 @@ internal class RedundantSemicolonDetector {
         prevLeaf.text.isEmpty()) {
       return false
     }
+
     val nextConcreteSibling = element.getNextSiblingIgnoringWhitespaceAndComments()
-    if (prevConcreteSibling is KtCallExpression && nextConcreteSibling is KtLambdaExpression) {
-      return false // Example: `foo(0); { dead -> lambda }`
+    if (nextConcreteSibling is KtLambdaExpression) {
+      /**
+       * Example: `val x = foo(0) ; { dead -> lambda }`
+       *
+       * There are a huge number of cases here because the trailing lambda syntax is so flexible.
+       * Therefore, we just assume that all semicolons followed by lambdas are meaningful. The cases
+       * where they could be removed are too rare to justify the risk of changing behaviour.
+       */
+      return false
     }
 
     return true

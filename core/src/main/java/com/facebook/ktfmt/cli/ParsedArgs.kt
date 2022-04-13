@@ -18,6 +18,7 @@ package com.facebook.ktfmt.cli
 
 import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
+import java.io.File
 import java.io.PrintStream
 
 /** ParsedArgs holds the arguments passed to ktfmt on the command-line, after parsing. */
@@ -34,6 +35,15 @@ data class ParsedArgs(
     val setExitIfChanged: Boolean,
 ) {
   companion object {
+
+    fun processArgs(err: PrintStream, args: Array<String>): ParsedArgs {
+      if (args.size == 1 && args[0].startsWith("@")) {
+        return parseOptions(err, File(args[0].substring(1)).readLines().toTypedArray())
+      } else {
+        return parseOptions(err, args)
+      }
+    }
+
     /** parseOptions parses command-line arguments passed to ktfmt. */
     fun parseOptions(err: PrintStream, args: Array<String>): ParsedArgs {
       val fileNames = mutableListOf<String>()
@@ -49,6 +59,7 @@ data class ParsedArgs(
           arg == "--dry-run" || arg == "-n" -> dryRun = true
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
           arg.startsWith("--") -> err.println("Unexpected option: $arg")
+          arg.startsWith("@") -> err.println("Unexpected option: $arg")
           else -> fileNames.add(arg)
         }
       }
