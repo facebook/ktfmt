@@ -16,7 +16,6 @@
 
 package com.facebook.ktfmt.format
 
-import com.facebook.ktfmt.debughelpers.PrintAstVisitor
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,8 +34,6 @@ class TokenizerTest {
             .joinToString("\n")
 
     val file = Parser.parse(code)
-    println("# Parse tree of input: ")
-    println("#".repeat(20))
     val tokenizer = Tokenizer(code, file)
     file.accept(tokenizer)
 
@@ -63,14 +60,8 @@ class TokenizerTest {
             .joinToString("\n")
 
     val file = Parser.parse(code)
-    println("# Parse tree of input: ")
-    println("#".repeat(20))
-    file.accept(PrintAstVisitor())
-
     val tokenizer = Tokenizer(code, file)
     file.accept(tokenizer)
-
-    print(tokenizer.toks.joinToString(", ") { "\"${it.originalText}\"" })
 
     assertThat(tokenizer.toks.map { it.originalText })
         .containsExactly(
@@ -109,12 +100,8 @@ class TokenizerTest {
       |""".trimMargin().trimMargin()
 
     val file = Parser.parse(code)
-    println("# Parse tree of input: ")
-    println("#".repeat(20))
     val tokenizer = Tokenizer(code, file)
     file.accept(tokenizer)
-
-    print(tokenizer.toks.joinToString(",\n") { "\"${it}\"" })
 
     assertThat(tokenizer.toks.map { it.originalText })
         .containsExactly("val", " ", "b", "=", "\"a\"", "\n", "val", " ", "a", "=", "5")
