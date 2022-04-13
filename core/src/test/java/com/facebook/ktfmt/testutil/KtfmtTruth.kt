@@ -74,12 +74,11 @@ fun assertThatFormatting(code: String): FormattedCodeSubject {
 
 class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) :
     Subject(metadata, code) {
-  private var options: FormattingOptions =
-      FormattingOptions(debuggingPrintOpsAfterFormatting = true)
+  private var options: FormattingOptions = FormattingOptions()
   private var allowTrailingWhitespace = false
 
   fun withOptions(options: FormattingOptions): FormattedCodeSubject {
-    this.options = options.copy(debuggingPrintOpsAfterFormatting = true)
+    this.options = options
     return this
   }
 
@@ -109,6 +108,9 @@ class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) 
         println("#".repeat(20))
         println(expectedFormatting)
         println("#".repeat(20))
+        println(
+            "Need more information about the break operations?" +
+                "Run test with assertion with \"FormattingOptions(debuggingPrintOpsAfterFormatting = true)\"")
       }
     } catch (e: Error) {
       reportError(code)
