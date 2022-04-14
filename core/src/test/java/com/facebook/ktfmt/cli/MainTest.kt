@@ -23,6 +23,7 @@ import java.io.PrintStream
 import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.util.concurrent.ForkJoinPool
+import kotlin.io.path.createTempDirectory
 import org.junit.After
 import org.junit.Assert.fail
 import org.junit.Test
@@ -33,7 +34,7 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class MainTest {
 
-  private val root = createTempDir()
+  private val root = createTempDirectory().toFile()
 
   private val emptyInput = "".byteInputStream()
   private val out = ByteArrayOutputStream()

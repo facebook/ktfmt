@@ -2253,7 +2253,7 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `handle ? for nullalble types`() =
+  fun `handle qmark for nullalble types`() =
       assertFormatted(
           """
       |fun doItWithNullReturns(a: String, b: String): Int? {
