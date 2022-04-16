@@ -22,7 +22,8 @@ import com.google.common.truth.Truth.assertThat
 import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
 import java.io.PrintStream
-import junit.framework.Assert.fail
+import kotlin.io.path.createTempDirectory
+import kotlin.test.assertFailsWith
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,7 +33,7 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class ParsedArgsTest {
 
-  private val root = createTempDir()
+  private val root = createTempDirectory().toFile()
 
   @After
   fun tearDown() {
@@ -132,12 +133,11 @@ class ParsedArgsTest {
   fun `processArgs use the @file option with non existing file`() {
     val out = ByteArrayOutputStream()
 
-    try {
-      ParsedArgs.processArgs(PrintStream(out), arrayOf("@non-existing-file"))
-      fail("expected an exception of type FileNotFoundException but nothing was thrown")
-    } catch (e: FileNotFoundException) {
-      assertThat(e.message).contains("non-existing-file (No such file or directory)")
-    }
+    val e =
+        assertFailsWith<FileNotFoundException> {
+          ParsedArgs.processArgs(PrintStream(out), arrayOf("@non-existing-file"))
+        }
+    assertThat(e.message).contains("non-existing-file (No such file or directory)")
   }
 
   @Test
