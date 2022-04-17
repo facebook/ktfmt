@@ -1557,20 +1557,31 @@ class KotlinInputAstVisitor(
   override fun visitAnnotatedExpression(expression: KtAnnotatedExpression) {
     builder.sync(expression)
     builder.block(ZERO) {
-      loop@ for (child in expression.node.children()) {
-        when (val psi = child.psi) {
-          is PsiWhiteSpace -> continue@loop
-          is KtAnnotationEntry -> {
-            visit(psi)
-            if (expression.annotationEntries.size != 1) {
-              builder.forcedBreak()
-            } else {
-              builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
-            }
-          }
-          else -> visit(psi)
+      builder.block(ZERO) {
+        visit(expression.annotationEntries[0])
+        expression.annotationEntries.drop(1).forEach {
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+          visit(it)
         }
       }
+
+      /**
+       * Break after annotations iff this is a block-level expression.
+       *
+       * For some block-level expressions (e.g. binary operators, infix functions) the line break
+       * changes the target of the annotation. When on the previous line, the annotation targets the
+       * entire expression. When on the same line, it targets only the left-most sub-expression.
+       *
+       * In order to always preserve semantics, and guarantee consistent formatting, we always break
+       * only for this case.
+       */
+      if (expression.parent is KtBlockExpression) {
+        builder.forcedBreak()
+      } else {
+        builder.space()
+      }
+
+      visit(expression.baseExpression)
     }
   }
 

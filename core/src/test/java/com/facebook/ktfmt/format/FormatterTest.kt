@@ -4021,7 +4021,8 @@ class FormatterTest {
       |class MyClass {}
       |
       |fun f() {
-      |  @Suppress("MagicNumber") add(10)
+      |  @Suppress("MagicNumber")
+      |  add(10)
       |
       |  @Annotation // test a comment after annotations
       |  return 5
@@ -4033,16 +4034,38 @@ class FormatterTest {
   fun `annotated expressions`() =
       assertFormatted(
           """
+      |------------------------------------------------
       |fun f() {
-      |  @Suppress("MagicNumber") add(10)
+      |  @Suppress("MagicNumber") add(10) && add(20)
+      |
+      |  @Suppress("MagicNumber")
+      |  add(10) && add(20)
+      |
+      |  @Anno1 @Anno2(param = Param1::class)
+      |  add(10) && add(20)
       |
       |  @Anno1
       |  @Anno2(param = Param1::class)
       |  @Anno3
       |  @Anno4(param = Param2::class)
-      |  add(10)
+      |  add(10) && add(20)
+      |
+      |  @Anno1
+      |  @Anno2(param = Param1::class)
+      |  @Anno3
+      |  @Anno4(param = Param2::class) add(10) &&
+      |      add(20)
+      |
+      |  @Suppress("MagicNumber") add(10) &&
+      |      add(20) &&
+      |      add(30)
+      |
+      |  add(@Suppress("MagicNumber") 10) &&
+      |      add(20) &&
+      |      add(30)
       |}
-      |""".trimMargin())
+      |""".trimMargin(),
+          deduceMaxWidth = true)
 
   @Test
   fun `annotated function declarations`() =
@@ -4686,8 +4709,7 @@ class FormatterTest {
       |    }
       |
       |fun foo() =
-      |    Runnable @Px
-      |    {
+      |    Runnable @Px {
       |      foo()
       |      //
       |    }
