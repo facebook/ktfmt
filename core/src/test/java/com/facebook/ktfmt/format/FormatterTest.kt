@@ -1244,7 +1244,8 @@ class FormatterTest {
           """
       |fun f(x: Int) {
       |  when {
-      |    0, 1 -> print(1)
+      |    0,
+      |    1 -> print(1)
       |    else -> print(0)
       |  }
       |}
@@ -4641,7 +4642,8 @@ class FormatterTest {
       |
       |  when (foo) {
       |    'x', -> 43
-      |    'x', 'y', -> 43
+      |    'x',
+      |    'y', -> 43
       |    'x',
       |    'y',
       |    'z',

@@ -1699,8 +1699,14 @@ class KotlinInputAstVisitor(
             builder.token("else")
           } else {
             builder.block(ZERO) {
-              forEachCommaSeparated(whenEntry.conditions.asIterable()) { visit(it) }
-              builder.guessToken(",")
+              val conditions = whenEntry.conditions
+              for ((index, condition) in conditions.withIndex()) {
+                visit(condition)
+                builder.guessToken(",")
+                if (index != conditions.lastIndex) {
+                  builder.forcedBreak()
+                }
+              }
             }
           }
           val whenExpression = whenEntry.expression
