@@ -110,8 +110,7 @@ internal class RedundantImportDetector(val enabled: Boolean) {
     }
 
     importCleanUpCandidates =
-        importList
-            .imports
+        importList.imports
             .filter { import ->
               import.isValidImport &&
                   !import.isAllUnder &&
