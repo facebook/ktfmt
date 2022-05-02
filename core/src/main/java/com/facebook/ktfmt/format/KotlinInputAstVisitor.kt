@@ -1557,20 +1557,30 @@ class KotlinInputAstVisitor(
   override fun visitAnnotatedExpression(expression: KtAnnotatedExpression) {
     builder.sync(expression)
     builder.block(ZERO) {
-      loop@ for (child in expression.node.children()) {
-        when (val psi = child.psi) {
-          is PsiWhiteSpace -> continue@loop
-          is KtAnnotationEntry -> {
-            visit(psi)
-            if (expression.annotationEntries.size != 1) {
-              builder.forcedBreak()
-            } else {
-              builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
-            }
+      val baseExpression = expression.baseExpression
+
+      builder.block(ZERO) {
+        val annotationEntries = expression.annotationEntries
+        for (annotationEntry in annotationEntries) {
+          if (annotationEntry !== annotationEntries.first()) {
+            builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
           }
-          else -> visit(psi)
+          visit(annotationEntry)
         }
       }
+
+      // Binary expressions in a block have a different meaning according to their formatting.
+      // If there in the line above, they refer to the entire expression, if they're in the same
+      // line then only to the first operand of the operator.
+      // We force a break to avoid such semantic changes
+      when {
+        (baseExpression is KtBinaryExpression || baseExpression is KtBinaryExpressionWithTypeRHS) &&
+            expression.parent is KtBlockExpression -> builder.forcedBreak()
+        baseExpression is KtLambdaExpression -> builder.space()
+        else -> builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+      }
+
+      visit(expression.baseExpression)
     }
   }
 

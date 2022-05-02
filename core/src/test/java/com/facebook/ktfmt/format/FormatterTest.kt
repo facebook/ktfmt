@@ -4034,16 +4034,38 @@ class FormatterTest {
   fun `annotated expressions`() =
       assertFormatted(
           """
+      |------------------------------------------------
       |fun f() {
-      |  @Suppress("MagicNumber") add(10)
+      |  @Suppress("MagicNumber") add(10) && add(20)
+      |
+      |  @Suppress("MagicNumber")
+      |  add(10) && add(20)
+      |
+      |  @Anno1 @Anno2(param = Param1::class)
+      |  add(10) && add(20)
       |
       |  @Anno1
       |  @Anno2(param = Param1::class)
       |  @Anno3
       |  @Anno4(param = Param2::class)
-      |  add(10)
+      |  add(10) && add(20)
+      |
+      |  @Anno1
+      |  @Anno2(param = Param1::class)
+      |  @Anno3
+      |  @Anno4(param = Param2::class)
+      |  add(10) && add(20)
+      |
+      |  @Suppress("MagicNumber") add(10) &&
+      |      add(20) &&
+      |      add(30)
+      |
+      |  add(@Suppress("MagicNumber") 10) &&
+      |      add(20) &&
+      |      add(30)
       |}
-      |""".trimMargin())
+      |""".trimMargin(),
+          deduceMaxWidth = true)
 
   @Test
   fun `annotated function declarations`() =
@@ -4688,8 +4710,7 @@ class FormatterTest {
       |    }
       |
       |fun foo() =
-      |    Runnable @Px
-      |    {
+      |    Runnable @Px {
       |      foo()
       |      //
       |    }
@@ -5687,4 +5708,48 @@ class FormatterTest {
       |    .z { it }
       |""".trimMargin(),
           deduceMaxWidth = true)
+
+  @Test
+  fun `annotations for expressions`() =
+      assertFormatted(
+          """
+      |fun f() {
+      |  var b
+      |  @Suppress("UNCHECKED_CAST") b = f(1) as Int
+      |  @Suppress("UNCHECKED_CAST")
+      |  b = f(1) as Int
+      |
+      |  @Suppress("UNCHECKED_CAST") b = f(1) to 5
+      |  @Suppress("UNCHECKED_CAST")
+      |  b = f(1) to 5
+      |
+      |  @Suppress("UNCHECKED_CAST") f(1) as Int + 5
+      |  @Suppress("UNCHECKED_CAST")
+      |  f(1) as Int + 5
+      |
+      |  @Anno1 /* comment */ @Anno2 f(1) as Int
+      |}
+      |""".trimMargin())
+
+  @Test
+  fun `annotations for expressions 2`() {
+    val code =
+        """
+      |fun f() {
+      |  @Suppress("UNCHECKED_CAST") f(1 + f(1) as Int)
+      |  @Suppress("UNCHECKED_CAST")
+      |  f(1 + f(1) as Int)
+      |}
+      |""".trimMargin()
+
+    val expected =
+        """
+      |fun f() {
+      |  @Suppress("UNCHECKED_CAST") f(1 + f(1) as Int)
+      |  @Suppress("UNCHECKED_CAST") f(1 + f(1) as Int)
+      |}
+      |""".trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
 }
