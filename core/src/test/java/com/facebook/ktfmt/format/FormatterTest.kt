@@ -585,7 +585,8 @@ class FormatterTest {
       |
       |  // Similar to above.
       |  abcdefghijkl.abcdefghijkl
-      |      ?.methodName3?.abcdefghijkl()
+      |      ?.methodName3
+      |      ?.abcdefghijkl()
       |
       |  // Multiple call expressions cause each part of the expression
       |  // to be placed on its own line.
@@ -2218,7 +2219,8 @@ class FormatterTest {
       |          .getInternalMutablePackageInfo(context.packageName)
       |          .someItems[0]
       |          .getInternalMutablePackageInfo(context.packageName)
-      |          .someItems[0].doIt()
+      |          .someItems[0]
+      |          .doIt()
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -5034,7 +5036,9 @@ class FormatterTest {
       |    .green
       |    .blue
       |    .shine()
-      |    .indigo.violet.cyan
+      |    .indigo
+      |    .violet
+      |    .cyan
       |    .magenta
       |    .key
       |""".trimMargin(),
@@ -5051,7 +5055,9 @@ class FormatterTest {
       |    .indigo
       |    .shine()
       |    .bright()
-      |    .violet.cyan.magenta
+      |    .violet
+      |    .cyan
+      |    .magenta
       |    .key
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -5119,7 +5125,9 @@ class FormatterTest {
       |    .green
       |    .blue
       |    .z { it }
-      |    .indigo.violet.cyan
+      |    .indigo
+      |    .violet
+      |    .cyan
       |    .magenta
       |    .key
       |""".trimMargin(),
@@ -5137,7 +5145,9 @@ class FormatterTest {
       |      it
       |      it
       |    }
-      |    .indigo.violet.cyan
+      |    .indigo
+      |    .violet
+      |    .cyan
       |    .magenta
       |    .key
       |""".trimMargin(),
@@ -5153,7 +5163,11 @@ class FormatterTest {
       |      it
       |      it
       |    }
-      |    .indigo.violet.cyan.magenta.key
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -5169,7 +5183,11 @@ class FormatterTest {
       |    }
       |    .shine()
       |    .bright()
-      |    .indigo.violet.cyan.magenta.key
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -5241,7 +5259,9 @@ class FormatterTest {
       |    .indigo
       |    .z { it }
       |    .shine()
-      |    .violet.cyan.magenta
+      |    .violet
+      |    .cyan
+      |    .magenta
       |    .key
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -5257,7 +5277,9 @@ class FormatterTest {
       |    .indigo
       |    .shine()
       |    .z { it }
-      |    .violet.cyan.magenta
+      |    .violet
+      |    .cyan
+      |    .magenta
       |    .key
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -5367,7 +5389,9 @@ class FormatterTest {
           """
       |-------------------------
       |z12.z { it }
-      |    .red.orange.yellow
+      |    .red
+      |    .orange
+      |    .yellow
       |    .green
       |    .blue
       |    .indigo
@@ -5385,7 +5409,9 @@ class FormatterTest {
           """
       |-------------------------
       |this.z { it }
-      |    .red.orange.yellow
+      |    .red
+      |    .orange
+      |    .yellow
       |    .green
       |    .blue
       |    .indigo

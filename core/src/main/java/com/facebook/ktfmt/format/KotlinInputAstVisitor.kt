@@ -622,15 +622,17 @@ class KotlinInputAstVisitor(
               (receiverExpression as? KtQualifiedExpression)?.selectorExpression
                   ?: receiverExpression
           val current = checkNotNull(part.selectorExpression)
-          if (shouldGroupPartWithPrevious(parts, part, index, previous, current)) {
+          if (lastIndexToOpen == 0 &&
+              shouldGroupPartWithPrevious(parts, part, index, previous, current)) {
             // this and the previous items should be grouped for better style
-            // we add another group to open in the current index we have been using
-            groupingInfos[lastIndexToOpen].groupOpenCount++
+            // we add another group to open in index 0
+            groupingInfos[0].groupOpenCount++
             // we don't always close a group when emitting this node, so we need this flag to
             // mark if we need to close a group
             groupingInfos[index].shouldCloseGroup = true
           } else {
-            // use this index in to open future groups
+            // use this index in to open future groups for arrays and postfixes
+            // we will also stop grouping field access to the beginning of the expression
             lastIndexToOpen = index
           }
         }

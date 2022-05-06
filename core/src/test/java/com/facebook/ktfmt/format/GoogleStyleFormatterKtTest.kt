@@ -663,7 +663,8 @@ class GoogleStyleFormatterKtTest {
       |
       |  // Similar to above.
       |  abcdefghijkl.abcdefghijkl
-      |    ?.methodName3?.abcdefghijkl()
+      |    ?.methodName3
+      |    ?.abcdefghijkl()
       |
       |  // Multiple call expressions cause each part of the expression
       |  // to be placed on its own line.
