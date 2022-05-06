@@ -2020,15 +2020,23 @@ class KotlinInputAstVisitor(
     builder.sync(parameter)
     builder.block(ZERO) {
       val destructuringDeclaration = parameter.destructuringDeclaration
+      val typeReference = parameter.typeReference
       if (destructuringDeclaration != null) {
-        visit(destructuringDeclaration)
+        builder.block(ZERO) {
+          visit(destructuringDeclaration)
+          if (typeReference != null) {
+            builder.token(":")
+            builder.space()
+            visit(typeReference)
+          }
+        }
       } else {
         declareOne(
             kind = DeclarationKind.PARAMETER,
             modifiers = parameter.modifierList,
             valOrVarKeyword = parameter.valOrVarKeyword?.text,
             name = parameter.nameIdentifier?.text,
-            type = parameter.typeReference,
+            type = typeReference,
             initializer = parameter.defaultValue)
       }
     }

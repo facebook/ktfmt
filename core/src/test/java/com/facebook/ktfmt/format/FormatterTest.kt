@@ -3639,6 +3639,16 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `handle lambda with destructuring and type`() =
+      assertFormatted(
+          """
+      |fun f() {
+      |  g { (a, b): List<Int> -> a }
+      |  g { (a, b): List<Int>, (c, d): List<Int> -> a }
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `handle parenthesis in lambda calls for now`() =
       assertFormatted(
           """
