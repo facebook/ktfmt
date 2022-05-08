@@ -94,7 +94,8 @@ object KDocFormatter {
       KDocTokens.LEADING_ASTERISK -> Unit // Ignore, no need to output anything
       KDocTokens.TAG_NAME -> tokens.add(KDocToken(TAG, tokenText))
       KDocTokens.CODE_BLOCK_TEXT -> tokens.add(KDocToken(CODE, tokenText))
-      KDocTokens.MARKDOWN_INLINE_LINK, KDocTokens.MARKDOWN_LINK -> {
+      KDocTokens.MARKDOWN_INLINE_LINK,
+      KDocTokens.MARKDOWN_LINK -> {
         tokens.add(KDocToken(MARKDOWN_LINK, tokenText))
       }
       KDocTokens.TEXT -> {

@@ -47,8 +47,9 @@ object TypeNameClassifier {
     TYPE(true) {
       override fun next(n: JavaCaseFormat): TyParseState {
         return when (n) {
-          JavaCaseFormat.UPPERCASE, JavaCaseFormat.LOWER_CAMEL, JavaCaseFormat.LOWERCASE ->
-              FIRST_STATIC_MEMBER
+          JavaCaseFormat.UPPERCASE,
+          JavaCaseFormat.LOWER_CAMEL,
+          JavaCaseFormat.LOWERCASE -> FIRST_STATIC_MEMBER
           JavaCaseFormat.UPPER_CAMEL -> TYPE
         }
       }
@@ -73,7 +74,8 @@ object TypeNameClassifier {
       override fun next(n: JavaCaseFormat): TyParseState {
         return when (n) {
           JavaCaseFormat.UPPERCASE -> AMBIGUOUS
-          JavaCaseFormat.LOWER_CAMEL, JavaCaseFormat.LOWERCASE -> REJECT
+          JavaCaseFormat.LOWER_CAMEL,
+          JavaCaseFormat.LOWERCASE -> REJECT
           JavaCaseFormat.UPPER_CAMEL -> TYPE
         }
       }

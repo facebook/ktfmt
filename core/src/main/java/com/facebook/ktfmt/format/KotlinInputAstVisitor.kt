@@ -636,7 +636,8 @@ class KotlinInputAstVisitor(
             lastIndexToOpen = index
           }
         }
-        is KtArrayAccessExpression, is KtPostfixExpression -> {
+        is KtArrayAccessExpression,
+        is KtPostfixExpression -> {
           // we group these with the last item with a name, and we always close them
           groupingInfos[lastIndexToOpen].groupOpenCount++
         }
