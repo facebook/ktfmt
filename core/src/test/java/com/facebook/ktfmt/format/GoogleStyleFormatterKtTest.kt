@@ -238,6 +238,64 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `don't one-line lambdas following parameter breaks`() =
+      assertFormatted(
+          """
+      |------------------------------------------------------------------------
+      |class Foo : Bar() {
+      |  fun doIt() {
+      |    // don't break in lambda, no parameter breaks found
+      |    fruit.forEach { eat(it) }
+      |
+      |    // don't break in lambda, because we only detect parameter breaks
+      |    // with trailing commas
+      |    fruit.forEach(
+      |      someVeryLongParameterNameThatWillCauseABreak,
+      |      evenWithoutATrailingCommaOnTheParameterListSoLetsSeeIt
+      |    ) { eat(it) }
+      |
+      |    // break in the lambda
+      |    fruit.forEach(
+      |      fromTheVine = true,
+      |    ) {
+      |      eat(it)
+      |    }
+      |
+      |    // don't break in the inner lambda, as nesting doesn't respect outer levels
+      |    fruit.forEach(
+      |      fromTheVine = true,
+      |    ) {
+      |      fruit.forEach { eat(it) }
+      |    }
+      |
+      |    // don't break in the lambda, as breaks don't propagate
+      |    fruit
+      |      .onlyBananas(
+      |        fromTheVine = true,
+      |      )
+      |      .forEach { eat(it) }
+      |
+      |    // don't break in the inner lambda, as breaks don't propagate to parameters
+      |    fruit.onlyBananas(
+      |      fromTheVine = true,
+      |      processThem = { eat(it) },
+      |    ) {
+      |      eat(it)
+      |    }
+      |
+      |    // don't break in the inner lambda, as breaks don't propagate to the body
+      |    fruit.onlyBananas(
+      |      fromTheVine = true,
+      |    ) {
+      |      val anon = { eat(it) }
+      |    }
+      |  }
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
   fun `function calls with multiple arguments`() =
       assertFormatted(
           """

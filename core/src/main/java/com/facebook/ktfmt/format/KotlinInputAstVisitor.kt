@@ -522,6 +522,7 @@ class KotlinInputAstVisitor(
               }
               val argsIndentElse = if (index == parts.size - 1) ZERO else expressionBreakIndent
               val lambdaIndentElse = if (isTrailingLambda) expressionBreakNegativeIndent else ZERO
+
               // emit `(1, 2) { it }` from `doIt(1, 2) { it }`
               visitCallElement(
                   null,
@@ -751,9 +752,14 @@ class KotlinInputAstVisitor(
           builder.token(")")
         }
       }
+      val hasTrailingComma = argumentList?.trailingComma != null
       if (lambdaArguments.isNotEmpty()) {
         builder.space()
-        builder.block(lambdaIndent) { lambdaArguments.forEach { visit(it) } }
+        builder.block(lambdaIndent) {
+          lambdaArguments.forEach {
+            visitArgumentInternal(it, forceBreakLambdaBody = hasTrailingComma)
+          }
+        }
       }
     }
   }
@@ -783,12 +789,38 @@ class KotlinInputAstVisitor(
 
   /** Example `{ 1 + 1 }` (as lambda) or `{ (x, y) -> x + y }` */
   override fun visitLambdaExpression(lambdaExpression: KtLambdaExpression) {
-    visitLambdaExpression(lambdaExpression, null as BreakTag?)
+    visitLambdaExpressionInternal(lambdaExpression, brokeBeforeBrace = null, forceBreakBody = false)
   }
 
-  private fun visitLambdaExpression(
+  /**
+   * The internal version of [visitLambdaExpression].
+   *
+   * @param brokeBeforeBrace used for tracking if a break was taken right before the lambda
+   * expression. Useful for scoping functions where we want good looking indentation. For example,
+   * here we have correct indentation before `bar()` and `car()` because we can detect the break
+   * after the equals:
+   * ```
+   * fun foo() =
+   *     coroutineScope { x ->
+   *       bar()
+   *       car()
+   *     }
+   * ```
+   * @param forceBreakBody if true, forces the lambda to be multi-line. Useful for call expressions
+   * where it would look weird for the lambda to be on one-line. For example, here we avoid
+   * one-lining `{ x = 0 }` since the parameters have a trailing comma:
+   * ```
+   * foo.bar(
+   *   trailingComma,
+   * ) {
+   *   x = 0
+   * }
+   * ```
+   */
+  private fun visitLambdaExpressionInternal(
       lambdaExpression: KtLambdaExpression,
       brokeBeforeBrace: BreakTag?,
+      forceBreakBody: Boolean,
   ) {
     builder.sync(lambdaExpression)
 
@@ -836,6 +868,10 @@ class KotlinInputAstVisitor(
         builder.token("->")
       }
       builder.breakOp(Doc.FillMode.UNIFIED, "", bracePlusZeroIndent)
+    }
+
+    if (forceBreakBody) {
+      builder.forcedBreak()
     }
 
     if (hasStatements) {
@@ -985,6 +1021,20 @@ class KotlinInputAstVisitor(
 
   /** Example `a` in `foo(a)`, or `*a`, or `limit = 50` */
   override fun visitArgument(argument: KtValueArgument) {
+    visitArgumentInternal(argument, forceBreakLambdaBody = false)
+  }
+
+  /**
+   * The internal version of [visitArgument].
+   *
+   * @param forceBreakLambdaBody if true (and [argument] is of type [KtLambdaExpression]), forces
+   * the lambda to be multi-line. See documentation of [visitLambdaExpressionInternal] for an
+   * example.
+   */
+  private fun visitArgumentInternal(
+      argument: KtValueArgument,
+      forceBreakLambdaBody: Boolean,
+  ) {
     builder.sync(argument)
     val hasArgName = argument.getArgumentName() != null
     val isLambda = argument.getArgumentExpression() is KtLambdaExpression
@@ -1004,7 +1054,15 @@ class KotlinInputAstVisitor(
         if (argument.isSpread) {
           builder.token("*")
         }
-        visit(argument.getArgumentExpression())
+        if (isLambda) {
+          visitLambdaExpressionInternal(
+              argument.getArgumentExpression() as KtLambdaExpression,
+              brokeBeforeBrace = null,
+              forceBreakBody = forceBreakLambdaBody,
+          )
+        } else {
+          visit(argument.getArgumentExpression())
+        }
       }
     }
   }
@@ -1274,17 +1332,22 @@ class KotlinInputAstVisitor(
     val breakToExpr = genSym()
     builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent, Optional.of(breakToExpr))
 
-    when (expr) {
-      is KtLambdaExpression -> {
-        visitLambdaExpression(expr, breakToExpr)
-      }
-      is KtCallExpression -> {
-        visit(expr.calleeExpression)
-        builder.space()
-        visitLambdaExpression(expr.lambdaArguments[0].getLambdaExpression() ?: fail(), breakToExpr)
-      }
-      else -> throw AssertionError(expr)
-    }
+    val lambdaExpression =
+        when (expr) {
+          is KtLambdaExpression -> expr
+          is KtCallExpression -> {
+            visit(expr.calleeExpression)
+            builder.space()
+            expr.lambdaArguments[0].getLambdaExpression() ?: fail()
+          }
+          else -> throw AssertionError(expr)
+        }
+
+    visitLambdaExpressionInternal(
+        lambdaExpression,
+        brokeBeforeBrace = breakToExpr,
+        forceBreakBody = false,
+    )
   }
 
   override fun visitClassOrObject(classOrObject: KtClassOrObject) {

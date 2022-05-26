@@ -718,6 +718,64 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
+  fun `don't one-line lambdas following parameter breaks`() =
+      assertFormatted(
+          """
+      |------------------------------------------------------------------------
+      |class Foo : Bar() {
+      |  fun doIt() {
+      |    // don't break in lambda, no parameter breaks found
+      |    fruit.forEach { eat(it) }
+      |
+      |    // break in the lambda because the closing paren gets attached
+      |    // to the last argument
+      |    fruit.forEach(
+      |        someVeryLongParameterNameThatWillCauseABreak,
+      |        evenWithoutATrailingCommaOnTheParameterListSoLetsSeeIt) {
+      |      eat(it)
+      |    }
+      |
+      |    // break in the lambda
+      |    fruit.forEach(
+      |        fromTheVine = true,
+      |    ) {
+      |      eat(it)
+      |    }
+      |
+      |    // don't break in the inner lambda, as nesting doesn't respect outer levels
+      |    fruit.forEach(
+      |        fromTheVine = true,
+      |    ) {
+      |      fruit.forEach { eat(it) }
+      |    }
+      |
+      |    // don't break in the lambda, as breaks don't propagate
+      |    fruit
+      |        .onlyBananas(
+      |            fromTheVine = true,
+      |        )
+      |        .forEach { eat(it) }
+      |
+      |    // don't break in the inner lambda, as breaks don't propagate to parameters
+      |    fruit.onlyBananas(
+      |        fromTheVine = true,
+      |        processThem = { eat(it) },
+      |    ) {
+      |      eat(it)
+      |    }
+      |
+      |    // don't break in the inner lambda, as breaks don't propagate to the body
+      |    fruit.onlyBananas(
+      |        fromTheVine = true,
+      |    ) {
+      |      val anon = { eat(it) }
+      |    }
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `indent parameters after a break when there's a lambda afterwards`() =
       assertFormatted(
           """
