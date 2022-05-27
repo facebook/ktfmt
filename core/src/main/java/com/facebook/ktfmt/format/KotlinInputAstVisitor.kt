@@ -231,18 +231,24 @@ class KotlinInputAstVisitor(
     }
   }
 
+  // /** Example `<Int, String>` in `List<Int, String>` */
+  // override fun visitTypeArgumentList(typeArgumentList: KtTypeArgumentList) {
+  //   builder.sync(typeArgumentList)
+  //   builder.block(ZERO) {
+  //     builder.token("<")
+  //     builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+  //     builder.block(ZERO) {
+  //       emitParameterLikeList(
+  //           typeArgumentList.arguments, typeArgumentList.trailingComma != null, wrapInBlock = true)
+  //     }
+  //   }
+  //   builder.token(">")
+  // }
+
   /** Example `<Int, String>` in `List<Int, String>` */
-  override fun visitTypeArgumentList(typeArgumentList: KtTypeArgumentList) {
-    builder.sync(typeArgumentList)
-    builder.block(ZERO) {
-      builder.token("<")
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      builder.block(ZERO) {
-        emitParameterLikeList(
-            typeArgumentList.arguments, typeArgumentList.trailingComma != null, wrapInBlock = true)
-      }
-    }
-    builder.token(">")
+  override fun visitTypeArgumentList(list: KtTypeArgumentList) {
+    builder.sync(list)
+    emitCommaSeparatedList(list.arguments, "<>", list.trailingComma)
   }
 
   override fun visitTypeProjection(typeProjection: KtTypeProjection) {
@@ -709,8 +715,7 @@ class KotlinInputAstVisitor(
           calleeExpression,
           typeArgumentList,
           valueArgumentList,
-          lambdaArguments,
-          lambdaIndent = ZERO)
+          lambdaArguments)
     }
   }
 
@@ -725,57 +730,94 @@ class KotlinInputAstVisitor(
   ) {
     builder.block(ZERO) {
       visit(callee)
-      val arguments = argumentList?.arguments.orEmpty()
-      builder.block(argumentsIndent) { visit(typeArgumentList) }
-      builder.block(argumentsIndent) {
-        if (argumentList != null) {
-          builder.token("(")
-        }
-        if (arguments.isNotEmpty()) {
-          if (isGoogleStyle) {
-            visit(argumentList)
-            val first = arguments.first()
-            if (arguments.size != 1 ||
-                first?.isNamed() != false ||
-                first.getArgumentExpression() !is KtLambdaExpression) {
-              builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
-            }
-          } else {
-            builder.block(ZERO) { visit(argumentList) }
+
+      builder.block(ZERO) {
+        builder.block(ZERO) {
+          builder.block(ZERO) {
+            visit(typeArgumentList) //
           }
+          visit(argumentList)
         }
-        if (argumentList != null) {
-          builder.token(")")
+        if (lambdaArguments.isNotEmpty()) {
+          builder.space()
+          visit(lambdaArguments[0].getLambdaExpression())
         }
-      }
-      if (lambdaArguments.isNotEmpty()) {
-        builder.space()
-        builder.block(lambdaIndent) { lambdaArguments.forEach { visit(it) } }
       }
     }
   }
 
+  private fun emitCommaSeparatedList(
+    elements: List<KtElement>,
+    parens: String? = null,
+    trailingComma: PsiElement? = null,
+    wrapElements: Boolean = false) {
+    if (parens != null) {
+      builder.token(parens.substring(0, 1))
+    }
+
+    if (elements.isNotEmpty()) {
+      val breakMode = if (trailingComma == null) Doc.FillMode.UNIFIED else Doc.FillMode.FORCED
+
+      builder.block(expressionBreakIndent, wrapElements) {
+        builder.breakOp(breakMode, "", ZERO)
+        visit(elements[0])
+
+        for (element in elements.drop(1)) {
+          builder.token(",")
+          builder.breakOp(breakMode, " ", ZERO)
+
+          visit(element)
+        }
+
+        if (trailingComma != null) {
+          builder.token(",")
+        }
+        // This break must be inside the block so that it triggers as part of the unified group,
+        // but we don't want the next line to be indented.
+        builder.breakOp(breakMode, "", expressionBreakNegativeIndent)
+      }
+    }
+
+    if (parens != null) {
+      // Pull the closing paren back to the base indent
+      builder.block(if (wrapElements) ZERO else expressionBreakNegativeIndent) {
+        // Force GJF to put the comments inside this block, by default it puts them outside.
+        builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
+
+        // Indent any leading comments to match the inside of the parens.
+        builder.token(parens.substring(1, 2), expressionBreakIndent)
+      }
+    }
+  }
+
+  // /** Example (`1, "hi"`) in a function call */
+  // override fun visitValueArgumentList(list: KtValueArgumentList) {
+  //   builder.sync(list)
+  //   val arguments = list.arguments
+  //   val isSingleUnnamedLambda =
+  //       arguments.size == 1 &&
+  //           arguments.first().getArgumentExpression() is KtLambdaExpression &&
+  //           arguments.first().getArgumentName() == null
+  //   if (isSingleUnnamedLambda) {
+  //     builder.block(expressionBreakNegativeIndent) {
+  //       visit(arguments.first())
+  //       if (list.trailingComma != null) {
+  //         builder.token(",")
+  //       }
+  //     }
+  //   } else {
+  //     // Break before args.
+  //     builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+  //     emitParameterLikeList(
+  //         list.arguments, list.trailingComma != null, wrapInBlock = !isGoogleStyle)
+  //   }
+  // }
+
   /** Example (`1, "hi"`) in a function call */
   override fun visitValueArgumentList(list: KtValueArgumentList) {
     builder.sync(list)
-    val arguments = list.arguments
-    val isSingleUnnamedLambda =
-        arguments.size == 1 &&
-            arguments.first().getArgumentExpression() is KtLambdaExpression &&
-            arguments.first().getArgumentName() == null
-    if (isSingleUnnamedLambda) {
-      builder.block(expressionBreakNegativeIndent) {
-        visit(arguments.first())
-        if (list.trailingComma != null) {
-          builder.token(",")
-        }
-      }
-    } else {
-      // Break before args.
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      emitParameterLikeList(
-          list.arguments, list.trailingComma != null, wrapInBlock = !isGoogleStyle)
-    }
+    emitCommaSeparatedList(list.arguments, "()", list.trailingComma)
   }
 
   /** Example `{ 1 + 1 }` (as lambda) or `{ (x, y) -> x + y }` */
@@ -1429,8 +1471,7 @@ class KotlinInputAstVisitor(
           null,
           call.typeArgumentList,
           call.valueArgumentList,
-          call.lambdaArguments,
-          lambdaIndent = ZERO)
+          call.lambdaArguments)
     }
   }
 
