@@ -51,6 +51,7 @@ import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtCollectionLiteralExpression
 import org.jetbrains.kotlin.psi.KtConstantExpression
 import org.jetbrains.kotlin.psi.KtConstructorDelegationCall
+import org.jetbrains.kotlin.psi.KtContainerNode
 import org.jetbrains.kotlin.psi.KtContinueExpression
 import org.jetbrains.kotlin.psi.KtDelegatedSuperTypeEntry
 import org.jetbrains.kotlin.psi.KtDestructuringDeclaration
@@ -2169,7 +2170,14 @@ class KotlinInputAstVisitor(
     if (openGroupBeforeLeft) builder.open(ZERO)
     visit(expression.leftHandSide)
     if (!openGroupBeforeLeft) builder.open(ZERO)
-    builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+    val parent = expression.parent
+    if (parent is KtValueArgument ||
+        parent is KtParenthesizedExpression ||
+        parent is KtContainerNode) {
+      builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+    } else {
+      builder.space()
+    }
     visit(expression.operationReference)
     builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
     builder.block(expressionBreakIndent) { visit(expression.typeReference) }

@@ -3236,7 +3236,13 @@ class FormatterTest {
       |  println(
       |      a is Int &&
       |          b is String)
+      |  l.b?.s?.sOrNull() is
+      |      SomethingLongEnough
       |}
+      |
+      |val a =
+      |    l.sOrNull() is
+      |        SomethingLongEnough
       |""".trimMargin(),
           deduceMaxWidth = true)
 
