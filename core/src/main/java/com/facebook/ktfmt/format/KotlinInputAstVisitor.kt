@@ -1754,18 +1754,8 @@ class KotlinInputAstVisitor(
   override fun visitWhenExpression(expression: KtWhenExpression) {
     builder.sync(expression)
     builder.block(ZERO) {
-      builder.token("when")
-      expression.subjectExpression?.let { subjectExp ->
-        builder.space()
-        builder.block(ZERO) {
-          builder.token("(")
-          builder.block(if (isGoogleStyle) expressionBreakIndent else ZERO) { visit(subjectExp) }
-          if (isGoogleStyle) {
-            builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-          }
-        }
-        builder.token(")")
-      }
+      emitKeywordWithCondition("when", expression.subjectExpression)
+
       builder.space()
       builder.token("{", Doc.Token.RealOrImaginary.REAL, blockIndent, Optional.of(blockIndent))
 
@@ -1837,18 +1827,7 @@ class KotlinInputAstVisitor(
   override fun visitIfExpression(expression: KtIfExpression) {
     builder.sync(expression)
     builder.block(ZERO) {
-      builder.block(ZERO) {
-        builder.token("if")
-        builder.space()
-        builder.token("(")
-        builder.block(if (isGoogleStyle) expressionBreakIndent else ZERO) {
-          visit(expression.condition)
-        }
-        if (isGoogleStyle) {
-          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-        }
-      }
-      builder.token(")")
+      emitKeywordWithCondition("if", expression.condition)
 
       if (expression.then is KtBlockExpression) {
         builder.space()
@@ -2043,11 +2022,7 @@ class KotlinInputAstVisitor(
   /** Example `while (a < b) { ... }` */
   override fun visitWhileExpression(expression: KtWhileExpression) {
     builder.sync(expression)
-    builder.token("while")
-    builder.space()
-    builder.token("(")
-    visit(expression.condition)
-    builder.token(")")
+    emitKeywordWithCondition("while", expression.condition)
     builder.space()
     visit(expression.body)
   }
@@ -2061,11 +2036,7 @@ class KotlinInputAstVisitor(
       visit(expression.body)
       builder.space()
     }
-    builder.token("while")
-    builder.space()
-    builder.token("(")
-    visit(expression.condition)
-    builder.token(")")
+    emitKeywordWithCondition("while", expression.condition)
   }
 
   /** Example `break` or `break@foo` in a loop */
@@ -2435,5 +2406,29 @@ class KotlinInputAstVisitor(
   /** Helper function to improve readability */
   private fun visit(element: PsiElement?) {
     element?.accept(this)
+  }
+
+  /** Emits a key word followed by a condition, e.g. `if (b)` or `while (c < d )` */
+  private fun emitKeywordWithCondition(keyword: String, condition: KtExpression?) {
+    if (condition == null) {
+      builder.token(keyword)
+      return
+    }
+
+    builder.block(ZERO) {
+      builder.token(keyword)
+      builder.space()
+      builder.token("(")
+      if (isGoogleStyle) {
+        builder.block(expressionBreakIndent) {
+          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+          visit(condition)
+          builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
+        }
+      } else {
+        builder.block(ZERO) { visit(condition) }
+      }
+    }
+    builder.token(")")
   }
 }
