@@ -764,18 +764,36 @@ class GoogleStyleFormatterKtTest {
           """
       |----------------------------
       |fun foo() {
-      |  if (expressions1 &&
+      |  if (
+      |    expressions1 &&
       |      expression2 &&
       |      expression3
       |  ) {
       |    bar()
       |  }
       |
-      |  if (foo(
+      |  if (
+      |    foo(
       |      expressions1 &&
       |        expression2 &&
       |        expression3
       |    )
+      |  ) {
+      |    bar()
+      |  }
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `if expression with condition that exactly fits to line`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |fun foo() {
+      |  if (
+      |    e1 && e2 && e3 = e4
       |  ) {
       |    bar()
       |  }
@@ -790,7 +808,8 @@ class GoogleStyleFormatterKtTest {
           """
       |-----------------------
       |fun foo() {
-      |  when (expressions1 +
+      |  when (
+      |    expressions1 +
       |      expression2 +
       |      expression3
       |  ) {
@@ -798,7 +817,8 @@ class GoogleStyleFormatterKtTest {
       |    2 -> print(2)
       |  }
       |
-      |  when (foo(
+      |  when (
+      |    foo(
       |      expressions1 &&
       |        expression2 &&
       |        expression3
@@ -806,6 +826,67 @@ class GoogleStyleFormatterKtTest {
       |  ) {
       |    1 -> print(1)
       |    2 -> print(2)
+      |  }
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `when expression with condition that exactly fits to line`() =
+      assertFormatted(
+          """
+      |---------------------------
+      |fun foo() {
+      |  when (
+      |    e1 && e2 && e3 = e4
+      |  ) {
+      |    1 -> print(1)
+      |    2 -> print(2)
+      |  }
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+    @Test
+  fun `while expression with multiline condition`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |fun foo() {
+      |  while (
+      |    expressions1 &&
+      |      expression2 &&
+      |      expression3
+      |  ) {
+      |    bar()
+      |  }
+      |
+      |  while (
+      |    foo(
+      |      expressions1 &&
+      |        expression2 &&
+      |        expression3
+      |    )
+      |  ) {
+      |    bar()
+      |  }
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `while expression with condition that exactly fits to line`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |fun foo() {
+      |  while (
+      |    e1 && e2 && e3 = e4
+      |  ) {
+      |    bar()
       |  }
       |}
       |""".trimMargin(),
