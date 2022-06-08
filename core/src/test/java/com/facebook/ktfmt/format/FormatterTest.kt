@@ -2834,7 +2834,7 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
-  fun `Unary expressions`() =
+  fun `Unary prefix expressions`() =
       assertFormatted(
           """
       |fun f() {
@@ -2844,6 +2844,39 @@ class FormatterTest {
       |  +4
       |  ++a
       |  --a
+      |
+      |  + +a
+      |  +-a
+      |  +!a
+      |  -+a
+      |  - -a
+      |  -!a
+      |  !+a
+      |  !a
+      |  ! !a
+      |
+      |  + ++a
+      |  +--a
+      |  -++a
+      |  - --a
+      |  !++a
+      |  !--a
+      |}
+      |""".trimMargin())
+
+  @Test
+  fun `Unary postfix expressions`() =
+      assertFormatted(
+          """
+      |fun f() {
+      |  a!!
+      |  a++
+      |  a--
+      |
+      |  a--!!
+      |  a++!!
+      |
+      |  a!! !!
       |}
       |""".trimMargin())
 
