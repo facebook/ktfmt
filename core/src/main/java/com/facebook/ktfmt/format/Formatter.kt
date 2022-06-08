@@ -78,9 +78,15 @@ object Formatter {
   @JvmStatic
   @Throws(FormatterException::class, ParseError::class)
   fun format(options: FormattingOptions, code: String): String {
-    checkEscapeSequences(code)
+    val (shebang, kotlinCode) =
+        if (code.startsWith("#!")) {
+          code.split("\n".toRegex(), limit = 2)
+        } else {
+          listOf("", code)
+        }
+    checkEscapeSequences(kotlinCode)
 
-    val lfCode = StringUtilRt.convertLineSeparators(code)
+    val lfCode = StringUtilRt.convertLineSeparators(kotlinCode)
     val sortedImports = sortedAndDistinctImports(lfCode)
     val pretty = prettyPrint(sortedImports, options, "\n")
     val noRedundantElements =
@@ -89,7 +95,9 @@ object Formatter {
         } catch (e: ParseError) {
           throw IllegalStateException("Failed to re-parse code after pretty printing:\n $pretty", e)
         }
-    return prettyPrint(noRedundantElements, options, Newlines.guessLineSeparator(code)!!)
+    val prettyCode =
+        prettyPrint(noRedundantElements, options, Newlines.guessLineSeparator(kotlinCode)!!)
+    return if (shebang.isNotEmpty()) shebang + "\n" + prettyCode else prettyCode
   }
 
   /** prettyPrint reflows 'code' using google-java-format's engine. */

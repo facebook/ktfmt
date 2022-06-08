@@ -50,6 +50,16 @@ class FormatterTest {
         |""".trimMargin())
 
   @Test
+  fun `support script (kts) files with a shebang`() =
+      assertFormatted(
+          """
+        |#!/usr/bin/env kscript
+        |package foo
+        |
+        |println("Called")
+        |""".trimMargin())
+
+  @Test
   fun `call chains`() =
       assertFormatted(
           """
