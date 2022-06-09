@@ -98,6 +98,7 @@ object KDocFormatter {
       KDocTokens.MARKDOWN_LINK -> {
         tokens.add(KDocToken(MARKDOWN_LINK, tokenText))
       }
+      KDocTokens.MARKDOWN_ESCAPED_CHAR,
       KDocTokens.TEXT -> {
         var first = true
         for (word in tokenizeKdocText(tokenText)) {

@@ -1722,6 +1722,14 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
+  fun `formatting kdoc with markdown errors`() =
+      assertFormatted(
+          """
+      |/** \[ */
+      |fun markdownError() = Unit
+      |""".trimMargin())
+
+  @Test
   fun `return statement with value`() =
       assertFormatted(
           """
