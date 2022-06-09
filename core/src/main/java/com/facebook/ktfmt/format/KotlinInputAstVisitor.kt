@@ -111,7 +111,6 @@ import org.jetbrains.kotlin.psi.KtTypeParameter
 import org.jetbrains.kotlin.psi.KtTypeParameterList
 import org.jetbrains.kotlin.psi.KtTypeProjection
 import org.jetbrains.kotlin.psi.KtTypeReference
-import org.jetbrains.kotlin.psi.KtUnaryExpression
 import org.jetbrains.kotlin.psi.KtUserType
 import org.jetbrains.kotlin.psi.KtValueArgument
 import org.jetbrains.kotlin.psi.KtValueArgumentList
@@ -1137,19 +1136,33 @@ class KotlinInputAstVisitor(
     builder.close()
   }
 
-  override fun visitUnaryExpression(expression: KtUnaryExpression) {
+  override fun visitPostfixExpression(expression: KtPostfixExpression) {
     builder.sync(expression)
     builder.block(ZERO) {
-      visit(expression.baseExpression)
-      builder.token(expression.operationReference.text)
+      val baseExpression = expression.baseExpression
+      val operator = expression.operationReference.text
+
+      visit(baseExpression)
+      if (baseExpression is KtPostfixExpression &&
+          baseExpression.operationReference.text.last() == operator.first()) {
+        builder.space()
+      }
+      builder.token(operator)
     }
   }
 
   override fun visitPrefixExpression(expression: KtPrefixExpression) {
     builder.sync(expression)
     builder.block(ZERO) {
-      builder.token(expression.operationReference.text)
-      visit(expression.baseExpression)
+      val baseExpression = expression.baseExpression
+      val operator = expression.operationReference.text
+
+      builder.token(operator)
+      if (baseExpression is KtPrefixExpression &&
+          operator.last() == baseExpression.operationReference.text.first()) {
+        builder.space()
+      }
+      visit(baseExpression)
     }
   }
 
