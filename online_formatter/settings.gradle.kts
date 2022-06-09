@@ -15,4 +15,3 @@
  */
 
 rootProject.name = "lambda"
-

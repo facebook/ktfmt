@@ -15,55 +15,48 @@
  */
 
 plugins {
-    id("org.jetbrains.intellij") version "0.7.2"
-    java
-    id("com.diffplug.spotless") version "5.10.2"
+  id("org.jetbrains.intellij") version "0.7.2"
+  java
+  id("com.diffplug.spotless") version "5.10.2"
 }
 
 val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
 val pluginVersion = "1.1"
 
 group = "com.facebook"
+
 version = "$pluginVersion.$ktfmtVersion"
 
 repositories {
-    mavenCentral()
-    mavenLocal()
+  mavenCentral()
+  mavenLocal()
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
 }
 
 dependencies {
-    implementation("com.facebook", "ktfmt", ktfmtVersion)
-    implementation("com.google.googlejavaformat", "google-java-format", "1.8")
+  implementation("com.facebook", "ktfmt", ktfmtVersion)
+  implementation("com.google.googlejavaformat", "google-java-format", "1.8")
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    // Version with which to build (and run; unless alternativeIdePath is specified)
-    version = "2020.3"
-    // To run on a different IDE, uncomment and specify a path.
-    // alternativeIdePath = "/Applications/Android Studio.app"
+  // Version with which to build (and run; unless alternativeIdePath is specified)
+  version = "2020.3"
+  // To run on a different IDE, uncomment and specify a path.
+  // alternativeIdePath = "/Applications/Android Studio.app"
 }
 
 tasks {
-    patchPluginXml {
-        sinceBuild("201")
-        untilBuild("")
-    }
-    publishPlugin {
-        token(System.getenv("JETBRAINS_MARKETPLACE_TOKEN"))
-    }
-    runPluginVerifier {
-        ideVersions(listOf("211.6432.7"))
-    }
+  patchPluginXml {
+    sinceBuild("201")
+    untilBuild("")
+  }
+  publishPlugin { token(System.getenv("JETBRAINS_MARKETPLACE_TOKEN")) }
+  runPluginVerifier { ideVersions(listOf("211.6432.7")) }
 }
 
-spotless {
-    java {
-        googleJavaFormat()
-    }
-}
+spotless { java { googleJavaFormat() } }

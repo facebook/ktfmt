@@ -40,24 +40,27 @@ tasks {
 
   withType<KotlinCompile>() { kotlinOptions.jvmTarget = "11" }
 
-  val packageFat by creating(Zip::class) {
-    from(compileKotlin)
-    from(processResources)
-    into("lib") { from(configurations.runtimeClasspath) }
-    dirMode = 0b111101101 // 0755
-    fileMode = 0b111101101 // 0755
-  }
+  val packageFat by
+      creating(Zip::class) {
+        from(compileKotlin)
+        from(processResources)
+        into("lib") { from(configurations.runtimeClasspath) }
+        dirMode = 0b111101101 // 0755
+        fileMode = 0b111101101 // 0755
+      }
 
-  val packageLibs by creating(Zip::class) {
-    into("java/lib") { from(configurations.runtimeClasspath) }
-    dirMode = 0b111101101 // 0755
-    fileMode = 0b111101101 // 0755
-  }
+  val packageLibs by
+      creating(Zip::class) {
+        into("java/lib") { from(configurations.runtimeClasspath) }
+        dirMode = 0b111101101 // 0755
+        fileMode = 0b111101101 // 0755
+      }
 
-  val packageSkinny by creating(Zip::class) {
-    from(compileKotlin)
-    from(processResources)
-  }
+  val packageSkinny by
+      creating(Zip::class) {
+        from(compileKotlin)
+        from(processResources)
+      }
 
   build { dependsOn(packageSkinny) }
 }

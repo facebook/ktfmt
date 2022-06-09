@@ -15,4 +15,3 @@
  */
 
 rootProject.name = "ktfmt_idea_plugin"
-
