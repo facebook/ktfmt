@@ -1037,31 +1037,35 @@ class KotlinInputAstVisitor(
   ) {
     builder.sync(argument)
     val hasArgName = argument.getArgumentName() != null
-    val isLambda = argument.getArgumentExpression() is KtLambdaExpression
+    val argExpr = argument.getArgumentExpression()
+
     builder.block(ZERO) {
       if (hasArgName) {
         visit(argument.getArgumentName())
         builder.space()
         builder.token("=")
-        if (isLambda) {
-          builder.space()
+
+        if (isLambdaOrScopingFunction(argExpr)) {
+          visitLambdaOrScopingFunction(argExpr)
+          return
         }
       }
-      builder.block(if (hasArgName && !isLambda) expressionBreakIndent else ZERO) {
-        if (hasArgName && !isLambda) {
+
+      builder.block(if (hasArgName) expressionBreakIndent else ZERO) {
+        if (hasArgName) {
           builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
         }
         if (argument.isSpread) {
           builder.token("*")
         }
-        if (isLambda) {
+        if (argExpr is KtLambdaExpression) {
           visitLambdaExpressionInternal(
-              argument.getArgumentExpression() as KtLambdaExpression,
+              argExpr,
               brokeBeforeBrace = null,
               forceBreakBody = forceBreakLambdaBody,
           )
         } else {
-          visit(argument.getArgumentExpression())
+          visit(argExpr)
         }
       }
     }
@@ -1327,24 +1331,25 @@ class KotlinInputAstVisitor(
    * 1. '... = foo() { ... }' due to the empty parenthesis
    * 2. '... = Runnable @Annotation { ... }' due to the annotation
    */
-  private fun isLambdaOrScopingFunction(expression: KtExpression?): Boolean {
-    if (expression is KtLambdaExpression) {
+  private fun isLambdaOrScopingFunction(expr: KtExpression?): Boolean {
+    if (expr is KtLambdaExpression) {
       return true
     }
-    if (expression is KtCallExpression &&
-        expression.valueArgumentList?.leftParenthesis == null &&
-        expression.lambdaArguments.isNotEmpty() &&
-        expression.typeArgumentList?.arguments.isNullOrEmpty() &&
-        expression.lambdaArguments.first().getArgumentExpression() is KtLambdaExpression) {
+    if (expr is KtCallExpression &&
+        expr.valueArgumentList?.leftParenthesis == null &&
+        expr.lambdaArguments.isNotEmpty() &&
+        expr.typeArgumentList?.arguments.isNullOrEmpty() &&
+        expr.lambdaArguments.first().getArgumentExpression() is KtLambdaExpression) {
       return true
     }
     return false
   }
 
   /** See [isLambdaOrScopingFunction] for examples. */
-  private fun visitLambdaOrScopingFunction(expr: PsiElement?) {
+  private fun visitLambdaOrScopingFunction(expr: KtExpression?) {
     val breakToExpr = genSym()
     builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent, Optional.of(breakToExpr))
+    builder.guessToken("*") // In case of a spread argument
 
     val lambdaExpression =
         when (expr) {
@@ -2395,9 +2400,12 @@ class KotlinInputAstVisitor(
     if (isEnabled) {
       open(plusIndent)
     }
-    block()
-    if (isEnabled) {
-      close()
+    try {
+      block()
+    } finally {
+      if (isEnabled) {
+        close()
+      }
     }
   }
 

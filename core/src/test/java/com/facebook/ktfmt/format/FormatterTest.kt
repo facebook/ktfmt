@@ -1224,6 +1224,38 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
+  fun `named arguments indent scope functions block like`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |fun test() {
+      |  test(
+      |      name = scope {
+      |        var x = 0
+      |      })
+      |
+      |  test(
+      |      name =
+      |          longerScope {
+      |            var x = 0
+      |          })
+      |
+      |  test(
+      |      name = *scope {
+      |        var x = 0
+      |      })
+      |
+      |  test(
+      |      name =
+      |          *longerScope {
+      |            var x = 0
+      |          })
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+
+  @Test
   fun `Arguments are blocks`() =
       assertFormatted(
           """
