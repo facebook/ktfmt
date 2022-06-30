@@ -984,33 +984,29 @@ class KotlinInputAstVisitor(
       wrapInBlock: Boolean = true,
       trailingBreak: Boolean = false,
   ) {
-    if (hasTrailingComma) {
-      builder.block(ZERO) {
-        builder.forcedBreak()
-        for (value in list) {
-          visit(value)
-          builder.token(",")
-          builder.forcedBreak()
-        }
-      }
-      return
+    val breakType = if (hasTrailingComma) Doc.FillMode.FORCED else Doc.FillMode.UNIFIED
+    fun emitComma() {
+      builder.token(",")
+      builder.breakOp(breakType, " ", ZERO)
     }
 
     builder.block(ZERO, isEnabled = wrapInBlock) {
-      var first = true
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      for (value in list) {
-        if (!first) {
-          builder.token(",")
-          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
-        }
-        first = false
+      builder.breakOp(breakType, "", ZERO)
 
+      var first = true
+      for (value in list) {
+        if (!first) emitComma()
+        first = false
         visit(value)
       }
+
+      if (hasTrailingComma) {
+        emitComma()
+      }
     }
+
     if (trailingBreak) {
-      builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
+      builder.breakOp(breakType, "", expressionBreakNegativeIndent)
     }
   }
 
