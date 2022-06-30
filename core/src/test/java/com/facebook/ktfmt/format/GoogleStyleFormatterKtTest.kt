@@ -238,6 +238,76 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `no forward propagation of breaks in call expressions (at trailing lambda)`() =
+      assertFormatted(
+          """
+      |--------------------------
+      |fun test() {
+      |  foo_bar_baz__zip<A>(b) {
+      |    c
+      |  }
+      |  foo.bar(baz).zip<A>(b) {
+      |    c
+      |  }
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `no forward propagation of breaks in call expressions (at value args)`() =
+      assertFormatted(
+          """
+      |----------------------
+      |fun test() {
+      |  foo_bar_baz__zip<A>(
+      |    b
+      |  ) { c }
+      |}
+      |
+      |fun test() {
+      |  foo.bar(baz).zip<A>(
+      |    b
+      |  ) { c }
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `no forward propagation of breaks in call expressions (at type args)`() =
+      assertFormatted(
+          """
+      |-------------------
+      |fun test() {
+      |  foo_bar_baz__zip<
+      |    A>(b) { c }
+      |  foo.bar(baz).zip<
+      |    A>(b) { c }
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `properly break fully qualified nested user types`() =
+      assertFormatted(
+          """
+      |-------------------------------------------------------
+      |val complicated:
+      |  com.example.interesting.SomeType<
+      |    com.example.interesting.SomeType<Int, Nothing>,
+      |    com.example.interesting.SomeType<
+      |      com.example.interesting.SomeType<Int, Nothing>,
+      |      Nothing
+      |    >
+      |  > =
+      |  DUMMY
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
   fun `don't one-line lambdas following parameter breaks`() =
       assertFormatted(
           """

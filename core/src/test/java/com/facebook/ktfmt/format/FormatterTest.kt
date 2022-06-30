@@ -804,6 +804,53 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `no forward propagation of breaks in call expressions (at trailing lambda)`() =
+      assertFormatted(
+          """
+      |--------------------------
+      |fun test() {
+      |  foo_bar_baz__zip<A>(b) {
+      |    c
+      |  }
+      |  foo.bar(baz).zip<A>(b) {
+      |    c
+      |  }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `no forward propagation of breaks in call expressions (at value args)`() =
+      assertFormatted(
+          """
+      |----------------------
+      |fun test() {
+      |  foo_bar_baz__zip<A>(
+      |      b) { c }
+      |}
+      |
+      |fun test() {
+      |  foo.bar(baz).zip<A>(
+      |      b) { c }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `no forward propagation of breaks in call expressions (at type args)`() =
+      assertFormatted(
+          """
+      |-------------------
+      |fun test() {
+      |  foo_bar_baz__zip<
+      |      A>(b) { c }
+      |  foo.bar(baz).zip<
+      |      A>(b) { c }
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `no break between multi-line strings and their selectors`() =
       assertFormatted(
           """
