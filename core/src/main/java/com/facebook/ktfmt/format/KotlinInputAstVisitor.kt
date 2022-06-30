@@ -729,26 +729,13 @@ class KotlinInputAstVisitor(
   ) {
     builder.block(ZERO) {
       visit(callee)
-      val arguments = argumentList?.arguments.orEmpty()
       builder.block(argumentsIndent) { visit(typeArgumentList) }
       builder.block(argumentsIndent) {
         if (argumentList != null) {
           builder.token("(")
-        }
-        if (arguments.isNotEmpty()) {
-          if (isGoogleStyle) {
-            visit(argumentList)
-            val first = arguments.first()
-            if (arguments.size != 1 ||
-                first?.isNamed() != false ||
-                first.getArgumentExpression() !is KtLambdaExpression) {
-              builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
-            }
-          } else {
+          if (argumentList.arguments.isNotEmpty()) {
             builder.block(ZERO) { visit(argumentList) }
           }
-        }
-        if (argumentList != null) {
           builder.token(")")
         }
       }
