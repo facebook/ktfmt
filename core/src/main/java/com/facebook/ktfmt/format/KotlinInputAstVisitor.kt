@@ -855,9 +855,7 @@ class KotlinInputAstVisitor(
 
     if (hasParams || hasArrow) {
       builder.space()
-      builder.block(bracePlusExpressionIndent) {
-        forEachCommaSeparated(valueParams) { it.accept(this) }
-      }
+      builder.block(bracePlusExpressionIndent) { visitEachCommaSeparated(valueParams) }
       builder.block(bracePlusBlockIndent) {
         if (lambdaExpression.functionLiteral.valueParameterList?.trailingComma != null) {
           builder.token(",")
@@ -947,16 +945,14 @@ class KotlinInputAstVisitor(
       return
     }
 
-    forEachCommaSeparated(list, hasTrailingComma, wrapInBlock, trailingBreak = isGoogleStyle) {
-      visit(it)
-    }
+    visitEachCommaSeparated(list, hasTrailingComma, wrapInBlock, trailingBreak = isGoogleStyle)
     if (hasTrailingComma) {
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
     }
   }
 
   /**
-   * Call `function` for each element in `list`, with comma (,) tokens inbetween.
+   * Visit each element in [list], with comma (,) tokens in-between.
    *
    * Example:
    * ```
@@ -982,18 +978,17 @@ class KotlinInputAstVisitor(
    * b,
    * ```
    */
-  private fun <T> forEachCommaSeparated(
-      list: Iterable<T>,
+  private fun visitEachCommaSeparated(
+      list: Iterable<PsiElement>,
       hasTrailingComma: Boolean = false,
       wrapInBlock: Boolean = true,
       trailingBreak: Boolean = false,
-      function: (T) -> Unit
   ) {
     if (hasTrailingComma) {
       builder.block(ZERO) {
         builder.forcedBreak()
         for (value in list) {
-          function(value)
+          visit(value)
           builder.token(",")
           builder.forcedBreak()
         }
@@ -1011,7 +1006,7 @@ class KotlinInputAstVisitor(
         }
         first = false
 
-        function(value)
+        visit(value)
       }
     }
     if (trailingBreak) {
@@ -1744,7 +1739,7 @@ class KotlinInputAstVisitor(
 
   override fun visitSuperTypeList(list: KtSuperTypeList) {
     builder.sync(list)
-    builder.block(expressionBreakIndent) { forEachCommaSeparated(list.entries) { visit(it) } }
+    builder.block(expressionBreakIndent) { visitEachCommaSeparated(list.entries) }
   }
 
   override fun visitSuperTypeCallEntry(call: KtSuperTypeCallEntry) {
@@ -1998,7 +1993,7 @@ class KotlinInputAstVisitor(
     builder.token("where")
     builder.space()
     builder.sync(list)
-    forEachCommaSeparated(list.constraints) { visit(it) }
+    visitEachCommaSeparated(list.constraints)
   }
 
   /** Example `T : Foo` */
