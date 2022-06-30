@@ -238,7 +238,7 @@ class KotlinInputAstVisitor(
       builder.token("<")
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
       builder.block(ZERO) {
-        emitParameterLikeList(
+        visitEachCommaSeparated(
             typeArgumentList.arguments, typeArgumentList.trailingComma != null, wrapInBlock = true)
       }
     }
@@ -769,7 +769,7 @@ class KotlinInputAstVisitor(
     } else {
       // Break before args.
       builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      emitParameterLikeList(
+      visitEachCommaSeparated(
           list.arguments, list.trailingComma != null, wrapInBlock = !isGoogleStyle)
     }
   }
@@ -916,26 +916,7 @@ class KotlinInputAstVisitor(
 
   /** e.g., `a: Int, b: Int, c: Int` in `fun foo(a: Int, b: Int, c: Int) { ... }`. */
   override fun visitParameterList(list: KtParameterList) {
-    emitParameterLikeList(list.parameters, list.trailingComma != null, wrapInBlock = false)
-  }
-
-  /**
-   * Emit a list of elements that look like function parameters or arguments, e.g., `a, b, c` in
-   * `foo(a, b, c)`
-   */
-  private fun <T : PsiElement> emitParameterLikeList(
-      list: List<T>?,
-      hasTrailingComma: Boolean,
-      wrapInBlock: Boolean
-  ) {
-    if (list.isNullOrEmpty()) {
-      return
-    }
-
-    visitEachCommaSeparated(list, hasTrailingComma, wrapInBlock, trailingBreak = isGoogleStyle)
-    if (hasTrailingComma) {
-      builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakNegativeIndent)
-    }
+    visitEachCommaSeparated(list.parameters, list.trailingComma != null, wrapInBlock = false)
   }
 
   /**
@@ -969,7 +950,7 @@ class KotlinInputAstVisitor(
       list: Iterable<PsiElement>,
       hasTrailingComma: Boolean = false,
       wrapInBlock: Boolean = true,
-      trailingBreak: Boolean = false,
+      trailingBreak: Boolean = isGoogleStyle,
   ) {
     val breakType = if (hasTrailingComma) Doc.FillMode.FORCED else Doc.FillMode.UNIFIED
     fun emitComma() {
@@ -992,7 +973,7 @@ class KotlinInputAstVisitor(
       }
     }
 
-    if (trailingBreak) {
+    if (trailingBreak || hasTrailingComma) {
       builder.breakOp(breakType, "", expressionBreakNegativeIndent)
     }
   }
@@ -1869,7 +1850,7 @@ class KotlinInputAstVisitor(
       builder.token("[")
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
       builder.block(expressionBreakIndent) {
-        emitParameterLikeList(
+        visitEachCommaSeparated(
             expression.indexExpressions, expression.trailingComma != null, wrapInBlock = true)
       }
     }
@@ -1889,7 +1870,7 @@ class KotlinInputAstVisitor(
       builder.token("(")
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
       builder.block(expressionBreakIndent) {
-        emitParameterLikeList(
+        visitEachCommaSeparated(
             destructuringDeclaration.entries, hasTrailingComma, wrapInBlock = true)
       }
     }
@@ -1951,7 +1932,7 @@ class KotlinInputAstVisitor(
         // Break before args.
         builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
         builder.block(expressionBreakIndent) {
-          emitParameterLikeList(list.parameters, list.trailingComma != null, wrapInBlock = true)
+          visitEachCommaSeparated(list.parameters, list.trailingComma != null, wrapInBlock = true)
         }
       }
       builder.token(">")
@@ -2174,7 +2155,7 @@ class KotlinInputAstVisitor(
       builder.token("[")
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
       builder.block(expressionBreakIndent) {
-        emitParameterLikeList(
+        visitEachCommaSeparated(
             expression.getInnerExpressions(), expression.trailingComma != null, wrapInBlock = true)
       }
     }
