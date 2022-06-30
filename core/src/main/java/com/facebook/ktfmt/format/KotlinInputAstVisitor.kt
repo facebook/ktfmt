@@ -754,24 +754,38 @@ class KotlinInputAstVisitor(
   /** Example (`1, "hi"`) in a function call */
   override fun visitValueArgumentList(list: KtValueArgumentList) {
     builder.sync(list)
+
     val arguments = list.arguments
     val isSingleUnnamedLambda =
         arguments.size == 1 &&
             arguments.first().getArgumentExpression() is KtLambdaExpression &&
             arguments.first().getArgumentName() == null
+    val hasTrailingComma = list.trailingComma != null
+
+    val wrapInBlock: Boolean
+    val trailingBreak: Boolean
+    val leadingBreak: Boolean
+
     if (isSingleUnnamedLambda) {
-      builder.block(expressionBreakNegativeIndent) {
-        visit(arguments.first())
-        if (list.trailingComma != null) {
-          builder.token(",")
-        }
-      }
+      wrapInBlock = true
+      trailingBreak = false
+      leadingBreak = hasTrailingComma
     } else {
-      // Break before args.
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      visitEachCommaSeparated(
-          list.arguments, list.trailingComma != null, wrapInBlock = !isGoogleStyle)
+      wrapInBlock = !isGoogleStyle
+      trailingBreak = isGoogleStyle
+      leadingBreak = true
     }
+
+    if (!isSingleUnnamedLambda) {
+      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+    }
+    visitEachCommaSeparated(
+        list.arguments,
+        hasTrailingComma,
+        wrapInBlock = wrapInBlock,
+        trailingBreak = trailingBreak,
+        leadingBreak = leadingBreak,
+    )
   }
 
   /** Example `{ 1 + 1 }` (as lambda) or `{ (x, y) -> x + y }` */
@@ -945,12 +959,19 @@ class KotlinInputAstVisitor(
    * a,
    * b,
    * ```
+   *
+   * @param wrapInBlock if true, place all the elements in a block. When there's no [leadingBreak],
+   * this will be negatively indented.
+   * @param trailingBreak if true, place a break after the last element. Redundant when
+   * [hasTrailingComma] is true.
+   * @param leadingBreak if true, break before the first element.
    */
   private fun visitEachCommaSeparated(
       list: Iterable<PsiElement>,
       hasTrailingComma: Boolean = false,
       wrapInBlock: Boolean = true,
       trailingBreak: Boolean = isGoogleStyle,
+      leadingBreak: Boolean = true,
   ) {
     val breakType = if (hasTrailingComma) Doc.FillMode.FORCED else Doc.FillMode.UNIFIED
     fun emitComma() {
@@ -958,8 +979,11 @@ class KotlinInputAstVisitor(
       builder.breakOp(breakType, " ", ZERO)
     }
 
-    builder.block(ZERO, isEnabled = wrapInBlock) {
-      builder.breakOp(breakType, "", ZERO)
+    val indent = if (leadingBreak) ZERO else expressionBreakNegativeIndent
+    builder.block(indent, isEnabled = wrapInBlock) {
+      if (leadingBreak) {
+        builder.breakOp(breakType, "", ZERO)
+      }
 
       var first = true
       for (value in list) {

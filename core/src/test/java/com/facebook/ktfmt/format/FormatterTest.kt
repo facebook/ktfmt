@@ -4788,7 +4788,9 @@ class FormatterTest {
           """
       |--------------------------
       |fun foo() {
-      |  foo({ it },)
+      |  foo(
+      |      { it },
+      |  )
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
