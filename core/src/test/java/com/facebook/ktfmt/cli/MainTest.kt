@@ -123,6 +123,16 @@ class MainTest {
   }
 
   @Test
+  fun `Parsing errors are reported (stdin-name)`() {
+    val code = "fun    f1 (  "
+    val returnValue =
+        Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("--stdin-name=file/Foo.kt", "-")).run()
+
+    assertThat(returnValue).isEqualTo(1)
+    assertThat(err.toString("UTF-8")).startsWith("file/Foo.kt:1:14: error: ")
+  }
+
+  @Test
   fun `Parsing errors are reported (file)`() {
     val fooBar = root.resolve("foo.kt")
     fooBar.writeText("fun    f1 (  ")
@@ -427,6 +437,26 @@ class MainTest {
 
     assertThat(out.toString("UTF-8")).doesNotContain("hello, world")
     assertThat(out.toString("UTF-8")).isEqualTo("<stdin>\n")
+    assertThat(exitCode).isEqualTo(1)
+  }
+
+  @Test
+  fun `--stdin-name can only be used with stdin`() {
+    val code = """fun f () =    println( "hello, world" )"""
+    val file = root.resolve("foo.kt")
+    file.writeText(code)
+
+    val exitCode =
+        Main(
+                emptyInput,
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf("--stdin-name=bar.kt", file.toString()))
+            .run()
+
+    assertThat(file.readText()).isEqualTo(code)
+    assertThat(out.toString("UTF-8")).isEmpty()
+    assertThat(err.toString("UTF-8")).isEqualTo("Error: --stdin-name can only be used with stdin\n")
     assertThat(exitCode).isEqualTo(1)
   }
 }

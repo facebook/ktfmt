@@ -42,29 +42,23 @@ class ParsedArgsTest {
 
   @Test
   fun `files to format are returned and unknown flags are reported`() {
-    val out = ByteArrayOutputStream()
+    val (parsed, out) = parseTestOptions("foo.kt", "--unknown")
 
-    val (fileNames, _) = ParsedArgs.parseOptions(PrintStream(out), arrayOf("foo.kt", "--unknown"))
-
-    assertThat(fileNames).containsExactly("foo.kt")
+    assertThat(parsed.fileNames).containsExactly("foo.kt")
     assertThat(out.toString()).isEqualTo("Unexpected option: --unknown\n")
   }
 
   @Test
   fun `files to format are returned and flags starting with @ are reported`() {
-    val out = ByteArrayOutputStream()
+    val (parsed, out) = parseTestOptions("foo.kt", "@unknown")
 
-    val (fileNames, _) = ParsedArgs.parseOptions(PrintStream(out), arrayOf("foo.kt", "@unknown"))
-
-    assertThat(fileNames).containsExactly("foo.kt")
+    assertThat(parsed.fileNames).containsExactly("foo.kt")
     assertThat(out.toString()).isEqualTo("Unexpected option: @unknown\n")
   }
 
   @Test
   fun `parseOptions uses default values when args are empty`() {
-    val out = ByteArrayOutputStream()
-
-    val parsed = ParsedArgs.parseOptions(PrintStream(out), arrayOf("foo.kt"))
+    val (parsed, _) = parseTestOptions("foo.kt")
 
     val formattingOptions = parsed.formattingOptions
     assertThat(formattingOptions.style).isEqualTo(FormattingOptions.Style.FACEBOOK)
@@ -76,57 +70,67 @@ class ParsedArgsTest {
 
     assertThat(parsed.dryRun).isFalse()
     assertThat(parsed.setExitIfChanged).isFalse()
+    assertThat(parsed.stdinName).isNull()
   }
 
   @Test
   fun `parseOptions recognizes --dropbox-style and rejects unknown flags`() {
-    val out = ByteArrayOutputStream()
+    val (parsed, out) = parseTestOptions("--dropbox-style", "foo.kt", "--unknown")
 
-    val (fileNames, formattingOptions) =
-        ParsedArgs.parseOptions(PrintStream(out), arrayOf("--dropbox-style", "foo.kt", "--unknown"))
-
-    assertThat(fileNames).containsExactly("foo.kt")
-    assertThat(formattingOptions.blockIndent).isEqualTo(4)
-    assertThat(formattingOptions.continuationIndent).isEqualTo(4)
+    assertThat(parsed.fileNames).containsExactly("foo.kt")
+    assertThat(parsed.formattingOptions.blockIndent).isEqualTo(4)
+    assertThat(parsed.formattingOptions.continuationIndent).isEqualTo(4)
     assertThat(out.toString()).isEqualTo("Unexpected option: --unknown\n")
   }
 
   @Test
   fun `parseOptions recognizes --google-style`() {
-    val out = ByteArrayOutputStream()
-
-    val (_, formattingOptions) =
-        ParsedArgs.parseOptions(PrintStream(out), arrayOf("--google-style", "foo.kt"))
-
-    assertThat(formattingOptions).isEqualTo(Formatter.GOOGLE_FORMAT)
+    val (parsed, _) = parseTestOptions("--google-style", "foo.kt")
+    assertThat(parsed.formattingOptions).isEqualTo(Formatter.GOOGLE_FORMAT)
   }
 
   @Test
   fun `parseOptions recognizes --dry-run`() {
-    val out = ByteArrayOutputStream()
-
-    val parsed = ParsedArgs.parseOptions(PrintStream(out), arrayOf("--dry-run", "foo.kt"))
-
+    val (parsed, _) = parseTestOptions("--dry-run", "foo.kt")
     assertThat(parsed.dryRun).isTrue()
   }
 
   @Test
   fun `parseOptions recognizes -n as --dry-run`() {
-    val out = ByteArrayOutputStream()
-
-    val parsed = ParsedArgs.parseOptions(PrintStream(out), arrayOf("-n", "foo.kt"))
-
+    val (parsed, _) = parseTestOptions("-n", "foo.kt")
     assertThat(parsed.dryRun).isTrue()
   }
 
   @Test
   fun `parseOptions recognizes --set-exit-if-changed`() {
-    val out = ByteArrayOutputStream()
-
-    val parsed =
-        ParsedArgs.parseOptions(PrintStream(out), arrayOf("--set-exit-if-changed", "foo.kt"))
-
+    val (parsed, _) = parseTestOptions("--set-exit-if-changed", "foo.kt")
     assertThat(parsed.setExitIfChanged).isTrue()
+  }
+
+  @Test
+  fun `parseOptions --stdin-name`() {
+    val (parsed, _) = parseTestOptions("--stdin-name=my/foo.kt")
+    assertThat(parsed.stdinName).isEqualTo("my/foo.kt")
+  }
+
+  @Test
+  fun `parseOptions --stdin-name with empty value`() {
+    val (parsed, _) = parseTestOptions("--stdin-name=")
+    assertThat(parsed.stdinName).isEqualTo("")
+  }
+
+  @Test
+  fun `parseOptions --stdin-name without value`() {
+    val (parsed, out) = parseTestOptions("--stdin-name")
+    assertThat(out).isEqualTo("Found option '--stdin-name', expected '--stdin-name=<value>'\n")
+    assertThat(parsed.stdinName).isNull()
+  }
+
+  @Test
+  fun `parseOptions --stdin-name prefix`() {
+    val (parsed, out) = parseTestOptions("--stdin-namea")
+    assertThat(out).isEqualTo("Found option '--stdin-namea', expected '--stdin-name=<value>'\n")
+    assertThat(parsed.stdinName).isNull()
   }
 
   @Test
@@ -152,5 +156,10 @@ class ParsedArgsTest {
     assertThat(parsed.dryRun).isTrue()
     assertThat(parsed.setExitIfChanged).isTrue()
     assertThat(parsed.fileNames).containsExactlyElementsIn(listOf("File1.kt", "File2.kt"))
+  }
+
+  private fun parseTestOptions(vararg args: String): Pair<ParsedArgs, String> {
+    val out = ByteArrayOutputStream()
+    return Pair(ParsedArgs.parseOptions(PrintStream(out), arrayOf(*args)), out.toString())
   }
 }

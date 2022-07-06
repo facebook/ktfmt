@@ -70,7 +70,7 @@ class Main(
   fun run(): Int {
     if (parsedArgs.fileNames.isEmpty()) {
       err.println(
-          "Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] File1.kt File2.kt ...")
+          "Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] File1.kt File2.kt ...")
       err.println("Or: ktfmt @file")
       return 1
     }
@@ -82,6 +82,9 @@ class Main(
       } catch (e: Exception) {
         1
       }
+    } else if (parsedArgs.stdinName != null) {
+      err.println("Error: --stdin-name can only be used with stdin")
+      return 1
     }
 
     val files: List<File>
@@ -120,7 +123,7 @@ class Main(
    * @return true iff input is valid and already formatted.
    */
   private fun format(file: File?): Boolean {
-    val fileName = file?.toString() ?: "<stdin>"
+    val fileName = file?.toString() ?: parsedArgs.stdinName ?: "<stdin>"
     try {
       val code = file?.readText() ?: BufferedReader(InputStreamReader(input)).readText()
       val formattedCode = Formatter.format(parsedArgs.formattingOptions, code)
@@ -130,7 +133,7 @@ class Main(
       if (file == null) {
         if (parsedArgs.dryRun) {
           if (!alreadyFormatted) {
-            out.println("<stdin>")
+            out.println(fileName)
           }
         } else {
           out.print(formattedCode)
