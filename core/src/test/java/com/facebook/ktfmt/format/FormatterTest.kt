@@ -728,24 +728,23 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
-  fun `don't one-line lambdas following parameter breaks`() =
+  fun `don't one-line lambdas following argument breaks`() =
       assertFormatted(
           """
       |------------------------------------------------------------------------
       |class Foo : Bar() {
       |  fun doIt() {
-      |    // don't break in lambda, no parameter breaks found
+      |    // don't break in lambda, no argument breaks found
       |    fruit.forEach { eat(it) }
       |
-      |    // break in the lambda because the closing paren gets attached
-      |    // to the last argument
+      |    // break in the lambda, without comma
       |    fruit.forEach(
       |        someVeryLongParameterNameThatWillCauseABreak,
       |        evenWithoutATrailingCommaOnTheParameterListSoLetsSeeIt) {
       |          eat(it)
       |        }
       |
-      |    // break in the lambda
+      |    // break in the lambda, with comma
       |    fruit.forEach(
       |        fromTheVine = true,
       |    ) {
@@ -820,18 +819,22 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `no forward propagation of breaks in call expressions (at value args)`() =
+  fun `forward propagation of breaks in call expressions (at value args)`() =
       assertFormatted(
           """
       |----------------------
       |fun test() {
       |  foo_bar_baz__zip<A>(
-      |      b) { c }
+      |      b) {
+      |        c
+      |      }
       |}
       |
       |fun test() {
       |  foo.bar(baz).zip<A>(
-      |      b) { c }
+      |      b) {
+      |        c
+      |      }
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -845,11 +848,15 @@ class FormatterTest {
       |  foo_bar_baz__zip<
       |      A
       |  >(
-      |      b) { c }
+      |      b) {
+      |        c
+      |      }
       |  foo.bar(baz).zip<
       |      A
       |  >(
-      |      b) { c }
+      |      b) {
+      |        c
+      |      }
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -3129,7 +3136,9 @@ class FormatterTest {
       |      lambdaArgument = {
       |        step1()
       |        step2()
-      |      }) { it.doIt() }
+      |      }) {
+      |        it.doIt()
+      |      }
       |}
       |""".trimMargin())
 

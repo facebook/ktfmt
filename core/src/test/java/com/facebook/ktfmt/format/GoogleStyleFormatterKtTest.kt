@@ -255,20 +255,24 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `no forward propagation of breaks in call expressions (at value args)`() =
+  fun `forward propagation of breaks in call expressions (at value args)`() =
       assertFormatted(
           """
       |----------------------
       |fun test() {
       |  foo_bar_baz__zip<A>(
       |    b
-      |  ) { c }
+      |  ) {
+      |    c
+      |  }
       |}
       |
       |fun test() {
       |  foo.bar(baz).zip<A>(
       |    b
-      |  ) { c }
+      |  ) {
+      |    c
+      |  }
       |}
       |""".trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
@@ -284,12 +288,16 @@ class GoogleStyleFormatterKtTest {
       |    A
       |  >(
       |    b
-      |  ) { c }
+      |  ) {
+      |    c
+      |  }
       |  foo.bar(baz).zip<
       |    A
       |  >(
       |    b
-      |  ) { c }
+      |  ) {
+      |    c
+      |  }
       |}
       |""".trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
@@ -314,23 +322,24 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `don't one-line lambdas following parameter breaks`() =
+  fun `don't one-line lambdas following argument breaks`() =
       assertFormatted(
           """
       |------------------------------------------------------------------------
       |class Foo : Bar() {
       |  fun doIt() {
-      |    // don't break in lambda, no parameter breaks found
+      |    // don't break in lambda, no argument breaks found
       |    fruit.forEach { eat(it) }
       |
-      |    // don't break in lambda, because we only detect parameter breaks
-      |    // with trailing commas
+      |    // break in lambda, without comma
       |    fruit.forEach(
       |      someVeryLongParameterNameThatWillCauseABreak,
       |      evenWithoutATrailingCommaOnTheParameterListSoLetsSeeIt
-      |    ) { eat(it) }
+      |    ) {
+      |      eat(it)
+      |    }
       |
-      |    // break in the lambda
+      |    // break in the lambda, with comma
       |    fruit.forEach(
       |      fromTheVine = true,
       |    ) {
@@ -444,7 +453,9 @@ class GoogleStyleFormatterKtTest {
       |      step1()
       |      step2()
       |    }
-      |  ) { it.doIt() }
+      |  ) {
+      |    it.doIt()
+      |  }
       |}
       |""".trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,

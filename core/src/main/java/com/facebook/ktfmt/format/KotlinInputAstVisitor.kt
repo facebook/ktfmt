@@ -520,6 +520,7 @@ class KotlinInputAstVisitor(
               }
               val argsIndentElse = if (index == parts.size - 1) ZERO else expressionBreakIndent
               val lambdaIndentElse = if (isTrailingLambda) expressionBreakNegativeIndent else ZERO
+              val negativeLambdaIndentElse = if (isTrailingLambda) expressionBreakIndent else ZERO
 
               // emit `(1, 2) { it }` from `doIt(1, 2) { it }`
               visitCallElement(
@@ -529,6 +530,7 @@ class KotlinInputAstVisitor(
                   selectorExpression.lambdaArguments,
                   argumentsIndent = Indent.If.make(nameTag, expressionBreakIndent, argsIndentElse),
                   lambdaIndent = Indent.If.make(nameTag, ZERO, lambdaIndentElse),
+                  negativeLambdaIndent = Indent.If.make(nameTag, ZERO, negativeLambdaIndentElse),
               )
             }
           }
@@ -716,7 +718,12 @@ class KotlinInputAstVisitor(
     }
   }
 
-  /** Examples `foo<T>(a, b)`, `foo(a)`, `boo()`, `super(a)` */
+  /**
+   * Examples `foo<T>(a, b)`, `foo(a)`, `boo()`, `super(a)`
+   *
+   * @param lambdaIndent how to indent [lambdaArguments], if present
+   * @param negativeLambdaIndent the negative indentation of [lambdaIndent]
+   */
   private fun visitCallElement(
       callee: KtExpression?,
       typeArgumentList: KtTypeArgumentList?,
@@ -724,24 +731,30 @@ class KotlinInputAstVisitor(
       lambdaArguments: List<KtLambdaArgument>,
       argumentsIndent: Indent = expressionBreakIndent,
       lambdaIndent: Indent = ZERO,
+      negativeLambdaIndent: Indent = ZERO,
   ) {
-    // Used to keep track of whether or not we need to indent the lambda
-    // This is based on if there is a break in the argument list
-    var brokeBeforeBrace: BreakTag? = null
+    // Apply the lambda indent to the callee, type args, value args, and the lambda.
+    // This is undone for the first three by the negative lambda indent.
+    // This way they're in one block, and breaks in the argument list cause a break in the lambda.
+    builder.block(lambdaIndent) {
 
-    visit(callee)
-    builder.block(argumentsIndent) {
-      builder.block(ZERO) { visit(typeArgumentList) }
-      if (argumentList != null) {
-        brokeBeforeBrace = visitValueArgumentListInternal(argumentList)
+      // Used to keep track of whether or not we need to indent the lambda
+      // This is based on if there is a break in the argument list
+      var brokeBeforeBrace: BreakTag? = null
+
+      builder.block(negativeLambdaIndent) {
+        visit(callee)
+        builder.block(argumentsIndent) {
+          builder.block(ZERO) { visit(typeArgumentList) }
+          if (argumentList != null) {
+            brokeBeforeBrace = visitValueArgumentListInternal(argumentList)
+          }
+        }
       }
-    }
-    if (lambdaArguments.isNotEmpty()) {
-      builder.space()
-      builder.block(lambdaIndent) {
+      if (lambdaArguments.isNotEmpty()) {
+        builder.space()
         visitArgumentInternal(
             lambdaArguments.single(),
-            forceBreakLambdaBody = argumentList?.trailingComma != null,
             wrapInBlock = false,
             brokeBeforeBrace = brokeBeforeBrace,
         )
@@ -801,7 +814,7 @@ class KotlinInputAstVisitor(
 
   /** Example `{ 1 + 1 }` (as lambda) or `{ (x, y) -> x + y }` */
   override fun visitLambdaExpression(lambdaExpression: KtLambdaExpression) {
-    visitLambdaExpressionInternal(lambdaExpression, brokeBeforeBrace = null, forceBreakBody = false)
+    visitLambdaExpressionInternal(lambdaExpression, brokeBeforeBrace = null)
   }
 
   /**
@@ -818,21 +831,10 @@ class KotlinInputAstVisitor(
    *       car()
    *     }
    * ```
-   * @param forceBreakBody if true, forces the lambda to be multi-line. Useful for call expressions
-   * where it would look weird for the lambda to be on one-line. For example, here we avoid
-   * one-lining `{ x = 0 }` since the parameters have a trailing comma:
-   * ```
-   * foo.bar(
-   *   trailingComma,
-   * ) {
-   *   x = 0
-   * }
-   * ```
    */
   private fun visitLambdaExpressionInternal(
       lambdaExpression: KtLambdaExpression,
       brokeBeforeBrace: BreakTag?,
-      forceBreakBody: Boolean,
   ) {
     builder.sync(lambdaExpression)
 
@@ -878,10 +880,6 @@ class KotlinInputAstVisitor(
         builder.token("->")
       }
       builder.breakOp(Doc.FillMode.UNIFIED, "", bracePlusZeroIndent)
-    }
-
-    if (forceBreakBody) {
-      builder.forcedBreak()
     }
 
     if (hasStatements) {
@@ -1082,7 +1080,6 @@ class KotlinInputAstVisitor(
   override fun visitArgument(argument: KtValueArgument) {
     visitArgumentInternal(
         argument,
-        forceBreakLambdaBody = false,
         wrapInBlock = true,
         brokeBeforeBrace = null,
     )
@@ -1091,14 +1088,10 @@ class KotlinInputAstVisitor(
   /**
    * The internal version of [visitArgument].
    *
-   * @param forceBreakLambdaBody if true (and [argument] is of type [KtLambdaExpression]), forces
-   * the lambda to be multi-line. See documentation of [visitLambdaExpressionInternal] for an
-   * example.
    * @param wrapInBlock if true places the argument expression in a block.
    */
   private fun visitArgumentInternal(
       argument: KtValueArgument,
-      forceBreakLambdaBody: Boolean,
       wrapInBlock: Boolean,
       brokeBeforeBrace: BreakTag?,
   ) {
@@ -1125,7 +1118,6 @@ class KotlinInputAstVisitor(
         visitLambdaExpressionInternal(
             argument.getArgumentExpression() as KtLambdaExpression,
             brokeBeforeBrace = brokeBeforeBrace,
-            forceBreakBody = forceBreakLambdaBody,
         )
       } else {
         visit(argument.getArgumentExpression())
@@ -1423,11 +1415,7 @@ class KotlinInputAstVisitor(
           else -> throw AssertionError(expr)
         }
 
-    visitLambdaExpressionInternal(
-        lambdaExpression,
-        brokeBeforeBrace = breakToExpr,
-        forceBreakBody = false,
-    )
+    visitLambdaExpressionInternal(lambdaExpression, brokeBeforeBrace = breakToExpr)
   }
 
   override fun visitClassOrObject(classOrObject: KtClassOrObject) {
