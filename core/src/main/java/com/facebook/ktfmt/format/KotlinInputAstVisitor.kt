@@ -712,7 +712,7 @@ class KotlinInputAstVisitor(
           typeArgumentList,
           valueArgumentList,
           lambdaArguments,
-          lambdaIndent = ZERO)
+      )
     }
   }
 
@@ -723,28 +723,44 @@ class KotlinInputAstVisitor(
       argumentList: KtValueArgumentList?,
       lambdaArguments: List<KtLambdaArgument>,
       argumentsIndent: Indent = expressionBreakIndent,
-      lambdaIndent: Indent = ZERO
+      lambdaIndent: Indent = ZERO,
   ) {
-    builder.block(ZERO) {
-      visit(callee)
-      builder.block(argumentsIndent) {
-        builder.block(ZERO) { visit(typeArgumentList) }
-        visit(argumentList)
+    // Used to keep track of whether or not we need to indent the lambda
+    // This is based on if there is a break in the argument list
+    var brokeBeforeBrace: BreakTag? = null
+
+    visit(callee)
+    builder.block(argumentsIndent) {
+      builder.block(ZERO) { visit(typeArgumentList) }
+      if (argumentList != null) {
+        brokeBeforeBrace = visitValueArgumentListInternal(argumentList)
       }
-      val hasTrailingComma = argumentList?.trailingComma != null
-      if (lambdaArguments.isNotEmpty()) {
-        builder.space()
-        builder.block(lambdaIndent) {
-          lambdaArguments.forEach {
-            visitArgumentInternal(it, forceBreakLambdaBody = hasTrailingComma)
-          }
-        }
+    }
+    if (lambdaArguments.isNotEmpty()) {
+      builder.space()
+      builder.block(lambdaIndent) {
+        visitArgumentInternal(
+            lambdaArguments.single(),
+            forceBreakLambdaBody = argumentList?.trailingComma != null,
+            wrapInBlock = false,
+            brokeBeforeBrace = brokeBeforeBrace,
+        )
       }
     }
   }
 
   /** Example (`1, "hi"`) in a function call */
   override fun visitValueArgumentList(list: KtValueArgumentList) {
+    visitValueArgumentListInternal(list)
+  }
+
+  /**
+   * Example (`1, "hi"`) in a function call
+   *
+   * @return a [BreakTag] which can tell you if a break was taken, but only when the list doesn't
+   * terminate in a negative closing indent. See [visitEachCommaSeparated] for examples.
+   */
+  private fun visitValueArgumentListInternal(list: KtValueArgumentList): BreakTag? {
     builder.sync(list)
 
     val arguments = list.arguments
@@ -771,7 +787,7 @@ class KotlinInputAstVisitor(
       breakAfterPrefix = arguments.isNotEmpty()
     }
 
-    visitEachCommaSeparated(
+    return visitEachCommaSeparated(
         list.arguments,
         hasTrailingComma,
         wrapInBlock = wrapInBlock,
@@ -974,6 +990,36 @@ class KotlinInputAstVisitor(
    * @param postfix if provided, emit this after the last element (or trailing comma).
    * @param breakAfterPrefix if true, emit a break after [prefix], but before the start of the
    * block.
+   * @return a [BreakTag] which can tell you if a break was taken, but only when the list doesn't
+   * terminate in a negative closing indent.
+   *
+   * Example 1, this returns a BreakTag which tells you a break wasn't taken:
+   * ```
+   * (arg1, arg2)
+   * ```
+   *
+   * Example 2, this returns a BreakTag which tells you a break WAS taken:
+   * ```
+   * (
+   *     arg1,
+   *     arg2)
+   * ```
+   *
+   * Example 3, this returns null:
+   * ```
+   * (
+   *     arg1,
+   *     arg2,
+   * )
+   * ```
+   *
+   * Example 4, this also returns null (similar to example 2, but Google style):
+   * ```
+   * (
+   *     arg1,
+   *     arg2
+   * )
+   * ```
    */
   private fun visitEachCommaSeparated(
       list: Iterable<PsiElement>,
@@ -984,11 +1030,16 @@ class KotlinInputAstVisitor(
       prefix: String? = null,
       postfix: String? = null,
       breakAfterPrefix: Boolean = true,
-  ) {
+  ): BreakTag? {
+    // a negative closing indent places the postfix to the left of the elements
+    // see examples 2 and 4 in the docstring
+    val needsNegativeClosingIndent = trailingBreak || hasTrailingComma
+    val nameTag = if (needsNegativeClosingIndent) null else genSym()
+
     if (prefix != null) {
       builder.token(prefix)
       if (breakAfterPrefix) {
-        builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+        builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO, Optional.ofNullable(nameTag))
       }
     }
 
@@ -1016,18 +1067,25 @@ class KotlinInputAstVisitor(
       }
     }
 
-    if (trailingBreak || hasTrailingComma) {
+    if (needsNegativeClosingIndent) {
       builder.breakOp(breakType, "", expressionBreakNegativeIndent)
     }
 
     if (postfix != null) {
       builder.token(postfix)
     }
+
+    return nameTag
   }
 
   /** Example `a` in `foo(a)`, or `*a`, or `limit = 50` */
   override fun visitArgument(argument: KtValueArgument) {
-    visitArgumentInternal(argument, forceBreakLambdaBody = false)
+    visitArgumentInternal(
+        argument,
+        forceBreakLambdaBody = false,
+        wrapInBlock = true,
+        brokeBeforeBrace = null,
+    )
   }
 
   /**
@@ -1036,39 +1094,41 @@ class KotlinInputAstVisitor(
    * @param forceBreakLambdaBody if true (and [argument] is of type [KtLambdaExpression]), forces
    * the lambda to be multi-line. See documentation of [visitLambdaExpressionInternal] for an
    * example.
+   * @param wrapInBlock if true places the argument expression in a block.
    */
   private fun visitArgumentInternal(
       argument: KtValueArgument,
       forceBreakLambdaBody: Boolean,
+      wrapInBlock: Boolean,
+      brokeBeforeBrace: BreakTag?,
   ) {
     builder.sync(argument)
     val hasArgName = argument.getArgumentName() != null
     val isLambda = argument.getArgumentExpression() is KtLambdaExpression
-    builder.block(ZERO) {
-      if (hasArgName) {
-        visit(argument.getArgumentName())
+    if (hasArgName) {
+      visit(argument.getArgumentName())
+      builder.space()
+      builder.token("=")
+      if (isLambda) {
         builder.space()
-        builder.token("=")
-        if (isLambda) {
-          builder.space()
-        }
       }
-      builder.block(if (hasArgName && !isLambda) expressionBreakIndent else ZERO) {
-        if (hasArgName && !isLambda) {
-          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
-        }
-        if (argument.isSpread) {
-          builder.token("*")
-        }
-        if (isLambda) {
-          visitLambdaExpressionInternal(
-              argument.getArgumentExpression() as KtLambdaExpression,
-              brokeBeforeBrace = null,
-              forceBreakBody = forceBreakLambdaBody,
-          )
-        } else {
-          visit(argument.getArgumentExpression())
-        }
+    }
+    val indent = if (hasArgName && !isLambda) expressionBreakIndent else ZERO
+    builder.block(indent, isEnabled = wrapInBlock) {
+      if (hasArgName && !isLambda) {
+        builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+      }
+      if (argument.isSpread) {
+        builder.token("*")
+      }
+      if (isLambda) {
+        visitLambdaExpressionInternal(
+            argument.getArgumentExpression() as KtLambdaExpression,
+            brokeBeforeBrace = brokeBeforeBrace,
+            forceBreakBody = forceBreakLambdaBody,
+        )
+      } else {
+        visit(argument.getArgumentExpression())
       }
     }
   }
@@ -1516,7 +1576,7 @@ class KotlinInputAstVisitor(
           call.typeArgumentList,
           call.valueArgumentList,
           call.lambdaArguments,
-          lambdaIndent = ZERO)
+      )
     }
   }
 

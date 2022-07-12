@@ -742,8 +742,8 @@ class FormatterTest {
       |    fruit.forEach(
       |        someVeryLongParameterNameThatWillCauseABreak,
       |        evenWithoutATrailingCommaOnTheParameterListSoLetsSeeIt) {
-      |      eat(it)
-      |    }
+      |          eat(it)
+      |        }
       |
       |    // break in the lambda
       |    fruit.forEach(
