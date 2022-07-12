@@ -843,9 +843,11 @@ class FormatterTest {
       |-------------------
       |fun test() {
       |  foo_bar_baz__zip<
-      |      A>(b) { c }
+      |      A
+      |  >(b) { c }
       |  foo.bar(baz).zip<
-      |      A>(b) { c }
+      |      A
+      |  >(b) { c }
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -3324,13 +3326,15 @@ class FormatterTest {
       |          is
       |          PairList<
       |              String,
-      |              Int>)
+      |              Int
+      |          >)
       |  doIt(
       |      something
       |          as
       |          PairList<
       |              String,
-      |              Int>)
+      |              Int
+      |          >)
       |  println(
       |      a is Int &&
       |          b is String)
@@ -3754,8 +3758,11 @@ class FormatterTest {
       |        com.example.interesting.SomeType<Int, Nothing>,
       |        com.example.interesting.SomeType<
       |            com.example.interesting.SomeType<
-      |                Int, Nothing>,
-      |            Nothing>> =
+      |                Int, Nothing
+      |            >,
+      |            Nothing
+      |        >
+      |    > =
       |    DUMMY
       |""".trimMargin(),
           deduceMaxWidth = true)

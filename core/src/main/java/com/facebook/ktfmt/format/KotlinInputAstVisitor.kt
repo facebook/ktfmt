@@ -239,6 +239,7 @@ class KotlinInputAstVisitor(
         typeArgumentList.trailingComma != null,
         prefix = "<",
         postfix = ">",
+        trailingBreak = true,
     )
   }
 
