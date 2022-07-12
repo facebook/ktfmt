@@ -727,15 +727,7 @@ class KotlinInputAstVisitor(
     builder.block(ZERO) {
       visit(callee)
       builder.block(argumentsIndent) { visit(typeArgumentList) }
-      builder.block(argumentsIndent) {
-        if (argumentList != null) {
-          builder.token("(")
-          if (argumentList.arguments.isNotEmpty()) {
-            builder.block(ZERO) { visit(argumentList) }
-          }
-          builder.token(")")
-        }
-      }
+      builder.block(argumentsIndent) { visit(argumentList) }
       val hasTrailingComma = argumentList?.trailingComma != null
       if (lambdaArguments.isNotEmpty()) {
         builder.space()
@@ -762,26 +754,29 @@ class KotlinInputAstVisitor(
     val wrapInBlock: Boolean
     val trailingBreak: Boolean
     val leadingBreak: Boolean
+    val breakAfterPrefix: Boolean
 
     if (isSingleUnnamedLambda) {
       wrapInBlock = true
       trailingBreak = false
-      leadingBreak = hasTrailingComma
+      leadingBreak = arguments.isNotEmpty() && hasTrailingComma
+      breakAfterPrefix = false
     } else {
       wrapInBlock = !isGoogleStyle
       trailingBreak = isGoogleStyle
-      leadingBreak = true
+      leadingBreak = arguments.isNotEmpty()
+      breakAfterPrefix = arguments.isNotEmpty()
     }
 
-    if (!isSingleUnnamedLambda) {
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-    }
     visitEachCommaSeparated(
         list.arguments,
         hasTrailingComma,
         wrapInBlock = wrapInBlock,
         trailingBreak = trailingBreak,
         leadingBreak = leadingBreak,
+        prefix = "(",
+        postfix = ")",
+        breakAfterPrefix = breakAfterPrefix,
     )
   }
 
@@ -948,6 +943,15 @@ class KotlinInputAstVisitor(
    * 5
    * ```
    *
+   * Optionally include a prefix and postfix:
+   * ```
+   *   (
+   *     a,
+   *     b,
+   *     c,
+   * )
+   * ```
+   *
    * @param hasTrailingComma if true, each element is placed on its own line (even if they could've
    * fit in a single line), and a trailing comma is emitted.
    *
@@ -963,9 +967,10 @@ class KotlinInputAstVisitor(
    * @param trailingBreak if true, place a break after the last element. Redundant when
    * [hasTrailingComma] is true.
    * @param leadingBreak if true, break before the first element.
-   * @param prefix if provided, emit this before the first element. Will also emit a break after the
-   * prefix.
+   * @param prefix if provided, emit this before the first element.
    * @param postfix if provided, emit this after the last element (or trailing comma).
+   * @param breakAfterPrefix if true, emit a break after [prefix], but before the start of the
+   * block.
    */
   private fun visitEachCommaSeparated(
       list: Iterable<PsiElement>,
@@ -975,10 +980,13 @@ class KotlinInputAstVisitor(
       leadingBreak: Boolean = true,
       prefix: String? = null,
       postfix: String? = null,
+      breakAfterPrefix: Boolean = true,
   ) {
     if (prefix != null) {
       builder.token(prefix)
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+      if (breakAfterPrefix) {
+        builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+      }
     }
 
     val breakType = if (hasTrailingComma) Doc.FillMode.FORCED else Doc.FillMode.UNIFIED
