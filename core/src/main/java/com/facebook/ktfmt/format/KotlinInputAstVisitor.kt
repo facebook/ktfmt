@@ -727,8 +727,10 @@ class KotlinInputAstVisitor(
   ) {
     builder.block(ZERO) {
       visit(callee)
-      builder.block(argumentsIndent) { visit(typeArgumentList) }
-      builder.block(argumentsIndent) { visit(argumentList) }
+      builder.block(argumentsIndent) {
+        builder.block(ZERO) { visit(typeArgumentList) }
+        visit(argumentList)
+      }
       val hasTrailingComma = argumentList?.trailingComma != null
       if (lambdaArguments.isNotEmpty()) {
         builder.space()

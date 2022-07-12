@@ -837,17 +837,19 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `no forward propagation of breaks in call expressions (at type args)`() =
+  fun `forward propagation of breaks in call expressions (at type args)`() =
       assertFormatted(
           """
       |-------------------
       |fun test() {
       |  foo_bar_baz__zip<
       |      A
-      |  >(b) { c }
+      |  >(
+      |      b) { c }
       |  foo.bar(baz).zip<
       |      A
-      |  >(b) { c }
+      |  >(
+      |      b) { c }
       |}
       |""".trimMargin(),
           deduceMaxWidth = true)
