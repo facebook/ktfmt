@@ -281,9 +281,11 @@ class GoogleStyleFormatterKtTest {
       |-------------------
       |fun test() {
       |  foo_bar_baz__zip<
-      |    A>(b) { c }
+      |    A
+      |  >(b) { c }
       |  foo.bar(baz).zip<
-      |    A>(b) { c }
+      |    A
+      |  >(b) { c }
       |}
       |""".trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,

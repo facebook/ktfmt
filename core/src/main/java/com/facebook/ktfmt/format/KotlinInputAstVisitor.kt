@@ -234,15 +234,12 @@ class KotlinInputAstVisitor(
   /** Example `<Int, String>` in `List<Int, String>` */
   override fun visitTypeArgumentList(typeArgumentList: KtTypeArgumentList) {
     builder.sync(typeArgumentList)
-    builder.block(ZERO) {
-      builder.token("<")
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      builder.block(ZERO) {
-        visitEachCommaSeparated(
-            typeArgumentList.arguments, typeArgumentList.trailingComma != null, wrapInBlock = true)
-      }
-    }
-    builder.token(">")
+    visitEachCommaSeparated(
+        typeArgumentList.arguments,
+        typeArgumentList.trailingComma != null,
+        prefix = "<",
+        postfix = ">",
+    )
   }
 
   override fun visitTypeProjection(typeProjection: KtTypeProjection) {
@@ -961,10 +958,14 @@ class KotlinInputAstVisitor(
    * ```
    *
    * @param wrapInBlock if true, place all the elements in a block. When there's no [leadingBreak],
-   * this will be negatively indented.
+   * this will be negatively indented. Note that the [prefix] and [postfix] aren't included in the
+   * block.
    * @param trailingBreak if true, place a break after the last element. Redundant when
    * [hasTrailingComma] is true.
    * @param leadingBreak if true, break before the first element.
+   * @param prefix if provided, emit this before the first element. Will also emit a break after the
+   * prefix.
+   * @param postfix if provided, emit this after the last element (or trailing comma).
    */
   private fun visitEachCommaSeparated(
       list: Iterable<PsiElement>,
@@ -972,7 +973,14 @@ class KotlinInputAstVisitor(
       wrapInBlock: Boolean = true,
       trailingBreak: Boolean = isGoogleStyle,
       leadingBreak: Boolean = true,
+      prefix: String? = null,
+      postfix: String? = null,
   ) {
+    if (prefix != null) {
+      builder.token(prefix)
+      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+    }
+
     val breakType = if (hasTrailingComma) Doc.FillMode.FORCED else Doc.FillMode.UNIFIED
     fun emitComma() {
       builder.token(",")
@@ -999,6 +1007,10 @@ class KotlinInputAstVisitor(
 
     if (trailingBreak || hasTrailingComma) {
       builder.breakOp(breakType, "", expressionBreakNegativeIndent)
+    }
+
+    if (postfix != null) {
+      builder.token(postfix)
     }
   }
 
