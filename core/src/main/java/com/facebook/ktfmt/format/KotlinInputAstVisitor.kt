@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.lexer.KtModifierKeywordToken
+import org.jetbrains.kotlin.lexer.KtSingleValueToken
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtAnnotatedExpression
 import org.jetbrains.kotlin.psi.KtAnnotation
@@ -70,6 +71,7 @@ import org.jetbrains.kotlin.psi.KtFunctionType
 import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtImportDirective
 import org.jetbrains.kotlin.psi.KtImportList
+import org.jetbrains.kotlin.psi.KtIntersectionType
 import org.jetbrains.kotlin.psi.KtIsExpression
 import org.jetbrains.kotlin.psi.KtLabelReferenceExpression
 import org.jetbrains.kotlin.psi.KtLabeledExpression
@@ -229,6 +231,18 @@ class KotlinInputAstVisitor(
     if (typeArgumentList != null) {
       builder.block(expressionBreakIndent) { visit(typeArgumentList) }
     }
+  }
+
+  /** Example: `A & B`, */
+  override fun visitIntersectionType(type: KtIntersectionType) {
+    builder.sync(type)
+
+    // TODO(strulovich): Should this have the same indentation behaviour as `x && y`?
+    visit(type.getLeftTypeRef())
+    builder.space()
+    builder.token("&")
+    builder.space()
+    visit(type.getRightTypeRef())
   }
 
   /** Example `<Int, String>` in `List<Int, String>` */
