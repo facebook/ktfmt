@@ -3027,6 +3027,16 @@ class FormatterTest {
       |""".trimMargin())
 
   @Test
+  fun `handle intersection generics`() =
+      assertFormatted(
+          """
+      |fun f() {
+      |  val l: Decl<A & B & C>
+      |  val p = Ctor<A & B & C, T & Y & Z>
+      |}
+      |""".trimMargin())
+
+  @Test
   fun `handle covariant and contravariant type arguments`() =
       assertFormatted("""
       |val p: Pair<in T, out S>
