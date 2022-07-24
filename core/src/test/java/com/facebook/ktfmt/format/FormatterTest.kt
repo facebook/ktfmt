@@ -862,21 +862,28 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `no break between multi-line strings and their selectors`() =
+  fun `forced break between multi-line strings and their selectors`() =
       assertFormatted(
           """
       |-------------------------
       |val STRING =
-      |    ""${'"'}
+      |    $QQQ
       |    |foo
-      |    |""${'"'}.trimMargin()
+      |    |$QQQ
+      |        .wouldFit()
       |
-      |// This is a bug (line is longer than limit)
-      |// that we don't know how to avoid, for now.
       |val STRING =
-      |    ""${'"'}
+      |    $QQQ
       |    |foo
-      |    |----------------------------------""${'"'}.trimMargin()
+      |    |----------------------------------$QQQ
+      |        .wouldntFit()
+      |
+      |val STRING =
+      |    $QQQ
+      |    |foo
+      |    |$QQQ
+      |        .firstLink()
+      |        .secondLink()
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -2459,12 +2466,12 @@ class FormatterTest {
   fun `Consecutive line breaks in multiline strings are preserved`() =
       assertFormatted(
           """
-      |val x = ""${'"'}
+      |val x = $QQQ
       |
       |
       |
       |Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-      |""${'"'}
+      |$QQQ
       |""".trimMargin())
 
   @Test
@@ -3527,7 +3534,7 @@ class FormatterTest {
         """
       |fun f() {
       |  val x = ";"
-      |  val x = ""${'"'}  don't touch ; in raw strings ""${'"'}
+      |  val x = $QQQ  don't touch ; in raw strings $QQQ
       |}
       |
       |// Don't touch ; inside comments.
@@ -3538,7 +3545,7 @@ class FormatterTest {
         """
       |fun f() {
       |  val x = ";"
-      |  val x = ""${'"'}  don't touch ; in raw strings ""${'"'}
+      |  val x = $QQQ  don't touch ; in raw strings $QQQ
       |}
       |
       |// Don't touch ; inside comments.
@@ -5979,5 +5986,9 @@ class FormatterTest {
       |""".trimMargin()
 
     assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  companion object {
+    const val QQQ = "\"\"\""
   }
 }
