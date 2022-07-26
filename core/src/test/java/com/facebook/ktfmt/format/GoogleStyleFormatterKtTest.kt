@@ -905,6 +905,55 @@ class GoogleStyleFormatterKtTest {
       |""".trimMargin())
 
   @Test
+  fun `comma separated lists, no automatic trailing break after lambda params`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |fun foo() {
+      |  someExpr.let { x -> x }
+      |  someExpr.let { x, y -> x }
+      |
+      |  someExpr.let { paramFits
+      |    ->
+      |    butNotArrow
+      |  }
+      |  someExpr.let { params, fit
+      |    ->
+      |    butNotArrow
+      |  }
+      |
+      |  someExpr.let {
+      |    parameterToLong ->
+      |    fits
+      |  }
+      |  someExpr.let {
+      |    tooLong,
+      |    together ->
+      |    fits
+      |  }
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `comma separated lists, no automatic trailing break after supertype list`() =
+      assertFormatted(
+          """
+      |----------------------------
+      |class Foo() :
+      |  ThisList,
+      |  WillBe,
+      |  TooLong(thats = ok) {
+      |  fun someMethod() {
+      |    val forceBodyBreak = 0
+      |  }
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
   fun `if expression with multiline condition`() =
       assertFormatted(
           """
