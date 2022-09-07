@@ -1167,8 +1167,7 @@ class GoogleStyleFormatterKtTest {
       |  val str1 =
       |    $TQ
       |    Some very long string that might mess things up
-      |    $TQ.trimIndent(
-      |    )
+      |    $TQ.trimIndent()
       |
       |  val str2 =
       |    $TQ

@@ -807,7 +807,7 @@ class KotlinInputAstVisitor(
       breakAfterPrefix = false
     } else {
       wrapInBlock = !isGoogleStyle
-      breakBeforePostfix = isGoogleStyle
+      breakBeforePostfix = isGoogleStyle && arguments.isNotEmpty()
       leadingBreak = arguments.isNotEmpty()
       breakAfterPrefix = arguments.isNotEmpty()
     }
