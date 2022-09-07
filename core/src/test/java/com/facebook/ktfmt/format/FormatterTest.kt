@@ -5973,4 +5973,29 @@ class FormatterTest {
 
     assertThatFormatting(code).isEqualTo(expected)
   }
+
+  @Test
+  fun `function call following long multiline string`() =
+      assertFormatted(
+          """
+      |--------------------------------
+      |fun f() {
+      |  val str1 =
+      |      $TQ
+      |      Some very long string that might mess things up
+      |      $TQ.trimIndent()
+      |
+      |  val str2 =
+      |      $TQ
+      |      Some very long string that might mess things up
+      |      $TQ.trimIndent(
+      |          someArg)
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  companion object {
+    /** Triple quotes, useful to use within triple-quoted strings. */
+    private const val TQ = "\"\"\""
+  }
 }

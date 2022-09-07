@@ -1157,4 +1157,32 @@ class GoogleStyleFormatterKtTest {
       |""".trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
+
+  @Test
+  fun `function call following long multiline string`() =
+      assertFormatted(
+          """
+      |--------------------------------
+      |fun f() {
+      |  val str1 =
+      |    $TQ
+      |    Some very long string that might mess things up
+      |    $TQ.trimIndent(
+      |    )
+      |
+      |  val str2 =
+      |    $TQ
+      |    Some very long string that might mess things up
+      |    $TQ.trimIndent(
+      |      someArg
+      |    )
+      |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  companion object {
+    /** Triple quotes, useful to use within triple-quoted strings. */
+    private const val TQ = "\"\"\""
+  }
 }
