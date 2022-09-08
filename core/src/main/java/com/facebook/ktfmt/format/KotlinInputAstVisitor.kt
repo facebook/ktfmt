@@ -466,7 +466,17 @@ class KotlinInputAstVisitor(
           visit(selectorExpression)
         }
       }
-      receiver is KtWhenExpression || receiver is KtStringTemplateExpression -> {
+      receiver is KtStringTemplateExpression -> {
+        builder.block(expressionBreakIndent) {
+          visit(receiver)
+          if (receiver.text.contains('\n')) {
+            builder.forcedBreak()
+          }
+          builder.token(expression.operationSign.value)
+          visit(expression.selectorExpression)
+        }
+      }
+      receiver is KtWhenExpression -> {
         builder.block(ZERO) {
           visit(receiver)
           builder.token(expression.operationSign.value)

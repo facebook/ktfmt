@@ -304,6 +304,33 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `forced break between multi-line strings and their selectors`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |val STRING =
+      |  $QQQ
+      |  |foo
+      |  |$QQQ
+      |    .wouldFit()
+      |
+      |val STRING =
+      |  $QQQ
+      |  |foo
+      |  |----------------------------------$QQQ
+      |    .wouldntFit()
+      |
+      |val STRING =
+      |  $QQQ
+      |  |foo
+      |  |$QQQ
+      |    .firstLink()
+      |    .secondLink()
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
   fun `properly break fully qualified nested user types`() =
       assertFormatted(
           """
@@ -1165,16 +1192,16 @@ class GoogleStyleFormatterKtTest {
       |--------------------------------
       |fun f() {
       |  val str1 =
-      |    $TQ
+      |    $QQQ
       |    Some very long string that might mess things up
-      |    $TQ.trimIndent()
+      |    $QQQ
+      |      .trimIndent()
       |
       |  val str2 =
-      |    $TQ
+      |    $QQQ
       |    Some very long string that might mess things up
-      |    $TQ.trimIndent(
-      |      someArg
-      |    )
+      |    $QQQ
+      |      .trimIndent(someArg)
       |}
       |""".trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
@@ -1182,6 +1209,6 @@ class GoogleStyleFormatterKtTest {
 
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
-    private const val TQ = "\"\"\""
+    private const val QQQ = "\"\"\""
   }
 }
