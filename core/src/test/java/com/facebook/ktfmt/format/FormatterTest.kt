@@ -865,21 +865,21 @@ class FormatterTest {
           """
       |-------------------------
       |val STRING =
-      |    $QQQ
+      |    $TQ
       |    |foo
-      |    |$QQQ
+      |    |$TQ
       |        .wouldFit()
       |
       |val STRING =
-      |    $QQQ
+      |    $TQ
       |    |foo
-      |    |----------------------------------$QQQ
+      |    |----------------------------------$TQ
       |        .wouldntFit()
       |
       |val STRING =
-      |    $QQQ
+      |    $TQ
       |    |foo
-      |    |$QQQ
+      |    |$TQ
       |        .firstLink()
       |        .secondLink()
       |""".trimMargin(),
@@ -2464,12 +2464,12 @@ class FormatterTest {
   fun `Consecutive line breaks in multiline strings are preserved`() =
       assertFormatted(
           """
-      |val x = $QQQ
+      |val x = $TQ
       |
       |
       |
       |Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-      |$QQQ
+      |$TQ
       |""".trimMargin())
 
   @Test
@@ -3530,7 +3530,7 @@ class FormatterTest {
         """
       |fun f() {
       |  val x = ";"
-      |  val x = $QQQ  don't touch ; in raw strings $QQQ
+      |  val x = $TQ  don't touch ; in raw strings $TQ
       |}
       |
       |// Don't touch ; inside comments.
@@ -3541,7 +3541,7 @@ class FormatterTest {
         """
       |fun f() {
       |  val x = ";"
-      |  val x = $QQQ  don't touch ; in raw strings $QQQ
+      |  val x = $TQ  don't touch ; in raw strings $TQ
       |}
       |
       |// Don't touch ; inside comments.
@@ -5988,15 +5988,15 @@ class FormatterTest {
       |--------------------------------
       |fun f() {
       |  val str1 =
-      |      $QQQ
+      |      $TQ
       |      Some very long string that might mess things up
-      |      $QQQ
+      |      $TQ
       |          .trimIndent()
       |
       |  val str2 =
-      |      $QQQ
+      |      $TQ
       |      Some very long string that might mess things up
-      |      $QQQ
+      |      $TQ
       |          .trimIndent(someArg)
       |}
       |""".trimMargin(),
@@ -6004,6 +6004,6 @@ class FormatterTest {
 
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
-    private const val QQQ = "\"\"\""
+    private const val TQ = "\"\"\""
   }
 }

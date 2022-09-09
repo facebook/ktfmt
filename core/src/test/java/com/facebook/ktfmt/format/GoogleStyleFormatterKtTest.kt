@@ -309,21 +309,21 @@ class GoogleStyleFormatterKtTest {
           """
       |-------------------------
       |val STRING =
-      |  $QQQ
+      |  $TQ
       |  |foo
-      |  |$QQQ
+      |  |$TQ
       |    .wouldFit()
       |
       |val STRING =
-      |  $QQQ
+      |  $TQ
       |  |foo
-      |  |----------------------------------$QQQ
+      |  |----------------------------------$TQ
       |    .wouldntFit()
       |
       |val STRING =
-      |  $QQQ
+      |  $TQ
       |  |foo
-      |  |$QQQ
+      |  |$TQ
       |    .firstLink()
       |    .secondLink()
       |""".trimMargin(),
@@ -1192,15 +1192,15 @@ class GoogleStyleFormatterKtTest {
       |--------------------------------
       |fun f() {
       |  val str1 =
-      |    $QQQ
+      |    $TQ
       |    Some very long string that might mess things up
-      |    $QQQ
+      |    $TQ
       |      .trimIndent()
       |
       |  val str2 =
-      |    $QQQ
+      |    $TQ
       |    Some very long string that might mess things up
-      |    $QQQ
+      |    $TQ
       |      .trimIndent(someArg)
       |}
       |""".trimMargin(),
@@ -1209,6 +1209,6 @@ class GoogleStyleFormatterKtTest {
 
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
-    private const val QQQ = "\"\"\""
+    private const val TQ = "\"\"\""
   }
 }
