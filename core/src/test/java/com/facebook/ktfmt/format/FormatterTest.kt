@@ -846,14 +846,12 @@ class FormatterTest {
       |-------------------
       |fun test() {
       |  foo_bar_baz__zip<
-      |      A
-      |  >(
+      |      A>(
       |      b) {
       |        c
       |      }
       |  foo.bar(baz).zip<
-      |      A
-      |  >(
+      |      A>(
       |      b) {
       |        c
       |      }
@@ -862,21 +860,28 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `no break between multi-line strings and their selectors`() =
+  fun `forced break between multi-line strings and their selectors`() =
       assertFormatted(
           """
       |-------------------------
       |val STRING =
-      |    ""${'"'}
+      |    $TQ
       |    |foo
-      |    |""${'"'}.trimMargin()
+      |    |$TQ
+      |        .wouldFit()
       |
-      |// This is a bug (line is longer than limit)
-      |// that we don't know how to avoid, for now.
       |val STRING =
-      |    ""${'"'}
+      |    $TQ
       |    |foo
-      |    |----------------------------------""${'"'}.trimMargin()
+      |    |----------------------------------$TQ
+      |        .wouldntFit()
+      |
+      |val STRING =
+      |    $TQ
+      |    |foo
+      |    |$TQ
+      |        .firstLink()
+      |        .secondLink()
       |""".trimMargin(),
           deduceMaxWidth = true)
 
@@ -2459,12 +2464,12 @@ class FormatterTest {
   fun `Consecutive line breaks in multiline strings are preserved`() =
       assertFormatted(
           """
-      |val x = ""${'"'}
+      |val x = $TQ
       |
       |
       |
       |Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-      |""${'"'}
+      |$TQ
       |""".trimMargin())
 
   @Test
@@ -3347,15 +3352,13 @@ class FormatterTest {
       |          is
       |          PairList<
       |              String,
-      |              Int
-      |          >)
+      |              Int>)
       |  doIt(
       |      something
       |          as
       |          PairList<
       |              String,
-      |              Int
-      |          >)
+      |              Int>)
       |  println(
       |      a is Int &&
       |          b is String)
@@ -3527,7 +3530,7 @@ class FormatterTest {
         """
       |fun f() {
       |  val x = ";"
-      |  val x = ""${'"'}  don't touch ; in raw strings ""${'"'}
+      |  val x = $TQ  don't touch ; in raw strings $TQ
       |}
       |
       |// Don't touch ; inside comments.
@@ -3538,7 +3541,7 @@ class FormatterTest {
         """
       |fun f() {
       |  val x = ";"
-      |  val x = ""${'"'}  don't touch ; in raw strings ""${'"'}
+      |  val x = $TQ  don't touch ; in raw strings $TQ
       |}
       |
       |// Don't touch ; inside comments.
@@ -3781,11 +3784,8 @@ class FormatterTest {
       |        com.example.interesting.SomeType<Int, Nothing>,
       |        com.example.interesting.SomeType<
       |            com.example.interesting.SomeType<
-      |                Int, Nothing
-      |            >,
-      |            Nothing
-      |        >
-      |    > =
+      |                Int, Nothing>,
+      |            Nothing>> =
       |    DUMMY
       |""".trimMargin(),
           deduceMaxWidth = true)
@@ -5981,5 +5981,31 @@ class FormatterTest {
       |""".trimMargin()
 
     assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `function call following long multiline string`() =
+      assertFormatted(
+          """
+      |--------------------------------
+      |fun f() {
+      |  val str1 =
+      |      $TQ
+      |      Some very long string that might mess things up
+      |      $TQ
+      |          .trimIndent()
+      |
+      |  val str2 =
+      |      $TQ
+      |      Some very long string that might mess things up
+      |      $TQ
+      |          .trimIndent(someArg)
+      |}
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  companion object {
+    /** Triple quotes, useful to use within triple-quoted strings. */
+    private const val TQ = "\"\"\""
   }
 }

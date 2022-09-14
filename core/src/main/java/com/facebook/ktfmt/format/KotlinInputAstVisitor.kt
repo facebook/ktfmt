@@ -252,7 +252,6 @@ class KotlinInputAstVisitor(
         typeArgumentList.trailingComma != null,
         prefix = "<",
         postfix = ">",
-        trailingBreak = true,
     )
   }
 
@@ -467,7 +466,17 @@ class KotlinInputAstVisitor(
           visit(selectorExpression)
         }
       }
-      receiver is KtWhenExpression || receiver is KtStringTemplateExpression -> {
+      receiver is KtStringTemplateExpression -> {
+        builder.block(expressionBreakIndent) {
+          visit(receiver)
+          if (receiver.text.contains('\n')) {
+            builder.forcedBreak()
+          }
+          builder.token(expression.operationSign.value)
+          visit(expression.selectorExpression)
+        }
+      }
+      receiver is KtWhenExpression -> {
         builder.block(ZERO) {
           visit(receiver)
           builder.token(expression.operationSign.value)
@@ -797,18 +806,18 @@ class KotlinInputAstVisitor(
     val hasTrailingComma = list.trailingComma != null
 
     val wrapInBlock: Boolean
-    val trailingBreak: Boolean
+    val breakBeforePostfix: Boolean
     val leadingBreak: Boolean
     val breakAfterPrefix: Boolean
 
     if (isSingleUnnamedLambda) {
       wrapInBlock = true
-      trailingBreak = false
+      breakBeforePostfix = false
       leadingBreak = arguments.isNotEmpty() && hasTrailingComma
       breakAfterPrefix = false
     } else {
       wrapInBlock = !isGoogleStyle
-      trailingBreak = isGoogleStyle
+      breakBeforePostfix = isGoogleStyle && arguments.isNotEmpty()
       leadingBreak = arguments.isNotEmpty()
       breakAfterPrefix = arguments.isNotEmpty()
     }
@@ -817,7 +826,7 @@ class KotlinInputAstVisitor(
         list.arguments,
         hasTrailingComma,
         wrapInBlock = wrapInBlock,
-        trailingBreak = trailingBreak,
+        breakBeforePostfix = breakBeforePostfix,
         leadingBreak = leadingBreak,
         prefix = "(",
         postfix = ")",
@@ -994,13 +1003,13 @@ class KotlinInputAstVisitor(
    * @param wrapInBlock if true, place all the elements in a block. When there's no [leadingBreak],
    * this will be negatively indented. Note that the [prefix] and [postfix] aren't included in the
    * block.
-   * @param trailingBreak if true, place a break after the last element. Redundant when
-   * [hasTrailingComma] is true.
    * @param leadingBreak if true, break before the first element.
    * @param prefix if provided, emit this before the first element.
    * @param postfix if provided, emit this after the last element (or trailing comma).
    * @param breakAfterPrefix if true, emit a break after [prefix], but before the start of the
    * block.
+   * @param breakBeforePostfix if true, place a break after the last element. Redundant when
+   * [hasTrailingComma] is true.
    * @return a [BreakTag] which can tell you if a break was taken, but only when the list doesn't
    * terminate in a negative closing indent.
    *
@@ -1036,16 +1045,14 @@ class KotlinInputAstVisitor(
       list: Iterable<PsiElement>,
       hasTrailingComma: Boolean = false,
       wrapInBlock: Boolean = true,
-      trailingBreak: Boolean = isGoogleStyle,
       leadingBreak: Boolean = true,
       prefix: String? = null,
       postfix: String? = null,
       breakAfterPrefix: Boolean = true,
+      breakBeforePostfix: Boolean = isGoogleStyle,
   ): BreakTag? {
-    // a negative closing indent places the postfix to the left of the elements
-    // see examples 2 and 4 in the docstring
-    val needsNegativeClosingIndent = trailingBreak || hasTrailingComma
-    val nameTag = if (needsNegativeClosingIndent) null else genSym()
+    val breakAfterLastElement = hasTrailingComma || (postfix != null && breakBeforePostfix)
+    val nameTag = if (breakAfterLastElement) null else genSym()
 
     if (prefix != null) {
       builder.token(prefix)
@@ -1078,7 +1085,9 @@ class KotlinInputAstVisitor(
       }
     }
 
-    if (needsNegativeClosingIndent) {
+    if (breakAfterLastElement) {
+      // a negative closing indent places the postfix to the left of the elements
+      // see examples 2 and 4 in the docstring
       builder.breakOp(breakType, "", expressionBreakNegativeIndent)
     }
 
@@ -2204,10 +2213,16 @@ class KotlinInputAstVisitor(
       builder.token(".")
     }
     builder.block(expressionBreakIndent) {
-      builder.token("(")
-      visit(type.parameterList)
+      val parameterList = type.parameterList
+      if (parameterList != null) {
+        visitEachCommaSeparated(
+            parameterList.parameters,
+            prefix = "(",
+            postfix = ")",
+            hasTrailingComma = parameterList.trailingComma != null,
+        )
+      }
     }
-    builder.token(")")
     builder.space()
     builder.token("->")
     builder.space()
