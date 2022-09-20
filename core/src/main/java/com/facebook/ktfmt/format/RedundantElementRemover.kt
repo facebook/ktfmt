@@ -17,6 +17,7 @@
 package com.facebook.ktfmt.format
 
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.kdoc.psi.impl.KDocImpl
 import org.jetbrains.kotlin.psi.KtImportList
 import org.jetbrains.kotlin.psi.KtPackageDirective
@@ -65,9 +66,16 @@ object RedundantElementRemover {
             redundantImportDetector.getRedundantImportElements()
 
     for (element in elementsToRemove.sortedByDescending(PsiElement::endOffset)) {
-      result.replace(element.startOffset, element.endOffset, "")
+      // Don't insert extra newlines when the semicolon is already a line terminator
+      val replacement = if (element.nextSibling.containsNewline()) "" else "\n"
+      result.replace(element.startOffset, element.endOffset, replacement)
     }
 
     return result.toString()
+  }
+
+  private fun PsiElement?.containsNewline(): Boolean {
+    if (this !is PsiWhiteSpace) return false
+    return this.text.contains('\n')
   }
 }

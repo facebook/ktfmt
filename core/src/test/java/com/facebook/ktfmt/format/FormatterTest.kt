@@ -3578,7 +3578,7 @@ class FormatterTest {
       |  if (true) ;
       |  if (true)
       |  /** a */
-      |  ;
+      |   ;
       |
       |  if (true)  else ;
       |}
@@ -3678,6 +3678,7 @@ class FormatterTest {
       |  someLongVariableName.let {
       |    someReallyLongFunctionNameThatMakesThisNotFitInOneLineWithTheAboveVariable();
       |  }
+      |  if (cond) ; else 6
       |} ;
       |
       |""".trimMargin()
@@ -3705,6 +3706,7 @@ class FormatterTest {
       |  someLongVariableName.let {
       |    someReallyLongFunctionNameThatMakesThisNotFitInOneLineWithTheAboveVariable()
       |  }
+      |  if (cond)  else 6
       |}
       |""".trimMargin()
     assertThatFormatting(code).isEqualTo(expected)

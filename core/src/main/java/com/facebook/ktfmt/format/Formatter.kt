@@ -88,13 +88,7 @@ object Formatter {
 
     val lfCode = StringUtilRt.convertLineSeparators(kotlinCode)
     val sortedImports = sortedAndDistinctImports(lfCode)
-    val pretty = prettyPrint(sortedImports, options, "\n")
-    val noRedundantElements =
-        try {
-          dropRedundantElements(pretty, options)
-        } catch (e: ParseError) {
-          throw IllegalStateException("Failed to re-parse code after pretty printing:\n $pretty", e)
-        }
+    val noRedundantElements = dropRedundantElements(sortedImports, options)
     val prettyCode =
         prettyPrint(noRedundantElements, options, Newlines.guessLineSeparator(kotlinCode)!!)
     return if (shebang.isNotEmpty()) shebang + "\n" + prettyCode else prettyCode
