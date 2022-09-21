@@ -467,9 +467,10 @@ class KotlinInputAstVisitor(
         }
       }
       receiver is KtStringTemplateExpression -> {
-        builder.block(expressionBreakIndent) {
+        val isMultiline = receiver.text.contains('\n')
+        builder.block(if (isMultiline) expressionBreakIndent else ZERO) {
           visit(receiver)
-          if (receiver.text.contains('\n')) {
+          if (isMultiline) {
             builder.forcedBreak()
           }
           builder.token(expression.operationSign.value)
@@ -2274,15 +2275,14 @@ class KotlinInputAstVisitor(
    */
   override fun visitCollectionLiteralExpression(expression: KtCollectionLiteralExpression) {
     builder.sync(expression)
-    builder.block(ZERO) {
-      builder.token("[")
-      builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
-      builder.block(expressionBreakIndent) {
-        visitEachCommaSeparated(
-            expression.getInnerExpressions(), expression.trailingComma != null, wrapInBlock = true)
-      }
+    builder.block(expressionBreakIndent) {
+      visitEachCommaSeparated(
+          expression.getInnerExpressions(),
+          expression.trailingComma != null,
+          prefix = "[",
+          postfix = "]",
+          wrapInBlock = true)
     }
-    builder.token("]")
   }
 
   override fun visitTryExpression(expression: KtTryExpression) {

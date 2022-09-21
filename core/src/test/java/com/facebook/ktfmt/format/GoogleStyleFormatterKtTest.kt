@@ -304,6 +304,18 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `expected indent in methods following single-line strings`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |"Hello %s".format(
+      |  someLongExpression
+      |)
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
   fun `forced break between multi-line strings and their selectors`() =
       assertFormatted(
           """
@@ -1203,6 +1215,34 @@ class GoogleStyleFormatterKtTest {
       |    $TQ
       |      .trimIndent(someArg)
       |}
+      |""".trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `array-literal in annotation`() =
+      assertFormatted(
+          """
+      |--------------------------------
+      |@Anno(
+      |  array =
+      |    [
+      |      someItem,
+      |      andAnother,
+      |      noTrailingComma
+      |    ]
+      |)
+      |class Host
+      |
+      |@Anno(
+      |  array =
+      |    [
+      |      someItem,
+      |      andAnother,
+      |      withTrailingComma,
+      |    ]
+      |)
+      |class Host
       |""".trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
