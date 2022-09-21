@@ -860,6 +860,16 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `expected indent in methods following single-line strings`() =
+      assertFormatted(
+          """
+      |-------------------------
+      |"Hello %s".format(
+      |    someLongExpression)
+      |""".trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `forced break between multi-line strings and their selectors`() =
       assertFormatted(
           """
