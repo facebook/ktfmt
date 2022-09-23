@@ -54,7 +54,8 @@ class GoogleStyleFormatterKtTest {
         |
         |          ImmutableList.newBuilder().add(1).add(1).add(1).add(1).add(1).add(1).add(1).add(1).add(1).add(1).build()
         |     }
-        |""".trimMargin()
+        |"""
+            .trimMargin()
 
     val expected =
         """
@@ -96,7 +97,8 @@ class GoogleStyleFormatterKtTest {
         |    .add(1)
         |    .build()
         |}
-        |""".trimMargin()
+        |"""
+            .trimMargin()
 
     assertThatFormatting(code).withOptions(Formatter.GOOGLE_FORMAT).isEqualTo(expected)
     // Don't add more tests here
@@ -140,7 +142,8 @@ class GoogleStyleFormatterKtTest {
       |class C(a: Int, var b: Int, val c: Int) {
       |  //
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -188,7 +191,8 @@ class GoogleStyleFormatterKtTest {
       |fun c12(a: Int, var b: Int, val c: Int) {
       |  //
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -212,7 +216,8 @@ class GoogleStyleFormatterKtTest {
       |    //
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -233,7 +238,8 @@ class GoogleStyleFormatterKtTest {
       |      }
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -250,7 +256,8 @@ class GoogleStyleFormatterKtTest {
       |    c
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -274,7 +281,8 @@ class GoogleStyleFormatterKtTest {
       |    c
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -299,7 +307,8 @@ class GoogleStyleFormatterKtTest {
       |    c
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -311,7 +320,8 @@ class GoogleStyleFormatterKtTest {
       |"Hello %s".format(
       |  someLongExpression
       |)
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -338,7 +348,8 @@ class GoogleStyleFormatterKtTest {
       |  |$TQ
       |    .firstLink()
       |    .secondLink()
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -356,7 +367,8 @@ class GoogleStyleFormatterKtTest {
       |    >
       |  > =
       |  DUMMY
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -415,7 +427,8 @@ class GoogleStyleFormatterKtTest {
       |    }
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -432,7 +445,8 @@ class GoogleStyleFormatterKtTest {
       |    123456789012345678901234567890
       |  )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT)
 
   @Test
@@ -462,7 +476,8 @@ class GoogleStyleFormatterKtTest {
       |    }
       |    .build()
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
@@ -477,7 +492,8 @@ class GoogleStyleFormatterKtTest {
       |    }
       |  )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
@@ -496,7 +512,8 @@ class GoogleStyleFormatterKtTest {
       |    it.doIt()
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
@@ -511,7 +528,8 @@ class GoogleStyleFormatterKtTest {
       |    }
       |  )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
       )
 
@@ -528,7 +546,8 @@ class GoogleStyleFormatterKtTest {
       |    c = 3456789012345678901234567890
       |  )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT)
 
   @Test
@@ -556,7 +575,8 @@ class GoogleStyleFormatterKtTest {
       |    )
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -576,7 +596,8 @@ class GoogleStyleFormatterKtTest {
       |        .doThat()
       |    )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -594,7 +615,8 @@ class GoogleStyleFormatterKtTest {
       |  )
       |  return if (b) 1 else 2
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT)
 
   @Test
@@ -610,7 +632,8 @@ class GoogleStyleFormatterKtTest {
       |      },
       |    duration = duration
       |  )
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT)
 
   @Test
@@ -633,7 +656,8 @@ class GoogleStyleFormatterKtTest {
       |      ) +
       |      value9
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -682,7 +706,8 @@ class GoogleStyleFormatterKtTest {
       |      b is String
       |  )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -713,7 +738,8 @@ class GoogleStyleFormatterKtTest {
       |    State(0)
       |  )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -742,7 +768,8 @@ class GoogleStyleFormatterKtTest {
       |    )
       |    .doThat()
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -767,7 +794,8 @@ class GoogleStyleFormatterKtTest {
       |    offspring
       |  )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -783,7 +811,8 @@ class GoogleStyleFormatterKtTest {
       |      Foo.createSpeciallyDesignedParameter(),
       |    )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -826,7 +855,8 @@ class GoogleStyleFormatterKtTest {
       |    3,
       |  )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -881,7 +911,8 @@ class GoogleStyleFormatterKtTest {
       |    .methodName4()
       |    .abcdefghijkl()
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -904,7 +935,8 @@ class GoogleStyleFormatterKtTest {
       |    }
       |  )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT)
 
   @Test
@@ -922,7 +954,8 @@ class GoogleStyleFormatterKtTest {
       |      println("b")
       |    )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -941,7 +974,8 @@ class GoogleStyleFormatterKtTest {
       |  doItOnce()
       |  doItTwice()
       |}
-      |""".trimMargin())
+      |"""
+              .trimMargin())
 
   @Test
   fun `comma separated lists, no automatic trailing break after lambda params`() =
@@ -971,7 +1005,8 @@ class GoogleStyleFormatterKtTest {
       |    fits
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -988,7 +1023,8 @@ class GoogleStyleFormatterKtTest {
       |    val forceBodyBreak = 0
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1016,7 +1052,8 @@ class GoogleStyleFormatterKtTest {
       |    bar()
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1032,7 +1069,8 @@ class GoogleStyleFormatterKtTest {
       |    bar()
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1062,7 +1100,8 @@ class GoogleStyleFormatterKtTest {
       |    2 -> print(2)
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1079,7 +1118,8 @@ class GoogleStyleFormatterKtTest {
       |    2 -> print(2)
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1107,7 +1147,8 @@ class GoogleStyleFormatterKtTest {
       |    bar()
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1123,7 +1164,8 @@ class GoogleStyleFormatterKtTest {
       |    bar()
       |  }
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1145,7 +1187,8 @@ class GoogleStyleFormatterKtTest {
       |      boo
       |    )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1163,7 +1206,8 @@ class GoogleStyleFormatterKtTest {
       |    param2
       |  )
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1177,7 +1221,8 @@ class GoogleStyleFormatterKtTest {
       |    .doOp(1)
       |    .doOp(2)
       |)
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1193,7 +1238,8 @@ class GoogleStyleFormatterKtTest {
       |    c: String,
       |    d: String
       |  ) -> Unit
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1215,7 +1261,8 @@ class GoogleStyleFormatterKtTest {
       |    $TQ
       |      .trimIndent(someArg)
       |}
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 
@@ -1243,7 +1290,8 @@ class GoogleStyleFormatterKtTest {
       |    ]
       |)
       |class Host
-      |""".trimMargin(),
+      |"""
+              .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
 

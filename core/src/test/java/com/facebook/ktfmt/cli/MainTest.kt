@@ -246,7 +246,8 @@ class MainTest {
           |println(child)
           |}
           |}
-          |""".trimMargin()
+          |"""
+            .trimMargin()
     val formatted =
         """fun f() {
           |    for (child in
@@ -254,7 +255,8 @@ class MainTest {
           |        println(child)
           |    }
           |}
-          |""".trimMargin()
+          |"""
+            .trimMargin()
     Main(
             code.byteInputStream(),
             PrintStream(out),
