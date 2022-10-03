@@ -1290,6 +1290,21 @@ class GoogleStyleFormatterKtTest {
       |    ]
       |)
       |class Host
+      |
+      |@Anno(
+      |  array =
+      |    [
+      |      // Comment
+      |      someItem,
+      |      // Comment
+      |      andAnother,
+      |      // Comment
+      |      withTrailingComment
+      |      // Comment
+      |      // Comment
+      |    ]
+      |)
+      |class Host
       |"""
               .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,

@@ -6423,6 +6423,46 @@ class FormatterTest {
               .trimMargin(),
           deduceMaxWidth = true)
 
+  @Test
+  fun `array-literal in annotation`() =
+      assertFormatted(
+          """
+      |--------------------------------
+      |@Anno(
+      |    array =
+      |        [
+      |            someItem,
+      |            andAnother,
+      |            noTrailingComma])
+      |class Host
+      |
+      |@Anno(
+      |    array =
+      |        [
+      |            someItem,
+      |            andAnother,
+      |            withTrailingComma,
+      |        ])
+      |class Host
+      |
+      |@Anno(
+      |    array =
+      |        [
+      |            // Comment
+      |            someItem,
+      |            // Comment
+      |            andAnother,
+      |            // Comment
+      |            withTrailingComment
+      |            // Comment
+      |            // Comment
+      |            ])
+      |class Host
+      |"""
+              .trimMargin(),
+          deduceMaxWidth = true)
+
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""

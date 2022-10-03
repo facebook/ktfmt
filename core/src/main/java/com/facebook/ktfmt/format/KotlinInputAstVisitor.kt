@@ -1093,7 +1093,17 @@ class KotlinInputAstVisitor(
     }
 
     if (postfix != null) {
-      builder.token(postfix)
+      if (breakAfterLastElement) {
+        // Indent trailing comments to the same depth as list items. We really have to fight
+        // googlejavaformat here for some reason.
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
+        builder.block(expressionBreakNegativeIndent) {
+          builder.breakOp(breakType, "", ZERO)
+          builder.token(postfix, expressionBreakIndent)
+        }
+      } else {
+        builder.token(postfix)
+      }
     }
 
     return nameTag
