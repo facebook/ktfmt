@@ -25,29 +25,4 @@ object Escaping {
   fun indexOfCommentEscapeSequences(s: String) =
       s.indexOfAny(listOf(SLASH_STAR_ESCAPE, STAR_SLASH_ESCAPE))
 
-  /**
-   * kotlin-compiler's KDoc lexer doesn't correctly handle nested slash-star comments, so we escape
-   * them into tombstones, format, then unescape.
-   */
-  fun escapeKDoc(s: String): String {
-    val startMarkerIndex = s.indexOf("/*")
-    val endMarkerIndex = s.lastIndexOf("*/")
-
-    if (startMarkerIndex == -1 || endMarkerIndex == -1) {
-      throw RuntimeException("KDoc with no /** and/or */")
-    }
-
-    return s.substring(0, startMarkerIndex + 3) +
-        s.substring(startMarkerIndex + 3, endMarkerIndex)
-            .replace("/*", SLASH_STAR_ESCAPE)
-            .replace("*/", STAR_SLASH_ESCAPE) +
-        s.substring(endMarkerIndex)
-  }
-
-  /**
-   *
-   * See [escapeKDoc].
-   */
-  fun unescapeKDoc(s: String): String =
-      s.replace(SLASH_STAR_ESCAPE, "/*").replace(STAR_SLASH_ESCAPE, "*/")
 }

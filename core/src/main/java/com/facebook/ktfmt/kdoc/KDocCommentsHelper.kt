@@ -25,6 +25,8 @@ import com.google.googlejavaformat.CommentsHelper
 import com.google.googlejavaformat.Input.Tok
 import com.google.googlejavaformat.Newlines
 import com.google.googlejavaformat.java.Formatter
+import kdocformatter.FormattingTask
+import kdocformatter.KDocFormattingOptions
 import java.util.ArrayList
 import java.util.regex.Pattern
 
@@ -38,7 +40,10 @@ class KDocCommentsHelper(private val lineSeparator: String, private val maxLineL
     }
     var text = tok.originalText
     if (tok.isJavadocComment) {
-      text = KDocFormatter.formatKDoc(text, column0, maxLineLength)
+      val options = KDocFormattingOptions(maxLineLength, maxLineLength)
+//    options.hangingIndent = blockIndent
+//    options.nestedListIndent = blockIndent - 1
+      text = kdocformatter.KDocFormatter(options).reformatComment(FormattingTask(options, text, " ".repeat(column0)))
     }
     val lines = ArrayList<String>()
     val it = Newlines.lineIterator(text)
