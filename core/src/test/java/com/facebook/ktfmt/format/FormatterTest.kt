@@ -1166,14 +1166,14 @@ class FormatterTest {
           | *
           | * Old {@link JavaDocLink} that gets removed.
           | *
+          | * @param unused [Param]
+          | * @return [Unit] as [ReturnedValue]
+          | * @property JavaDocLink [Param]
+          | * @throws AnException
           | * @throws AnException
           | * @exception Sample.SampleException
-          | * @param unused [Param]
-          | * @property JavaDocLink [Param]
-          | * @return [Unit] as [ReturnedValue]
           | * @sample Example
           | * @see Bar for more info
-          | * @throws AnException
           | */
           |class Dummy
           |"""
@@ -1810,62 +1810,10 @@ class FormatterTest {
       |/**
       | * Here are some fruit I like:
       | * - Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana
-      | * Banana Banana Banana Banana Banana
+      | *   Banana Banana Banana Banana Banana
       | * - Apple Apple Apple Apple Apple Apple
       | *
       | * This is another paragraph
-      | */
-      |"""
-            .trimMargin()
-    assertThatFormatting(code).isEqualTo(expected)
-  }
-
-  @Test
-  fun `too many spaces on list continuation mean it's a code block, so mark it accordingly`() {
-    val code =
-        """
-      |/**
-      | * Here are some fruit I like:
-      | * - Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana
-      | *     Banana Banana Banana Banana Banana
-      | */
-      |"""
-            .trimMargin()
-    val expected =
-        """
-      |/**
-      | * Here are some fruit I like:
-      | * - Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana
-      | * ```
-      | *     Banana Banana Banana Banana Banana
-      | * ```
-      | */
-      |"""
-            .trimMargin()
-    assertThatFormatting(code).isEqualTo(expected)
-  }
-
-  @Test
-  fun `add explicit code markers around indented code`() {
-    val code =
-        """
-      |/**
-      | * This is a code example:
-      | *
-      | *     this_is_code()
-      | *
-      | * This is not code again
-      | */
-      |"""
-            .trimMargin()
-    val expected =
-        """
-      |/**
-      | * This is a code example:
-      | * ```
-      | *     this_is_code()
-      | * ```
-      | * This is not code again
       | */
       |"""
             .trimMargin()
@@ -4665,7 +4613,6 @@ class FormatterTest {
           """
       |/**
       | * This is how you write a simple hello world in Kotlin:
-      | *
       | * ```
       | * fun main(args: Array<String>) {
       | *   println("Hello World!")
@@ -4673,9 +4620,11 @@ class FormatterTest {
       | * ```
       | *
       | * Amazing ah?
+      | *
       | * ```
       | * fun `code can be with a blank line above it` () {}
       | * ```
+      | *
       | * Or after it!
       | */
       |class MyClass {}
@@ -4905,8 +4854,7 @@ class FormatterTest {
       | * Doesn't preserve the original line endings.
       | *
       | * @param marginPrefix non-blank string, which is used as a margin delimiter. Default is `|` (pipe
-      | * character).
-      | *
+      | *     character).
       | * @sample samples.text.Strings.trimMargin
       | * @see trimIndent
       | * @see kotlin.text.isWhitespace

@@ -1,211 +1,160 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright (c) Tor Norbye.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
-
-/*
- * This was copied from https://github.com/google/google-java-format and modified extensively to
- * work for Kotlin formatting
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.facebook.ktfmt.kdoc
 
-import com.facebook.ktfmt.kdoc.KDocToken.Type.BEGIN_KDOC
-import com.facebook.ktfmt.kdoc.KDocToken.Type.BLANK_LINE
-import com.facebook.ktfmt.kdoc.KDocToken.Type.CODE
-import com.facebook.ktfmt.kdoc.KDocToken.Type.CODE_BLOCK_MARKER
-import com.facebook.ktfmt.kdoc.KDocToken.Type.CODE_CLOSE_TAG
-import com.facebook.ktfmt.kdoc.KDocToken.Type.CODE_OPEN_TAG
-import com.facebook.ktfmt.kdoc.KDocToken.Type.END_KDOC
-import com.facebook.ktfmt.kdoc.KDocToken.Type.LIST_ITEM_OPEN_TAG
-import com.facebook.ktfmt.kdoc.KDocToken.Type.LITERAL
-import com.facebook.ktfmt.kdoc.KDocToken.Type.MARKDOWN_LINK
-import com.facebook.ktfmt.kdoc.KDocToken.Type.PRE_CLOSE_TAG
-import com.facebook.ktfmt.kdoc.KDocToken.Type.PRE_OPEN_TAG
-import com.facebook.ktfmt.kdoc.KDocToken.Type.TABLE_CLOSE_TAG
-import com.facebook.ktfmt.kdoc.KDocToken.Type.TABLE_OPEN_TAG
-import com.facebook.ktfmt.kdoc.KDocToken.Type.TAG
-import com.facebook.ktfmt.kdoc.KDocToken.Type.WHITESPACE
-import java.util.regex.Pattern.compile
-import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
-import org.jetbrains.kotlin.kdoc.lexer.KDocLexer
-import org.jetbrains.kotlin.kdoc.lexer.KDocTokens
-import org.jetbrains.kotlin.lexer.KtTokens.WHITE_SPACE
+import kotlin.math.min
 
-/**
- * Entry point for formatting KDoc.
- *
- * This stateless class reads tokens from the stateful lexer and translates them to "requests" and
- * "writes" to the stateful writer. It also munges tokens into "standardized" forms. Finally, it
- * performs postprocessing to convert the written KDoc to a one-liner if possible or to leave a
- * single blank line if it's empty.
- */
-object KDocFormatter {
-
-  private val ONE_CONTENT_LINE_PATTERN = compile(" */[*][*]\n *[*] (.*)\n *[*]/")
-
-  private val NUMBERED_LIST_PATTERN = "[0-9]+\\.".toRegex()
-
-  /**
-   * Formats the given Javadoc comment, which must start with ∕✱✱ and end with ✱∕. The output will
-   * start and end with the same characters.
-   */
-  fun formatKDoc(input: String, blockIndent: Int, maxLineLength: Int): String {
-    val escapedInput = Escaping.escapeKDoc(input)
-    val kDocLexer = KDocLexer()
-    kDocLexer.start(escapedInput)
-    val tokens = mutableListOf<KDocToken>()
-    var previousType: IElementType? = null
-    while (kDocLexer.tokenType != null) {
-      val tokenType = kDocLexer.tokenType
-      val tokenText =
-          with(kDocLexer.tokenText) {
-            if (previousType == KDocTokens.LEADING_ASTERISK && first() == ' ') substring(1)
-            else this
-          }
-
-      processToken(tokenType, tokens, tokenText, previousType)
-
-      previousType = tokenType
-      kDocLexer.advance()
-    }
-    val result = render(tokens, blockIndent, maxLineLength)
-    return makeSingleLineIfPossible(blockIndent, result, maxLineLength)
+/** Formatter which can reformat KDoc comments. */
+class KDocFormatter(private val options: KDocFormattingOptions) {
+  /** Reformats the [comment], which follows the given [initialIndent] string. */
+  fun reformatComment(comment: String, initialIndent: String): String {
+    return reformatComment(FormattingTask(options, comment, initialIndent))
   }
 
-  private fun processToken(
-      tokenType: IElementType?,
-      tokens: MutableList<KDocToken>,
-      tokenText: String,
-      previousType: IElementType?
-  ) {
-    when (tokenType) {
-      KDocTokens.START -> tokens.add(KDocToken(BEGIN_KDOC, tokenText))
-      KDocTokens.END -> tokens.add(KDocToken(END_KDOC, tokenText))
-      KDocTokens.LEADING_ASTERISK -> Unit // Ignore, no need to output anything
-      KDocTokens.TAG_NAME -> tokens.add(KDocToken(TAG, tokenText))
-      KDocTokens.CODE_BLOCK_TEXT -> tokens.add(KDocToken(CODE, tokenText))
-      KDocTokens.MARKDOWN_INLINE_LINK,
-      KDocTokens.MARKDOWN_LINK -> {
-        tokens.add(KDocToken(MARKDOWN_LINK, tokenText))
+  fun reformatComment(task: FormattingTask): String {
+    val indent = task.secondaryIndent
+    val indentSize = getIndentSize(indent, options)
+    val firstIndentSize = getIndentSize(task.initialIndent, options)
+    val comment = task.comment
+    val lineComment = comment.isLineComment()
+    val blockComment = comment.isBlockComment()
+    val paragraphs = ParagraphListBuilder(comment, options, task).scan(indentSize)
+    val commentType = task.type
+    val lineSeparator = "\n$indent${commentType.linePrefix}"
+    val prefix = commentType.prefix
+
+    // Collapse single line? If alternate is turned on, use the opposite of the
+    // setting
+    val collapseLine = options.collapseSingleLine.let { if (options.alternate) !it else it }
+    if (paragraphs.isSingleParagraph() && collapseLine && !lineComment) {
+      // Does the text fit on a single line?
+      val trimmed = paragraphs.firstOrNull()?.text?.trim() ?: ""
+      // Subtract out space for "/** " and " */" and the indent:
+      val width =
+          min(
+              options.maxLineWidth - firstIndentSize - commentType.singleLineOverhead(),
+              options.maxCommentWidth)
+      val suffix = if (commentType.suffix.isEmpty()) "" else " ${commentType.suffix}"
+      if (trimmed.length <= width) {
+        return "$prefix $trimmed$suffix"
       }
-      KDocTokens.MARKDOWN_ESCAPED_CHAR,
-      KDocTokens.TEXT -> {
-        var first = true
-        for (word in tokenizeKdocText(tokenText)) {
-          if (word.first().isWhitespace()) {
-            tokens.add(KDocToken(WHITESPACE, " "))
-            continue
-          }
-          if (first) {
-            if (word == "-" || word == "*" || word.matches(NUMBERED_LIST_PATTERN)) {
-              tokens.add(KDocToken(LIST_ITEM_OPEN_TAG, ""))
-            }
-            first = false
-          }
-          // If the KDoc is malformed (e.g. unclosed code block) KDocLexer doesn't report an
-          // END_KDOC properly. We want to recover in such cases
-          if (word == "*/") {
-            tokens.add(KDocToken(END_KDOC, word))
-          } else if (word.startsWith("```")) {
-            tokens.add(KDocToken(CODE_BLOCK_MARKER, word))
-          } else {
-            tokens.add(KDocToken(LITERAL, word))
-          }
+      if (indentSize < firstIndentSize) {
+        val nextLineWidth =
+            min(
+                options.maxLineWidth - indentSize - commentType.singleLineOverhead(),
+                options.maxCommentWidth)
+        if (trimmed.length <= nextLineWidth) {
+          return "$prefix $trimmed$suffix"
         }
       }
-      WHITE_SPACE -> {
-        if (previousType == KDocTokens.LEADING_ASTERISK || tokenText.count { it == '\n' } >= 2) {
-          tokens.add(KDocToken(BLANK_LINE, ""))
-        } else {
-          tokens.add(KDocToken(WHITESPACE, " "))
-        }
-      }
-      else -> throw RuntimeException("Unexpected: $tokenType")
     }
-  }
-  private fun render(input: List<KDocToken>, blockIndent: Int, maxLineLength: Int): String {
-    val output = KDocWriter(blockIndent, maxLineLength)
-    for (token in input) {
-      when (token.type) {
-        BEGIN_KDOC -> output.writeBeginJavadoc()
-        END_KDOC -> {
-          output.writeEndJavadoc()
-          return Escaping.unescapeKDoc(output.toString())
-        }
-        LIST_ITEM_OPEN_TAG -> output.writeListItemOpen(token)
-        PRE_OPEN_TAG -> output.writePreOpen(token)
-        PRE_CLOSE_TAG -> output.writePreClose(token)
-        CODE_OPEN_TAG -> output.writeCodeOpen(token)
-        CODE_CLOSE_TAG -> output.writeCodeClose(token)
-        TABLE_OPEN_TAG -> output.writeTableOpen(token)
-        TABLE_CLOSE_TAG -> output.writeTableClose(token)
-        TAG -> output.writeTag(token)
-        CODE -> output.writeCodeLine(token)
-        CODE_BLOCK_MARKER -> output.writeExplicitCodeBlockMarker(token)
-        BLANK_LINE -> output.requestBlankLine()
-        WHITESPACE -> output.requestWhitespace()
-        LITERAL -> output.writeLiteral(token)
-        MARKDOWN_LINK -> output.writeMarkdownLink(token)
-        else -> throw AssertionError(token.type)
-      }
-    }
-    throw AssertionError()
-  }
 
-  /**
-   * Returns the given string or a one-line version of it (e.g., "∕✱✱ Tests for foos. ✱∕") if it
-   * fits on one line.
-   */
-  private fun makeSingleLineIfPossible(
-      blockIndent: Int,
-      input: String,
-      maxLineLength: Int
-  ): String {
-    val oneLinerContentLength = maxLineLength - "/**  */".length - blockIndent
-    val matcher = ONE_CONTENT_LINE_PATTERN.matcher(input)
-    if (matcher.matches() && matcher.group(1).isEmpty()) {
-      return "/** */"
-    } else if (matcher.matches() && matcher.group(1).length <= oneLinerContentLength) {
-      return "/** " + matcher.group(1) + " */"
-    }
-    return input
-  }
+    val sb = StringBuilder()
 
-  /**
-   * tokenizeKdocText splits 's' by whitespace, and returns both whitespace and non-whitespace
-   * parts.
-   *
-   * Multiple adjacent whitespace characters are collapsed into one. Trailing and leading spaces are
-   * included in the result.
-   *
-   * Example: `" one two three "` becomes `[" ", "one", " ", "two", " ", "three", " "]`. See tests
-   * for more examples.
-   */
-  fun tokenizeKdocText(s: String) = sequence {
-    if (s.isEmpty()) {
-      return@sequence
+    sb.append(prefix)
+    if (lineComment) {
+      sb.append(' ')
+    } else {
+      sb.append(lineSeparator)
     }
-    var mark = 0
-    var inWhitespace = s[0].isWhitespace()
-    for (i in 1..s.lastIndex) {
-      if (inWhitespace == s[i].isWhitespace()) {
+
+    for (paragraph in paragraphs) {
+      if (paragraph.separate) {
+        // Remove trailing spaces which can happen when we have a paragraph
+        // separator
+        stripTrailingSpaces(lineComment, sb)
+        sb.append(lineSeparator)
+      }
+      val text = paragraph.text
+      if (paragraph.preformatted || paragraph.table) {
+        sb.append(text)
+        // Remove trailing spaces which can happen when we have an empty line in a
+        // preformatted paragraph.
+        stripTrailingSpaces(lineComment, sb)
+        sb.append(lineSeparator)
         continue
       }
-      val result = if (inWhitespace) " " else s.substring(mark, i)
-      inWhitespace = s[i].isWhitespace()
-      mark = i
-      yield(result)
+
+      val lineWithoutIndent = options.maxLineWidth - commentType.lineOverhead()
+      val quoteAdjustment = if (paragraph.quoted) 2 else 0
+      val maxLineWidth =
+          min(options.maxCommentWidth, lineWithoutIndent - indentSize) - quoteAdjustment
+      val firstMaxLineWidth =
+          if (sb.indexOf('\n') == -1) {
+            min(options.maxCommentWidth, lineWithoutIndent - firstIndentSize) - quoteAdjustment
+          } else {
+            maxLineWidth
+          }
+
+      val lines = paragraph.reflow(firstMaxLineWidth, maxLineWidth)
+      var first = true
+      val hangingIndent = paragraph.hangingIndent
+      for (line in lines) {
+        sb.append(paragraph.indent)
+        if (first && !paragraph.continuation) {
+          first = false
+        } else {
+          sb.append(hangingIndent)
+        }
+        if (paragraph.quoted) {
+          sb.append("> ")
+        }
+        if (line.isEmpty()) {
+          // Remove trailing spaces which can happen when we have a paragraph
+          // separator
+          stripTrailingSpaces(lineComment, sb)
+        } else {
+          sb.append(line)
+        }
+        sb.append(lineSeparator)
+      }
     }
-    yield(if (inWhitespace) " " else s.substring(mark, s.length))
+    if (!lineComment) {
+      if (sb.endsWith("* ")) {
+        sb.setLength(sb.length - 2)
+      }
+      sb.append("*/")
+    } else if (sb.endsWith(lineSeparator)) {
+      @Suppress("ReturnValueIgnored") sb.removeSuffix(lineSeparator)
+    }
+
+    val formatted =
+        if (lineComment) {
+          sb.trim().removeSuffix("//").trim().toString()
+        } else if (blockComment) {
+          sb.toString().replace(lineSeparator + "\n", "\n\n")
+        } else {
+          sb.toString()
+        }
+
+    val separatorIndex = comment.indexOf('\n')
+    return if (separatorIndex > 0 && comment[separatorIndex - 1] == '\r') {
+      // CRLF separator
+      formatted.replace("\n", "\r\n")
+    } else {
+      formatted
+    }
+  }
+
+  private fun stripTrailingSpaces(lineComment: Boolean, sb: StringBuilder) {
+    if (!lineComment && sb.endsWith("* ")) {
+      sb.setLength(sb.length - 1)
+    } else if (lineComment && sb.endsWith("// ")) {
+      sb.setLength(sb.length - 1)
+    }
   }
 }
