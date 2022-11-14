@@ -663,8 +663,8 @@ class KDocFormatterTest {
         """
             /**
              * @param client the client to
-             *     report errors to and to use
-             *     to read files
+             *   report errors to and to use to
+             *   read files
              */
             """
             .trimIndent())
@@ -1212,11 +1212,10 @@ class KDocFormatterTest {
         """
             /**
              * @param configuration the
-             *     configuration to look up
-             *     which issues are enabled etc
-             *     from
+             *   configuration to look up which
+             *   issues are enabled etc from
              * @param platforms the platforms
-             *     applying to this analysis
+             *   applying to this analysis
              */
             """
             .trimIndent())
@@ -1571,7 +1570,7 @@ class KDocFormatterTest {
              * <ul>
              * <li>Incremental merge will never clean the output.
              * <li>The inputs must be able to tell which changes to
-             *     relative files have been made.
+             *   relative files have been made.
              * <li>Intermediate state must be saved between merges.
              * </ul>
              */
@@ -1945,20 +1944,20 @@ class KDocFormatterTest {
              * @return this for constructor chaining
              *
              * TODO: Adds the given dependency graph (the output of the Gradle
-             *     dependency task) to be constructed when mocking a Gradle
-             *     model for this project.
+             *   dependency task) to be constructed when mocking a Gradle model
+             *   for this project.
              * TODO: More stuff to do here
              * TODO: Consider looking at the localization="suggested" attribute
-             *     in the platform attrs.xml to catch future recommended
-             *     attributes.
+             *   in the platform attrs.xml to catch future recommended
+             *   attributes.
              * TODO: Also adds the given dependency graph (the output of the
-             *     Gradle dependency task) to be constructed when mocking a
-             *     Gradle model for this project.
+             *   Gradle dependency task) to be constructed when mocking a Gradle
+             *   model for this project.
              * TODO(b/144576310): Cover multi-module search. Searching in the
-             *     search bar should show an option to change module if there
-             *     are resources in it.
+             *   search bar should show an option to change module if there are
+             *   resources in it.
              * TODO(myldap): Cover filter usage. Eg: Look for a framework
-             *     resource by enabling its filter.
+             *   resource by enabling its filter.
              */
             """
             .trimIndent(),
@@ -2003,8 +2002,8 @@ class KDocFormatterTest {
              * end. If the length of the range is not known, end may be null.
              *
              * @param file the associated file (but see the documentation for
-             *     [Location.file] for more information on what the file
-             *     represents)
+             *   [Location.file] for more information on what the file
+             *   represents)
              * @param start the starting position, or null
              * @param end the ending position, or null
              * @return Something
@@ -2053,15 +2052,15 @@ class KDocFormatterTest {
              *
              * @param host A wrapper for the component that will host the prompt.
              * @param crypto A cryptographic object to be associated with this
-             *     authentication.
+             *   authentication.
              * @return [AuthenticationResult] for a successful authentication.
              * @throws AuthPromptErrorException when an unrecoverable error has been
-             *     encountered and authentication has stopped.
+             *   encountered and authentication has stopped.
              * @throws AuthPromptFailureException when an authentication attempt by
-             *     the user has been rejected.
+             *   the user has been rejected.
              * @sample androidx.biometric.samples.auth.credentialAuth
              * @see CredentialAuthPrompt.authenticate( AuthPromptHost host,
-             *     BiometricPrompt.CryptoObject, AuthPromptCallback )
+             *   BiometricPrompt.CryptoObject, AuthPromptCallback )
              */
             """
             .trimIndent(),
@@ -2341,12 +2340,12 @@ class KDocFormatterTest {
              * <li> Instantiating a given class. For this, see [getApplicableConstructorTypes] and [visitConstructor]</li>
              * <li> Referencing a given constant. For this, see [getApplicableReferenceNames] and [visitReference]</li>
              * <li> Extending a given class or implementing a given interface. For this, see [applicableSuperClasses] and
-             *     [visitClass]</li>
+             *   [visitClass]</li>
              * <li> More complicated scenarios: perform a general AST traversal with a visitor. In this case, first tell lint
-             *     which AST node types you're interested in with the [getApplicableUastTypes] method, and then provide a
-             *     [UElementHandler] from the [createUastHandler] where you override the various applicable handler methods.
-             *     This is done rather than a general visitor from the root node to avoid having to have every single lint
-             *     detector (there are hundreds) do a full tree traversal on its own.</li>
+             *   which AST node types you're interested in with the [getApplicableUastTypes] method, and then provide a
+             *   [UElementHandler] from the [createUastHandler] where you override the various applicable handler methods. This
+             *   is done rather than a general visitor from the root node to avoid having to have every single lint detector
+             *   (there are hundreds) do a full tree traversal on its own.</li>
              * </ul>
              *
              * {@linkplain SourceCodeScanner} exposes the UAST API to lint checks. UAST is short for "Universal AST" and is an
@@ -2839,9 +2838,9 @@ class KDocFormatterTest {
              * part, emitting it to the [builder] while closing and opening groups.
              *
              * @param brokeBeforeBrace used for tracking if a break was taken right before the lambda
-             *     expression. Useful for scoping functions where we want good looking indentation. For
-             *     example, here we have correct indentation before `bar()` and `car()` because we can
-             *     detect the break after the equals:
+             *   expression. Useful for scoping functions where we want good looking indentation. For
+             *   example, here we have correct indentation before `bar()` and `car()` because we can detect
+             *   the break after the equals:
              */
              """
             .trimIndent())
@@ -2914,7 +2913,7 @@ class KDocFormatterTest {
              * This is my SampleInterface interface.
              *
              * @sample
-             *     com.example.java.sample.library.extra.long.path.MyCustomSampleInterfaceImplementationForTesting
+             *   com.example.java.sample.library.extra.long.path.MyCustomSampleInterfaceImplementationForTesting
              */
             """
             .trimIndent())
@@ -3004,8 +3003,8 @@ class KDocFormatterTest {
         """
             /**
              * @return Amet do non adipiscing sed consequat duis non Officia ID
-             *     (amet sed consequat non adipiscing sed eiusmod), magna
-             *     consequat.
+             *   (amet sed consequat non adipiscing sed eiusmod), magna
+             *   consequat.
              */
             """
             .trimIndent())
@@ -3035,16 +3034,16 @@ class KDocFormatterTest {
         """
             /**
              * @property dataItemOrderRandomizer sit tempor enim pariatur non
-             *     culpa id [Pariatur]z in qui anim. Anim id-lorem sit magna
-             *     [Consectetur] pariatur.
+             *   culpa id [Pariatur]z in qui anim. Anim id-lorem sit magna
+             *   [Consectetur] pariatur.
              * @property randomBytesProvider non mollit anim pariatur non culpa
-             *     qui qui `mollit` lorem amet consectetur [Pariatur]z in
-             *     IssuerSignedItem culpa.
+             *   qui qui `mollit` lorem amet consectetur [Pariatur]z in
+             *   IssuerSignedItem culpa.
              * @property preserveMapOrder officia id pariatur non culpa id lorem
-             *     pariatur culpa culpa id o est amet consectetur sed sed do
-             *     ENIM minim.
+             *   pariatur culpa culpa id o est amet consectetur sed sed do ENIM
+             *   minim.
              * @property reprehenderit p esse cillum officia est do enim enim
-             *     nostrud nisi d non sunt mollit id est tempor enim.
+             *   nostrud nisi d non sunt mollit id est tempor enim.
              */
             """
             .trimIndent())

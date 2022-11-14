@@ -1182,6 +1182,39 @@ class FormatterTest {
   }
 
   @Test
+  fun `keep import elements only mentioned in kdoc, single line`() {
+    assertFormatted(
+        """
+          |import com.shopping.Bag
+          |
+          |/**
+          | * Some summary.
+          | *
+          | * @param count you can fit this many in a [Bag]
+          | */
+          |fun fetchBananas(count: Int)
+          |"""
+            .trimMargin())
+  }
+
+  @Test
+  fun `keep import elements only mentioned in kdoc, multiline`() {
+    assertFormatted(
+        """
+          |import com.shopping.Bag
+          |
+          |/**
+          | * Some summary.
+          | *
+          | * @param count this is how many of these wonderful fruit you can fit into the useful object that
+          | *   you may refer to as a [Bag]
+          | */
+          |fun fetchBananas(count: Int)
+          |"""
+            .trimMargin())
+  }
+
+  @Test
   fun `keep component imports`() =
       assertFormatted(
           """
@@ -4854,7 +4887,7 @@ class FormatterTest {
       | * Doesn't preserve the original line endings.
       | *
       | * @param marginPrefix non-blank string, which is used as a margin delimiter. Default is `|` (pipe
-      | *     character).
+      | *   character).
       | * @sample samples.text.Strings.trimMargin
       | * @see trimIndent
       | * @see kotlin.text.isWhitespace

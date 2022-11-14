@@ -1,4 +1,20 @@
 /*
+ * Portions Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
  * Copyright (c) Tor Norbye.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,8 +58,11 @@ class KDocFormattingOptions(
    */
   var addPunctuation: Boolean = false
 
-  /** How many spaces to use for hanging indents in numbered lists and after block tags. */
-  var hangingIndent: Int = 4
+  /**
+   * How many spaces to use for hanging indents in numbered lists and after block tags. Using 4 or
+   * more here will result in subsequent lines being interpreted as block formatted.
+   */
+  var hangingIndent: Int = 2
 
   /** When there are nested lists etc, how many spaces to indent by. */
   var nestedListIndent: Int = 3
