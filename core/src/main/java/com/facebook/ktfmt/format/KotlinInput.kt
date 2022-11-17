@@ -28,7 +28,6 @@ import com.google.googlejavaformat.Input
 import com.google.googlejavaformat.Newlines
 import com.google.googlejavaformat.java.FormatterException
 import com.google.googlejavaformat.java.JavaOutput
-import java.util.LinkedHashMap
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtFile
