@@ -55,16 +55,7 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
     val toks = buildToks(file, text)
     positionToColumnMap = makePositionToColumnMap(toks)
     tokens = buildTokens(toks)
-    val tokenLocations = ImmutableRangeMap.builder<Int, Token>()
-    for (token in tokens) {
-      val end = JavaOutput.endTok(token)
-      var upper = end.position
-      if (end.text.isNotEmpty()) {
-        upper += end.length() - 1
-      }
-      tokenLocations.put(Range.closed(JavaOutput.startTok(token).position, upper), token)
-    }
-    positionTokenMap = tokenLocations.build()
+    positionTokenMap = buildTokenPositionsMap(tokens)
 
     // adjust kN for EOF
     kToToken = arrayOfNulls(kN + 1)
@@ -205,6 +196,20 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
       toksBefore = ImmutableList.builder()
     }
     return tokens.build()
+  }
+
+  private fun buildTokenPositionsMap(tokens: ImmutableList<Token>): ImmutableRangeMap<Int, Token> {
+    val tokenLocations = ImmutableRangeMap.builder<Int, Token>()
+    for (token in tokens) {
+      val end = JavaOutput.endTok(token)
+      var upper = end.position
+      if (end.text.isNotEmpty()) {
+        upper += end.length() - 1
+      }
+      tokenLocations.put(Range.closed(JavaOutput.startTok(token).position, upper), token)
+    }
+
+    return tokenLocations.build()
   }
 
   private fun isParamComment(tok: Tok): Boolean {
