@@ -196,11 +196,8 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
     val tokenLocations = ImmutableRangeMap.builder<Int, Token>()
     for (token in tokens) {
       val end = JavaOutput.endTok(token)
-      var upper = end.position
-      if (end.text.isNotEmpty()) {
-        upper += end.length() - 1
-      }
-      tokenLocations.put(Range.closed(JavaOutput.startTok(token).position, upper), token)
+      val endPosition = end.position + (if (end.text.isNotEmpty()) end.length() - 1 else 0)
+      tokenLocations.put(Range.closed(JavaOutput.startTok(token).position, endPosition), token)
     }
 
     return tokenLocations.build()
