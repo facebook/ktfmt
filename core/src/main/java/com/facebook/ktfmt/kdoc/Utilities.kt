@@ -114,16 +114,20 @@ fun String.isLine(minCount: Int = 3): Boolean {
 
 fun String.isKDocTag(): Boolean {
   // Not using a hardcoded list here since tags can change over time
-  if (startsWith("@")) {
+  if (startsWith("@") && length > 1) {
     for (i in 1 until length) {
       val c = this[i]
       if (c.isWhitespace()) {
         return i > 2
       } else if (!c.isLetter() || !c.isLowerCase()) {
-        if (c == '[' && startsWith("@param")) {
+        if (c == '[' && (startsWith("@param") || startsWith("@property"))) {
           // @param is allowed to use brackets -- see
           // https://kotlinlang.org/docs/kotlin-doc.html#param-name
           // Example: @param[foo] The description of foo
+          return true
+        } else if (i == 1 && c.isLetter() && c.isUpperCase()) {
+          // Allow capitalized tgs, such as @See -- this is normally a typo; convertMarkup
+          // should also fix these.
           return true
         }
         return false

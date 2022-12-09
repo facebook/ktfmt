@@ -120,10 +120,10 @@ class KDocFormatterTest {
         KDocFormattingOptions(72),
         """
             /**
-             * Returns whether lint should check all warnings, including
-             * those off by default, or null if not configured in
-             * this configuration. This is a really really really
-             * long sentence which needs to be broken up. And
+             * Returns whether lint should check all warnings, including those
+             * off by default, or null if not configured in this configuration.
+             * This is a really really really long sentence which needs to be
+             * broken up. And
              * ThisIsALongSentenceWhichCannotBeBrokenUpAndMustBeIncludedAsAWholeWithoutNewlinesInTheMiddle.
              *
              * This is a separate section which should be flowed together with
@@ -3522,9 +3522,9 @@ class KDocFormatterTest {
              * # Design
              * The splash screen icon uses the same specifications as
              * [Adaptive Icons](https://developer.android.com/guide/practices/ui_guidelines/icon_design_adaptive)
-             * . This means that the icon needs to fit within a circle
-             * whose diameter is 2/3 the size of the icon. The actual
-             * values don't really matter if you use a vector icon.
+             * . This means that the icon needs to fit within a circle whose
+             * diameter is 2/3 the size of the icon. The actual values don't
+             * really matter if you use a vector icon.
              *
              * ## Specs
              * - With icon background (`Theme.SplashScreen.IconBackground`)
@@ -4577,6 +4577,356 @@ class KDocFormatterTest {
         indent = "        ",
         // <pre> and ``` are rendered differently; this is an intentional diff
         verifyDokka = false)
+  }
+
+  @Test
+  fun testOpenRange() {
+    // https://github.com/tnorbye/kdoc-formatter/issues/84
+    val source =
+        """
+            /**
+             * This is a line that has the length such that this [link gets
+             * broken across lines]() which is not valid.
+             *
+             * Input is a float in range
+             * [0, 1) where 0 is fully settled and 1 is dismissed. Will be continue to be called after the user's finger has lifted. Will not be called for if not dismissible.
+             */
+            """
+            .trimIndent()
+    checkFormatter(
+        source,
+        KDocFormattingOptions(maxLineWidth = 72),
+        """
+            /**
+             * This is a line that has the length such that this
+             * [link gets broken across lines]() which is not valid.
+             *
+             * Input is a float in range [0, 1) where 0 is fully settled and 1 is
+             * dismissed. Will be continue to be called after the user's finger has
+             * lifted. Will not be called for if not dismissible.
+             */
+            """
+            .trimIndent(),
+        indent = "")
+  }
+
+  @Test
+  fun testPropertiesWithBrackets() {
+    val source =
+    // From AOSP
+    // tools/base/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/cxx/prefab/PackageModel.kt
+    """
+            /**
+             * The Android abi.json schema.
+             *
+             * @property[abi] The ABI name of the described library. These names match the tag field for
+             * [com.android.build.gradle.internal.core.Abi].
+             * @property[api] The minimum OS version supported by the library. i.e. the
+             * library's `minSdkVersion`.
+             * @property[ndk] The major version of the NDK that this library was built with.
+             * @property[stl] The STL that this library was built with.
+             * @property[static] If true then the library is .a, if false then .so.
+             */
+            """
+            .trimIndent()
+    checkFormatter(
+        source,
+        KDocFormattingOptions(maxLineWidth = 72),
+        """
+            /**
+             * The Android abi.json schema.
+             *
+             * @property[abi] The ABI name of the described library. These names
+             *   match the tag field for
+             *   [com.android.build.gradle.internal.core.Abi].
+             * @property[api] The minimum OS version supported by the library. i.e.
+             *   the library's `minSdkVersion`.
+             * @property[ndk] The major version of the NDK that this library was
+             *   built with.
+             * @property[stl] The STL that this library was built with.
+             * @property[static] If true then the library is .a, if false then .so.
+             */
+            """
+            .trimIndent(),
+        indent = "")
+  }
+
+  @Test
+  fun testHandingIndent() {
+    val source =
+        """
+            /**
+             * @param count this is how many you
+             *   can fit in a [Bag]
+             * @param weight how heavy this would
+             *     be in [Grams]
+             */
+            """
+    checkFormatter(
+        source,
+        KDocFormattingOptions(maxLineWidth = 72),
+        """
+            /**
+             * @param count this is how many you can fit in a [Bag]
+             * @param weight how heavy this would be in [Grams]
+             */
+            """
+            .trimIndent(),
+        indent = "")
+  }
+
+  @Test
+  fun testMarkupAcrossLines() {
+    val source =
+        """
+            /**
+             * Broadcast Action: Indicates the Bluetooth scan mode of the local Adapter
+             * has changed.
+             * <p>Always contains the extra fields {@link #EXTRA_SCAN_MODE} and {@link
+             * #EXTRA_PREVIOUS_SCAN_MODE} containing the new and old scan modes
+             * respectively.
+             */
+            """
+            .trimIndent()
+    checkFormatter(
+        source,
+        KDocFormattingOptions(maxLineWidth = 72),
+        """
+            /**
+             * Broadcast Action: Indicates the Bluetooth scan mode of the local
+             * Adapter has changed.
+             *
+             * Always contains the extra fields [EXTRA_SCAN_MODE] and
+             * [EXTRA_PREVIOUS_SCAN_MODE] containing the new and old scan modes
+             * respectively.
+             */
+            """
+            .trimIndent(),
+        indent = "")
+  }
+
+  @Test
+  fun testReferences() {
+    val source =
+        """
+            /**
+             * Construct a rectangle from its left and top edges as well as its width and height.
+             * @param offset Offset to represent the top and left parameters of the Rect
+             * @param size Size to determine the width and height of this [Rect].
+             * @return Rect with [Rect.left] and [Rect.top] configured to [Offset.x] and [Offset.y] as
+             * [Rect.right] and [Rect.bottom] to [Offset.x] + [Size.width] and [Offset.y] + [Size.height]
+             * respectively
+             */
+            """
+            .trimIndent()
+    checkFormatter(
+        source,
+        KDocFormattingOptions(maxLineWidth = 72),
+        """
+            /**
+             * Construct a rectangle from its left and top edges as well as its
+             * width and height.
+             *
+             * @param offset Offset to represent the top and left parameters of the
+             *   Rect
+             * @param size Size to determine the width and height of this [Rect].
+             * @return Rect with [Rect.left] and [Rect.top] configured to [Offset.x]
+             *   and [Offset.y] as [Rect.right] and [Rect.bottom] to
+             *   [Offset.x] + [Size.width] and [Offset.y] + [Size.height]
+             *   respectively
+             */
+            """
+            .trimIndent(),
+        indent = "")
+  }
+
+  @Test
+  fun testDecapitalizeKdocTags() {
+    val source =
+        """
+            /**
+             * Represents a component that handles scroll events, so that other components in the hierarchy
+             * can adjust their behaviour.
+             * @See [provideScrollContainerInfo] and [consumeScrollContainerInfo]
+             */
+            """
+            .trimIndent()
+    checkFormatter(
+        source,
+        KDocFormattingOptions(maxLineWidth = 72).apply { convertMarkup = true },
+        """
+            /**
+             * Represents a component that handles scroll events, so that other
+             * components in the hierarchy can adjust their behaviour.
+             *
+             * @see [provideScrollContainerInfo] and [consumeScrollContainerInfo]
+             */
+            """
+            .trimIndent(),
+        indent = "")
+  }
+
+  @Test
+  fun testLineBreak() {
+    // Makes sure a scenario where we used to put "0." at the beginning of a new line.
+    // From AOSP's
+    // frameworks/support/graphics/graphics-core/src/main/java/androidx/graphics/surface/SurfaceControlWrapper.kt
+    val source =
+        """
+            /**
+             * Updates z order index for [SurfaceControlWrapper]. Note that the z order for a
+             * surface is relative to other surfaces that are siblings of this surface.
+             * Behavior of siblings with the same z order is undefined.
+             *
+             * Z orders can range from Integer.MIN_VALUE to Integer.MAX_VALUE. Default z order
+             * index is 0. [SurfaceControlWrapper] instances are positioned back-to-front. That is
+             * lower z order values are rendered below other [SurfaceControlWrapper] instances with
+             * higher z order values.
+             *
+             * @param surfaceControl surface control to set the z order of.
+             *
+             * @param zOrder desired layer z order to set the surfaceControl.
+             */
+            """
+            .trimIndent()
+    checkFormatter(
+        source,
+        KDocFormattingOptions(maxLineWidth = 72),
+        """
+            /**
+             * Updates z order index for [SurfaceControlWrapper]. Note that
+             * the z order for a surface is relative to other surfaces that
+             * are siblings of this surface. Behavior of siblings with the
+             * same z order is undefined.
+             *
+             * Z orders can range from Integer.MIN_VALUE
+             * to Integer.MAX_VALUE. Default z order index
+             * is 0. [SurfaceControlWrapper] instances are positioned
+             * back-to-front. That is lower z order values are rendered
+             * below other [SurfaceControlWrapper] instances with higher z
+             * order values.
+             *
+             * @param surfaceControl surface control to set the z order of.
+             * @param zOrder desired layer z order to set the
+             *   surfaceControl.
+             */
+            """
+            .trimIndent(),
+        indent = "        ")
+  }
+
+  @Test
+  fun testDocTagsInsidePreformatted() {
+    // Makes sure we don't treat markup inside preformatted text as potential
+    // doc tags (with the fix to make us flexible recognize @See as a doctag
+    // it revealed we were also looking inside preformatted text and started
+    // treating annotations like @Retention as a doc tag.)
+    val source =
+        """
+            /**
+             * Denotes that the annotated element of integer type, represents
+             * a logical type and that its value should be one of the explicitly
+             * named constants. If the IntDef#flag() attribute is set to true,
+             * multiple constants can be combined.
+             *
+             * Example:
+             * ```
+             * @Retention(SOURCE)
+             * @IntDef({NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS})
+             * public @interface NavigationMode {}
+             * public static final int NAVIGATION_MODE_STANDARD = 0;
+             * public static final int NAVIGATION_MODE_LIST = 1;
+             * public static final int NAVIGATION_MODE_TABS = 2;
+             * ...
+             * public abstract void setNavigationMode(@NavigationMode int mode);
+             *
+             * @NavigationMode
+             * public abstract int getNavigationMode();
+             * ```
+             *
+             * For a flag, set the flag attribute:
+             * ```
+             * @IntDef(
+             * flag = true,
+             * value = {NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS}
+             * )
+             * ```
+             *
+             * @see LongDef
+             */
+
+            """
+            .trimIndent()
+    checkFormatter(
+        source,
+        KDocFormattingOptions(maxLineWidth = 72),
+        """
+            /**
+             * Denotes that the annotated element of integer type, represents a
+             * logical type and that its value should be one of the explicitly named
+             * constants. If the IntDef#flag() attribute is set to true, multiple
+             * constants can be combined.
+             *
+             * Example:
+             * ```
+             * @Retention(SOURCE)
+             * @IntDef({NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS})
+             * public @interface NavigationMode {}
+             * public static final int NAVIGATION_MODE_STANDARD = 0;
+             * public static final int NAVIGATION_MODE_LIST = 1;
+             * public static final int NAVIGATION_MODE_TABS = 2;
+             * ...
+             * public abstract void setNavigationMode(@NavigationMode int mode);
+             *
+             * @NavigationMode
+             * public abstract int getNavigationMode();
+             * ```
+             *
+             * For a flag, set the flag attribute:
+             * ```
+             * @IntDef(
+             * flag = true,
+             * value = {NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS}
+             * )
+             * ```
+             *
+             * @see LongDef
+             */
+            """
+            .trimIndent(),
+        indent = "")
+  }
+
+  @Test
+  fun testConvertMarkup2() {
+    // Bug where the markup conversion around <p></p> wasn't working correctly
+    // From AOSP's
+    // frameworks/support/bluetooth/bluetooth-core/src/main/java/androidx/bluetooth/core/BluetoothAdapter.kt
+    val source =
+        """
+            /**
+             * Fundamentally, this is your starting point for all
+             * Bluetooth actions. * </p>
+             * <p>This class is thread safe.</p>
+             *
+             * @hide
+             */
+            """
+            .trimIndent()
+    checkFormatter(
+        source,
+        KDocFormattingOptions(maxLineWidth = 72),
+        """
+            /**
+             * Fundamentally, this is your starting point for all Bluetooth actions.
+             *
+             * This class is thread safe.
+             *
+             * @hide
+             */
+            """
+            .trimIndent(),
+        indent = "")
   }
 
   /**
