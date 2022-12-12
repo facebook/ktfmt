@@ -277,7 +277,7 @@ class KotlinInputAstVisitor(
   /**
    * @param keyword e.g., "fun" or "class".
    * @param typeOrDelegationCall for functions, the return typeOrDelegationCall; for classes, the
-   * list of supertypes.
+   *   list of supertypes.
    */
   private fun visitFunctionLikeExpression(
       modifierList: KtModifierList?,
@@ -627,6 +627,7 @@ class KotlinInputAstVisitor(
    *                         lastIndexToOpen to track the spot after the last time we stopped
    *                         grouping.
    * ```
+   *
    * The final expression with groupings:
    * ```
    * {{a.b}[2]}.{c.d}()
@@ -794,7 +795,7 @@ class KotlinInputAstVisitor(
    * Example (`1, "hi"`) in a function call
    *
    * @return a [BreakTag] which can tell you if a break was taken, but only when the list doesn't
-   * terminate in a negative closing indent. See [visitEachCommaSeparated] for examples.
+   *   terminate in a negative closing indent. See [visitEachCommaSeparated] for examples.
    */
   private fun visitValueArgumentListInternal(list: KtValueArgumentList): BreakTag? {
     builder.sync(list)
@@ -844,9 +845,9 @@ class KotlinInputAstVisitor(
    * The internal version of [visitLambdaExpression].
    *
    * @param brokeBeforeBrace used for tracking if a break was taken right before the lambda
-   * expression. Useful for scoping functions where we want good looking indentation. For example,
-   * here we have correct indentation before `bar()` and `car()` because we can detect the break
-   * after the equals:
+   *   expression. Useful for scoping functions where we want good looking indentation. For example,
+   *   here we have correct indentation before `bar()` and `car()` because we can detect the break
+   *   after the equals:
    * ```
    * fun foo() =
    *     coroutineScope { x ->
@@ -993,7 +994,7 @@ class KotlinInputAstVisitor(
    * ```
    *
    * @param hasTrailingComma if true, each element is placed on its own line (even if they could've
-   * fit in a single line), and a trailing comma is emitted.
+   *   fit in a single line), and a trailing comma is emitted.
    *
    * Example:
    * ```
@@ -1002,17 +1003,17 @@ class KotlinInputAstVisitor(
    * ```
    *
    * @param wrapInBlock if true, place all the elements in a block. When there's no [leadingBreak],
-   * this will be negatively indented. Note that the [prefix] and [postfix] aren't included in the
-   * block.
+   *   this will be negatively indented. Note that the [prefix] and [postfix] aren't included in the
+   *   block.
    * @param leadingBreak if true, break before the first element.
    * @param prefix if provided, emit this before the first element.
    * @param postfix if provided, emit this after the last element (or trailing comma).
    * @param breakAfterPrefix if true, emit a break after [prefix], but before the start of the
-   * block.
+   *   block.
    * @param breakBeforePostfix if true, place a break after the last element. Redundant when
-   * [hasTrailingComma] is true.
+   *   [hasTrailingComma] is true.
    * @return a [BreakTag] which can tell you if a break was taken, but only when the list doesn't
-   * terminate in a negative closing indent.
+   *   terminate in a negative closing indent.
    *
    * Example 1, this returns a BreakTag which tells you a break wasn't taken:
    * ```

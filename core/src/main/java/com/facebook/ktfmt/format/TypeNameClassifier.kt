@@ -90,7 +90,6 @@ object TypeNameClassifier {
    * a type or static field access, or -1 if no such prefix was found.
    *
    * Examples:
-   *
    * * ClassName
    * * ClassName.staticMemberName
    * * com.google.ClassName.InnerClass.staticMemberName

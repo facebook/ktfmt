@@ -44,10 +44,7 @@ object Escaping {
         s.substring(endMarkerIndex)
   }
 
-  /**
-   *
-   * See [escapeKDoc].
-   */
+  /** See [escapeKDoc]. */
   fun unescapeKDoc(s: String): String =
       s.replace(SLASH_STAR_ESCAPE, "/*").replace(STAR_SLASH_ESCAPE, "*/")
 }
