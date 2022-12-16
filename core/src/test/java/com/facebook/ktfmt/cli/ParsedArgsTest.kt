@@ -108,6 +108,33 @@ class ParsedArgsTest {
   }
 
   @Test
+  fun `parseOptions defaults to removing imports`() {
+    val (parsed, _) = parseTestOptions("foo.kt")
+    assertThat(parsed.formattingOptions.removeUnusedImports).isTrue()
+  }
+
+  @Test
+  fun `parseOptions recognizes --do-not-remove-unused-imports to removing imports`() {
+    val (parsed, _) = parseTestOptions("--do-not-remove-unused-imports", "foo.kt")
+    assertThat(parsed.formattingOptions.removeUnusedImports).isFalse()
+  }
+
+  @Test
+  fun `parseOptions handles dropbox style and --do-not-remove-unused-imports`() {
+    val (parsed, _) =
+        parseTestOptions("--do-not-remove-unused-imports", "--dropbox-style", "foo.kt")
+    assertThat(parsed.formattingOptions.removeUnusedImports).isFalse()
+    assertThat(parsed.formattingOptions.style).isEqualTo(FormattingOptions.Style.DROPBOX)
+  }
+
+  @Test
+  fun `parseOptions handles google style and --do-not-remove-unused-imports`() {
+    val (parsed, _) = parseTestOptions("--do-not-remove-unused-imports", "--google-style", "foo.kt")
+    assertThat(parsed.formattingOptions.removeUnusedImports).isFalse()
+    assertThat(parsed.formattingOptions.style).isEqualTo(FormattingOptions.Style.GOOGLE)
+  }
+
+  @Test
   fun `parseOptions --stdin-name`() {
     val (parsed, _) = parseTestOptions("--stdin-name=my/foo.kt")
     assertThat(parsed.stdinName).isEqualTo("my/foo.kt")

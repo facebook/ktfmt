@@ -52,6 +52,7 @@ data class ParsedArgs(
       var formattingOptions = FormattingOptions()
       var dryRun = false
       var setExitIfChanged = false
+      var removeUnusedImports = true
       var stdinName: String? = null
 
       for (arg in args) {
@@ -61,6 +62,7 @@ data class ParsedArgs(
           arg == "--kotlinlang-style" -> formattingOptions = Formatter.KOTLINLANG_FORMAT
           arg == "--dry-run" || arg == "-n" -> dryRun = true
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
+          arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
           arg.startsWith("--stdin-name") -> stdinName = parseKeyValueArg(err, "--stdin-name", arg)
           arg.startsWith("--") -> err.println("Unexpected option: $arg")
           arg.startsWith("@") -> err.println("Unexpected option: $arg")
@@ -68,7 +70,13 @@ data class ParsedArgs(
         }
       }
 
-      return ParsedArgs(fileNames, formattingOptions, dryRun, setExitIfChanged, stdinName)
+      return ParsedArgs(
+          fileNames,
+          formattingOptions.copy(removeUnusedImports = removeUnusedImports),
+          dryRun,
+          setExitIfChanged,
+          stdinName,
+      )
     }
 
     private fun parseKeyValueArg(err: PrintStream, key: String, arg: String): String? {
