@@ -1322,53 +1322,48 @@ class KotlinInputAstVisitor(
             builder.token(".")
           }
           builder.token(name)
-          builder.op("")
         }
       }
 
-      if (name != null) {
-        builder.open(expressionBreakIndent) // open block for named values
-      }
-      // For example `: String` in `val thisIsALongName: String` or `fun f(): String`
-      if (type != null) {
-        if (name != null) {
-          builder.token(":")
-          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+      builder.block(expressionBreakIndent, isEnabled = name != null) {
+        // For example `: String` in `val thisIsALongName: String` or `fun f(): String`
+        if (type != null) {
+          if (name != null) {
+            builder.token(":")
+            builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+          }
+          visit(type)
         }
-        visit(type)
       }
-    }
 
-    // For example `where T : Int` in a generic method
-    if (typeConstraintList != null) {
-      builder.space()
-      visit(typeConstraintList)
-      builder.space()
-    }
-
-    // for example `by lazy { compute() }`
-    if (delegate != null) {
-      builder.space()
-      builder.token("by")
-      if (isLambdaOrScopingFunction(delegate.expression)) {
+      // For example `where T : Int` in a generic method
+      if (typeConstraintList != null) {
         builder.space()
-        visit(delegate)
-      } else {
-        builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
-        builder.block(expressionBreakIndent) { visit(delegate) }
+        visit(typeConstraintList)
+        builder.space()
       }
-    } else if (initializer != null) {
-      builder.space()
-      builder.token("=")
-      if (isLambdaOrScopingFunction(initializer)) {
-        visitLambdaOrScopingFunction(initializer)
-      } else {
-        builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
-        builder.block(expressionBreakIndent) { visit(initializer) }
+
+      // for example `by lazy { compute() }`
+      if (delegate != null) {
+        builder.space()
+        builder.token("by")
+        if (isLambdaOrScopingFunction(delegate.expression)) {
+          builder.space()
+          visit(delegate)
+        } else {
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+          builder.block(expressionBreakIndent) { visit(delegate) }
+        }
+      } else if (initializer != null) {
+        builder.space()
+        builder.token("=")
+        if (isLambdaOrScopingFunction(initializer)) {
+          visitLambdaOrScopingFunction(initializer)
+        } else {
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+          builder.block(expressionBreakIndent) { visit(initializer) }
+        }
       }
-    }
-    if (name != null) {
-      builder.close() // close block for named values
     }
     // for example `private set` or `get = 2 * field`
     if (accessors?.isNotEmpty() == true) {
