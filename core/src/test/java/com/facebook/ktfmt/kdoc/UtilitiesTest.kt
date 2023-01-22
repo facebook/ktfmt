@@ -100,6 +100,77 @@ class UtilitiesTest {
     assertThat("  \t@param\t   foo  bar.".getParamName()).isEqualTo("foo")
     assertThat("@param[foo]".getParamName()).isEqualTo("foo")
     assertThat("@param  [foo]".getParamName()).isEqualTo("foo")
-    assertThat("@param ".getParamName()).isEqualTo(null)
+    assertThat("@param ".getParamName()).isNull()
+  }
+
+  @Test
+  fun testComputeWords() {
+    fun List<String>.describe(): String {
+      return "listOf(${this.joinToString(", ") { "\"$it\"" }})"
+    }
+    fun check(text: String, expected: List<String>, customizeParagraph: (Paragraph) -> Unit = {}) {
+      val task = FormattingTask(KDocFormattingOptions(12), "/** $text */", "")
+      val paragraph = Paragraph(task)
+      paragraph.content.append(text)
+      customizeParagraph(paragraph)
+      val words = paragraph.computeWords()
+
+      assertThat(words.describe()).isEqualTo(expected.describe())
+    }
+    check("Foo", listOf("Foo"))
+    check("Foo Bar Baz", listOf("Foo", "Bar", "Baz"))
+    check("Foo Bar Baz", listOf("Foo Bar", "Baz")) { it.quoted = true }
+    check("Foo Bar Baz", listOf("Foo Bar", "Baz")) { it.hanging = true }
+    check("1. Foo", listOf("1.", "Foo"))
+    // "1." can't start a word; if it ends up at the beginning of a line it becomes
+    // a numbered element.
+    check("Foo 1.", listOf("Foo 1."))
+    check("Foo bar [Link Text] foo bar.", listOf("Foo", "bar", "[Link Text]", "foo", "bar."))
+    check("Interval [0, 1) foo bar.", listOf("Interval [0, 1)", "foo", "bar."))
+
+    // ">" cannot start a word; it would become quoted text
+    check("if >= 3", listOf("if >=", "3"))
+    check("if >= 3.", listOf("if >= 3."))
+
+    check(
+        "SDK version - [`Partial(Mode.UseIfAvailable)`](Partial) on API 24+",
+        listOf("SDK", "version - [`Partial(Mode.UseIfAvailable)`](Partial)", "on", "API", "24+"))
+
+    check(
+        "Z orders can range from Integer.MIN_VALUE to Integer.MAX_VALUE. Default z order " +
+            " index is 0. [SurfaceControlWrapper] instances are positioned back-to-front.",
+        listOf(
+            "Z",
+            "orders",
+            "can",
+            "range",
+            "from",
+            "Integer.MIN_VALUE",
+            "to",
+            "Integer.MAX_VALUE.",
+            "Default",
+            "z",
+            "order",
+            "index",
+            "is 0. [SurfaceControlWrapper]",
+            "instances",
+            "are",
+            "positioned",
+            "back-to-front."))
+    check(
+        "Equates to `cmd package compile -f -m speed <package>` on API 24+.",
+        listOf(
+            "Equates",
+            "to",
+            "`cmd",
+            "package",
+            "compile",
+            "-f",
+            "-m",
+            "speed",
+            "<package>`",
+            "on",
+            "API",
+            "24+."))
   }
 }

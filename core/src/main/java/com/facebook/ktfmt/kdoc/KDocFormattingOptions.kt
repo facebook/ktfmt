@@ -60,7 +60,8 @@ class KDocFormattingOptions(
 
   /**
    * How many spaces to use for hanging indents in numbered lists and after block tags. Using 4 or
-   * more here will result in subsequent lines being interpreted as block formatted.
+   * more here will result in subsequent lines being interpreted as block formatted by IntelliJ (but
+   * not Dokka).
    */
   var hangingIndent: Int = 2
 
