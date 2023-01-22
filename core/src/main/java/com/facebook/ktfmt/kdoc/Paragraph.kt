@@ -101,10 +101,6 @@ class Paragraph(private val task: FormattingTask) {
     return content.isEmpty()
   }
 
-  private fun hasClosingPre(): Boolean {
-    return content.contains("</pre>", ignoreCase = false) || next?.hasClosingPre() ?: false
-  }
-
   fun cleanup() {
     val original = text
 
@@ -164,11 +160,23 @@ class Paragraph(private val task: FormattingTask) {
   }
 
   private fun convertMarkup(s: String): String {
-    if (s.none { it == '<' || it == '&' || it == '{' }) return s
+    // Whether the tag starts with a capital letter and needs to be cleaned, e.g. `@See` -> `@see`.
+    // (isKDocTag only allows the first letter to be capitalized.)
+    val convertKDocTag = s.isKDocTag() && s[1].isUpperCase()
+
+    if (!convertKDocTag && s.none { it == '<' || it == '&' || it == '{' }) {
+      return s
+    }
 
     val sb = StringBuilder(s.length)
     var i = 0
     val n = s.length
+
+    if (convertKDocTag) {
+      sb.append('@').append(s[1].lowercaseChar())
+      i += 2
+    }
+
     var code = false
     var brackets = 0
     while (i < n) {
@@ -335,8 +343,12 @@ class Paragraph(private val task: FormattingTask) {
     return reflow(words, lineWidth, hangingIndentSize)
   }
 
-  fun reflow(words: List<String>, lineWidth: Int, hangingIndentSize: Int): List<String> {
-    if (options.alternate || !options.optimal || hanging && hangingIndentSize > 0) {
+  private fun reflow(words: List<String>, lineWidth: Int, hangingIndentSize: Int): List<String> {
+    if (options.alternate ||
+        !options.optimal ||
+        hanging && hangingIndentSize > 0 ||
+        // An unbreakable long word may make other lines shorter and won't look good
+        words.any { it.length > lineWidth }) {
       // Switch to greedy if explicitly turned on, and for hanging indent
       // paragraphs, since the current implementation doesn't have support
       // for a different maximum length on the first line from the rest
@@ -405,7 +417,8 @@ class Paragraph(private val task: FormattingTask) {
         word.startsWith("```") ||
         word.isDirectiveMarker() ||
         word.startsWith("@") || // interpreted as a tag
-        word.isTodo()) {
+        word.isTodo() ||
+        word.startsWith(">")) {
       return false
     }
 
@@ -419,7 +432,14 @@ class Paragraph(private val task: FormattingTask) {
     return true
   }
 
-  private fun computeWords(): List<String> {
+  /**
+   * Split [text] up into individual "words"; in the case where some words are not allowed to span
+   * lines, it will combine these into single word. For example, if we have a sentence which ends
+   * with a number, e.g. "the sum is 5.", we want to make sure "5." is never placed at the beginning
+   * of a new line (which would turn it into a list item), so for this we'll compute the word list
+   * "the", "sum", "is 5.".
+   */
+  fun computeWords(): List<String> {
     val words = text.split(Regex("\\s+")).filter { it.isNotBlank() }.map { it.trim() }
     if (words.size == 1) {
       return words
@@ -438,39 +458,53 @@ class Paragraph(private val task: FormattingTask) {
 
     val combined = ArrayList<String>(words.size)
 
-    // If this paragraph is a list item or a quoted line, merge the first word
-    // with this item such that we never split them apart.
-    var start = 0
-    var first = words[start++]
-    if (quoted || hanging && !text.isKDocTag()) {
-      first = first + " " + words[start++]
-    }
-
-    combined.add(first)
-    var prev = first
-    var insideSquareBrackets = words[start - 1].startsWith("[")
-    for (i in start until words.size) {
-      val word = words[i]
-
-      // We also cannot break up a URL text across lines, which will alter the
-      // rendering of the docs.
-      if (prev.startsWith("[")) insideSquareBrackets = true
-      if (prev.contains("]")) insideSquareBrackets = false
-
-      // Can we start a new line with this without interpreting it in a special
-      // way?
-      if (!canBreakAt(word) || insideSquareBrackets) {
-        // Combine with previous word with a single space; the line breaking
-        // algorithm won't know that it's more than one word.
-        val joined = "$prev $word"
-        combined.removeLast()
-        combined.add(joined)
-        prev = joined
-      } else {
-        combined.add(word)
-        prev = word
+    var from = 0
+    val end = words.size
+    while (from < end) {
+      val start =
+          if (from == 0 && (quoted || hanging && !text.isKDocTag())) {
+            from + 2
+          } else {
+            from + 1
+          }
+      var to = words.size
+      for (i in start until words.size) {
+        val next = words[i]
+        if (next.startsWith("[") && !next.startsWith("[[")) {
+          // find end
+          var j = -1
+          for (k in i until words.size) {
+            if (']' in words[k]) {
+              j = k
+              break
+            }
+          }
+          if (j != -1) {
+            // combine everything in the string; we can't break link text
+            if (start == from + 1 && canBreakAt(words[start])) {
+              combined.add(words[from])
+              from = start
+            }
+            // Maybe not break; what if the next word isn't okay?
+            to = j + 1
+            if (to == words.size || canBreakAt(words[to])) {
+              break
+            }
+          } // else: unterminated [, ignore
+        } else if (canBreakAt(next)) {
+          to = i
+          break
+        }
       }
+
+      if (to == from + 1) {
+        combined.add(words[from])
+      } else if (to > from) {
+        combined.add(words.subList(from, to).joinToString(" "))
+      }
+      from = to
     }
+
     return combined
   }
 
@@ -503,7 +537,7 @@ class Paragraph(private val task: FormattingTask) {
     }
 
     fun search(pi0: Int, pj0: Int, pi1: Int, pj1: Int) {
-      val stack = java.util.ArrayDeque<Quadruple>()
+      val stack = ArrayDeque<Quadruple>()
       stack.add(Quadruple(pi0, pj0, pi1, pj1))
 
       while (stack.isNotEmpty()) {

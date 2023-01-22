@@ -48,6 +48,7 @@ class ParagraphListBuilder(
   private fun closeParagraph(): Paragraph {
     val text = paragraph.text
     when {
+      paragraph.preformatted -> {}
       text.isKDocTag() -> {
         paragraph.doc = true
         paragraph.hanging = true
@@ -142,14 +143,15 @@ class ParagraphListBuilder(
     newParagraph()
     var j = i
     var foundClose = false
-    var customize = true
+    var allowCustomize = true
     while (j < lines.size) {
       val l = lines[j]
       val lineWithIndentation = lineContent(l)
       if (lineWithIndentation.contains("```") &&
           lineWithIndentation.trimStart().startsWith("```")) {
-        // Don't convert <pre> tags if we already have nested ``` content; that will lead to trouble
-        customize = false
+        // Don't convert <pre> tags if we already have nested ``` content; that will lead to
+        // trouble
+        allowCustomize = false
       }
       val done = (includeStart || j > i) && until(lineWithIndentation)
       if (!includeEnd && done) {
@@ -175,7 +177,7 @@ class ParagraphListBuilder(
     if (!foundClose && expectClose) {
       // Just add a single line as preformatted and then treat the rest in the
       // normal way
-      customize = false
+      allowCustomize = false
       j = lines.size
     }
 
@@ -185,7 +187,7 @@ class ParagraphListBuilder(
       appendText(lineWithIndentation)
       paragraph.preformatted = true
       paragraph.allowEmpty = true
-      if (customize) {
+      if (allowCustomize) {
         customize(index, paragraph)
       }
       newParagraph()
@@ -254,8 +256,11 @@ class ParagraphListBuilder(
         newParagraph(i - 1).block = true
         appendText(lineWithoutIndentation)
         newParagraph(i).block = true
-      } else if (lineWithoutIndentation.startsWith(
-          "#")) { // not isHeader() because <h> is handled separately
+      } else if (lineWithoutIndentation.startsWith("#")
+      // "## X" is a header, "##X" is not
+      &&
+          lineWithoutIndentation.firstOrNull { it != '#' }?.equals(' ') ==
+              true) { // not isHeader() because <h> is handled separately
         // ## Header
         newParagraph(i - 1).block = true
         appendText(lineWithoutIndentation)
@@ -496,17 +501,28 @@ class ParagraphListBuilder(
     return ParagraphList(paragraphs)
   }
 
-  private fun addPlainText(i: Int, text: String, braceBalance: Int = 0): Int {
-    val s =
-        if (options.convertMarkup &&
-                (text.startsWith("<p>", true) || text.startsWith("<p/>", true))) {
-              paragraph.separate = true
-              text.substring(text.indexOf('>') + 1).trim()
-            } else {
-              text
-            }
-            .let { if (options.collapseSpaces) it.collapseSpaces() else it }
+  private fun convertPrefix(text: String): String {
+    return if (options.convertMarkup &&
+        (text.startsWith("<p>", true) || text.startsWith("<p/>", true))) {
+      paragraph.separate = true
+      text.substring(text.indexOf('>') + 1).trim()
+    } else {
+      text
+    }
+  }
 
+  private fun convertSuffix(trimmedPrefix: String): String {
+    return if (options.convertMarkup &&
+        (trimmedPrefix.endsWith("<p/>", true) || (trimmedPrefix.endsWith("</p>", true)))) {
+      trimmedPrefix.substring(0, trimmedPrefix.length - 4).trimEnd().removeSuffix("*").trimEnd()
+    } else {
+      trimmedPrefix
+    }
+  }
+
+  private fun addPlainText(i: Int, text: String, braceBalance: Int = 0): Int {
+    val trimmed = convertSuffix(convertPrefix(text))
+    val s = trimmed.let { if (options.collapseSpaces) it.collapseSpaces() else it }
     appendText(s)
     appendText(" ")
 
