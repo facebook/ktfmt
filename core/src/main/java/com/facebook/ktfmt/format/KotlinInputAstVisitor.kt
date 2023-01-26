@@ -2480,11 +2480,7 @@ class KotlinInputAstVisitor(
    * @param plusIndent the block level to pass to the block
    * @param block a code block to be run in this block level
    */
-  private inline fun OpsBuilder.block(
-      plusIndent: Indent,
-      isEnabled: Boolean = true,
-      block: () -> Unit
-  ) {
+  private fun OpsBuilder.block(plusIndent: Indent, isEnabled: Boolean = true, block: () -> Unit) {
     if (isEnabled) {
       open(plusIndent)
     }
