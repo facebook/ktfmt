@@ -123,6 +123,7 @@ import org.jetbrains.kotlin.psi.KtWhileExpression
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import org.jetbrains.kotlin.psi.psiUtil.startsWithComment
+import org.jetbrains.kotlin.psi.psiUtil.getPrevSiblingIgnoringWhitespace
 
 /** An AST visitor that builds a stream of {@link Op}s to format. */
 class KotlinInputAstVisitor(
@@ -1346,7 +1347,10 @@ class KotlinInputAstVisitor(
           visit(delegate)
         } else {
           builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
-          builder.block(expressionBreakIndent) { visit(delegate) }
+          builder.block(expressionBreakIndent) {
+            builder.fenceComments()
+            visit(delegate)
+          }
         }
       } else if (initializer != null) {
         builder.space()
@@ -1355,7 +1359,10 @@ class KotlinInputAstVisitor(
           visitLambdaOrScopingFunction(initializer)
         } else {
           builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
-          builder.block(expressionBreakIndent) { visit(initializer) }
+          builder.block(expressionBreakIndent) {
+            builder.fenceComments()
+            visit(initializer)
+          }
         }
       }
     }
@@ -1409,6 +1416,10 @@ class KotlinInputAstVisitor(
    * 2. '... = Runnable @Annotation { ... }' due to the annotation
    */
   private fun isLambdaOrScopingFunction(expression: KtExpression?): Boolean {
+    if (expression == null) return false
+    if (expression.getPrevSiblingIgnoringWhitespace() is PsiComment) {
+      return false // Leading comments cause weird indentation.
+    }
     if (expression is KtLambdaExpression) {
       return true
     }
