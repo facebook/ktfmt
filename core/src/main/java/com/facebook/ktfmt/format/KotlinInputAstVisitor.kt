@@ -923,12 +923,9 @@ class KotlinInputAstVisitor(
     if (hasParams || hasArrow || hasStatements) {
       // If we had to break in the body, ensure there is a break before the closing brace
       builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusZeroIndent)
-      builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
     }
     builder.block(bracePlusZeroIndent) {
-      // If there are closing comments, make sure they and the brace are indented together
-      // The comments will indent themselves, so consume the previous break as a blank line
-      builder.breakOp(Doc.FillMode.INDEPENDENT, "", ZERO)
+      builder.fenceComments()
       builder.token("}", blockIndent)
     }
   }
@@ -1095,11 +1092,8 @@ class KotlinInputAstVisitor(
 
     if (postfix != null) {
       if (breakAfterLastElement) {
-        // Indent trailing comments to the same depth as list items. We really have to fight
-        // googlejavaformat here for some reason.
-        builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
         builder.block(expressionBreakNegativeIndent) {
-          builder.breakOp(breakType, "", ZERO)
+          builder.fenceComments()
           builder.token(postfix, expressionBreakIndent)
         }
       } else {
@@ -2488,6 +2482,11 @@ class KotlinInputAstVisitor(
   /** Helper method to sync the current offset to match any element in the AST */
   private fun OpsBuilder.sync(psiElement: PsiElement) {
     sync(psiElement.startOffset)
+  }
+
+  /** Prevent susequent comments from being moved ahead of this point, into parent [Level]s. */
+  private fun OpsBuilder.fenceComments() {
+    addAll(FenceCommentsOp.AS_LIST)
   }
 
   /**
