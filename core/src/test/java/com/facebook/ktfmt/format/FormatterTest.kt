@@ -446,6 +446,58 @@ class FormatterTest {
               .trimMargin())
 
   @Test
+  fun `properties with line comment above initializer`() =
+      assertFormatted(
+          """
+      |class Foo {
+      |  var x: Int =
+      |      // Comment
+      |      0
+      |
+      |  var y: Int =
+      |      // Comment
+      |      scope {
+      |        0 //
+      |      }
+      |
+      |  var z: Int =
+      |      // Comment
+      |      if (cond) {
+      |        0
+      |      } else {
+      |        1
+      |      }
+      |}
+      |"""
+              .trimMargin())
+
+  @Test
+  fun `properties with line comment above delegate`() =
+      assertFormatted(
+          """
+      |class Foo {
+      |  var x: Int by
+      |      // Comment
+      |      0
+      |
+      |  var y: Int by
+      |      // Comment
+      |      scope {
+      |        0 //
+      |      }
+      |
+      |  var z: Int by
+      |      // Comment
+      |      if (cond) {
+      |        0
+      |      } else {
+      |        1
+      |      }
+      |}
+      |"""
+              .trimMargin())
+
+  @Test
   fun `properties with accessors`() =
       assertFormatted(
           """
