@@ -264,7 +264,9 @@ class FormatterTest {
           """
       |class Foo(a: Int, var b: Double, val c: String) {
       |  val x = 2
+      |
       |  fun method() {}
+      |
       |  class Bar
       |}
       |"""
@@ -276,8 +278,11 @@ class FormatterTest {
           """
       |class Foo(public val p1: Int, private val p2: Int, open val p3: Int, final val p4: Int) {
       |  private var f1 = 0
+      |
       |  public var f2 = 0
+      |
       |  open var f3 = 0
+      |
       |  final var f4 = 0
       |}
       |"""
@@ -504,15 +509,18 @@ class FormatterTest {
       |class Foo {
       |  var x: Int
       |    get() = field
+      |
       |  var y: Boolean
       |    get() = x.equals(123)
       |    set(value) {
       |      field = value
       |    }
+      |
       |  var z: Boolean
       |    get() {
       |      x.equals(123)
       |    }
+      |
       |  var zz = false
       |    private set
       |}
@@ -525,7 +533,9 @@ class FormatterTest {
         """
       |class Foo {
       |  var x = false; private set
+      |
       |  internal val a by lazy { 5 }; internal get
+      |
       |  var foo: Int; get() = 6; set(x) {};
       |}
       |"""
@@ -536,8 +546,10 @@ class FormatterTest {
       |class Foo {
       |  var x = false
       |    private set
+      |
       |  internal val a by lazy { 5 }
       |    internal get
+      |
       |  var foo: Int
       |    get() = 6
       |    set(x) {}
@@ -2231,6 +2243,7 @@ class FormatterTest {
           """
       |class Foo private constructor(number: Int) {
       |  private constructor(n: Float) : this(1)
+      |
       |  private constructor(n: Double) : this(1) {
       |    println("built")
       |  }
@@ -4299,6 +4312,7 @@ class FormatterTest {
       |  TRUE,
       |  FALSE,
       |  FILE_NOT_FOUND;
+      |
       |  fun isGood(): Boolean {
       |    return true
       |  }
@@ -4345,8 +4359,7 @@ class FormatterTest {
   fun `handle empty enum`() =
       assertFormatted(
           """
-      |enum class YTho {
-      |}
+      |enum class YTho {}
       |"""
               .trimMargin())
 
@@ -6494,6 +6507,109 @@ class FormatterTest {
       |"""
               .trimMargin(),
           deduceMaxWidth = true)
+
+  @Test
+  fun `force blank line between class members`() {
+    val code =
+        """
+      |class Foo {
+      |  val x = 0
+      |  fun foo() {}
+      |  class Bar {}
+      |  enum class Enum {
+      |    A {
+      |      val x = 0
+      |      fun foo() {}
+      |    };
+      |    abstract fun foo(): Unit
+      |  }
+      |}
+      |"""
+            .trimMargin()
+
+    val expected =
+        """
+      |class Foo {
+      |  val x = 0
+      |
+      |  fun foo() {}
+      |
+      |  class Bar {}
+      |
+      |  enum class Enum {
+      |    A {
+      |      val x = 0
+      |
+      |      fun foo() {}
+      |    };
+      |
+      |    abstract fun foo(): Unit
+      |  }
+      |}
+      |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `preserve blank line between class members between properties`() {
+    val code =
+        """
+      |class Foo {
+      |  val x = 0
+      |  val x = 0
+      |
+      |  val x = 0
+      |}
+      |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(code)
+  }
+
+  @Test
+  fun `force blank line between class members preserved between properties with accessors`() {
+    val code =
+        """
+      |class Foo {
+      |  val _x = 0
+      |  val x = 0
+      |    private get
+      |  val y = 0
+      |}
+      |
+      |class Foo {
+      |  val _x = 0
+      |  val x = 0
+      |    private set
+      |  val y = 0
+      |}
+      |"""
+            .trimMargin()
+
+    val expected =
+        """
+      |class Foo {
+      |  val _x = 0
+      |  val x = 0
+      |    private get
+      |
+      |  val y = 0
+      |}
+      |
+      |class Foo {
+      |  val _x = 0
+      |  val x = 0
+      |    private set
+      |
+      |  val y = 0
+      |}
+      |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
 
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */

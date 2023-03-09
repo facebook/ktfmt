@@ -44,7 +44,7 @@ import org.jetbrains.kotlin.psi.KtBreakExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtCallableReferenceExpression
 import org.jetbrains.kotlin.psi.KtCatchClause
-import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtClassBody
 import org.jetbrains.kotlin.psi.KtClassInitializer
 import org.jetbrains.kotlin.psi.KtClassLiteralExpression
 import org.jetbrains.kotlin.psi.KtClassOrObject
@@ -170,10 +170,9 @@ class KotlinInputAstVisitor(
           true,
           function.valueParameterList,
           function.typeConstraintList,
-          function.bodyBlockExpression,
-          function.bodyExpression,
+          function.bodyBlockExpression ?: function.bodyExpression,
           function.typeReference,
-          function.bodyBlockExpression?.lBrace != null)
+      )
     }
   }
 
@@ -289,10 +288,8 @@ class KotlinInputAstVisitor(
       emitParenthesis: Boolean,
       parameterList: KtParameterList?,
       typeConstraintList: KtTypeConstraintList?,
-      bodyBlockExpression: KtBlockExpression?,
-      nonBlockBodyExpressions: KtExpression?,
+      bodyExpression: KtExpression?,
       typeOrDelegationCall: KtElement?,
-      emitBraces: Boolean
   ) {
     builder.block(ZERO) {
       if (modifierList != null) {
@@ -361,19 +358,19 @@ class KotlinInputAstVisitor(
         builder.space()
         visit(typeConstraintList)
       }
-      if (bodyBlockExpression != null) {
+      if (bodyExpression is KtBlockExpression) {
         builder.space()
-        visitBlockBody(bodyBlockExpression, emitBraces)
-      } else if (nonBlockBodyExpressions != null) {
+        visit(bodyExpression)
+      } else if (bodyExpression != null) {
         builder.space()
         builder.block(ZERO) {
           builder.token("=")
-          if (isLambdaOrScopingFunction(nonBlockBodyExpressions)) {
-            visitLambdaOrScopingFunction(nonBlockBodyExpressions)
+          if (isLambdaOrScopingFunction(bodyExpression)) {
+            visitLambdaOrScopingFunction(bodyExpression)
           } else {
             builder.block(expressionBreakIndent) {
               builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
-              builder.block(ZERO) { visit(nonBlockBodyExpressions) }
+              builder.block(ZERO) { visit(bodyExpression) }
             }
           }
         }
@@ -389,23 +386,22 @@ class KotlinInputAstVisitor(
     return Output.BreakTag()
   }
 
-  private fun visitBlockBody(bodyBlockExpression: PsiElement, emitBraces: Boolean) {
-    if (emitBraces) {
-      builder.token("{", Doc.Token.RealOrImaginary.REAL, blockIndent, Optional.of(blockIndent))
-    }
+  private fun emitBracedBlock(
+      bodyBlockExpression: PsiElement,
+      emitChildren: (Array<PsiElement>) -> Unit,
+  ) {
+    builder.token("{", Doc.Token.RealOrImaginary.REAL, blockIndent, Optional.of(blockIndent))
     val statements = bodyBlockExpression.children
     if (statements.isNotEmpty()) {
       builder.block(blockIndent) {
         builder.forcedBreak()
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
-        visitStatements(statements)
+        emitChildren(statements)
       }
       builder.forcedBreak()
       builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
     }
-    if (emitBraces) {
-      builder.token("}", blockIndent)
-    }
+    builder.token("}", blockIndent)
   }
 
   private fun visitStatement(statement: PsiElement) {
@@ -1384,10 +1380,9 @@ class KotlinInputAstVisitor(
                 accessor.bodyExpression != null || accessor.bodyBlockExpression != null,
                 accessor.parameterList,
                 null,
-                accessor.bodyBlockExpression,
-                accessor.bodyExpression,
+                accessor.bodyBlockExpression ?: accessor.bodyExpression,
                 accessor.returnTypeReference,
-                accessor.bodyBlockExpression?.lBrace != null)
+            )
           }
         }
       }
@@ -1488,57 +1483,11 @@ class KotlinInputAstVisitor(
         visit(typeConstraintList)
         builder.space()
       }
-      val body = classOrObject.body
-      if (classOrObject.hasModifier(KtTokens.ENUM_KEYWORD)) {
-        visitEnumBody(classOrObject as KtClass)
-      } else if (body != null) {
-        visitBlockBody(body, true)
-      }
+      visit(classOrObject.body)
     }
     if (classOrObject.nameIdentifier != null) {
       builder.forcedBreak()
     }
-  }
-
-  /** Example `{ RED, GREEN; fun foo() { ... } }` for an enum class */
-  private fun visitEnumBody(enumClass: KtClass) {
-    val body = enumClass.body
-    if (body == null) {
-      return
-    }
-    builder.token("{", Doc.Token.RealOrImaginary.REAL, blockIndent, Optional.of(blockIndent))
-    builder.open(ZERO)
-    builder.block(blockIndent) {
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      val (enumEntries, nonEnumEntryStatements) = body.children.partition { it is KtEnumEntry }
-      builder.forcedBreak()
-      visitEnumEntries(enumEntries)
-
-      if (nonEnumEntryStatements.isNotEmpty()) {
-        builder.forcedBreak()
-        builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
-        visitStatements(nonEnumEntryStatements.toTypedArray())
-      }
-    }
-    builder.forcedBreak()
-    builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
-    builder.token("}", blockIndent)
-    builder.close()
-  }
-
-  /** Example `RED, GREEN, BLUE,` in an enum class, or `RED, GREEN;` */
-  private fun visitEnumEntries(enumEntries: List<PsiElement>) {
-    builder.block(ZERO) {
-      builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-      for (value in enumEntries) {
-        visit(value)
-        if (builder.peekToken() == Optional.of(",")) {
-          builder.token(",")
-          builder.forcedBreak()
-        }
-      }
-    }
-    builder.guessToken(";")
   }
 
   override fun visitPrimaryConstructor(constructor: KtPrimaryConstructor) {
@@ -1568,11 +1517,9 @@ class KotlinInputAstVisitor(
 
   /** Example `private constructor(n: Int) : this(4, 5) { ... }` inside a class's body */
   override fun visitSecondaryConstructor(constructor: KtSecondaryConstructor) {
-    val delegationCall = constructor.getDelegationCall()
-    val bodyExpression = constructor.bodyExpression
-
     builder.sync(constructor)
 
+    val delegationCall = constructor.getDelegationCall()
     visitFunctionLikeExpression(
         constructor.modifierList,
         "constructor",
@@ -1582,10 +1529,9 @@ class KotlinInputAstVisitor(
         true,
         constructor.valueParameterList,
         null,
-        bodyExpression,
-        null,
+        constructor.bodyExpression,
         if (!delegationCall.isImplicit) delegationCall else null,
-        true)
+    )
   }
 
   override fun visitConstructorDelegationCall(call: KtConstructorDelegationCall) {
@@ -1897,9 +1843,54 @@ class KotlinInputAstVisitor(
     }
   }
 
+  override fun visitClassBody(body: KtClassBody) {
+    builder.sync(body)
+    emitBracedBlock(body) { children ->
+      val (enumEntries, nonEnumEntryMembers) = children.partition { it is KtEnumEntry }
+
+      if (enumEntries.isNotEmpty()) {
+        builder.block(ZERO) {
+          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+          for (value in enumEntries) {
+            visit(value)
+            if (builder.peekToken() == Optional.of(",")) {
+              builder.token(",")
+              builder.forcedBreak()
+            }
+          }
+        }
+        builder.guessToken(";")
+
+        if (nonEnumEntryMembers.isNotEmpty()) {
+          builder.forcedBreak()
+          builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
+        }
+      }
+
+      var prev: PsiElement? = null
+      for (curr in nonEnumEntryMembers) {
+        val blankLineBetweenMembers =
+            when {
+              prev == null -> OpsBuilder.BlankLineWanted.PRESERVE
+              prev !is KtProperty -> OpsBuilder.BlankLineWanted.YES
+              prev.getter != null || prev.setter != null -> OpsBuilder.BlankLineWanted.YES
+              curr is KtProperty -> OpsBuilder.BlankLineWanted.PRESERVE
+              else -> OpsBuilder.BlankLineWanted.YES
+            }
+        builder.blankLineWanted(blankLineBetweenMembers)
+
+        builder.block(ZERO) { visit(curr) }
+        builder.guessToken(";")
+        builder.forcedBreak()
+
+        prev = curr
+      }
+    }
+  }
+
   override fun visitBlockExpression(expression: KtBlockExpression) {
     builder.sync(expression)
-    visitBlockBody(expression, true)
+    emitBracedBlock(expression) { children -> visitStatements(children) }
   }
 
   override fun visitWhenConditionWithExpression(condition: KtWhenConditionWithExpression) {
@@ -2347,10 +2338,9 @@ class KotlinInputAstVisitor(
       visit(enumEntry.modifierList)
       builder.token(enumEntry.nameIdentifier?.text ?: fail())
       enumEntry.initializerList?.initializers?.forEach { visit(it) }
-      val body = enumEntry.body
-      if (body != null) {
+      enumEntry.body?.let {
         builder.space()
-        visitBlockBody(body, true)
+        visit(it)
       }
     }
   }
