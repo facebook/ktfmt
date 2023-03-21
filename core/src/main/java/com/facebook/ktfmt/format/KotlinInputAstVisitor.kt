@@ -204,15 +204,17 @@ class KotlinInputAstVisitor(
   /** Example: `String?` or `((Int) -> Unit)?` */
   override fun visitNullableType(nullableType: KtNullableType) {
     builder.sync(nullableType)
+
+    // Normally we wouldn't loop over children, but there can be multiple layers of parens.
+    val modifierList = nullableType.modifierList
     val innerType = nullableType.innerType
-    val addParenthesis = innerType is KtFunctionType
-    if (addParenthesis) {
-      builder.token("(")
-    }
-    visit(nullableType.modifierList)
-    visit(innerType)
-    if (addParenthesis) {
-      builder.token(")")
+    for (child in nullableType.node.children()) {
+      when {
+        child.psi == modifierList -> visit(modifierList)
+        child.psi == innerType -> visit(innerType)
+        child.elementType == KtTokens.LPAR -> builder.token("(")
+        child.elementType == KtTokens.RPAR -> builder.token(")")
+      }
     }
     builder.token("?")
   }

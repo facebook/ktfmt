@@ -2603,14 +2603,24 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `handle qmark for nullalble types`() =
+  fun `handle qmark for nullable types`() =
       assertFormatted(
           """
-      |fun doItWithNullReturns(a: String, b: String): Int? {
-      |  return 5
-      |}
+      |var x: Int? = null
+      |var x: (Int)? = null
+      |var x: (Int?) = null
+      |var x: ((Int))? = null
+      |var x: ((Int?)) = null
+      |var x: ((Int)?) = null
       |
-      |fun doItWithNulls(a: String, b: String?) {}
+      |var x: @Anno Int? = null
+      |var x: @Anno() (Int)? = null
+      |var x: @Anno (Int?) = null
+      |var x: (@Anno Int)? = null
+      |var x: (@Anno Int?) = null
+      |var x: (@Anno() (Int))? = null
+      |var x: (@Anno (Int?)) = null
+      |var x: (@Anno() (Int)?) = null
       |"""
               .trimMargin())
 
