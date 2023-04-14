@@ -68,7 +68,7 @@ fun assertFormatted(
 
 fun assertThatFormatting(code: String): FormattedCodeSubject {
   fun codes(): Subject.Factory<FormattedCodeSubject, String> {
-    return Subject.Factory { metadata, subject -> FormattedCodeSubject(metadata, subject) }
+    return Subject.Factory { metadata, subject -> FormattedCodeSubject(metadata, subject!!) }
   }
   return Truth.assertAbout(codes()).that(code)
 }

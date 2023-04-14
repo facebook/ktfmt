@@ -968,8 +968,8 @@ class FormatterTest {
       assertFormatted(
           """
       |-------------------------
-      |"Hello %s".format(
-      |    someLongExpression)
+      |"Hello %s"
+      |    .format(expression)
       |"""
               .trimMargin(),
           deduceMaxWidth = true)
@@ -6462,7 +6462,17 @@ class FormatterTest {
       assertFormatted(
           """
       |--------------------------------
-      |fun f() {
+      |fun stringFitsButNotMethod() {
+      |  val str1 =
+      |      $TQ Some string $TQ
+      |          .trimIndent()
+      |
+      |  val str2 =
+      |      $TQ Some string $TQ
+      |          .trimIndent(someArg)
+      |}
+      |
+      |fun stringTooLong() {
       |  val str1 =
       |      $TQ
       |      Some very long string that might mess things up

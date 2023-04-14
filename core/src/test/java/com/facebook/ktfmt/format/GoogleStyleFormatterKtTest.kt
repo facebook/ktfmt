@@ -317,9 +317,8 @@ class GoogleStyleFormatterKtTest {
       assertFormatted(
           """
       |-------------------------
-      |"Hello %s".format(
-      |  someLongExpression
-      |)
+      |"Hello %s"
+      |  .format(expression)
       |"""
               .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
