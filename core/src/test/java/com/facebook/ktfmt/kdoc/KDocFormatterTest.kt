@@ -2955,8 +2955,7 @@ class KDocFormatterTest {
             /**
              * This is my SampleInterface interface.
              *
-             * @sample
-             *   com.example.java.sample.library.extra.long.path.MyCustomSampleInterfaceImplementationForTesting
+             * @sample com.example.java.sample.library.extra.long.path.MyCustomSampleInterfaceImplementationForTesting
              */
             """
             .trimIndent())
