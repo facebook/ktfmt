@@ -409,7 +409,7 @@ class Paragraph(private val task: FormattingTask) {
    * need to make sure we don't make it the first word on the next line since that would change the
    * documentation.
    */
-  private fun canBreakAt(word: String): Boolean {
+  private fun canBreakAt(prev: String, word: String): Boolean {
     // Can we start a new line with this without interpreting it in a special
     // way?
 
@@ -420,6 +420,10 @@ class Paragraph(private val task: FormattingTask) {
         word.isTodo() ||
         word.startsWith(">")) {
       return false
+    }
+
+    if (prev == "@sample") {
+      return false // https://github.com/facebookincubator/ktfmt/issues/310
     }
 
     if (!word.first().isLetter()) {
@@ -480,18 +484,18 @@ class Paragraph(private val task: FormattingTask) {
             }
           }
           if (j != -1) {
-            // combine everything in the string; we can't break link text
-            if (start == from + 1 && canBreakAt(words[start])) {
+            // combine everything in the string; we can't break link text or @sample tags
+            if (start == from + 1 && canBreakAt(words[start - 1], words[start])) {
               combined.add(words[from])
               from = start
             }
             // Maybe not break; what if the next word isn't okay?
             to = j + 1
-            if (to == words.size || canBreakAt(words[to])) {
+            if (to == words.size || canBreakAt(words[to - 1], words[to])) {
               break
             }
           } // else: unterminated [, ignore
-        } else if (canBreakAt(next)) {
+        } else if (canBreakAt(words[i - 1], next)) {
           to = i
           break
         }
