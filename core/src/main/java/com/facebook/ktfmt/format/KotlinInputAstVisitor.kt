@@ -52,6 +52,7 @@ import org.jetbrains.kotlin.psi.KtCollectionLiteralExpression
 import org.jetbrains.kotlin.psi.KtConstantExpression
 import org.jetbrains.kotlin.psi.KtConstructorDelegationCall
 import org.jetbrains.kotlin.psi.KtContainerNode
+import org.jetbrains.kotlin.psi.KtContextReceiverList
 import org.jetbrains.kotlin.psi.KtContinueExpression
 import org.jetbrains.kotlin.psi.KtDelegatedSuperTypeEntry
 import org.jetbrains.kotlin.psi.KtDestructuringDeclaration
@@ -124,6 +125,7 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.jetbrains.kotlin.psi.psiUtil.getPrevSiblingIgnoringWhitespace
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import org.jetbrains.kotlin.psi.psiUtil.startsWithComment
+import org.jetbrains.kotlin.psi.stubs.elements.KtStubElementTypes
 
 /** An AST visitor that builds a stream of {@link Op}s to format. */
 class KotlinInputAstVisitor(
@@ -162,6 +164,7 @@ class KotlinInputAstVisitor(
     builder.sync(function)
     builder.block(ZERO) {
       visitFunctionLikeExpression(
+          function.getStubOrPsiChild(KtStubElementTypes.CONTEXT_RECEIVER_LIST),
           function.modifierList,
           "fun",
           function.typeParameterList,
@@ -282,6 +285,7 @@ class KotlinInputAstVisitor(
    *   list of supertypes.
    */
   private fun visitFunctionLikeExpression(
+      contextReceiverList: KtContextReceiverList?,
       modifierList: KtModifierList?,
       keyword: String,
       typeParameters: KtTypeParameterList?,
@@ -294,6 +298,9 @@ class KotlinInputAstVisitor(
       typeOrDelegationCall: KtElement?,
   ) {
     builder.block(ZERO) {
+      if (contextReceiverList != null) {
+        visitContextReceiverList(contextReceiverList)
+      }
       if (modifierList != null) {
         visitModifierList(modifierList)
       }
@@ -1372,6 +1379,7 @@ class KotlinInputAstVisitor(
 
           builder.block(ZERO) {
             visitFunctionLikeExpression(
+                null,
                 accessor.modifierList,
                 accessor.namePlaceholder.text,
                 null,
@@ -1533,6 +1541,7 @@ class KotlinInputAstVisitor(
 
     val delegationCall = constructor.getDelegationCall()
     visitFunctionLikeExpression(
+        constructor.getStubOrPsiChild(KtStubElementTypes.CONTEXT_RECEIVER_LIST),
         constructor.modifierList,
         "constructor",
         null,
@@ -1635,6 +1644,16 @@ class KotlinInputAstVisitor(
 
     // Force a newline afterwards.
     builder.guessToken(";")
+    builder.forcedBreak()
+  }
+
+  /** Example `context(Logger, Raise<Error>)` */
+  override fun visitContextReceiverList(contextReceiverList: KtContextReceiverList) {
+    builder.sync(contextReceiverList)
+    builder.token("context")
+    builder.token("(")
+    visitEachCommaSeparated(contextReceiverList.contextReceivers())
+    builder.token(")")
     builder.forcedBreak()
   }
 
