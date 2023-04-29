@@ -6675,15 +6675,31 @@ class FormatterTest {
   }
 
   @Test
-  fun `context receivers`() =
-    assertFormatted(
+  fun `context receivers`() {
+    val code =
         """
       |class A {
       |  context(Logger, Raise<Error>)
-      |  fun test() {}
+      |
+      |  @SomeAnnotation
+      |
+      |  fun doNothing() {}
       |}
       |"""
-            .trimMargin())
+            .trimMargin()
+
+    val expected =
+        """
+      |class A {
+      |  context(Logger, Raise<Error>)
+      |  @SomeAnnotation
+      |  fun doNothing() {}
+      |}
+      |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
 
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
