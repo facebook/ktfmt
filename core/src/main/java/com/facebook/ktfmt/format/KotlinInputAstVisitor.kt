@@ -1469,8 +1469,12 @@ class KotlinInputAstVisitor(
 
   override fun visitClassOrObject(classOrObject: KtClassOrObject) {
     builder.sync(classOrObject)
+    val contextReceiverList = classOrObject.getStubOrPsiChild(KtStubElementTypes.CONTEXT_RECEIVER_LIST)
     val modifierList = classOrObject.modifierList
     builder.block(ZERO) {
+      if (contextReceiverList != null) {
+        visitContextReceiverList(contextReceiverList)
+      }
       if (modifierList != null) {
         visitModifierList(modifierList)
       }

@@ -6684,6 +6684,10 @@ class FormatterTest {
       |  @SomeAnnotation
       |
       |  fun doNothing() {}
+      |
+      |  context(SomethingElse)
+      |
+      |  private class NestedClass {}
       |}
       |"""
             .trimMargin()
@@ -6694,6 +6698,9 @@ class FormatterTest {
       |  context(Logger, Raise<Error>)
       |  @SomeAnnotation
       |  fun doNothing() {}
+      |
+      |  context(SomethingElse)
+      |  private class NestedClass {}
       |}
       |"""
             .trimMargin()
