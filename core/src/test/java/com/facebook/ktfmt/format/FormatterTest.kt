@@ -6678,6 +6678,8 @@ class FormatterTest {
   fun `context receivers`() {
     val code =
         """
+      |context(Something)
+      |
       |class A {
       |  context(Logger, Raise<Error>)
       |
@@ -6694,6 +6696,7 @@ class FormatterTest {
 
     val expected =
         """
+      |context(Something)
       |class A {
       |  context(Logger, Raise<Error>)
       |  @SomeAnnotation

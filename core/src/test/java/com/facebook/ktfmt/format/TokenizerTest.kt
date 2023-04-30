@@ -114,6 +114,7 @@ class TokenizerTest {
   @Test
   fun `Context receivers are parsed correctly`() {
     val code = """
+      |context(Something)
       |class A {
       |  context(Logger, Raise<Error>)
       |  fun test() {}
@@ -125,10 +126,10 @@ class TokenizerTest {
     file.accept(tokenizer)
 
     assertThat(tokenizer.toks.map { it.originalText })
-            .containsExactly("class", " ", "A", " ", "{", "\n", "  ", "context", "(", "Logger", ",", " ", "Raise", "<", "Error", ">", ")", "\n", "  ", "fun", " ", "test", "(", ")", " ", "{", "}", "\n", "}")
+            .containsExactly("context", "(", "Something", ")", "\n", "class", " ", "A", " ", "{", "\n", "  ", "context", "(", "Logger", ",", " ", "Raise", "<", "Error", ">", ")", "\n", "  ", "fun", " ", "test", "(", ")", " ", "{", "}", "\n", "}")
             .inOrder()
     assertThat(tokenizer.toks.map { it.index })
-            .containsExactly(0, -1, 1, -1, 2, -1, -1, 3, 4, 5, 6, -1, 7, 8, 9, 10, 11, -1, -1, 12, -1, 13, 14, 15, -1, 16, 17, -1, 18)
+            .containsExactly(0, 1, 2, 3, -1, 4, -1, 5, -1, 6, -1, -1, 7, 8, 9, 10, -1, 11, 12, 13, 14, 15, -1, -1, 16, -1, 17, 18, 19, -1, 20, 21, -1, 22)
             .inOrder()
   }
 }

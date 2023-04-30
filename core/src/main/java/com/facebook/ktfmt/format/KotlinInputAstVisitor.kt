@@ -95,6 +95,7 @@ import org.jetbrains.kotlin.psi.KtQualifiedExpression
 import org.jetbrains.kotlin.psi.KtReferenceExpression
 import org.jetbrains.kotlin.psi.KtReturnExpression
 import org.jetbrains.kotlin.psi.KtScript
+import org.jetbrains.kotlin.psi.KtScriptInitializer
 import org.jetbrains.kotlin.psi.KtSecondaryConstructor
 import org.jetbrains.kotlin.psi.KtSimpleNameExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
@@ -2450,6 +2451,7 @@ class KotlinInputAstVisitor(
   override fun visitScript(script: KtScript) {
     markForPartialFormat()
     var lastChildHadBlankLineBefore = false
+    var lastChildIsContextReceiver = false
     var first = true
     for (child in script.blockExpression.children) {
       if (child.text.isBlank()) {
@@ -2459,6 +2461,8 @@ class KotlinInputAstVisitor(
       val childGetsBlankLineBefore = child !is KtProperty
       if (first) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
+      } else if (lastChildIsContextReceiver) {
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
       } else if (child !is PsiComment &&
           (childGetsBlankLineBefore || lastChildHadBlankLineBefore)) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
@@ -2466,6 +2470,7 @@ class KotlinInputAstVisitor(
       visit(child)
       builder.guessToken(";")
       lastChildHadBlankLineBefore = childGetsBlankLineBefore
+      lastChildIsContextReceiver = child is KtScriptInitializer && child.firstChild?.firstChild?.firstChild?.text == "context"
       first = false
     }
     markForPartialFormat()
