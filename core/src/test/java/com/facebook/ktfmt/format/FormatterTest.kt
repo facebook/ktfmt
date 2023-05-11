@@ -440,7 +440,7 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `don't keep adding newlines between these two comments when they're at end of file`() =
+  fun `don't keep adding newlines between these two comments when they're at end of file`() {
       assertFormatted(
           """
      |package foo
@@ -449,6 +449,37 @@ class FormatterTest {
      |/* Another comment */
      |"""
               .trimMargin())
+
+    assertFormatted(
+          """
+     |// Comment as first element
+     |package foo
+     |// a
+     |
+     |/* Another comment */
+     |"""
+              .trimMargin())
+
+    assertFormatted(
+          """
+     |// Comment as first element then blank line
+     |
+     |package foo
+     |// a
+     |
+     |/* Another comment */
+     |"""
+              .trimMargin())
+
+    assertFormatted(
+          """
+     |// Comment as first element
+     |package foo
+     |// Adjacent line comments
+     |// Don't separate
+     |"""
+              .trimMargin())
+  }
 
   @Test
   fun `properties with line comment above initializer`() =
