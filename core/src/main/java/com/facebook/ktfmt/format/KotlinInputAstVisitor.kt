@@ -397,7 +397,7 @@ class KotlinInputAstVisitor(
     if (statements.isNotEmpty()) {
       builder.block(blockIndent) {
         builder.forcedBreak()
-        builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
         emitChildren(statements)
       }
       builder.forcedBreak()
