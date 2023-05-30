@@ -2390,16 +2390,22 @@ class KotlinInputAstVisitor(
 
   override fun visitKtFile(file: KtFile) {
     markForPartialFormat()
-    var importListEmpty = false
+    val importListEmpty = file.importList?.text?.isBlank() ?: true
+
     var isFirst = true
     for (child in file.children) {
       if (child.text.isBlank()) {
-        importListEmpty = child is KtImportList
         continue
       }
-      if (!isFirst && child !is PsiComment && (child !is KtScript || !importListEmpty)) {
-        builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
-      }
+
+      builder.blankLineWanted(
+          when {
+            isFirst -> OpsBuilder.BlankLineWanted.NO
+            child is PsiComment -> OpsBuilder.BlankLineWanted.NO
+            child is KtScript && importListEmpty -> OpsBuilder.BlankLineWanted.PRESERVE
+            else -> OpsBuilder.BlankLineWanted.YES
+          })
+
       visit(child)
       isFirst = false
     }
