@@ -5321,6 +5321,7 @@ class FormatterTest {
               .trimMargin(),
           deduceMaxWidth = true)
 
+  //
   @Test
   fun `assignment of a scoping function`() =
       assertFormatted(
@@ -5341,8 +5342,19 @@ class FormatterTest {
       |  //
       |}
       |
+      |fun foo() = scope label@{
+      |  foo()
+      |  //
+      |}
+      |
       |fun foo() =
       |    coroutineScope { x ->
+      |      foo()
+      |      //
+      |    }
+      |
+      |fun foo() =
+      |    coroutineScope label@{
       |      foo()
       |      //
       |    }

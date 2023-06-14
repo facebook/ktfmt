@@ -1415,16 +1415,26 @@ class KotlinInputAstVisitor(
     if (expression.getPrevSiblingIgnoringWhitespace() is PsiComment) {
       return false // Leading comments cause weird indentation.
     }
-    if (expression is KtLambdaExpression) {
+
+    var carry = expression
+    if (carry is KtCallExpression) {
+      if (
+        carry.valueArgumentList?.leftParenthesis == null &&
+          carry.lambdaArguments.isNotEmpty() &&
+          carry.typeArgumentList?.arguments.isNullOrEmpty()
+      ) {
+        carry = carry.lambdaArguments[0].getArgumentExpression()
+      } else {
+        return false
+      }
+    }
+    if (carry is KtLabeledExpression) {
+      carry = carry.baseExpression
+    }
+    if (carry is KtLambdaExpression) {
       return true
     }
-    if (expression is KtCallExpression &&
-        expression.valueArgumentList?.leftParenthesis == null &&
-        expression.lambdaArguments.isNotEmpty() &&
-        expression.typeArgumentList?.arguments.isNullOrEmpty() &&
-        expression.lambdaArguments.first().getArgumentExpression() is KtLambdaExpression) {
-      return true
-    }
+
     return false
   }
 
@@ -1433,18 +1443,22 @@ class KotlinInputAstVisitor(
     val breakToExpr = genSym()
     builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent, Optional.of(breakToExpr))
 
-    val lambdaExpression =
-        when (expr) {
-          is KtLambdaExpression -> expr
-          is KtCallExpression -> {
-            visit(expr.calleeExpression)
-            builder.space()
-            expr.lambdaArguments[0].getLambdaExpression() ?: fail()
-          }
-          else -> throw AssertionError(expr)
-        }
+    var carry = expr
+    if (carry is KtCallExpression) {
+      visit(carry.calleeExpression)
+      builder.space()
+      carry = carry.lambdaArguments[0].getArgumentExpression()
+    }
+    if (carry is KtLabeledExpression) {
+      visit(carry.labelQualifier)
+      carry = carry.baseExpression ?: fail()
+    }
+    if (carry is KtLambdaExpression) {
+      visitLambdaExpressionInternal(carry, brokeBeforeBrace = breakToExpr)
+      return
+    }
 
-    visitLambdaExpressionInternal(lambdaExpression, brokeBeforeBrace = breakToExpr)
+    throw AssertionError(carry)
   }
 
   override fun visitClassOrObject(classOrObject: KtClassOrObject) {
