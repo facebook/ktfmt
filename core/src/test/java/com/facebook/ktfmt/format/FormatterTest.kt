@@ -2508,6 +2508,7 @@ class FormatterTest {
       |"""
               .trimMargin(),
           deduceMaxWidth = true)
+
   @Test
   fun `chains with derferences and array indexing`() =
       assertFormatted(

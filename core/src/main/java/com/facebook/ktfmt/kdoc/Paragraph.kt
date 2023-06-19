@@ -37,9 +37,11 @@ import kotlin.math.min
 class Paragraph(private val task: FormattingTask) {
   private val options: KDocFormattingOptions
     get() = task.options
+
   var content = StringBuilder()
   val text
     get() = content.toString()
+
   var prev: Paragraph? = null
   var next: Paragraph? = null
 
