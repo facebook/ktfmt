@@ -1661,6 +1661,7 @@ class KotlinInputAstVisitor(
             prefix = "(",
             postfix = ")",
             breakAfterPrefix = false,
+            breakBeforePostfix = false
     )
     builder.forcedBreak()
   }
