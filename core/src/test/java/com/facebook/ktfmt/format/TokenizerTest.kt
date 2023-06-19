@@ -116,7 +116,9 @@ class TokenizerTest {
     val code = """
       |context(Something)
       |class A {
-      |  context(Logger, Raise<Error>)
+      |  context(
+      |  // Test comment.
+      |  Logger, Raise<Error>)
       |  fun test() {}
       |}
       |""".trimMargin().trimMargin()
@@ -126,10 +128,10 @@ class TokenizerTest {
     file.accept(tokenizer)
 
     assertThat(tokenizer.toks.map { it.originalText })
-            .containsExactly("context", "(", "Something", ")", "\n", "class", " ", "A", " ", "{", "\n", "  ", "context", "(", "Logger", ",", " ", "Raise", "<", "Error", ">", ")", "\n", "  ", "fun", " ", "test", "(", ")", " ", "{", "}", "\n", "}")
+            .containsExactly("context", "(", "Something", ")", "\n", "class", " ", "A", " ", "{", "\n", "  ", "context", "(", "\n", "  ", "// Test comment.", "\n", "  ", "Logger", ",", " ", "Raise", "<", "Error", ">", ")", "\n", "  ", "fun", " ", "test", "(", ")", " ", "{", "}", "\n", "}")
             .inOrder()
     assertThat(tokenizer.toks.map { it.index })
-            .containsExactly(0, 1, 2, 3, -1, 4, -1, 5, -1, 6, -1, -1, 7, 8, 9, 10, -1, 11, 12, 13, 14, 15, -1, -1, 16, -1, 17, 18, 19, -1, 20, 21, -1, 22)
+            .containsExactly(0, 1, 2, 3, -1, 4, -1, 5, -1, 6, -1, -1, 7, 8, -1, -1, 9, -1, -1, 10, 11, -1, 12, 13, 14, 15, 16, -1, -1, 17, -1, 18, 19, 20, -1, 21, 22, -1, 23)
             .inOrder()
   }
 }

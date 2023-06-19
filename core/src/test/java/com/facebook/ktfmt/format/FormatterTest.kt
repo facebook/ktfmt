@@ -6681,7 +6681,9 @@ class FormatterTest {
       |context(Something)
       |
       |class A {
-      |  context(Logger, Raise<Error>)
+      |  context(
+      |  // Test comment.
+      |  Logger, Raise<Error>)
       |
       |  @SomeAnnotation
       |
@@ -6698,7 +6700,10 @@ class FormatterTest {
         """
       |context(Something)
       |class A {
-      |  context(Logger, Raise<Error>)
+      |  context(
+      |  // Test comment.
+      |  Logger,
+      |  Raise<Error>)
       |  @SomeAnnotation
       |  fun doNothing() {}
       |
