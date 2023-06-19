@@ -1656,9 +1656,12 @@ class KotlinInputAstVisitor(
   override fun visitContextReceiverList(contextReceiverList: KtContextReceiverList) {
     builder.sync(contextReceiverList)
     builder.token("context")
-    builder.token("(")
-    visitEachCommaSeparated(contextReceiverList.contextReceivers())
-    builder.token(")")
+    visitEachCommaSeparated(
+            contextReceiverList.contextReceivers(),
+            prefix = "(",
+            postfix = ")",
+            breakAfterPrefix = false,
+    )
     builder.forcedBreak()
   }
 
