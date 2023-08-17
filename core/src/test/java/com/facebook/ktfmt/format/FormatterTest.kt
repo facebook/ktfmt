@@ -1179,7 +1179,7 @@ class FormatterTest {
   }
 
   @Test
-  fun `imports from the same package are removed`() {
+  fun `used imports from this package are removed`() {
     val code =
         """
       |package com.example
@@ -1205,6 +1205,96 @@ class FormatterTest {
       |}
       |"""
             .trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `potentially unused imports from this package are kept if they are overloaded`() {
+    val code =
+        """
+      |package com.example
+      |
+      |import com.example.a
+      |import com.example.b
+      |import com.example.c
+      |import com.notexample.a
+      |import com.notexample.b
+      |import com.notexample.notC as c
+      |
+      |fun test() {
+      |  a("hello")
+      |  c("hello")
+      |}
+      |"""
+          .trimMargin()
+    val expected =
+        """
+      |package com.example
+      |
+      |import com.example.a
+      |import com.example.c
+      |import com.notexample.a
+      |import com.notexample.notC as c
+      |
+      |fun test() {
+      |  a("hello")
+      |  c("hello")
+      |}
+      |"""
+          .trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `used imports from this package are kept if they are aliased`() {
+    val code =
+        """
+      |package com.example
+      |
+      |import com.example.b as a
+      |import com.example.c
+      |
+      |fun test() {
+      |  a("hello")
+      |}
+      |"""
+          .trimMargin()
+    val expected =
+        """
+      |package com.example
+      |
+      |import com.example.b as a
+      |
+      |fun test() {
+      |  a("hello")
+      |}
+      |"""
+          .trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `unused imports are computed using only the alias name if present`() {
+    val code =
+        """
+      |package com.example
+      |
+      |import com.notexample.a as b
+      |
+      |fun test() {
+      |  a("hello")
+      |}
+      |"""
+          .trimMargin()
+    val expected =
+        """
+      |package com.example
+      |
+      |fun test() {
+      |  a("hello")
+      |}
+      |"""
+          .trimMargin()
     assertThatFormatting(code).isEqualTo(expected)
   }
 
