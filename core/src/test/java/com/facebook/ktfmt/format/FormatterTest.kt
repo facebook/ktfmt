@@ -2598,6 +2598,7 @@ class FormatterTest {
       |"""
               .trimMargin(),
           deduceMaxWidth = true)
+
   @Test
   fun `chains with derferences and array indexing`() =
       assertFormatted(
@@ -5431,8 +5432,19 @@ class FormatterTest {
       |  //
       |}
       |
+      |fun foo() = scope label@{
+      |  foo()
+      |  //
+      |}
+      |
       |fun foo() =
       |    coroutineScope { x ->
+      |      foo()
+      |      //
+      |    }
+      |
+      |fun foo() =
+      |    coroutineScope label@{
       |      foo()
       |      //
       |    }
