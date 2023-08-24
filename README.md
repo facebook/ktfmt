@@ -20,6 +20,11 @@ For comparison, the same code formatted by [`ktlint`](https://github.com/pintere
 | ------ | --------|
 | ![ktlint](docs/images/ktlint.png) | ![IntelliJ](docs/images/intellij.png) |
 
+## Playground
+
+We have a [live playground](https://facebook.github.io/ktfmt/) where you can easily see how ktfmt would format your code.
+Give it a try! https://facebook.github.io/ktfmt/
+
 ## Using the formatter
 
 ### IntelliJ, Android Studio, and other JetBrains IDEs
