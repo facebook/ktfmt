@@ -112,11 +112,10 @@ internal class RedundantImportDetector(val enabled: Boolean) {
     importCleanUpCandidates =
         importList.imports
             .filter { import ->
+              val identifier = import.identifier ?: return@filter false
               import.isValidImport &&
-                  !import.isAllUnder &&
-                  import.identifier != null &&
-                  requireNotNull(import.identifier) !in OPERATORS &&
-                  !COMPONENT_OPERATOR_REGEX.matches(import.identifier.orEmpty())
+                  identifier !in OPERATORS &&
+                  !COMPONENT_OPERATOR_REGEX.matches(identifier)
             }
             .toSet()
 
@@ -160,20 +159,20 @@ internal class RedundantImportDetector(val enabled: Boolean) {
   fun getRedundantImportElements(): List<PsiElement> {
     if (!enabled) return emptyList()
 
-    val redundantImports = mutableListOf<PsiElement>()
+    val identifierCounts =
+        importCleanUpCandidates.groupBy { it.identifier }.mapValues { it.value.size }
 
-    // Collect unused imports
-    for (import in importCleanUpCandidates) {
-      val isUnused = import.aliasName !in usedReferences && import.identifier !in usedReferences
-      val isFromSamePackage = import.importedFqName?.parent() == thisPackage && import.alias == null
-      if (isUnused || isFromSamePackage) {
-        redundantImports += import
-      }
+    return importCleanUpCandidates.filter {
+      val isUsed = it.identifier in usedReferences
+      val isFromThisPackage = it.importedFqName?.parent() == thisPackage
+      val hasAlias = it.alias != null
+      val isOverload = requireNotNull(identifierCounts[it.identifier]) > 1
+      // Remove if...
+      !isUsed || (isFromThisPackage && !hasAlias && !isOverload)
     }
-
-    return redundantImports
   }
 
+  /** The imported short name, possibly an alias name, if any. */
   private inline val KtImportDirective.identifier: String?
     get() = importPath?.importedName?.identifier?.trim('`')
 }
