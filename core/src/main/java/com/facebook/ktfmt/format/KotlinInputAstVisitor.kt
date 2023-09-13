@@ -2414,7 +2414,7 @@ class KotlinInputAstVisitor(
    * @throws FormattingError
    */
   override fun visitElement(element: PsiElement) {
-    inExpression.addLast(element is KtExpression || inExpression.peekLast())
+    inExpression.addLast(element is KtExpression || inExpression.last())
     val previous = builder.depth()
     try {
       super.visitElement(element)
@@ -2480,10 +2480,6 @@ class KotlinInputAstVisitor(
     markForPartialFormat()
   }
 
-  private fun inExpression(): Boolean {
-    return inExpression.peekLast()
-  }
-
   /**
    * markForPartialFormat is used to delineate the smallest areas of code that must be formatted
    * together.
@@ -2492,7 +2488,7 @@ class KotlinInputAstVisitor(
    * covered by an area marked by this method.
    */
   private fun markForPartialFormat() {
-    if (!inExpression()) {
+    if (!inExpression.last()) {
       builder.markForPartialFormat()
     }
   }
