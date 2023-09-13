@@ -6764,6 +6764,48 @@ class FormatterTest {
     assertThatFormatting(code).isEqualTo(expected)
   }
 
+  @Test
+  fun `context receivers`() {
+    val code =
+        """
+      |context(Something)
+      |
+      |class A {
+      |  context(
+      |  // Test comment.
+      |  Logger, Raise<Error>)
+      |
+      |  @SomeAnnotation
+      |
+      |  fun doNothing() {}
+      |
+      |  context(SomethingElse)
+      |
+      |  private class NestedClass {}
+      |}
+      |"""
+            .trimMargin()
+
+    val expected =
+        """
+      |context(Something)
+      |class A {
+      |  context(
+      |  // Test comment.
+      |  Logger,
+      |  Raise<Error>)
+      |  @SomeAnnotation
+      |  fun doNothing() {}
+      |
+      |  context(SomethingElse)
+      |  private class NestedClass {}
+      |}
+      |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""
