@@ -1207,20 +1207,31 @@ class KotlinInputAstVisitor(
     val leftMostExpression = parts.first()
     visit(leftMostExpression.left)
     for (leftExpression in parts) {
-      when (leftExpression.operationToken) {
-        KtTokens.RANGE -> {}
-        KtTokens.ELVIS -> builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-        else -> builder.space()
-      }
-      builder.token(leftExpression.operationReference.text)
       val isFirst = leftExpression === leftMostExpression
-      if (isFirst) {
-        builder.open(expressionBreakIndent)
-      }
+
       when (leftExpression.operationToken) {
-        KtTokens.RANGE -> {}
-        KtTokens.ELVIS -> builder.space()
-        else -> builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+        KtTokens.RANGE -> {
+          if (isFirst) {
+            builder.open(expressionBreakIndent)
+          }
+          builder.token(leftExpression.operationReference.text)
+        }
+        KtTokens.ELVIS -> {
+          if (isFirst) {
+            builder.open(expressionBreakIndent)
+          }
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+          builder.token(leftExpression.operationReference.text)
+          builder.space()
+        }
+        else -> {
+          builder.space()
+          if (isFirst) {
+            builder.open(expressionBreakIndent)
+          }
+          builder.token(leftExpression.operationReference.text)
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+        }
       }
       visit(leftExpression.right)
     }
