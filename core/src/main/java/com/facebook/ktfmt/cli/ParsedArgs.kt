@@ -38,16 +38,8 @@ data class ParsedArgs(
 ) {
   companion object {
 
+    /** processArgs parses command-line arguments passed to ktfmt. */
     fun processArgs(err: PrintStream, args: Array<String>): ParsedArgs {
-      if (args.size == 1 && args[0].startsWith("@")) {
-        return parseOptions(err, File(args[0].substring(1)).readLines().toTypedArray())
-      } else {
-        return parseOptions(err, args)
-      }
-    }
-
-    /** parseOptions parses command-line arguments passed to ktfmt. */
-    fun parseOptions(err: PrintStream, args: Array<String>): ParsedArgs {
       val fileNames = mutableListOf<String>()
       var formattingOptions = FormattingOptions()
       var dryRun = false
@@ -55,20 +47,24 @@ data class ParsedArgs(
       var removeUnusedImports = true
       var stdinName: String? = null
 
-      for (arg in args) {
-        when {
-          arg == "--dropbox-style" -> formattingOptions = Formatter.DROPBOX_FORMAT
-          arg == "--google-style" -> formattingOptions = Formatter.GOOGLE_FORMAT
-          arg == "--kotlinlang-style" -> formattingOptions = Formatter.KOTLINLANG_FORMAT
-          arg == "--dry-run" || arg == "-n" -> dryRun = true
-          arg == "--set-exit-if-changed" -> setExitIfChanged = true
-          arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
-          arg.startsWith("--stdin-name") -> stdinName = parseKeyValueArg(err, "--stdin-name", arg)
-          arg.startsWith("--") -> err.println("Unexpected option: $arg")
-          arg.startsWith("@") -> err.println("Unexpected option: $arg")
-          else -> fileNames.add(arg)
+      fun parseArgs(args: Array<String>) {
+        for (arg in args) {
+          when {
+            arg == "--dropbox-style" -> formattingOptions = Formatter.DROPBOX_FORMAT
+            arg == "--google-style" -> formattingOptions = Formatter.GOOGLE_FORMAT
+            arg == "--kotlinlang-style" -> formattingOptions = Formatter.KOTLINLANG_FORMAT
+            arg == "--dry-run" || arg == "-n" -> dryRun = true
+            arg == "--set-exit-if-changed" -> setExitIfChanged = true
+            arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
+            arg.startsWith("--stdin-name") -> stdinName = parseKeyValueArg(err, "--stdin-name", arg)
+            arg.startsWith("--") -> err.println("Unexpected option: $arg")
+            arg.startsWith("@") -> parseArgs(readArgsFile(arg))
+            else -> fileNames.add(arg)
+          }
         }
       }
+
+      parseArgs(args)
 
       return ParsedArgs(
           fileNames,
@@ -87,5 +83,9 @@ data class ParsedArgs(
       }
       return parts[1]
     }
+
+    /** Reads an argument file prefixed with "@" */
+    private fun readArgsFile(arg: String): Array<String> =
+        File(arg.substring(1)).readLines().toTypedArray()
   }
 }
