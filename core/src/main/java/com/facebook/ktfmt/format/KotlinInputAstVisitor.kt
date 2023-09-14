@@ -1470,7 +1470,8 @@ class KotlinInputAstVisitor(
 
   override fun visitClassOrObject(classOrObject: KtClassOrObject) {
     builder.sync(classOrObject)
-    val contextReceiverList = classOrObject.getStubOrPsiChild(KtStubElementTypes.CONTEXT_RECEIVER_LIST)
+    val contextReceiverList =
+        classOrObject.getStubOrPsiChild(KtStubElementTypes.CONTEXT_RECEIVER_LIST)
     val modifierList = classOrObject.modifierList
     builder.block(ZERO) {
       if (contextReceiverList != null) {
@@ -1657,12 +1658,11 @@ class KotlinInputAstVisitor(
     builder.sync(contextReceiverList)
     builder.token("context")
     visitEachCommaSeparated(
-            contextReceiverList.contextReceivers(),
-            prefix = "(",
-            postfix = ")",
-            breakAfterPrefix = false,
-            breakBeforePostfix = false
-    )
+        contextReceiverList.contextReceivers(),
+        prefix = "(",
+        postfix = ")",
+        breakAfterPrefix = false,
+        breakBeforePostfix = false)
     builder.forcedBreak()
   }
 
@@ -2474,7 +2474,9 @@ class KotlinInputAstVisitor(
       visit(child)
       builder.guessToken(";")
       lastChildHadBlankLineBefore = childGetsBlankLineBefore
-      lastChildIsContextReceiver = child is KtScriptInitializer && child.firstChild?.firstChild?.firstChild?.text == "context"
+      lastChildIsContextReceiver =
+          child is KtScriptInitializer &&
+              child.firstChild?.firstChild?.firstChild?.text == "context"
       first = false
     }
     markForPartialFormat()
