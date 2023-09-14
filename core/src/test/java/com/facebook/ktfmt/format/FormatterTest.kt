@@ -4380,6 +4380,52 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `chain of Elvis operator`() =
+      assertFormatted(
+          """
+        |---------------------------
+        |fun f() {
+        |  return option1()
+        |      ?: option2()
+        |      ?: option3()
+        |      ?: option4()
+        |      ?: option5()
+        |}
+        |"""
+              .trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `Elvis operator mixed with plus operator breaking on plus`() =
+      assertFormatted(
+          """
+        |------------------------
+        |fun f() {
+        |  return option1()
+        |      ?: option2() +
+        |          option3()
+        |      ?: option4() +
+        |          option5()
+        |}
+        |"""
+              .trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `Elvis operator mixed with plus operator breaking on elvis`() =
+      assertFormatted(
+          """
+        |---------------------------------
+        |fun f() {
+        |  return option1()
+        |      ?: option2() + option3()
+        |      ?: option4() + option5()
+        |}
+        |"""
+              .trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `handle comments in the middle of calling chain`() =
       assertFormatted(
           """
