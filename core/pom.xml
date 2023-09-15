@@ -11,12 +11,12 @@
     <parent>
         <groupId>com.facebook</groupId>
         <artifactId>ktfmt-parent</artifactId>
-        <version>0.44-SNAPSHOT</version>
+        <version>0.45-SNAPSHOT</version>
     </parent>
 
     <properties>
         <dokka.version>0.10.1</dokka.version>
-        <kotlin.version>1.6.10</kotlin.version>
+        <kotlin.version>1.6.20-M1</kotlin.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <main.class>com.facebook.ktfmt.cli.Main</main.class>
@@ -144,7 +144,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>29.0-jre</version>
+            <version>32.0.0-jre</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
