@@ -232,7 +232,7 @@ class ParagraphListBuilder(
       }
 
       if (lineWithIndentation.startsWith("    ") && // markdown preformatted text
-      (i == 1 || lineContent(lines[i - 2]).isBlank()) && // we've already ++'ed i above
+          (i == 1 || lineContent(lines[i - 2]).isBlank()) && // we've already ++'ed i above
           // Make sure it's not just deeply indented inside a different block
           (paragraph.prev == null ||
               lineWithIndentation.length - lineWithoutIndentation.length >=
