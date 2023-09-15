@@ -52,6 +52,7 @@ import org.jetbrains.kotlin.psi.KtCollectionLiteralExpression
 import org.jetbrains.kotlin.psi.KtConstantExpression
 import org.jetbrains.kotlin.psi.KtConstructorDelegationCall
 import org.jetbrains.kotlin.psi.KtContainerNode
+import org.jetbrains.kotlin.psi.KtContextReceiverList
 import org.jetbrains.kotlin.psi.KtContinueExpression
 import org.jetbrains.kotlin.psi.KtDelegatedSuperTypeEntry
 import org.jetbrains.kotlin.psi.KtDestructuringDeclaration
@@ -94,6 +95,7 @@ import org.jetbrains.kotlin.psi.KtQualifiedExpression
 import org.jetbrains.kotlin.psi.KtReferenceExpression
 import org.jetbrains.kotlin.psi.KtReturnExpression
 import org.jetbrains.kotlin.psi.KtScript
+import org.jetbrains.kotlin.psi.KtScriptInitializer
 import org.jetbrains.kotlin.psi.KtSecondaryConstructor
 import org.jetbrains.kotlin.psi.KtSimpleNameExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
@@ -124,6 +126,7 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import org.jetbrains.kotlin.psi.psiUtil.getPrevSiblingIgnoringWhitespace
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import org.jetbrains.kotlin.psi.psiUtil.startsWithComment
+import org.jetbrains.kotlin.psi.stubs.elements.KtStubElementTypes
 
 /** An AST visitor that builds a stream of {@link Op}s to format. */
 class KotlinInputAstVisitor(
@@ -162,6 +165,7 @@ class KotlinInputAstVisitor(
     builder.sync(function)
     builder.block(ZERO) {
       visitFunctionLikeExpression(
+          function.getStubOrPsiChild(KtStubElementTypes.CONTEXT_RECEIVER_LIST),
           function.modifierList,
           "fun",
           function.typeParameterList,
@@ -282,6 +286,7 @@ class KotlinInputAstVisitor(
    *   list of supertypes.
    */
   private fun visitFunctionLikeExpression(
+      contextReceiverList: KtContextReceiverList?,
       modifierList: KtModifierList?,
       keyword: String,
       typeParameters: KtTypeParameterList?,
@@ -294,6 +299,9 @@ class KotlinInputAstVisitor(
       typeOrDelegationCall: KtElement?,
   ) {
     builder.block(ZERO) {
+      if (contextReceiverList != null) {
+        visitContextReceiverList(contextReceiverList)
+      }
       if (modifierList != null) {
         visitModifierList(modifierList)
       }
@@ -1199,20 +1207,31 @@ class KotlinInputAstVisitor(
     val leftMostExpression = parts.first()
     visit(leftMostExpression.left)
     for (leftExpression in parts) {
-      when (leftExpression.operationToken) {
-        KtTokens.RANGE -> {}
-        KtTokens.ELVIS -> builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-        else -> builder.space()
-      }
-      builder.token(leftExpression.operationReference.text)
       val isFirst = leftExpression === leftMostExpression
-      if (isFirst) {
-        builder.open(expressionBreakIndent)
-      }
+
       when (leftExpression.operationToken) {
-        KtTokens.RANGE -> {}
-        KtTokens.ELVIS -> builder.space()
-        else -> builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+        KtTokens.RANGE -> {
+          if (isFirst) {
+            builder.open(expressionBreakIndent)
+          }
+          builder.token(leftExpression.operationReference.text)
+        }
+        KtTokens.ELVIS -> {
+          if (isFirst) {
+            builder.open(expressionBreakIndent)
+          }
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+          builder.token(leftExpression.operationReference.text)
+          builder.space()
+        }
+        else -> {
+          builder.space()
+          if (isFirst) {
+            builder.open(expressionBreakIndent)
+          }
+          builder.token(leftExpression.operationReference.text)
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+        }
       }
       visit(leftExpression.right)
     }
@@ -1372,6 +1391,7 @@ class KotlinInputAstVisitor(
 
           builder.block(ZERO) {
             visitFunctionLikeExpression(
+                null,
                 accessor.modifierList,
                 accessor.namePlaceholder.text,
                 null,
@@ -1461,8 +1481,13 @@ class KotlinInputAstVisitor(
 
   override fun visitClassOrObject(classOrObject: KtClassOrObject) {
     builder.sync(classOrObject)
+    val contextReceiverList =
+        classOrObject.getStubOrPsiChild(KtStubElementTypes.CONTEXT_RECEIVER_LIST)
     val modifierList = classOrObject.modifierList
     builder.block(ZERO) {
+      if (contextReceiverList != null) {
+        visitContextReceiverList(contextReceiverList)
+      }
       if (modifierList != null) {
         visitModifierList(modifierList)
       }
@@ -1533,6 +1558,7 @@ class KotlinInputAstVisitor(
 
     val delegationCall = constructor.getDelegationCall()
     visitFunctionLikeExpression(
+        constructor.getStubOrPsiChild(KtStubElementTypes.CONTEXT_RECEIVER_LIST),
         constructor.modifierList,
         "constructor",
         null,
@@ -1635,6 +1661,19 @@ class KotlinInputAstVisitor(
 
     // Force a newline afterwards.
     builder.guessToken(";")
+    builder.forcedBreak()
+  }
+
+  /** Example `context(Logger, Raise<Error>)` */
+  override fun visitContextReceiverList(contextReceiverList: KtContextReceiverList) {
+    builder.sync(contextReceiverList)
+    builder.token("context")
+    visitEachCommaSeparated(
+        contextReceiverList.contextReceivers(),
+        prefix = "(",
+        postfix = ")",
+        breakAfterPrefix = false,
+        breakBeforePostfix = false)
     builder.forcedBreak()
   }
 
@@ -2427,6 +2466,7 @@ class KotlinInputAstVisitor(
   override fun visitScript(script: KtScript) {
     markForPartialFormat()
     var lastChildHadBlankLineBefore = false
+    var lastChildIsContextReceiver = false
     var first = true
     for (child in script.blockExpression.children) {
       if (child.text.isBlank()) {
@@ -2436,6 +2476,8 @@ class KotlinInputAstVisitor(
       val childGetsBlankLineBefore = child !is KtProperty
       if (first) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
+      } else if (lastChildIsContextReceiver) {
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
       } else if (child !is PsiComment &&
           (childGetsBlankLineBefore || lastChildHadBlankLineBefore)) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
@@ -2443,6 +2485,9 @@ class KotlinInputAstVisitor(
       visit(child)
       builder.guessToken(";")
       lastChildHadBlankLineBefore = childGetsBlankLineBefore
+      lastChildIsContextReceiver =
+          child is KtScriptInitializer &&
+              child.firstChild?.firstChild?.firstChild?.text == "context"
       first = false
     }
     markForPartialFormat()

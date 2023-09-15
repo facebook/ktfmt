@@ -110,4 +110,109 @@ class TokenizerTest {
         .containsExactly(0, -1, 1, 2, 3, -1, 4, -1, 5, 6, 7)
         .inOrder()
   }
+
+  @Test
+  fun `Context receivers are parsed correctly`() {
+    val code =
+        """
+      |context(Something)
+      |class A {
+      |  context(
+      |  // Test comment.
+      |  Logger, Raise<Error>)
+      |  fun test() {}
+      |}
+      |"""
+            .trimMargin()
+            .trimMargin()
+
+    val file = Parser.parse(code)
+    val tokenizer = Tokenizer(code, file)
+    file.accept(tokenizer)
+
+    assertThat(tokenizer.toks.map { it.originalText })
+        .containsExactly(
+            "context",
+            "(",
+            "Something",
+            ")",
+            "\n",
+            "class",
+            " ",
+            "A",
+            " ",
+            "{",
+            "\n",
+            "  ",
+            "context",
+            "(",
+            "\n",
+            "  ",
+            "// Test comment.",
+            "\n",
+            "  ",
+            "Logger",
+            ",",
+            " ",
+            "Raise",
+            "<",
+            "Error",
+            ">",
+            ")",
+            "\n",
+            "  ",
+            "fun",
+            " ",
+            "test",
+            "(",
+            ")",
+            " ",
+            "{",
+            "}",
+            "\n",
+            "}")
+        .inOrder()
+    assertThat(tokenizer.toks.map { it.index })
+        .containsExactly(
+            0,
+            1,
+            2,
+            3,
+            -1,
+            4,
+            -1,
+            5,
+            -1,
+            6,
+            -1,
+            -1,
+            7,
+            8,
+            -1,
+            -1,
+            9,
+            -1,
+            -1,
+            10,
+            11,
+            -1,
+            12,
+            13,
+            14,
+            15,
+            16,
+            -1,
+            -1,
+            17,
+            -1,
+            18,
+            19,
+            20,
+            -1,
+            21,
+            22,
+            -1,
+            23)
+        .inOrder()
+  }
 }

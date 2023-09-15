@@ -1179,31 +1179,121 @@ class FormatterTest {
   }
 
   @Test
-  fun `imports from the same package are removed`() {
+  fun `used imports from this package are removed`() {
     val code =
         """
-      |package com.example
-      |
-      |import com.example.Sample
-      |import com.example.Sample.CONSTANT
-      |import com.example.a.foo
-      |
-      |fun test() {
-      |  foo(CONSTANT, Sample())
-      |}
-      |"""
+            |package com.example
+            |
+            |import com.example.Sample
+            |import com.example.Sample.CONSTANT
+            |import com.example.a.foo
+            |
+            |fun test() {
+            |  foo(CONSTANT, Sample())
+            |}
+            |"""
             .trimMargin()
     val expected =
         """
-      |package com.example
-      |
-      |import com.example.Sample.CONSTANT
-      |import com.example.a.foo
-      |
-      |fun test() {
-      |  foo(CONSTANT, Sample())
-      |}
-      |"""
+            |package com.example
+            |
+            |import com.example.Sample.CONSTANT
+            |import com.example.a.foo
+            |
+            |fun test() {
+            |  foo(CONSTANT, Sample())
+            |}
+            |"""
+            .trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `potentially unused imports from this package are kept if they are overloaded`() {
+    val code =
+        """
+            |package com.example
+            |
+            |import com.example.a
+            |import com.example.b
+            |import com.example.c
+            |import com.notexample.a
+            |import com.notexample.b
+            |import com.notexample.notC as c
+            |
+            |fun test() {
+            |  a("hello")
+            |  c("hello")
+            |}
+            |"""
+            .trimMargin()
+    val expected =
+        """
+            |package com.example
+            |
+            |import com.example.a
+            |import com.example.c
+            |import com.notexample.a
+            |import com.notexample.notC as c
+            |
+            |fun test() {
+            |  a("hello")
+            |  c("hello")
+            |}
+            |"""
+            .trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `used imports from this package are kept if they are aliased`() {
+    val code =
+        """
+            |package com.example
+            |
+            |import com.example.b as a
+            |import com.example.c
+            |
+            |fun test() {
+            |  a("hello")
+            |}
+            |"""
+            .trimMargin()
+    val expected =
+        """
+            |package com.example
+            |
+            |import com.example.b as a
+            |
+            |fun test() {
+            |  a("hello")
+            |}
+            |"""
+            .trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `unused imports are computed using only the alias name if present`() {
+    val code =
+        """
+            |package com.example
+            |
+            |import com.notexample.a as b
+            |
+            |fun test() {
+            |  a("hello")
+            |}
+            |"""
+            .trimMargin()
+    val expected =
+        """
+            |package com.example
+            |
+            |fun test() {
+            |  a("hello")
+            |}
+            |"""
             .trimMargin()
     assertThatFormatting(code).isEqualTo(expected)
   }
@@ -1212,66 +1302,66 @@ class FormatterTest {
   fun `keep import elements only mentioned in kdoc`() {
     val code =
         """
-          |package com.example.kdoc
-          |
-          |import com.example.Bar
-          |import com.example.Example
-          |import com.example.Foo
-          |import com.example.JavaDocLink
-          |import com.example.Param
-          |import com.example.R
-          |import com.example.ReturnedValue
-          |import com.example.Sample
-          |import com.example.unused
-          |import com.example.exception.AnException
-          |import com.example.kdoc.Doc
-          |
-          |/**
-          | * [Foo] is something only mentioned here, just like [R.layout.test] and [Doc].
-          | *
-          | * Old {@link JavaDocLink} that gets removed.
-          | *
-          | * @throws AnException
-          | * @exception Sample.SampleException
-          | * @param unused [Param]
-          | * @property JavaDocLink [Param]
-          | * @return [Unit] as [ReturnedValue]
-          | * @sample Example
-          | * @see Bar for more info
-          | * @throws AnException
-          | */
-          |class Dummy
-          |"""
+            |package com.example.kdoc
+            |
+            |import com.example.Bar
+            |import com.example.Example
+            |import com.example.Foo
+            |import com.example.JavaDocLink
+            |import com.example.Param
+            |import com.example.R
+            |import com.example.ReturnedValue
+            |import com.example.Sample
+            |import com.example.unused
+            |import com.example.exception.AnException
+            |import com.example.kdoc.Doc
+            |
+            |/**
+            | * [Foo] is something only mentioned here, just like [R.layout.test] and [Doc].
+            | *
+            | * Old {@link JavaDocLink} that gets removed.
+            | *
+            | * @throws AnException
+            | * @exception Sample.SampleException
+            | * @param unused [Param]
+            | * @property JavaDocLink [Param]
+            | * @return [Unit] as [ReturnedValue]
+            | * @sample Example
+            | * @see Bar for more info
+            | * @throws AnException
+            | */
+            |class Dummy
+            |"""
             .trimMargin()
     val expected =
         """
-          |package com.example.kdoc
-          |
-          |import com.example.Bar
-          |import com.example.Example
-          |import com.example.Foo
-          |import com.example.Param
-          |import com.example.R
-          |import com.example.ReturnedValue
-          |import com.example.Sample
-          |import com.example.exception.AnException
-          |
-          |/**
-          | * [Foo] is something only mentioned here, just like [R.layout.test] and [Doc].
-          | *
-          | * Old {@link JavaDocLink} that gets removed.
-          | *
-          | * @param unused [Param]
-          | * @return [Unit] as [ReturnedValue]
-          | * @property JavaDocLink [Param]
-          | * @throws AnException
-          | * @throws AnException
-          | * @exception Sample.SampleException
-          | * @sample Example
-          | * @see Bar for more info
-          | */
-          |class Dummy
-          |"""
+            |package com.example.kdoc
+            |
+            |import com.example.Bar
+            |import com.example.Example
+            |import com.example.Foo
+            |import com.example.Param
+            |import com.example.R
+            |import com.example.ReturnedValue
+            |import com.example.Sample
+            |import com.example.exception.AnException
+            |
+            |/**
+            | * [Foo] is something only mentioned here, just like [R.layout.test] and [Doc].
+            | *
+            | * Old {@link JavaDocLink} that gets removed.
+            | *
+            | * @param unused [Param]
+            | * @return [Unit] as [ReturnedValue]
+            | * @property JavaDocLink [Param]
+            | * @throws AnException
+            | * @throws AnException
+            | * @exception Sample.SampleException
+            | * @sample Example
+            | * @see Bar for more info
+            | */
+            |class Dummy
+            |"""
             .trimMargin()
     assertThatFormatting(code).isEqualTo(expected)
   }
@@ -1280,15 +1370,15 @@ class FormatterTest {
   fun `keep import elements only mentioned in kdoc, single line`() {
     assertFormatted(
         """
-          |import com.shopping.Bag
-          |
-          |/**
-          | * Some summary.
-          | *
-          | * @param count you can fit this many in a [Bag]
-          | */
-          |fun fetchBananas(count: Int)
-          |"""
+            |import com.shopping.Bag
+            |
+            |/**
+            | * Some summary.
+            | *
+            | * @param count you can fit this many in a [Bag]
+            | */
+            |fun fetchBananas(count: Int)
+            |"""
             .trimMargin())
   }
 
@@ -1296,16 +1386,16 @@ class FormatterTest {
   fun `keep import elements only mentioned in kdoc, multiline`() {
     assertFormatted(
         """
-          |import com.shopping.Bag
-          |
-          |/**
-          | * Some summary.
-          | *
-          | * @param count this is how many of these wonderful fruit you can fit into the useful object that
-          | *   you may refer to as a [Bag]
-          | */
-          |fun fetchBananas(count: Int)
-          |"""
+            |import com.shopping.Bag
+            |
+            |/**
+            | * Some summary.
+            | *
+            | * @param count this is how many of these wonderful fruit you can fit into the useful object that
+            | *   you may refer to as a [Bag]
+            | */
+            |fun fetchBananas(count: Int)
+            |"""
             .trimMargin())
   }
 
@@ -1313,69 +1403,69 @@ class FormatterTest {
   fun `keep component imports`() =
       assertFormatted(
           """
-          |import com.example.component1
-          |import com.example.component10
-          |import com.example.component120
-          |import com.example.component2
-          |import com.example.component3
-          |import com.example.component4
-          |import com.example.component5
-          |"""
+              |import com.example.component1
+              |import com.example.component10
+              |import com.example.component120
+              |import com.example.component2
+              |import com.example.component3
+              |import com.example.component4
+              |import com.example.component5
+              |"""
               .trimMargin())
 
   @Test
   fun `keep operator imports`() =
       assertFormatted(
           """
-          |import com.example.and
-          |import com.example.compareTo
-          |import com.example.contains
-          |import com.example.dec
-          |import com.example.div
-          |import com.example.divAssign
-          |import com.example.equals
-          |import com.example.get
-          |import com.example.getValue
-          |import com.example.hasNext
-          |import com.example.inc
-          |import com.example.invoke
-          |import com.example.iterator
-          |import com.example.minus
-          |import com.example.minusAssign
-          |import com.example.mod
-          |import com.example.modAssign
-          |import com.example.next
-          |import com.example.not
-          |import com.example.or
-          |import com.example.plus
-          |import com.example.plusAssign
-          |import com.example.provideDelegate
-          |import com.example.rangeTo
-          |import com.example.rem
-          |import com.example.remAssign
-          |import com.example.set
-          |import com.example.setValue
-          |import com.example.times
-          |import com.example.timesAssign
-          |import com.example.unaryMinus
-          |import com.example.unaryPlus
-          |"""
+              |import com.example.and
+              |import com.example.compareTo
+              |import com.example.contains
+              |import com.example.dec
+              |import com.example.div
+              |import com.example.divAssign
+              |import com.example.equals
+              |import com.example.get
+              |import com.example.getValue
+              |import com.example.hasNext
+              |import com.example.inc
+              |import com.example.invoke
+              |import com.example.iterator
+              |import com.example.minus
+              |import com.example.minusAssign
+              |import com.example.mod
+              |import com.example.modAssign
+              |import com.example.next
+              |import com.example.not
+              |import com.example.or
+              |import com.example.plus
+              |import com.example.plusAssign
+              |import com.example.provideDelegate
+              |import com.example.rangeTo
+              |import com.example.rem
+              |import com.example.remAssign
+              |import com.example.set
+              |import com.example.setValue
+              |import com.example.times
+              |import com.example.timesAssign
+              |import com.example.unaryMinus
+              |import com.example.unaryPlus
+              |"""
               .trimMargin())
 
   @Test
   fun `keep unused imports when formatting options has feature turned off`() {
     val code =
         """
-      |import com.unused.FooBarBaz as Baz
-      |import com.unused.Sample
-      |import com.unused.a as `when`
-      |import com.unused.a as wow
-      |import com.unused.a.*
-      |import com.unused.b as `if`
-      |import com.unused.b as we
-      |import com.unused.bar // test
-      |import com.unused.`class`
-      |"""
+            |import com.unused.FooBarBaz as Baz
+            |import com.unused.Sample
+            |import com.unused.a as `when`
+            |import com.unused.a as wow
+            |import com.unused.a.*
+            |import com.unused.b as `if`
+            |import com.unused.b as we
+            |import com.unused.bar // test
+            |import com.unused.`class`
+            |"""
             .trimMargin()
 
     assertThatFormatting(code)
@@ -1387,34 +1477,34 @@ class FormatterTest {
   fun `comments between imports are moved above import list`() {
     val code =
         """
-        |package com.facebook.ktfmt
-        |
-        |/* leading comment */
-        |import com.example.abc
-        |/* internal comment 1 */
-        |import com.example.bcd
-        |// internal comment 2
-        |import com.example.Sample
-        |// trailing comment
-        |
-        |val x = Sample(abc, bcd)
-        |"""
+            |package com.facebook.ktfmt
+            |
+            |/* leading comment */
+            |import com.example.abc
+            |/* internal comment 1 */
+            |import com.example.bcd
+            |// internal comment 2
+            |import com.example.Sample
+            |// trailing comment
+            |
+            |val x = Sample(abc, bcd)
+            |"""
             .trimMargin()
     val expected =
         """
-        |package com.facebook.ktfmt
-        |
-        |/* leading comment */
-        |/* internal comment 1 */
-        |// internal comment 2
-        |import com.example.Sample
-        |import com.example.abc
-        |import com.example.bcd
-        |
-        |// trailing comment
-        |
-        |val x = Sample(abc, bcd)
-        |"""
+            |package com.facebook.ktfmt
+            |
+            |/* leading comment */
+            |/* internal comment 1 */
+            |// internal comment 2
+            |import com.example.Sample
+            |import com.example.abc
+            |import com.example.bcd
+            |
+            |// trailing comment
+            |
+            |val x = Sample(abc, bcd)
+            |"""
             .trimMargin()
     assertThatFormatting(code).isEqualTo(expected)
   }
@@ -1423,12 +1513,12 @@ class FormatterTest {
   fun `no redundant newlines when there are no imports`() =
       assertFormatted(
           """
-        |package foo123
-        |
-        |/*
-        |bar
-        |*/
-        |"""
+              |package foo123
+              |
+              |/*
+              |bar
+              |*/
+              |"""
               .trimMargin())
 
   @Test
@@ -4290,6 +4380,52 @@ class FormatterTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `chain of Elvis operator`() =
+      assertFormatted(
+          """
+        |---------------------------
+        |fun f() {
+        |  return option1()
+        |      ?: option2()
+        |      ?: option3()
+        |      ?: option4()
+        |      ?: option5()
+        |}
+        |"""
+              .trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `Elvis operator mixed with plus operator breaking on plus`() =
+      assertFormatted(
+          """
+        |------------------------
+        |fun f() {
+        |  return option1()
+        |      ?: option2() +
+        |          option3()
+        |      ?: option4() +
+        |          option5()
+        |}
+        |"""
+              .trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `Elvis operator mixed with plus operator breaking on elvis`() =
+      assertFormatted(
+          """
+        |---------------------------------
+        |fun f() {
+        |  return option1()
+        |      ?: option2() + option3()
+        |      ?: option4() + option5()
+        |}
+        |"""
+              .trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
   fun `handle comments in the middle of calling chain`() =
       assertFormatted(
           """
@@ -6667,6 +6803,48 @@ class FormatterTest {
       |    private set
       |
       |  val y = 0
+      |}
+      |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `context receivers`() {
+    val code =
+        """
+      |context(Something)
+      |
+      |class A {
+      |  context(
+      |  // Test comment.
+      |  Logger, Raise<Error>)
+      |
+      |  @SomeAnnotation
+      |
+      |  fun doNothing() {}
+      |
+      |  context(SomethingElse)
+      |
+      |  private class NestedClass {}
+      |}
+      |"""
+            .trimMargin()
+
+    val expected =
+        """
+      |context(Something)
+      |class A {
+      |  context(
+      |  // Test comment.
+      |  Logger,
+      |  Raise<Error>)
+      |  @SomeAnnotation
+      |  fun doNothing() {}
+      |
+      |  context(SomethingElse)
+      |  private class NestedClass {}
       |}
       |"""
             .trimMargin()
