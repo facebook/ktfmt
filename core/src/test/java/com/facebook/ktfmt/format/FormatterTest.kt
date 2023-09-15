@@ -2251,6 +2251,7 @@ class FormatterTest {
   fun `a few variations of constructors`() =
       assertFormatted(
           """
+      |------------------------------------------------------
       |class Foo constructor(number: Int) {}
       |
       |class Foo2 private constructor(number: Int) {}
@@ -2269,8 +2270,19 @@ class FormatterTest {
       |    number5: Int,
       |    number6: Int
       |) {}
+      |
+      |class Foo6
+      |@Inject
+      |private constructor(hasSpaceForAnnos: Innnt) {
+      |  //                                           @Inject
+      |}
+      |
+      |class FooTooLongForCtorAndSupertypes
+      |@Inject
+      |private constructor(x: Int) : NoooooooSpaceForAnnos {}
       |"""
-              .trimMargin())
+              .trimMargin(),
+          deduceMaxWidth = true)
 
   @Test
   fun `a primary constructor without a class body `() =
@@ -3610,7 +3622,7 @@ class FormatterTest {
               .trimMargin())
 
   @Test
-  fun `handle file annotations`() =
+  fun `handle file annotations`() {
       assertFormatted(
           """
       |@file:JvmName("DifferentName")
@@ -3624,6 +3636,52 @@ class FormatterTest {
       |}
       |"""
               .trimMargin())
+
+      assertFormatted(
+          """
+      |@file:JvmName("DifferentName") // Comment
+      |
+      |package com.somecompany.example
+      |
+      |import com.somecompany.example2
+      |
+      |class Foo {
+      |  val a = example2("and 1")
+      |}
+      |"""
+              .trimMargin())
+
+      assertFormatted(
+          """
+      |@file:JvmName("DifferentName")
+      |
+      |// Comment
+      |
+      |package com.somecompany.example
+      |
+      |import com.somecompany.example2
+      |
+      |class Foo {
+      |  val a = example2("and 1")
+      |}
+      |"""
+              .trimMargin())
+
+      assertFormatted(
+          """
+      |@file:JvmName("DifferentName")
+      |
+      |// Comment
+      |package com.somecompany.example
+      |
+      |import com.somecompany.example2
+      |
+      |class Foo {
+      |  val a = example2("and 1")
+      |}
+      |"""
+              .trimMargin())
+  }
 
   @Test
   fun `handle init block`() =
@@ -6850,6 +6908,100 @@ class FormatterTest {
             .trimMargin()
 
     assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `trailing comment after function in class`() =
+      assertFormatted(
+          """
+      |class Host {
+      |  fun fooBlock() {
+      |    return
+      |  } // Trailing after fn
+      |  // Hanging after fn
+      |
+      |  // End of class
+      |}
+      |
+      |class Host {
+      |  fun fooExpr() = 0 // Trailing after fn
+      |  // Hanging after fn
+      |
+      |  // End of class
+      |}
+      |
+      |class Host {
+      |  constructor() {} // Trailing after fn
+      |  // Hanging after fn
+      |
+      |  // End of class
+      |}
+      |
+      |class Host
+      |// Primary constructor
+      |constructor() // Trailing after fn
+      |  // Hanging after fn
+      |{
+      |  // End of class
+      |}
+      |
+      |class Host {
+      |  fun fooBlock() {
+      |    return
+      |  }
+      |
+      |  // Between elements
+      |
+      |  fun fooExpr() = 0
+      |
+      |  // Between elements
+      |
+      |  fun fooBlock() {
+      |    return
+      |  }
+      |}
+      |"""
+              .trimMargin())
+
+  @Test
+  fun `trailing comment after function top-level`() {
+      assertFormatted(
+          """
+      |fun fooBlock() {
+      |  return
+      |} // Trailing after fn
+      |// Hanging after fn
+      |
+      |// End of file
+      |"""
+              .trimMargin())
+
+      assertFormatted(
+          """
+      |fun fooExpr() = 0 // Trailing after fn
+      |// Hanging after fn
+      |
+      |// End of file
+      |"""
+              .trimMargin())
+
+      assertFormatted(
+          """
+      |fun fooBlock() {
+      |  return
+      |}
+      |
+      |// Between elements
+      |
+      |fun fooExpr() = 0
+      |
+      |// Between elements
+      |
+      |fun fooBlock() {
+      |  return
+      |}
+      |"""
+              .trimMargin())
   }
 
   companion object {
