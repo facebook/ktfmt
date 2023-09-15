@@ -49,7 +49,15 @@ class ParsedArgsTest {
   }
 
   @Test
-  fun `processArgs uses default values when args are empty`() {
+  fun `files to format are returned and flags starting with @ are reported`() {
+    val (parsed, out) = parseTestOptions("foo.kt", "@unknown")
+
+    assertThat(parsed.fileNames).containsExactly("foo.kt")
+    assertThat(out.toString()).isEqualTo("Unexpected option: @unknown\n")
+  }
+
+  @Test
+  fun `parseOptions uses default values when args are empty`() {
     val (parsed, _) = parseTestOptions("foo.kt")
 
     val formattingOptions = parsed.formattingOptions
@@ -66,7 +74,7 @@ class ParsedArgsTest {
   }
 
   @Test
-  fun `processArgs recognizes --dropbox-style and rejects unknown flags`() {
+  fun `parseOptions recognizes --dropbox-style and rejects unknown flags`() {
     val (parsed, out) = parseTestOptions("--dropbox-style", "foo.kt", "--unknown")
 
     assertThat(parsed.fileNames).containsExactly("foo.kt")
@@ -76,43 +84,43 @@ class ParsedArgsTest {
   }
 
   @Test
-  fun `processArgs recognizes --google-style`() {
+  fun `parseOptions recognizes --google-style`() {
     val (parsed, _) = parseTestOptions("--google-style", "foo.kt")
     assertThat(parsed.formattingOptions).isEqualTo(Formatter.GOOGLE_FORMAT)
   }
 
   @Test
-  fun `processArgs recognizes --dry-run`() {
+  fun `parseOptions recognizes --dry-run`() {
     val (parsed, _) = parseTestOptions("--dry-run", "foo.kt")
     assertThat(parsed.dryRun).isTrue()
   }
 
   @Test
-  fun `processArgs recognizes -n as --dry-run`() {
+  fun `parseOptions recognizes -n as --dry-run`() {
     val (parsed, _) = parseTestOptions("-n", "foo.kt")
     assertThat(parsed.dryRun).isTrue()
   }
 
   @Test
-  fun `processArgs recognizes --set-exit-if-changed`() {
+  fun `parseOptions recognizes --set-exit-if-changed`() {
     val (parsed, _) = parseTestOptions("--set-exit-if-changed", "foo.kt")
     assertThat(parsed.setExitIfChanged).isTrue()
   }
 
   @Test
-  fun `processArgs defaults to removing imports`() {
+  fun `parseOptions defaults to removing imports`() {
     val (parsed, _) = parseTestOptions("foo.kt")
     assertThat(parsed.formattingOptions.removeUnusedImports).isTrue()
   }
 
   @Test
-  fun `processArgs recognizes --do-not-remove-unused-imports to removing imports`() {
+  fun `parseOptions recognizes --do-not-remove-unused-imports to removing imports`() {
     val (parsed, _) = parseTestOptions("--do-not-remove-unused-imports", "foo.kt")
     assertThat(parsed.formattingOptions.removeUnusedImports).isFalse()
   }
 
   @Test
-  fun `processArgs handles dropbox style and --do-not-remove-unused-imports`() {
+  fun `parseOptions handles dropbox style and --do-not-remove-unused-imports`() {
     val (parsed, _) =
         parseTestOptions("--do-not-remove-unused-imports", "--dropbox-style", "foo.kt")
     assertThat(parsed.formattingOptions.removeUnusedImports).isFalse()
@@ -120,33 +128,33 @@ class ParsedArgsTest {
   }
 
   @Test
-  fun `processArgs handles google style and --do-not-remove-unused-imports`() {
+  fun `parseOptions handles google style and --do-not-remove-unused-imports`() {
     val (parsed, _) = parseTestOptions("--do-not-remove-unused-imports", "--google-style", "foo.kt")
     assertThat(parsed.formattingOptions.removeUnusedImports).isFalse()
     assertThat(parsed.formattingOptions.style).isEqualTo(FormattingOptions.Style.GOOGLE)
   }
 
   @Test
-  fun `processArgs --stdin-name`() {
+  fun `parseOptions --stdin-name`() {
     val (parsed, _) = parseTestOptions("--stdin-name=my/foo.kt")
     assertThat(parsed.stdinName).isEqualTo("my/foo.kt")
   }
 
   @Test
-  fun `processArgs --stdin-name with empty value`() {
+  fun `parseOptions --stdin-name with empty value`() {
     val (parsed, _) = parseTestOptions("--stdin-name=")
     assertThat(parsed.stdinName).isEqualTo("")
   }
 
   @Test
-  fun `processArgs --stdin-name without value`() {
+  fun `parseOptions --stdin-name without value`() {
     val (parsed, out) = parseTestOptions("--stdin-name")
     assertThat(out).isEqualTo("Found option '--stdin-name', expected '--stdin-name=<value>'\n")
     assertThat(parsed.stdinName).isNull()
   }
 
   @Test
-  fun `processArgs --stdin-name prefix`() {
+  fun `parseOptions --stdin-name prefix`() {
     val (parsed, out) = parseTestOptions("--stdin-namea")
     assertThat(out).isEqualTo("Found option '--stdin-namea', expected '--stdin-name=<value>'\n")
     assertThat(parsed.stdinName).isNull()
@@ -177,35 +185,8 @@ class ParsedArgsTest {
     assertThat(parsed.fileNames).containsExactlyElementsIn(listOf("File1.kt", "File2.kt"))
   }
 
-  @Test
-  fun `processArgs use normal arguments and the @file option with file containing arguments`() {
-    val out = ByteArrayOutputStream()
-    val file = root.resolve("existing-file")
-    file.writeText("--set-exit-if-changed\nFile1.kt\nFile2.kt\n")
-
-    val parsed =
-        ParsedArgs.processArgs(
-            PrintStream(out), arrayOf("--google-style", "--dry-run", "@" + file.absolutePath))
-
-    assertThat(parsed.formattingOptions).isEqualTo(Formatter.GOOGLE_FORMAT)
-    assertThat(parsed.dryRun).isTrue()
-    assertThat(parsed.setExitIfChanged).isTrue()
-    assertThat(parsed.fileNames).containsExactlyElementsIn(listOf("File1.kt", "File2.kt"))
-  }
-
-  @Test
-  fun `processArgs use the @file option recursively`() {
-    val out = ByteArrayOutputStream()
-    val inner = root.resolve("inner").apply { writeText("File1.kt\nFile2.kt\n") }
-    val outer = root.resolve("outer").apply { writeText("@${inner.absolutePath}") }
-
-    val parsed = ParsedArgs.processArgs(PrintStream(out), arrayOf("@" + outer.absolutePath))
-
-    assertThat(parsed.fileNames).containsExactlyElementsIn(listOf("File1.kt", "File2.kt"))
-  }
-
   private fun parseTestOptions(vararg args: String): Pair<ParsedArgs, String> {
     val out = ByteArrayOutputStream()
-    return Pair(ParsedArgs.processArgs(PrintStream(out), arrayOf(*args)), out.toString())
+    return Pair(ParsedArgs.parseOptions(PrintStream(out), arrayOf(*args)), out.toString())
   }
 }
