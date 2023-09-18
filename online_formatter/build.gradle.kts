@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-plugins { kotlin("jvm") version "1.5.0" }
+plugins { kotlin("jvm") version "1.8.22" }
 
 repositories {
   mavenLocal()
@@ -35,10 +33,10 @@ dependencies {
   testImplementation(kotlin("test-junit"))
 }
 
+kotlin { jvmToolchain(11) }
+
 tasks {
   test { useJUnit() }
-
-  withType<KotlinCompile>() { kotlinOptions.jvmTarget = "11" }
 
   val packageFat by
       creating(Zip::class) {
