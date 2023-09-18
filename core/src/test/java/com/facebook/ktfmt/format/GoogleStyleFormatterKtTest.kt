@@ -105,7 +105,7 @@ class GoogleStyleFormatterKtTest {
   }
 
   @Test
-  fun `class params are placed each in their own line`() =
+  fun `class value params are placed each in their own line`() =
       assertFormatted(
           """
       |-----------------------------------------
@@ -141,6 +141,58 @@ class GoogleStyleFormatterKtTest {
       |
       |class C(a: Int, var b: Int, val c: Int) {
       |  //
+      |}
+      |"""
+              .trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `class type params are placed each in their own line`() =
+      assertFormatted(
+          """
+      |------------------------------------
+      |class Foo<
+      |  TypeA : Int,
+      |  TypeC : String
+      |> {
+      |  // Class name + type params too long for one line
+      |  // Type params could fit on one line but break
+      |}
+      |
+      |class Foo<
+      |  TypeA : Int,
+      |  TypeB : Double,
+      |  TypeC : String
+      |> {
+      |  // Type params can't fit on one line
+      |}
+      |
+      |class Foo<
+      |  TypeA : Int,
+      |  TypeB : Double,
+      |  TypeC : String
+      |>
+      |
+      |class Foo<
+      |  TypeA : Int,
+      |  TypeB : Double,
+      |  TypeC : String
+      |>() {
+      |  //
+      |}
+      |
+      |class Bi<
+      |  TypeA : Int,
+      |  TypeB : Double,
+      |  TypeC : String
+      |>(a: Int, var b: Int, val c: Int) {
+      |  // TODO: Breaking the type param list
+      |  // should propagate to the value param list
+      |}
+      |
+      |class C<A : Int, B : Int, C : Int> {
+      |  // Class name + type params fit on one line
       |}
       |"""
               .trimMargin(),
@@ -1304,6 +1356,108 @@ class GoogleStyleFormatterKtTest {
       |    ]
       |)
       |class Host
+      |"""
+              .trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `leading and trailing comments in block-like lists`() =
+      assertFormatted(
+          """
+      |--------------------------------
+      |@Anno(
+      |  array =
+      |    [
+      |      // Comment
+      |      someItem
+      |      // Comment
+      |    ]
+      |)
+      |class Host(
+      |  // Comment
+      |  val someItem: Int
+      |  // Comment
+      |) {
+      |  constructor(
+      |    // Comment
+      |    someItem: Int
+      |    // Comment
+      |  ) : this(
+      |    // Comment
+      |    someItem
+      |    // Comment
+      |  )
+      |
+      |  fun foo(
+      |    // Comment
+      |    someItem: Int
+      |    // Comment
+      |  ): Int {
+      |    foo(
+      |      // Comment
+      |      someItem
+      |      // Comment
+      |    )
+      |  }
+      |
+      |  var x: Int = 0
+      |    set(
+      |      // Comment
+      |      someItem: Int
+      |      // Comment
+      |    ) = Unit
+      |
+      |  fun <
+      |    // Comment
+      |    someItem : Int
+      |    // Comment
+      |  > bar(): Int {
+      |    bar<
+      |      // Comment
+      |      someItem
+      |      // Comment
+      |    >()
+      |  }
+      |}
+      |"""
+              .trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
+  @Test
+  fun `comments in empty block-like lists`() =
+      assertFormatted(
+          """
+      |--------------------------------
+      |@Anno(
+      |  array =
+      |    [
+      |      // Comment
+      |    ]
+      |)
+      |class Host(
+      |  // Comment
+      |) {
+      |  constructor(
+      |    // Comment
+      |  ) : this(
+      |    // Comment
+      |  )
+      |
+      |  val x: Int
+      |    get(
+      |      // Comment
+      |    ) = 0
+      |
+      |  fun foo(
+      |    // Comment
+      |  ): Int {
+      |    foo(
+      |      // Comment
+      |    )
+      |  }
+      |}
       |"""
               .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
