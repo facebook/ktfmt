@@ -7004,6 +7004,32 @@ class FormatterTest {
             .trimMargin())
   }
 
+  @Test
+  fun `line break on base class`() =
+      assertFormatted(
+          """
+      |---------------------------
+      |class Basket<T>() :
+      |    WovenObject {
+      |  // some body
+      |}
+      |"""
+              .trimMargin(),
+          deduceMaxWidth = true)
+
+  @Test
+  fun `line break on type specifier`() =
+      assertFormatted(
+          """
+      |---------------------------
+      |class Basket<T>() where
+      |T : Fruit {
+      |  // some body
+      |}
+      |"""
+              .trimMargin(),
+          deduceMaxWidth = true)
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""
