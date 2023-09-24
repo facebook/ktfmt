@@ -20,9 +20,7 @@ plugins {
   id("com.diffplug.spotless") version "5.10.2"
 }
 
-// TODO: use the commented line again once 0.45 is successfully published to maven central
-//val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
-val ktfmtVersion = "0.46"
+val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
 val pluginVersion = "1.1"
 
 group = "com.facebook"
