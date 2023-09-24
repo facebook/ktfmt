@@ -21,6 +21,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @State(
@@ -31,7 +32,7 @@ class KtfmtSettings implements PersistentStateComponent<KtfmtSettings.State> {
   private State state = new State();
 
   static KtfmtSettings getInstance(Project project) {
-    return ServiceManager.getService(project, KtfmtSettings.class);
+    return project.getService(KtfmtSettings.class);
   }
 
   @Nullable
@@ -41,7 +42,7 @@ class KtfmtSettings implements PersistentStateComponent<KtfmtSettings.State> {
   }
 
   @Override
-  public void loadState(State state) {
+  public void loadState(@NotNull State state) {
     this.state = state;
   }
 
@@ -85,7 +86,7 @@ class KtfmtSettings implements PersistentStateComponent<KtfmtSettings.State> {
     public void setEnabled(@Nullable String enabledStr) {
       if (enabledStr == null) {
         enabled = EnabledState.UNKNOWN;
-      } else if (Boolean.valueOf(enabledStr)) {
+      } else if (Boolean.parseBoolean(enabledStr)) {
         enabled = EnabledState.ENABLED;
       } else {
         enabled = EnabledState.DISABLED;
