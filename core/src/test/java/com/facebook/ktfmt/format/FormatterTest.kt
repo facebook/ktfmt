@@ -4636,6 +4636,37 @@ class FormatterTest {
   }
 
   @Test
+  fun `empty enum with semicolons`() {
+    assertThatFormatting(
+            """
+        |enum class Empty {
+        |  ;
+        |}
+        |"""
+                .trimMargin())
+        .isEqualTo(
+            """
+        |enum class Empty {}
+        |"""
+                .trimMargin())
+
+    assertThatFormatting(
+            """
+        |enum class Empty {
+        |  ;
+        |  ;
+        |  ;
+        |}
+        |"""
+                .trimMargin())
+        .isEqualTo(
+            """
+        |enum class Empty {}
+        |"""
+                .trimMargin())
+  }
+
+  @Test
   fun `semicolon is placed on next line when there's a trailing comma in an enum declaration`() =
       assertFormatted(
           """
@@ -7029,6 +7060,54 @@ class FormatterTest {
       |"""
               .trimMargin(),
           deduceMaxWidth = true)
+
+  @Test
+  fun `don't crash on empty enum with semicolons`() {
+    assertFormatted(
+        """
+      |---------------------------
+      |enum class Foo {
+      |  ;
+      |
+      |  fun foo(): Unit
+      |}
+      |"""
+            .trimMargin(),
+        deduceMaxWidth = true)
+
+    assertFormatted(
+        """
+      |---------------------------
+      |enum class Foo {
+      |  ;
+      |
+      |  companion object Bar
+      |}
+      |"""
+            .trimMargin(),
+        deduceMaxWidth = true)
+
+    assertThatFormatting(
+            """
+      |enum class Foo {
+      |  ;
+      |  ;
+      |  ;
+      |
+      |  fun foo(): Unit
+      |}
+      |"""
+                .trimMargin())
+        .isEqualTo(
+            """
+      |enum class Foo {
+      |  ;
+      |
+      |  fun foo(): Unit
+      |}
+      |"""
+                .trimMargin())
+  }
 
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
