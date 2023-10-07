@@ -258,6 +258,7 @@ class KotlinInputAstVisitor(
     visitEachCommaSeparated(
         typeArgumentList.arguments,
         typeArgumentList.trailingComma != null,
+        wrapInBlock = !isGoogleStyle,
         prefix = "<",
         postfix = ">",
     )
@@ -2374,7 +2375,7 @@ class KotlinInputAstVisitor(
           expression.trailingComma != null,
           prefix = "[",
           postfix = "]",
-          wrapInBlock = true)
+          wrapInBlock = !isGoogleStyle)
     }
   }
 

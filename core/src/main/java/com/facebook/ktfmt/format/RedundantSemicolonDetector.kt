@@ -35,15 +35,13 @@ internal class RedundantSemicolonDetector {
 
   fun getRedundantSemicolonElements(): List<PsiElement> = extraSemicolons
 
-  /** returns **true** if this element was an extra comma, **false** otherwise. */
-  fun takeElement(element: PsiElement, superBlock: () -> Unit) {
+  fun takeElement(element: PsiElement) {
     if (isExtraSemicolon(element)) {
       extraSemicolons += element
-    } else {
-      superBlock.invoke()
     }
   }
 
+  /** returns **true** if this element was an extra comma, **false** otherwise. */
   private fun isExtraSemicolon(element: PsiElement): Boolean {
     if (element.text != ";") {
       return false
