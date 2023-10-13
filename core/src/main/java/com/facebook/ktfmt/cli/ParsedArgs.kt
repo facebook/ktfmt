@@ -54,6 +54,7 @@ data class ParsedArgs(
       var setExitIfChanged = false
       var removeUnusedImports = true
       var stdinName: String? = null
+      var maxWidth: Int? = null
 
       for (arg in args) {
         when {
@@ -64,6 +65,8 @@ data class ParsedArgs(
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
           arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
           arg.startsWith("--stdin-name") -> stdinName = parseKeyValueArg(err, "--stdin-name", arg)
+          arg.startsWith("--max-width") ->
+              maxWidth = parseKeyValueArg(err, "--max-width", arg)?.asInt(err, "max-width")
           arg.startsWith("--") -> err.println("Unexpected option: $arg")
           arg.startsWith("@") -> err.println("Unexpected option: $arg")
           else -> fileNames.add(arg)
@@ -72,7 +75,9 @@ data class ParsedArgs(
 
       return ParsedArgs(
           fileNames,
-          formattingOptions.copy(removeUnusedImports = removeUnusedImports),
+          formattingOptions.copy(
+              removeUnusedImports = removeUnusedImports,
+              maxWidth = maxWidth ?: formattingOptions.maxWidth),
           dryRun,
           setExitIfChanged,
           stdinName,
@@ -86,6 +91,15 @@ data class ParsedArgs(
         return null
       }
       return parts[1]
+    }
+
+    private fun String?.asInt(err: PrintStream, name: String): Int? {
+      if (this == null) return null
+      val result = this.toIntOrNull()
+      if (result == null) {
+        err.println("Invalid $name: $this")
+      }
+      return result
     }
   }
 }

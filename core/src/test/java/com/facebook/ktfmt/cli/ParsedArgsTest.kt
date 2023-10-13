@@ -96,6 +96,26 @@ class ParsedArgsTest {
   }
 
   @Test
+  fun `parseOptions recognizes --max-width`() {
+    val (parsed, _) = parseTestOptions("--max-width=120", "foo.kt")
+    assertThat(parsed.formattingOptions.maxWidth).isEqualTo(120)
+  }
+
+  @Test
+  fun `parseOptions handles invalid --max-width`() {
+    val (parsed, out) = parseTestOptions("--max-width=hi", "foo.kt")
+    assertThat(parsed.formattingOptions.maxWidth).isEqualTo(100)
+    assertThat(out).isEqualTo("Invalid max-width: hi\n")
+  }
+
+  @Test
+  fun `parseOptions handles empty --max-width`() {
+    val (parsed, out) = parseTestOptions("--max-width", "foo.kt")
+    assertThat(parsed.formattingOptions.maxWidth).isEqualTo(100)
+    assertThat(out).isEqualTo("Found option '--max-width', expected '--max-width=<value>'\n")
+  }
+
+  @Test
   fun `parseOptions recognizes -n as --dry-run`() {
     val (parsed, _) = parseTestOptions("-n", "foo.kt")
     assertThat(parsed.dryRun).isTrue()

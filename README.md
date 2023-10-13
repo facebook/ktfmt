@@ -67,6 +67,8 @@ java -jar /path/to/ktfmt-<VERSION>-jar-with-dependencies.jar [--dropbox-style] [
 
 `--dropbox-style` makes `ktfmt` use a block indent of 4 spaces instead of 2. See below for details.
 
+`--max-width=XYZ` configures max line width
+
 ***Note:*** *There is no configurability as to the formatter's algorithm for
 formatting (apart from `--dropbox-style`). This is a deliberate design decision to unify our code
 formatting on a single format.*
