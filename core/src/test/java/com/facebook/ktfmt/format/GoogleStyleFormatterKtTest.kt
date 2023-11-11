@@ -112,7 +112,7 @@ class GoogleStyleFormatterKtTest {
       |class Foo(
       |  a: Int,
       |  var b: Double,
-      |  val c: String
+      |  val c: String,
       |) {
       |  //
       |}
@@ -120,13 +120,13 @@ class GoogleStyleFormatterKtTest {
       |class Foo(
       |  a: Int,
       |  var b: Double,
-      |  val c: String
+      |  val c: String,
       |)
       |
       |class Foo(
       |  a: Int,
       |  var b: Int,
-      |  val c: Int
+      |  val c: Int,
       |) {
       |  //
       |}
@@ -134,7 +134,7 @@ class GoogleStyleFormatterKtTest {
       |class Bi(
       |  a: Int,
       |  var b: Int,
-      |  val c: Int
+      |  val c: Int,
       |) {
       |  //
       |}
@@ -154,7 +154,7 @@ class GoogleStyleFormatterKtTest {
       |------------------------------------
       |class Foo<
       |  TypeA : Int,
-      |  TypeC : String
+      |  TypeC : String,
       |> {
       |  // Class name + type params too long for one line
       |  // Type params could fit on one line but break
@@ -163,7 +163,7 @@ class GoogleStyleFormatterKtTest {
       |class Foo<
       |  TypeA : Int,
       |  TypeB : Double,
-      |  TypeC : String
+      |  TypeC : String,
       |> {
       |  // Type params can't fit on one line
       |}
@@ -171,13 +171,13 @@ class GoogleStyleFormatterKtTest {
       |class Foo<
       |  TypeA : Int,
       |  TypeB : Double,
-      |  TypeC : String
+      |  TypeC : String,
       |>
       |
       |class Foo<
       |  TypeA : Int,
       |  TypeB : Double,
-      |  TypeC : String
+      |  TypeC : String,
       |>() {
       |  //
       |}
@@ -185,7 +185,7 @@ class GoogleStyleFormatterKtTest {
       |class Bi<
       |  TypeA : Int,
       |  TypeB : Double,
-      |  TypeC : String
+      |  TypeC : String,
       |>(a: Int, var b: Int, val c: Int) {
       |  // TODO: Breaking the type param list
       |  // should propagate to the value param list
@@ -207,7 +207,7 @@ class GoogleStyleFormatterKtTest {
       |fun foo12(
       |  a: Int,
       |  var b: Double,
-      |  val c: String
+      |  val c: String,
       |) {
       |  //
       |}
@@ -215,19 +215,19 @@ class GoogleStyleFormatterKtTest {
       |fun foo12(
       |  a: Int,
       |  var b: Double,
-      |  val c: String
+      |  val c: String,
       |)
       |
       |fun foo12(
       |  a: Int,
       |  var b: Double,
-      |  val c: String
+      |  val c: String,
       |) = 5
       |
       |fun foo12(
       |  a: Int,
       |  var b: Int,
-      |  val c: Int
+      |  val c: Int,
       |) {
       |  //
       |}
@@ -235,7 +235,7 @@ class GoogleStyleFormatterKtTest {
       |fun bi12(
       |  a: Int,
       |  var b: Int,
-      |  val c: Int
+      |  val c: Int,
       |) {
       |  //
       |}
@@ -256,14 +256,14 @@ class GoogleStyleFormatterKtTest {
       |interface X {
       |  fun f(
       |    arg1: Arg1Type,
-      |    arg2: Arg2Type
+      |    arg2: Arg2Type,
       |  ): Map<String, Map<String, Double>>? {
       |    //
       |  }
       |
       |  fun functionWithGenericReturnType(
       |    arg1: Arg1Type,
-      |    arg2: Arg2Type
+      |    arg2: Arg2Type,
       |  ): Map<String, Map<String, Double>>? {
       |    //
       |  }
@@ -282,7 +282,7 @@ class GoogleStyleFormatterKtTest {
       |  fun method() {
       |    Foo.FooBar(
       |        param1,
-      |        param2
+      |        param2,
       |      )
       |      .apply {
       |        //
@@ -414,8 +414,8 @@ class GoogleStyleFormatterKtTest {
       |    com.example.interesting.SomeType<Int, Nothing>,
       |    com.example.interesting.SomeType<
       |      com.example.interesting.SomeType<Int, Nothing>,
-      |      Nothing
-      |    >
+      |      Nothing,
+      |    >,
       |  > =
       |  DUMMY
       |"""
@@ -433,24 +433,24 @@ class GoogleStyleFormatterKtTest {
       |    // don't break in lambda, no argument breaks found
       |    fruit.forEach { eat(it) }
       |
-      |    // break in lambda, without comma
+      |    // break in lambda, natural break
       |    fruit.forEach(
       |      someVeryLongParameterNameThatWillCauseABreak,
-      |      evenWithoutATrailingCommaOnTheParameterListSoLetsSeeIt
+      |      evenWithoutATrailingCommaOnTheParameterListSoLetsSeeIt,
       |    ) {
       |      eat(it)
       |    }
       |
-      |    // break in the lambda, with comma
+      |    // break in the lambda, forced break
       |    fruit.forEach(
-      |      fromTheVine = true,
+      |      fromTheVine = true //
       |    ) {
       |      eat(it)
       |    }
       |
       |    // don't break in the inner lambda, as nesting doesn't respect outer levels
       |    fruit.forEach(
-      |      fromTheVine = true,
+      |      fromTheVine = true //
       |    ) {
       |      fruit.forEach { eat(it) }
       |    }
@@ -458,21 +458,21 @@ class GoogleStyleFormatterKtTest {
       |    // don't break in the lambda, as breaks don't propagate
       |    fruit
       |      .onlyBananas(
-      |        fromTheVine = true,
+      |        fromTheVine = true //
       |      )
       |      .forEach { eat(it) }
       |
       |    // don't break in the inner lambda, as breaks don't propagate to parameters
       |    fruit.onlyBananas(
       |      fromTheVine = true,
-      |      processThem = { eat(it) },
+      |      processThem = { eat(it) }, //
       |    ) {
       |      eat(it)
       |    }
       |
       |    // don't break in the inner lambda, as breaks don't propagate to the body
       |    fruit.onlyBananas(
-      |      fromTheVine = true,
+      |      fromTheVine = true //
       |    ) {
       |      val anon = { eat(it) }
       |    }
@@ -493,7 +493,7 @@ class GoogleStyleFormatterKtTest {
       |  foo(
       |    123456789012345678901234567890,
       |    123456789012345678901234567890,
-      |    123456789012345678901234567890
+      |    123456789012345678901234567890,
       |  )
       |}
       |"""
@@ -520,7 +520,7 @@ class GoogleStyleFormatterKtTest {
       |              blablabl,
       |              blablabl,
       |              blablabl,
-      |              blabla
+      |              blabla,
       |            )
       |            .show()
       |      }
@@ -558,7 +558,7 @@ class GoogleStyleFormatterKtTest {
       |    lambdaArgument = {
       |      step1()
       |      step2()
-      |    }
+      |    },
       |  ) {
       |    it.doIt()
       |  }
@@ -594,7 +594,7 @@ class GoogleStyleFormatterKtTest {
       |  foo(
       |    123456789012345678901234567890,
       |    b = 23456789012345678901234567890,
-      |    c = 3456789012345678901234567890
+      |    c = 3456789012345678901234567890,
       |  )
       |}
       |"""
@@ -622,7 +622,7 @@ class GoogleStyleFormatterKtTest {
       |      typeConstraintList =
       |        property.typeConstraintList,
       |      delegate = property.delegate,
-      |      initializer = property.initializer
+      |      initializer = property.initializer,
       |    )
       |  }
       |}
@@ -681,7 +681,7 @@ class GoogleStyleFormatterKtTest {
       |        // Printing
       |        print()
       |      },
-      |    duration = duration
+      |    duration = duration,
       |  )
       |"""
               .trimMargin(),
@@ -703,7 +703,7 @@ class GoogleStyleFormatterKtTest {
       |      (1 + 2) +
       |      function(
       |        value7,
-      |        value8
+      |        value8,
       |      ) +
       |      value9
       |}
@@ -742,14 +742,16 @@ class GoogleStyleFormatterKtTest {
       |    something
       |      is
       |      PairList<
-      |        String, Int
+      |        String,
+      |        Int,
       |      >
       |  )
       |  doIt(
       |    something
       |      as
       |      PairList<
-      |        String, Int
+      |        String,
+      |        Int,
       |      >
       |  )
       |  println(
@@ -771,22 +773,22 @@ class GoogleStyleFormatterKtTest {
       |  computeBreaks(
       |    javaOutput.commentsHelper,
       |    maxWidth,
-      |    Doc.State(+0, 0)
+      |    Doc.State(+0, 0),
       |  )
       |  computeBreaks(
       |    output.commentsHelper,
       |    maxWidth,
-      |    State(0)
+      |    State(0),
       |  )
       |  doc.computeBreaks(
       |    javaOutput.commentsHelper,
       |    maxWidth,
-      |    Doc.State(+0, 0)
+      |    Doc.State(+0, 0),
       |  )
       |  doc.computeBreaks(
       |    output.commentsHelper,
       |    maxWidth,
-      |    State(0)
+      |    State(0),
       |  )
       |}
       |"""
@@ -804,18 +806,18 @@ class GoogleStyleFormatterKtTest {
       |  fooDdoIt(
       |    foo1,
       |    foo2,
-      |    foo3
+      |    foo3,
       |  )
       |  foo.doIt(
       |    foo1,
       |    foo2,
-      |    foo3
+      |    foo3,
       |  )
       |  foo
       |    .doIt(
       |      foo1,
       |      foo2,
-      |      foo3
+      |      foo3,
       |    )
       |    .doThat()
       |}
@@ -835,14 +837,14 @@ class GoogleStyleFormatterKtTest {
       |    val name: String,
       |    val age: Int,
       |    val title: String,
-      |    val offspring: List<Foo>
+      |    val offspring: List<Foo>,
       |  ) : this(
       |    number,
       |    name,
       |    age,
       |    title,
       |    offspring,
-      |    offspring
+      |    offspring,
       |  )
       |}
       |"""
@@ -868,48 +870,277 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
-  fun `handle trailing commas (function calls)`() =
+  fun `handle forced breaks in function calls`() =
       assertFormatted(
           """
       |------------------------
       |fun main() {
       |  foo(
-      |    3,
+      |    3 //
       |  )
       |
       |  foo<Int>(
-      |    3,
+      |    3 //
       |  )
       |
       |  foo<
-      |    Int,
+      |    Int //
       |  >(
-      |    3,
+      |    3 //
       |  )
       |
       |  foo<Int>(
       |    "asdf",
-      |    "asdf"
+      |    "asdf", //
+      |  )
+      |
+      |  foo<
+      |    Int //
+      |  >(
+      |    "asd",
+      |    "asd", //
       |  )
       |
       |  foo<
       |    Int,
+      |    Boolean, //
       |  >(
-      |    "asd",
-      |    "asd",
-      |  )
-      |
-      |  foo<
-      |    Int,
-      |    Boolean,
-      |  >(
-      |    3,
+      |    3 //
       |  )
       |}
       |"""
               .trimMargin(),
           formattingOptions = Formatter.GOOGLE_FORMAT,
           deduceMaxWidth = true)
+
+  @Test
+  fun `tailing commas are removed when redundant`() {
+      val code =
+          """
+      |fun main() {
+      |  fun <A, B,> foo() {}
+      |
+      |  fun foo(a: Int, b: Int = 0,) {}
+      |
+      |  foo<Int, Int,>()
+      |
+      |  foo(0, 0,)
+      |
+      |  @Anno(arr = [0, 0,]) //
+      |  fun foo() {}
+      |}
+      |"""
+              .trimMargin()
+    val expected =
+          """
+      |fun main() {
+      |  fun <A, B> foo() {}
+      |
+      |  fun foo(a: Int, b: Int = 0) {}
+      |
+      |  foo<Int, Int>()
+      |
+      |  foo(0, 0)
+      |
+      |  @Anno(arr = [0, 0]) //
+      |  fun foo() {}
+      |}
+      |"""
+              .trimMargin()
+    assertThatFormatting(code).withOptions(Formatter.GOOGLE_FORMAT).isEqualTo(expected)
+  }
+
+  @Test
+  fun `tailing commas are added when missing`() {
+      // Use trailing comments to force the breaks
+      val code =
+          """
+      |fun main() {
+      |  fun <
+      |    A,
+      |    B // Comma before comment
+      |  > foo() {}
+      |
+      |  fun foo(
+      |    a: Int,
+      |    b: Int = 0 // Comma before comment
+      |  ) {}
+      |
+      |  foo<
+      |    Int,
+      |    Int // Comma before comment
+      |  >()
+      |
+      |  foo(
+      |    0,
+      |    b = 0 // Comma before comment
+      |  )
+      |
+      |  foo(
+      |    0,
+      |    b = {
+      |      // Comma outside lambda
+      |    }
+      |  )
+      |
+      |  @Anno(
+      |    arr = [
+      |      0,
+      |      0 // Comma before comment
+      |    ]
+      |  )
+      |  fun foo() {}
+      |}
+      |"""
+              .trimMargin()
+    val expected =
+        """
+      |fun main() {
+      |  fun <
+      |    A,
+      |    B, // Comma before comment
+      |  > foo() {}
+      |
+      |  fun foo(
+      |    a: Int,
+      |    b: Int = 0, // Comma before comment
+      |  ) {}
+      |
+      |  foo<
+      |    Int,
+      |    Int, // Comma before comment
+      |  >()
+      |
+      |  foo(
+      |    0,
+      |    b = 0, // Comma before comment
+      |  )
+      |
+      |  foo(
+      |    0,
+      |    b = {
+      |      // Comma outside lambda
+      |    },
+      |  )
+      |
+      |  @Anno(
+      |    arr =
+      |      [
+      |        0,
+      |        0, // Comma before comment
+      |      ]
+      |  )
+      |  fun foo() {}
+      |}
+      |"""
+              .trimMargin()
+    assertThatFormatting(code).withOptions(Formatter.GOOGLE_FORMAT).isEqualTo(expected)
+  }
+
+  @Test
+  fun `tailing commas that are always removed`() {
+      // Use trailing comments to force the breaks
+      val code =
+          """
+      |fun main() {
+      |  foo {
+      |    a, //
+      |    b, ->
+      |    a
+      |  }
+      |
+      |  when (a) {
+      |    is A, //
+      |    is B, -> return
+      |  }
+      |}
+      |"""
+              .trimMargin()
+    val expected =
+        """
+      |fun main() {
+      |  foo {
+      |    a, //
+      |    b ->
+      |    a
+      |  }
+      |
+      |  when (a) {
+      |    is A, //
+      |    is B -> return
+      |  }
+      |}
+      |"""
+              .trimMargin()
+    assertThatFormatting(code).withOptions(Formatter.GOOGLE_FORMAT).isEqualTo(expected)
+  }
+
+  @Test
+  fun `tailing commas are not added to empty lists`() {
+    // Use trailing comments to force the breaks
+    assertFormatted(
+          """
+      |fun main() {
+      |  fun foo(
+      |    //
+      |  ) {}
+      |
+      |  foo(
+      |    //
+      |  )
+      |
+      |  foo {
+      |  //
+      |  ->
+      |    0
+      |  }
+      |
+      |  @Anno(
+      |    arr =
+      |      [
+      |        //
+      |      ]
+      |  )
+      |  fun foo() {}
+      |}
+      |"""
+              .trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = false)
+  }
+
+  @Test
+  fun `tailing commas are not added to single-element lists`() {
+    assertFormatted(
+          """
+      |fun main() {
+      |  fun foo(
+      |    a: Int //
+      |  ) {}
+      |
+      |  foo(
+      |    0 //
+      |  )
+      |
+      |  foo {
+      |    a //
+      |     ->
+      |    0
+      |  }
+      |
+      |  @Anno(
+      |    arr =
+      |      [
+      |        0 //
+      |      ]
+      |  )
+      |  fun foo() {}
+      |}
+      |"""
+              .trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = false)
+  }
 
   @Test
   fun `an assortment of tests for emitQualifiedExpression`() =
@@ -998,11 +1229,11 @@ class GoogleStyleFormatterKtTest {
       |fun f() {
       |  foo(
       |      println("a"),
-      |      println("b")
+      |      println("b"),
       |    )
       |    .bar(
       |      println("b"),
-      |      println("b")
+      |      println("b"),
       |    )
       |}
       |"""
@@ -1235,7 +1466,7 @@ class GoogleStyleFormatterKtTest {
       |      foo,
       |      bar,
       |      zed,
-      |      boo
+      |      boo,
       |    )
       |}
       |"""
@@ -1254,7 +1485,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |  Foo.FooBar(
       |    param1,
-      |    param2
+      |    param2,
       |  )
       |}
       |"""
@@ -1287,7 +1518,7 @@ class GoogleStyleFormatterKtTest {
       |    a: String,
       |    b: String,
       |    c: String,
-      |    d: String
+      |    d: String,
       |  ) -> Unit
       |"""
               .trimMargin(),
@@ -1327,7 +1558,7 @@ class GoogleStyleFormatterKtTest {
       |    [
       |      someItem,
       |      andAnother,
-      |      noTrailingComma
+      |      noTrailingComma,
       |    ]
       |)
       |class Host
@@ -1350,7 +1581,7 @@ class GoogleStyleFormatterKtTest {
       |      // Comment
       |      andAnother,
       |      // Comment
-      |      withTrailingComment
+      |      withTrailingComment,
       |      // Comment
       |      // Comment
       |    ]
