@@ -915,8 +915,8 @@ class GoogleStyleFormatterKtTest {
 
   @Test
   fun `tailing commas are removed when redundant`() {
-      val code =
-          """
+    val code =
+        """
       |fun main() {
       |  fun <A, B,> foo() {}
       |
@@ -930,9 +930,9 @@ class GoogleStyleFormatterKtTest {
       |  fun foo() {}
       |}
       |"""
-              .trimMargin()
+            .trimMargin()
     val expected =
-          """
+        """
       |fun main() {
       |  fun <A, B> foo() {}
       |
@@ -946,15 +946,15 @@ class GoogleStyleFormatterKtTest {
       |  fun foo() {}
       |}
       |"""
-              .trimMargin()
+            .trimMargin()
     assertThatFormatting(code).withOptions(Formatter.GOOGLE_FORMAT).isEqualTo(expected)
   }
 
   @Test
   fun `tailing commas are added when missing`() {
-      // Use trailing comments to force the breaks
-      val code =
-          """
+    // Use trailing comments to force the breaks
+    val code =
+        """
       |fun main() {
       |  fun <
       |    A,
@@ -992,7 +992,7 @@ class GoogleStyleFormatterKtTest {
       |  fun foo() {}
       |}
       |"""
-              .trimMargin()
+            .trimMargin()
     val expected =
         """
       |fun main() {
@@ -1033,15 +1033,15 @@ class GoogleStyleFormatterKtTest {
       |  fun foo() {}
       |}
       |"""
-              .trimMargin()
+            .trimMargin()
     assertThatFormatting(code).withOptions(Formatter.GOOGLE_FORMAT).isEqualTo(expected)
   }
 
   @Test
   fun `tailing commas that are always removed`() {
-      // Use trailing comments to force the breaks
-      val code =
-          """
+    // Use trailing comments to force the breaks
+    val code =
+        """
       |fun main() {
       |  foo {
       |    a, //
@@ -1055,7 +1055,7 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |"""
-              .trimMargin()
+            .trimMargin()
     val expected =
         """
       |fun main() {
@@ -1071,7 +1071,7 @@ class GoogleStyleFormatterKtTest {
       |  }
       |}
       |"""
-              .trimMargin()
+            .trimMargin()
     assertThatFormatting(code).withOptions(Formatter.GOOGLE_FORMAT).isEqualTo(expected)
   }
 
@@ -1079,7 +1079,7 @@ class GoogleStyleFormatterKtTest {
   fun `tailing commas are not added to empty lists`() {
     // Use trailing comments to force the breaks
     assertFormatted(
-          """
+        """
       |fun main() {
       |  fun foo(
       |    //
@@ -1104,15 +1104,15 @@ class GoogleStyleFormatterKtTest {
       |  fun foo() {}
       |}
       |"""
-              .trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = false)
+            .trimMargin(),
+        formattingOptions = Formatter.GOOGLE_FORMAT,
+        deduceMaxWidth = false)
   }
 
   @Test
   fun `tailing commas are not added to single-element lists`() {
     assertFormatted(
-          """
+        """
       |fun main() {
       |  fun foo(
       |    a: Int //
@@ -1137,9 +1137,9 @@ class GoogleStyleFormatterKtTest {
       |  fun foo() {}
       |}
       |"""
-              .trimMargin(),
-          formattingOptions = Formatter.GOOGLE_FORMAT,
-          deduceMaxWidth = false)
+            .trimMargin(),
+        formattingOptions = Formatter.GOOGLE_FORMAT,
+        deduceMaxWidth = false)
   }
 
   @Test

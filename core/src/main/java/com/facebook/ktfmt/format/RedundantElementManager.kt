@@ -28,9 +28,9 @@ import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 /**
- * Adds and removes elements that are not strictly needed in the code, such as semicolons and
- * unused imports.
-*/
+ * Adds and removes elements that are not strictly needed in the code, such as semicolons and unused
+ * imports.
+ */
 object RedundantElementManager {
   /** Remove extra semicolons and unused imports, if enabled in the [options] */
   fun dropRedundantElements(code: String, options: FormattingOptions): String {
