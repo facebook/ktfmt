@@ -1230,7 +1230,7 @@ class KotlinInputAstVisitor(
       val isFirst = leftExpression === leftMostExpression
 
       when (leftExpression.operationToken) {
-        KtTokens.RANGE -> {
+        KtTokens.RANGE, KtTokens.RANGE_UNTIL -> {
           if (isFirst) {
             builder.open(expressionBreakIndent)
           }
