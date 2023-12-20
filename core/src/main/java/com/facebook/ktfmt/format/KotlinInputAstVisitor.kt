@@ -54,6 +54,7 @@ import org.jetbrains.kotlin.psi.KtConstructorDelegationCall
 import org.jetbrains.kotlin.psi.KtContainerNode
 import org.jetbrains.kotlin.psi.KtContextReceiverList
 import org.jetbrains.kotlin.psi.KtContinueExpression
+import org.jetbrains.kotlin.psi.KtDeclarationModifierList
 import org.jetbrains.kotlin.psi.KtDelegatedSuperTypeEntry
 import org.jetbrains.kotlin.psi.KtDestructuringDeclaration
 import org.jetbrains.kotlin.psi.KtDestructuringDeclarationEntry
@@ -1854,6 +1855,16 @@ class KotlinInputAstVisitor(
         null, // Type-arguments are included in the annotation's callee expression.
         annotationEntry.valueArgumentList,
         listOf())
+
+    // Annotations on properties should each be on their own line
+    if (
+      annotationEntry.parent != null &&
+      annotationEntry.parent::class == KtDeclarationModifierList::class &&
+      annotationEntry.parent.parent != null &&
+      annotationEntry.parent.parent::class == KtProperty::class
+    ) {
+      builder.forcedBreak()
+    }
   }
 
   override fun visitFileAnnotationList(

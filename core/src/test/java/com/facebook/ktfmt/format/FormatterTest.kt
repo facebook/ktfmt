@@ -1528,8 +1528,13 @@ class FormatterTest {
       |@Fancy
       |class Foo {
       |  @Fancy
+      |  @NotFancy
+      |  val z = 0
+      |
+      |  @Fancy
       |  fun baz(@Fancy foo: Int) {
-      |    @Fancy val a = 1 + foo
+      |    @Fancy
+      |    val a = 1 + foo
       |  }
       |}
       |"""
@@ -2369,6 +2374,24 @@ class FormatterTest {
       |"""
               .trimMargin(),
           deduceMaxWidth = true)
+
+
+  @Test
+  fun `a constructor with many arguments over multiple lines and annotations`() =
+    assertFormatted(
+        """
+    |--------------------------------------------------
+    |data class Foo
+    |constructor(
+    |    @JsonProperty("number_") val number: Int,
+    |    val name: String,
+    |    @JsonProperty("years") val age: Int,
+    |    val title: String,
+    |    val offspring: List<Foo>
+    |) {}
+    |"""
+              .trimMargin(),
+            deduceMaxWidth = true)
 
   @Test
   fun `handle secondary constructors`() =
@@ -4779,9 +4802,11 @@ class FormatterTest {
       assertFormatted(
           """
       |class FooTest {
-      |  @get:Rule val exceptionRule: ExpectedException = ExpectedException.none()
+      |  @get:Rule
+      |  val exceptionRule: ExpectedException = ExpectedException.none()
       |
-      |  @set:Magic(name = "Jane") var field: String
+      |  @set:Magic(name = "Jane")
+      |  var field: String
       |}
       |"""
               .trimMargin())
