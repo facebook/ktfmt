@@ -21,11 +21,15 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
 import java.lang.IllegalStateException
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
+import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
 import java.util.concurrent.ForkJoinPool
 import kotlin.io.path.createTempDirectory
 import org.junit.After
 import org.junit.Assert.fail
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -40,6 +44,13 @@ class MainTest {
   private val out = ByteArrayOutputStream()
   private val err = ByteArrayOutputStream()
 
+  private val testCharset = StandardCharsets.UTF_16
+
+  @Before
+  fun setUp() {
+    assertThat(Charset.defaultCharset()).isEqualTo(testCharset) // Verify the test JVM flags
+  }
+
   @After
   fun tearDown() {
     root.deleteRecursively()
@@ -52,7 +63,7 @@ class MainTest {
   @Test
   fun `expandArgsToFileNames - single file arg is used as is`() {
     val fooBar = root.resolve("foo.bar")
-    fooBar.writeText("hi")
+    fooBar.writeText("hi", UTF_8)
     assertThat(Main.expandArgsToFileNames(listOf(fooBar.toString()))).containsExactly(fooBar)
   }
 
@@ -67,9 +78,9 @@ class MainTest {
     val dir = root.resolve("dir")
     dir.mkdirs()
     val foo = dir.resolve("foo.kt")
-    foo.writeText("")
+    foo.writeText("", UTF_8)
     val bar = dir.resolve("bar.kt")
-    bar.writeText("")
+    bar.writeText("", UTF_8)
     assertThat(Main.expandArgsToFileNames(listOf(dir.toString()))).containsExactly(foo, bar)
   }
 
@@ -78,16 +89,16 @@ class MainTest {
     val dir1 = root.resolve("dir1")
     dir1.mkdirs()
     val foo1 = dir1.resolve("foo1.kt")
-    foo1.writeText("")
+    foo1.writeText("", UTF_8)
     val bar1 = dir1.resolve("bar1.kt")
-    bar1.writeText("")
+    bar1.writeText("", UTF_8)
 
     val dir2 = root.resolve("dir2")
     dir1.mkdirs()
     val foo2 = dir1.resolve("foo2.kt")
-    foo2.writeText("")
+    foo2.writeText("", UTF_8)
     val bar2 = dir1.resolve("bar2.kt")
-    bar2.writeText("")
+    bar2.writeText("", UTF_8)
 
     assertThat(Main.expandArgsToFileNames(listOf(dir1.toString(), dir2.toString())))
         .containsExactly(foo1, bar1, foo2, bar2)
@@ -109,7 +120,7 @@ class MainTest {
     Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("-")).run()
 
     val expected = "fun f1(): Int = 0\n"
-    assertThat(out.toString("UTF-8")).isEqualTo(expected)
+    assertThat(out.toString(UTF_8)).isEqualTo(expected)
   }
 
   @Test
@@ -119,7 +130,7 @@ class MainTest {
         Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("-")).run()
 
     assertThat(returnValue).isEqualTo(1)
-    assertThat(err.toString("UTF-8")).startsWith("<stdin>:1:14: error: ")
+    assertThat(err.toString(testCharset)).startsWith("<stdin>:1:14: error: ")
   }
 
   @Test
@@ -134,18 +145,18 @@ class MainTest {
             .run()
 
     assertThat(returnValue).isEqualTo(1)
-    assertThat(err.toString("UTF-8")).startsWith("file/Foo.kt:1:14: error: ")
+    assertThat(err.toString(testCharset)).startsWith("file/Foo.kt:1:14: error: ")
   }
 
   @Test
   fun `Parsing errors are reported (file)`() {
     val fooBar = root.resolve("foo.kt")
-    fooBar.writeText("fun    f1 (  ")
+    fooBar.writeText("fun    f1 (  ", UTF_8)
     val returnValue =
         Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf(fooBar.toString())).run()
 
     assertThat(returnValue).isEqualTo(1)
-    assertThat(err.toString("UTF-8")).contains("foo.kt:1:14: error: ")
+    assertThat(err.toString(testCharset)).contains("foo.kt:1:14: error: ")
   }
 
   @Test
@@ -153,9 +164,9 @@ class MainTest {
     val file1 = root.resolve("file1.kt")
     val file2Broken = root.resolve("file2.kt")
     val file3 = root.resolve("file3.kt")
-    file1.writeText("fun    f1 ()  ")
-    file2Broken.writeText("fun    f1 (  ")
-    file3.writeText("fun    f1 ()  ")
+    file1.writeText("fun    f1 ()  ", UTF_8)
+    file2Broken.writeText("fun    f1 (  ", UTF_8)
+    file3.writeText("fun    f1 ()  ", UTF_8)
 
     // Make Main() process files serially.
     val forkJoinPool = ForkJoinPool(1)
@@ -173,16 +184,16 @@ class MainTest {
             .get()
 
     assertThat(returnValue).isEqualTo(1)
-    assertThat(err.toString("UTF-8")).contains("Done formatting $file1")
-    assertThat(err.toString("UTF-8")).contains("file2.kt:1:14: error: ")
-    assertThat(err.toString("UTF-8")).contains("Done formatting $file3")
+    assertThat(err.toString(testCharset)).contains("Done formatting $file1")
+    assertThat(err.toString(testCharset)).contains("file2.kt:1:14: error: ")
+    assertThat(err.toString(testCharset)).contains("Done formatting $file3")
   }
 
   @Test
   fun `file is not modified if it is already formatted`() {
     val code = """fun f() = println("hello, world")""" + "\n"
     val formattedFile = root.resolve("formatted_file.kt")
-    formattedFile.writeText(code)
+    formattedFile.writeText(code, UTF_8)
     val formattedFilePath = formattedFile.toPath()
 
     val lastModifiedTimeBeforeRunningFormatter =
@@ -199,7 +210,7 @@ class MainTest {
   fun `file is modified if it is not formatted`() {
     val code = """fun f() =   println(  "hello, world")""" + "\n"
     val unformattedFile = root.resolve("unformatted_file.kt")
-    unformattedFile.writeText(code)
+    unformattedFile.writeText(code, UTF_8)
     val unformattedFilePath = unformattedFile.toPath()
 
     val lastModifiedTimeBeforeRunningFormatter =
@@ -225,7 +236,7 @@ class MainTest {
 }
 """
     val fooBar = root.resolve("foo.kt")
-    fooBar.writeText(code)
+    fooBar.writeText(code, UTF_8)
 
     Main(
             emptyInput,
@@ -264,7 +275,7 @@ class MainTest {
             arrayOf("--dropbox-style", "-"))
         .run()
 
-    assertThat(out.toString("UTF-8")).isEqualTo(formatted)
+    assertThat(out.toString(UTF_8)).isEqualTo(formatted)
   }
 
   @Test
@@ -298,7 +309,7 @@ class MainTest {
             PrintStream(err),
             arrayOf("-"))
         .run()
-    assertThat(out.toString("UTF-8")).isEqualTo(expected)
+    assertThat(out.toString(UTF_8)).isEqualTo(expected)
 
     out.reset()
 
@@ -308,20 +319,20 @@ class MainTest {
             PrintStream(err),
             arrayOf("-"))
         .run()
-    assertThat(out.toString("UTF-8")).isEqualTo(expected)
+    assertThat(out.toString(UTF_8)).isEqualTo(expected)
   }
 
   @Test
   fun `--dry-run prints filename and does not change file`() {
     val code = """fun f () =    println( "hello, world" )"""
     val file = root.resolve("foo.kt")
-    file.writeText(code)
+    file.writeText(code, UTF_8)
 
     Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf("--dry-run", file.toString()))
         .run()
 
     assertThat(file.readText()).isEqualTo(code)
-    assertThat(out.toString("UTF-8")).contains(file.toString())
+    assertThat(out.toString(testCharset)).contains(file.toString())
   }
 
   @Test
@@ -331,20 +342,20 @@ class MainTest {
     Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("--dry-run", "-"))
         .run()
 
-    assertThat(out.toString("UTF-8")).doesNotContain("hello, world")
-    assertThat(out.toString("UTF-8")).isEqualTo("<stdin>\n")
+    assertThat(out.toString(UTF_8)).doesNotContain("hello, world")
+    assertThat(out.toString(testCharset)).isEqualTo("<stdin>\n")
   }
 
   @Test
   fun `--dry-run prints nothing when there are no changes needed (file)`() {
     val code = """fun f() = println("hello, world")\n"""
     val file = root.resolve("foo.kt")
-    file.writeText(code)
+    file.writeText(code, UTF_8)
 
     Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf("--dry-run", file.toString()))
         .run()
 
-    assertThat(out.toString("UTF-8")).isEmpty()
+    assertThat(out.toString(UTF_8)).isEmpty()
   }
 
   @Test
@@ -354,14 +365,14 @@ class MainTest {
     Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("--dry-run", "-"))
         .run()
 
-    assertThat(out.toString("UTF-8")).isEmpty()
+    assertThat(out.toString(UTF_8)).isEmpty()
   }
 
   @Test
   fun `Exit code is 0 when there are changes (file)`() {
     val code = """fun f () =    println( "hello, world" )"""
     val file = root.resolve("foo.kt")
-    file.writeText(code)
+    file.writeText(code, UTF_8)
 
     val exitCode =
         Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf(file.toString())).run()
@@ -383,7 +394,7 @@ class MainTest {
   fun `Exit code is 1 when there are changes and --set-exit-if-changed is set (file)`() {
     val code = """fun f () =    println( "hello, world" )"""
     val file = root.resolve("foo.kt")
-    file.writeText(code)
+    file.writeText(code, UTF_8)
 
     val exitCode =
         Main(
@@ -415,7 +426,7 @@ class MainTest {
   fun `--set-exit-if-changed and --dry-run changes nothing, prints filenames, and exits with 1 (file)`() {
     val code = """fun f () =    println( "hello, world" )"""
     val file = root.resolve("foo.kt")
-    file.writeText(code)
+    file.writeText(code, UTF_8)
 
     val exitCode =
         Main(
@@ -426,7 +437,7 @@ class MainTest {
             .run()
 
     assertThat(file.readText()).isEqualTo(code)
-    assertThat(out.toString("UTF-8")).contains(file.toString())
+    assertThat(out.toString(testCharset)).contains(file.toString())
     assertThat(exitCode).isEqualTo(1)
   }
 
@@ -442,8 +453,8 @@ class MainTest {
                 arrayOf("--dry-run", "--set-exit-if-changed", "-"))
             .run()
 
-    assertThat(out.toString("UTF-8")).doesNotContain("hello, world")
-    assertThat(out.toString("UTF-8")).isEqualTo("<stdin>\n")
+    assertThat(out.toString(UTF_8)).doesNotContain("hello, world")
+    assertThat(out.toString(testCharset)).isEqualTo("<stdin>\n")
     assertThat(exitCode).isEqualTo(1)
   }
 
@@ -451,7 +462,7 @@ class MainTest {
   fun `--stdin-name can only be used with stdin`() {
     val code = """fun f () =    println( "hello, world" )"""
     val file = root.resolve("foo.kt")
-    file.writeText(code)
+    file.writeText(code, UTF_8)
 
     val exitCode =
         Main(
@@ -462,8 +473,43 @@ class MainTest {
             .run()
 
     assertThat(file.readText()).isEqualTo(code)
-    assertThat(out.toString("UTF-8")).isEmpty()
-    assertThat(err.toString("UTF-8")).isEqualTo("Error: --stdin-name can only be used with stdin\n")
+    assertThat(out.toString(UTF_8)).isEmpty()
+    assertThat(err.toString(testCharset)).isEqualTo("Error: --stdin-name can only be used with stdin\n")
     assertThat(exitCode).isEqualTo(1)
+  }
+
+  @Test
+  fun `Always use UTF8 encoding (stdin, stdout)`() {
+    val code = """fun f () =    println( "hello, world" )"""
+    val expected = """fun f() = println("hello, world")""" + "\n"
+
+    val exitCode =
+        Main(
+                code.byteInputStream(UTF_8),
+                PrintStream(out, true, testCharset),
+                PrintStream(err),
+                arrayOf("-"))
+            .run()
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(out.toString(UTF_8)).isEqualTo(expected)
+  }
+
+  @Test
+  fun `Always use UTF8 encoding (file)`() {
+    val code = """fun f() =   println(  "hello, world")""" + "\n"
+    val file = root.resolve("unformatted_file.kt")
+    file.writeText(code, UTF_8)
+
+    val exitCode =
+        Main(
+                emptyInput,
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf(file.toString()))
+            .run()
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(file.readText(UTF_8)).isEqualTo("""fun f() = println("hello, world")""" + "\n")
   }
 }

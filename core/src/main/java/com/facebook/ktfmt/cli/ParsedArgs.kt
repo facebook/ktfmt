@@ -20,6 +20,7 @@ import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
 import java.io.File
 import java.io.PrintStream
+import java.nio.charset.StandardCharsets.UTF_8
 
 /** ParsedArgs holds the arguments passed to ktfmt on the command-line, after parsing. */
 data class ParsedArgs(
@@ -40,7 +41,7 @@ data class ParsedArgs(
 
     fun processArgs(err: PrintStream, args: Array<String>): ParsedArgs {
       if (args.size == 1 && args[0].startsWith("@")) {
-        return parseOptions(err, File(args[0].substring(1)).readLines().toTypedArray())
+        return parseOptions(err, File(args[0].substring(1)).readLines(UTF_8).toTypedArray())
       } else {
         return parseOptions(err, args)
       }
