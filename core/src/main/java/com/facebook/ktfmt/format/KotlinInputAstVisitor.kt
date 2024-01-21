@@ -44,6 +44,7 @@ import org.jetbrains.kotlin.psi.KtBreakExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtCallableReferenceExpression
 import org.jetbrains.kotlin.psi.KtCatchClause
+import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassBody
 import org.jetbrains.kotlin.psi.KtClassInitializer
 import org.jetbrains.kotlin.psi.KtClassLiteralExpression
@@ -1941,12 +1942,13 @@ class KotlinInputAstVisitor(
   override fun visitClassBody(body: KtClassBody) {
     builder.sync(body)
     emitBracedBlock(body) { children ->
-      val (enumEntries, nonEnumEntryMembers) = children.partition { it is KtEnumEntry }
+      val enumEntryList = EnumEntryList.extractChildList(body)
+      val members = children.filter { it !is KtEnumEntry }
 
-      if (enumEntries.isNotEmpty()) {
+      if (enumEntryList != null) {
         builder.block(ZERO) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
-          for (value in enumEntries) {
+          for (value in enumEntryList.enumEntries) {
             visit(value)
             if (builder.peekToken() == Optional.of(",")) {
               builder.token(",")
@@ -1956,14 +1958,14 @@ class KotlinInputAstVisitor(
         }
         builder.guessToken(";")
 
-        if (nonEnumEntryMembers.isNotEmpty()) {
+        if (members.isNotEmpty()) {
           builder.forcedBreak()
           builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
         }
       }
 
       var prev: PsiElement? = null
-      for (curr in nonEnumEntryMembers) {
+      for (curr in members) {
         val blankLineBetweenMembers =
             when {
               prev == null -> OpsBuilder.BlankLineWanted.PRESERVE

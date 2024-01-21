@@ -17,6 +17,8 @@
 package com.facebook.ktfmt.format
 
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtClassBody
 import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
 import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.psi.KtEnumEntry
@@ -51,9 +53,16 @@ internal class RedundantSemicolonDetector {
     if (parent is KtStringTemplateExpression || parent is KtStringTemplateEntry) {
       return false
     }
-    if (parent is KtEnumEntry &&
-        parent.siblings(forward = true, withItself = false).any { it is KtDeclaration }) {
-      return false
+
+    if (parent is KtEnumEntry) {
+      val classBody = parent.parent as KtClassBody
+      // Terminating semicolon with no other class members.
+      return classBody.children.last() == parent
+    }
+    if (parent is KtClassBody) {
+      val enumEntryList = EnumEntryList.extractChildList(parent) ?: return true
+      // Is not terminating semicolon or is terminating with no members.
+      return element != enumEntryList.terminatingSemicolon || parent.children.isEmpty()
     }
 
     val prevLeaf = element.prevLeaf(false)
