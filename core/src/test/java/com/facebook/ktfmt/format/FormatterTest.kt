@@ -375,6 +375,7 @@ class FormatterTest {
         |      "The" +
         |          "quick" +
         |          ("brown".."fox") +
+        |          ("brown"..<"fox") +
         |          "jumps" +
         |          "over" +
         |          "the".."lazy" + "dog"
@@ -1696,6 +1697,7 @@ class FormatterTest {
       |    in a..3 -> print()
       |    in 1..b -> print()
       |    !in 1..b -> print()
+      |    in 1..<b -> print()
       |    else -> print(3)
       |  }
       |}
