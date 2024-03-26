@@ -200,9 +200,7 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
             false));
   }
 
-  /**
-   * @noinspection ALL
-   */
+  /** @noinspection ALL */
   public JComponent $$$getRootComponent$$$() {
     return panel;
   }
