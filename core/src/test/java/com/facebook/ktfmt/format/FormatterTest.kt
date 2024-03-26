@@ -4683,6 +4683,68 @@ class FormatterTest {
               .trimMargin())
 
   @Test
+  fun `semicolon is removed from empty enum`() {
+    val code =
+        """
+        |enum class SingleSemi {
+        |  ;
+        |}
+        |
+        |enum class MultSemi {
+        |  // a
+        |  ;
+        |  // b
+        |  ;
+        |  // c
+        |  ;
+        |}
+        |"""
+            .trimMargin()
+    val expected =
+        """
+        |enum class SingleSemi {}
+        |
+        |enum class MultSemi {
+        |  // a
+        |
+        |  // b
+        |
+        |  // c
+        |
+        |}
+        |"""
+            .trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `semicolon management in enum with no entries but other members`() {
+    val code =
+        """
+        |enum class Empty {
+        |  ;
+        |
+        |  fun f() {}
+        |  ;
+        |  fun g() {}
+        |}
+        |"""
+            .trimMargin()
+    val expected =
+        """
+        |enum class Empty {
+        |  ;
+        |
+        |  fun f() {}
+        |
+        |  fun g() {}
+        |}
+        |"""
+            .trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
   fun `handle varargs and spread operator`() =
       assertFormatted(
           """
