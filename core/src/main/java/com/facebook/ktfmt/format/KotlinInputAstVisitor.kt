@@ -44,6 +44,7 @@ import org.jetbrains.kotlin.psi.KtBreakExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtCallableReferenceExpression
 import org.jetbrains.kotlin.psi.KtCatchClause
+import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassBody
 import org.jetbrains.kotlin.psi.KtClassInitializer
 import org.jetbrains.kotlin.psi.KtClassLiteralExpression
@@ -1961,6 +1962,12 @@ class KotlinInputAstVisitor(
         if (nonEnumEntryMembers.isNotEmpty()) {
           builder.forcedBreak()
           builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
+        }
+      } else {
+        val parent = body.parent
+        if (parent is KtClass && parent.isEnum() && children.isNotEmpty()) {
+          builder.token(";")
+          builder.forcedBreak()
         }
       }
 
