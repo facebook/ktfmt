@@ -20,11 +20,15 @@ import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.ParseError
 import com.google.googlejavaformat.FormattingError
 import java.io.BufferedReader
+import java.io.BufferedWriter
 import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.io.OutputStreamWriter
 import java.io.PrintStream
+import java.nio.charset.StandardCharsets.UTF_8
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.exitProcess
 
@@ -125,7 +129,8 @@ class Main(
   private fun format(file: File?): Boolean {
     val fileName = file?.toString() ?: parsedArgs.stdinName ?: "<stdin>"
     try {
-      val code = file?.readText() ?: BufferedReader(InputStreamReader(input)).readText()
+      val bytes = if (file == null) input else FileInputStream(file)
+      val code = BufferedReader(InputStreamReader(bytes, UTF_8)).readText()
       val formattedCode = Formatter.format(parsedArgs.formattingOptions, code)
       val alreadyFormatted = code == formattedCode
 
@@ -136,7 +141,7 @@ class Main(
             out.println(fileName)
           }
         } else {
-          out.print(formattedCode)
+          BufferedWriter(OutputStreamWriter(out, UTF_8)).use { it.write(formattedCode) }
         }
         return alreadyFormatted
       }
@@ -148,7 +153,7 @@ class Main(
       } else {
         // TODO(T111284144): Add tests
         if (!alreadyFormatted) {
-          file.writeText(formattedCode)
+          file.writeText(formattedCode, UTF_8)
         }
         err.println("Done formatting $fileName")
       }
@@ -158,18 +163,14 @@ class Main(
       err.println("Error formatting $fileName: ${e.message}; skipping.")
       throw e
     } catch (e: ParseError) {
-      handleParseError(fileName, e)
+      err.println("$fileName:${e.message}")
       throw e
     } catch (e: FormattingError) {
       for (diagnostic in e.diagnostics()) {
-        System.err.println("$fileName:$diagnostic")
+        err.println("$fileName:$diagnostic")
       }
       e.printStackTrace(err)
       throw e
     }
-  }
-
-  private fun handleParseError(fileName: String, e: ParseError) {
-    err.println("$fileName:${e.message}")
   }
 }
