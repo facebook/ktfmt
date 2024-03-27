@@ -16,20 +16,12 @@
 
 package com.facebook.ktfmt.intellij;
 
-import static org.junit.Assert.assertEquals;
+class Notifications {
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+  static final String PARSING_ERROR_NOTIFICATION_GROUP = "ktfmt parsing error";
+  static final String PARSING_ERROR_TITLE = PARSING_ERROR_NOTIFICATION_GROUP;
 
-@RunWith(JUnit4.class)
-public class FormatterUtilTest {
-  @Test
-  public void getReplacements() throws Exception {
-    String code = "val   a =    5";
-    String expected = "val a = 5\n";
-    String actual = FormatterUtil.formatCode(UiFormatterStyle.DEFAULT, code);
-
-    assertEquals(expected, actual);
+  static String parsingErrorMessage(String filename) {
+    return "ktfmt failed. Does " + filename + " have syntax errors?";
   }
 }

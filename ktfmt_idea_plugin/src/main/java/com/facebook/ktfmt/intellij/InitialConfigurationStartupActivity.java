@@ -17,21 +17,21 @@
 package com.facebook.ktfmt.intellij;
 
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
+import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManagerListener;
+import com.intellij.openapi.startup.StartupActivity;
 import org.jetbrains.annotations.NotNull;
 
-final class InitialConfigurationProjectManagerListener implements ProjectManagerListener {
+final class InitialConfigurationStartupActivity implements StartupActivity.Background {
 
   private static final String NOTIFICATION_TITLE = "Enable ktfmt";
   private static final NotificationGroup NOTIFICATION_GROUP =
-      new NotificationGroup(NOTIFICATION_TITLE, NotificationDisplayType.STICKY_BALLOON, true);
+      NotificationGroupManager.getInstance().getNotificationGroup(NOTIFICATION_TITLE);
 
   @Override
-  public void projectOpened(@NotNull Project project) {
+  public void runActivity(@NotNull Project project) {
 
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
 
@@ -42,17 +42,17 @@ final class InitialConfigurationProjectManagerListener implements ProjectManager
   }
 
   private void displayNewUserNotification(Project project, KtfmtSettings settings) {
-    Notification notification =
-        new Notification(
+    new Notification(
             NOTIFICATION_GROUP.getDisplayId(),
             NOTIFICATION_TITLE,
             "The ktfmt plugin is disabled by default. "
                 + "<a href=\"enable\">Enable for this project</a>.",
-            NotificationType.INFORMATION,
+            NotificationType.INFORMATION)
+        .setListener(
             (n, e) -> {
               settings.setEnabled(true);
               n.expire();
-            });
-    notification.notify(project);
+            })
+        .notify(project);
   }
 }
