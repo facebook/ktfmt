@@ -3,8 +3,10 @@ package com.facebook.ktfmt.format
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.psi.KtClassBody
 import org.jetbrains.kotlin.psi.KtCollectionLiteralExpression
 import org.jetbrains.kotlin.psi.KtElement
+import org.jetbrains.kotlin.psi.KtEnumEntry
 import org.jetbrains.kotlin.psi.KtFunctionLiteral
 import org.jetbrains.kotlin.psi.KtLambdaExpression
 import org.jetbrains.kotlin.psi.KtParameterList
@@ -70,6 +72,13 @@ object TrailingCommas {
             return // Never add trailing commas to lambda param lists
           }
         }
+        is KtClassBody -> {
+          EnumEntryList.extractChildList(element)?.also {
+            if (it.terminatingSemicolon != null) {
+              return // Never add a trailing comma after there is already a terminating semicolon
+            }
+          }
+        }
       }
 
       val list = extractManagedList(element) ?: return
@@ -96,6 +105,16 @@ object TrailingCommas {
         ManagedList(element.getInnerExpressions(), element.trailingComma)
       }
       is KtWhenEntry -> ManagedList(element.conditions.toList(), element.trailingComma)
+      is KtEnumEntry -> {
+        EnumEntryList.extractParentList(element).let {
+          ManagedList(it.enumEntries, it.trailingComma)
+        }
+      }
+      is KtClassBody -> {
+        EnumEntryList.extractChildList(element)?.let {
+          ManagedList(it.enumEntries, it.trailingComma)
+        }
+      }
       else -> null
     }
   }
