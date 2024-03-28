@@ -1,5 +1,4 @@
-[![](https://github.com/facebookincubator/ktfmt/workflows/build/badge.svg)](https://github.com/facebookincubator/ktfmt/actions?query=workflow%3Abuild)
-
+[![](https://github.com/facebookincubator/ktfmt/workflows/build/badge.svg)](https://github.com/facebookincubator/ktfmt/actions?query=workflow%3Abuild)[![slack](https://img.shields.io/badge/Slack-ktfmt-purple.svg?logo=slack)](https://kotlinlang.slack.com/archives/C01GZCU0QNB)
 # ktfmt
 
 `ktfmt` is a program that pretty-prints (formats) Kotlin code, based on [google-java-format](https://github.com/google/google-java-format).
