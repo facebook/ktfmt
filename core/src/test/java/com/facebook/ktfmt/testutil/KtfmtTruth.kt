@@ -47,18 +47,18 @@ fun assertFormatted(
   val first = code.lines().first()
   var deducedCode = code
   var maxWidth = FormattingOptions.DEFAULT_MAX_WIDTH
-  val isFirstLineAMaxWidthMarker = first.all { it == '-' }
+  val isFirstLineAMaxWidthMarker = first.isNotEmpty() && first.all { it == '-' }
   if (deduceMaxWidth) {
     if (!isFirstLineAMaxWidthMarker) {
       throw RuntimeException(
-          "deduceMaxWidth is false, please remove the first dashes only line from the code (i.e. ---)")
+          "When deduceMaxWidth is true the first line needs to be all dashes only (i.e. ---)")
     }
     deducedCode = code.substring(code.indexOf('\n') + 1)
     maxWidth = first.length
   } else {
     if (isFirstLineAMaxWidthMarker) {
       throw RuntimeException(
-          "When deduceMaxWidth is true the first line need to be all dashes only (i.e. ---)")
+          "deduceMaxWidth is false, please remove the first dashes only line from the code (i.e. ---)")
     }
   }
   assertThatFormatting(deducedCode)
@@ -112,7 +112,7 @@ class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) 
         println(expectedFormatting)
         println("#".repeat(20))
         println(
-            "Need more information about the break operations?" +
+            "Need more information about the break operations? " +
                 "Run test with assertion with \"FormattingOptions(debuggingPrintOpsAfterFormatting = true)\"")
       }
     } catch (e: Error) {
