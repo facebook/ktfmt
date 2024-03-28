@@ -5904,15 +5904,6 @@ class FormatterTest {
               .trimMargin())
 
   @Test
-  fun `lambda with only comments`() =
-      assertFormatted(
-          """
-      |val a = { /* do nothing */ }
-      |val b = { /* do nothing */ /* also do nothing */ }
-      |"""
-              .trimMargin())
-
-  @Test
   fun `chaining - many dereferences`() =
       assertFormatted(
           """

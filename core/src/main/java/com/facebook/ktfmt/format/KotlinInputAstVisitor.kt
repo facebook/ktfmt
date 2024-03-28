@@ -891,7 +891,6 @@ class KotlinInputAstVisitor(
     val valueParams = lambdaExpression.valueParameters
     val hasParams = valueParams.isNotEmpty()
     val statements = (lambdaExpression.bodyExpression ?: fail()).children
-    val hasComments = lambdaExpression.bodyExpression?.children()?.any { it is PsiComment } ?: false
     val hasStatements = statements.isNotEmpty()
     val hasArrow = lambdaExpression.functionLiteral.arrow != null
 
@@ -947,7 +946,7 @@ class KotlinInputAstVisitor(
       }
     }
 
-    if (hasParams || hasArrow || hasStatements || hasComments) {
+    if (hasParams || hasArrow || hasStatements) {
       // If we had to break in the body, ensure there is a break before the closing brace
       builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusZeroIndent)
     }
