@@ -23,6 +23,7 @@ import com.facebook.ktfmt.format.Parser
 import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
 import com.google.common.truth.Truth
+import org.intellij.lang.annotations.Language
 import org.junit.Assert
 
 /**
@@ -40,7 +41,7 @@ import org.junit.Assert
  *   beginning to indicate the max width to format by
  */
 fun assertFormatted(
-    code: String,
+    @Language("kts") code: String,
     formattingOptions: FormattingOptions = FormattingOptions(),
     deduceMaxWidth: Boolean = false
 ) {
@@ -66,7 +67,7 @@ fun assertFormatted(
       .isEqualTo(deducedCode)
 }
 
-fun assertThatFormatting(code: String): FormattedCodeSubject {
+fun assertThatFormatting(@Language("kts") code: String): FormattedCodeSubject {
   fun codes(): Subject.Factory<FormattedCodeSubject, String> {
     return Subject.Factory { metadata, subject ->
       FormattedCodeSubject(metadata, checkNotNull(subject))
@@ -90,7 +91,7 @@ class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) 
     return this
   }
 
-  fun isEqualTo(expectedFormatting: String) {
+  fun isEqualTo(@Language("kts") expectedFormatting: String) {
     if (!allowTrailingWhitespace && expectedFormatting.lines().any { it.endsWith(" ") }) {
       throw RuntimeException(
           "Expected code contains trailing whitespace, which the formatter usually doesn't output:\n" +
