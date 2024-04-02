@@ -23,7 +23,6 @@ import com.google.googlejavaformat.FormattingError
 import com.google.googlejavaformat.Indent
 import com.google.googlejavaformat.Indent.Const.ZERO
 import com.google.googlejavaformat.OpsBuilder
-import com.google.googlejavaformat.Output
 import com.google.googlejavaformat.Output.BreakTag
 import java.util.ArrayDeque
 import java.util.Optional
@@ -124,7 +123,6 @@ import org.jetbrains.kotlin.psi.KtWhenConditionWithExpression
 import org.jetbrains.kotlin.psi.KtWhenExpression
 import org.jetbrains.kotlin.psi.KtWhileExpression
 import org.jetbrains.kotlin.psi.psiUtil.children
-import org.jetbrains.kotlin.psi.psiUtil.getNextSiblingIgnoringWhitespace
 import org.jetbrains.kotlin.psi.psiUtil.getPrevSiblingIgnoringWhitespace
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import org.jetbrains.kotlin.psi.psiUtil.startsWithComment
@@ -399,8 +397,8 @@ class KotlinInputAstVisitor(
     }
   }
 
-  private fun genSym(): Output.BreakTag {
-    return Output.BreakTag()
+  private fun genSym(): BreakTag {
+    return BreakTag()
   }
 
   private fun emitBracedBlock(
@@ -726,34 +724,6 @@ class KotlinInputAstVisitor(
     return current is KtCallExpression &&
         previous !is KtCallExpression &&
         index == parts.indices.last
-  }
-
-  /** Returns true if the expression represents an invocation that is also a lambda */
-  private fun KtExpression.isLambda(): Boolean {
-    return extractCallExpression(this)?.lambdaArguments?.isNotEmpty() ?: false
-  }
-
-  /** Does this list have parens with only whitespace between them? */
-  private fun KtParameterList.hasEmptyParens(): Boolean {
-    val left = this.leftParenthesis ?: return false
-    val right = this.rightParenthesis ?: return false
-    return left.getNextSiblingIgnoringWhitespace() == right
-  }
-
-  /** Does this list have parens with only whitespace between them? */
-  private fun KtValueArgumentList.hasEmptyParens(): Boolean {
-    val left = this.leftParenthesis ?: return false
-    val right = this.rightParenthesis ?: return false
-    return left.getNextSiblingIgnoringWhitespace() == right
-  }
-
-  /**
-   * emitQualifiedExpression formats call expressions that are either part of a qualified
-   * expression, or standing alone. This method makes it easier to handle both cases uniformly.
-   */
-  private fun extractCallExpression(expression: KtExpression): KtCallExpression? {
-    val ktExpression = (expression as? KtQualifiedExpression)?.selectorExpression ?: expression
-    return ktExpression as? KtCallExpression
   }
 
   override fun visitCallExpression(callExpression: KtCallExpression) {
@@ -2594,7 +2564,7 @@ class KotlinInputAstVisitor(
     sync(psiElement.startOffset)
   }
 
-  /** Prevent susequent comments from being moved ahead of this point, into parent [Level]s. */
+  /** Prevent subsequent comments from being moved ahead of this point, into parent [Level]s. */
   private fun OpsBuilder.fenceComments() {
     addAll(FenceCommentsOp.AS_LIST)
   }
