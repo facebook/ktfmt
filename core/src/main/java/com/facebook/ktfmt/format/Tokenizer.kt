@@ -42,66 +42,80 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
     private val WHITESPACE_NEWLINE_REGEX: Pattern = Pattern.compile("\\R|( )+")
   }
 
-  val toks = mutableListOf<KotlinTok>()
-  var index = 0
+  val toks: MutableList<KotlinTok> = mutableListOf()
+  var index: Int = 0
+    private set
 
   override fun visitElement(element: PsiElement) {
     val startIndex = element.startOffset
+    val endIndex = element.endOffset
+    val elementText = element.text
+    val originalText = fileText.substring(startIndex, endIndex)
     when (element) {
       is PsiComment -> {
         toks.add(
             KotlinTok(
-                index,
-                fileText.substring(startIndex, element.endOffset),
-                element.text,
-                startIndex,
-                0,
-                false,
-                KtTokens.EOF))
+                index = index,
+                originalText = originalText,
+                text = elementText,
+                position = startIndex,
+                column = 0,
+                isToken = false,
+                kind = KtTokens.EOF,
+            ),
+        )
         index++
         return
       }
       is KtStringTemplateExpression -> {
         toks.add(
             KotlinTok(
-                index,
-                WhitespaceTombstones.replaceTrailingWhitespaceWithTombstone(
-                    fileText.substring(startIndex, element.endOffset)),
-                element.text,
-                startIndex,
-                0,
-                true,
-                KtTokens.EOF))
+                index = index,
+                originalText =
+                    WhitespaceTombstones.replaceTrailingWhitespaceWithTombstone(
+                        originalText,
+                    ),
+                text = elementText,
+                position = startIndex,
+                column = 0,
+                isToken = true,
+                kind = KtTokens.EOF,
+            ),
+        )
         index++
         return
       }
       is LeafPsiElement -> {
-        val elementText = element.text
-        val endIndex = element.endOffset
         if (element is PsiWhiteSpace) {
           val matcher = WHITESPACE_NEWLINE_REGEX.matcher(elementText)
           while (matcher.find()) {
             val text = matcher.group()
             toks.add(
                 KotlinTok(
-                    -1,
-                    fileText.substring(startIndex + matcher.start(), startIndex + matcher.end()),
-                    text,
-                    startIndex + matcher.start(),
-                    0,
-                    false,
-                    KtTokens.EOF))
+                    index = -1,
+                    originalText =
+                        fileText.substring(
+                            startIndex + matcher.start(), startIndex + matcher.end()),
+                    text = text,
+                    position = startIndex + matcher.start(),
+                    column = 0,
+                    isToken = false,
+                    kind = KtTokens.EOF,
+                ),
+            )
           }
         } else {
           toks.add(
               KotlinTok(
-                  index,
-                  fileText.substring(startIndex, endIndex),
-                  elementText,
-                  startIndex,
-                  0,
-                  true,
-                  KtTokens.EOF))
+                  index = index,
+                  originalText = originalText,
+                  text = elementText,
+                  position = startIndex,
+                  column = 0,
+                  isToken = true,
+                  kind = KtTokens.EOF,
+              ),
+          )
           index++
         }
       }
