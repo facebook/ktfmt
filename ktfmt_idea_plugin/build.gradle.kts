@@ -15,12 +15,12 @@
  */
 
 plugins {
-  id("org.jetbrains.intellij") version "1.15.0"
+  id("org.jetbrains.intellij") version "1.17.3"
   java
   id("com.diffplug.spotless") version "5.10.2"
 }
 
-val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
+val ktfmtVersion = rootProject.file("../version.txt").readText().trim().replace("-SNAPSHOT", "")
 val pluginVersion = "1.1"
 
 group = "com.facebook"
@@ -45,18 +45,18 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
   // Version with which to build (and run; unless alternativeIdePath is specified)
-  version = "2023.2.2"
+  version.set("2022.1")
   // To run on a different IDE, uncomment and specify a path.
   // localPath = "/Applications/Android Studio.app"
 }
 
 tasks {
   patchPluginXml {
-    sinceBuild.set("213")
+    sinceBuild.set("221")
     untilBuild.set("")
   }
   publishPlugin { token.set(System.getenv("JETBRAINS_MARKETPLACE_TOKEN")) }
-  runPluginVerifier { ideVersions.set(listOf("211.6432.7")) }
+  runPluginVerifier { ideVersions.set(listOf("221")) }
 }
 
 spotless { java { googleJavaFormat() } }
