@@ -29,9 +29,11 @@ import com.google.googlejavaformat.Op
  * indentation.
  */
 object FenceCommentsOp : Op {
-  val AS_LIST = ImmutableList.of<Op>(FenceCommentsOp)
+  val AS_LIST: ImmutableList<Op> = ImmutableList.of(FenceCommentsOp)
 
   override fun add(builder: DocBuilder) {
     // Do nothing. This Op simply needs to be in the OpsBuilder.
   }
+
+  override fun toString(): String = "FenceComments"
 }
