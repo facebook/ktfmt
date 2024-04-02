@@ -29,11 +29,13 @@ import org.junit.Assert
 /**
  * Verifies the given code passes through formatting, and stays the same at the end
  *
- * @param code a code string that continas an optional first line made of "---" in the case
- *   [deduceMaxWidth] is true. For example:
+ * @param code a code string that contains an optional first line made of at least 8 '-' or '/' in
+ *   the case [deduceMaxWidth] is true. For example:
  * ```
- * --------------------
- * // exactly 20 `-` above
+ * ////////////////////////
+ * // exactly 24 `/` above
+ * // and that will be the
+ * // size of the line
  * fun f()
  * ```
  *
@@ -43,12 +45,13 @@ import org.junit.Assert
 fun assertFormatted(
     @Language("kts") code: String,
     formattingOptions: FormattingOptions = FormattingOptions(),
-    deduceMaxWidth: Boolean = false
+    deduceMaxWidth: Boolean = false,
 ) {
   val first = code.lines().first()
   var deducedCode = code
   var maxWidth = FormattingOptions.DEFAULT_MAX_WIDTH
-  val isFirstLineAMaxWidthMarker = first.isNotEmpty() && first.all { it == '-' }
+  val lineWidthMarkers = setOf('-', '/')
+  val isFirstLineAMaxWidthMarker = first.length >= 8 && first.all { it in lineWidthMarkers }
   if (deduceMaxWidth) {
     if (!isFirstLineAMaxWidthMarker) {
       throw RuntimeException(

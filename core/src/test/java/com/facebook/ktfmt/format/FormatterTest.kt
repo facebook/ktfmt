@@ -65,7 +65,7 @@ class FormatterTest {
   fun `call chains`() =
       assertFormatted(
           """
-      |--------------------------------------------------
+      |//////////////////////////////////////////////////
       |fun f() {
       |  // Static method calls are attached to the class name.
       |  ImmutableList.newBuilder()
@@ -104,7 +104,7 @@ class FormatterTest {
   fun `line breaks in function arguments`() =
       assertFormatted(
           """
-      |--------------------------------------------------
+      |//////////////////////////////////////////////////
       |fun f() {
       |  computeBreaks(
       |      javaOutput.commentsHelper,
@@ -127,7 +127,7 @@ class FormatterTest {
   fun `parameters and return type in function definitions`() =
       assertFormatted(
           """
-      |----------------------------------------
+      |////////////////////////////////////////
       |fun format(
       |    code: String,
       |    maxWidth: Int =
@@ -313,7 +313,7 @@ class FormatterTest {
   fun `breaking long binary operations`() =
       assertFormatted(
           """
-      |--------------------
+      |////////////////////
       |fun foo() {
       |  val finalWidth =
       |      value1 +
@@ -336,7 +336,7 @@ class FormatterTest {
   fun `prioritize according to associativity`() =
       assertFormatted(
           """
-      |--------------------------------------
+      |//////////////////////////////////////
       |fun foo() {
       |  return expression1 != expression2 ||
       |      expression2 != expression1
@@ -349,7 +349,7 @@ class FormatterTest {
   fun `once a binary expression is broken, split on every line`() =
       assertFormatted(
           """
-        |--------------------------------------
+        |//////////////////////////////////////
         |fun foo() {
         |  val sentence =
         |      "The" +
@@ -369,7 +369,7 @@ class FormatterTest {
   fun `long binary expressions with ranges in the middle`() =
       assertFormatted(
           """
-        |--------------------------------------
+        |//////////////////////////////////////
         |fun foo() {
         |  val sentence =
         |      "The" +
@@ -388,7 +388,7 @@ class FormatterTest {
   fun `assignment expressions with scoping functions are block-like`() =
       assertFormatted(
           """
-        |---------------------------
+        |///////////////////////////
         |fun f() {
         |  name.sub = scope { x ->
         |    //
@@ -596,7 +596,7 @@ class FormatterTest {
   fun `a property with a too long name being broken on multiple lines`() =
       assertFormatted(
           """
-      |--------------------
+      |////////////////////
       |class Foo {
       |  val thisIsALongName:
       |      String =
@@ -676,7 +676,7 @@ class FormatterTest {
   fun `safe dot operator expression chain in expression function`() =
       assertFormatted(
           """
-      |--------------------------------------------------
+      |//////////////////////////////////////////////////
       |fun f(number: Int) =
       |    Something.doStuff(number)?.size
       |"""
@@ -687,7 +687,7 @@ class FormatterTest {
   fun `avoid breaking suspected package names`() =
       assertFormatted(
           """
-      |-----------------------
+      |///////////////////////
       |fun f() {
       |  com.facebook.Foo
       |      .format()
@@ -710,7 +710,7 @@ class FormatterTest {
   fun `an assortment of tests for emitQualifiedExpression`() =
       assertFormatted(
           """
-      |-------------------------------------
+      |/////////////////////////////////////
       |fun f() {
       |  // Regression test: https://github.com/facebookincubator/ktfmt/issues/56
       |  kjsdfglkjdfgkjdfkgjhkerjghkdfj
@@ -762,7 +762,7 @@ class FormatterTest {
   fun `an assortment of tests for emitQualifiedExpression with lambdas`() =
       assertFormatted(
           """
-      |----------------------------------------------------------------------------
+      |////////////////////////////////////////////////////////////////////////////
       |fun f() {
       |  val items =
       |      items.toMutableList.apply {
@@ -862,7 +862,7 @@ class FormatterTest {
   fun `don't one-line lambdas following argument breaks`() =
       assertFormatted(
           """
-      |------------------------------------------------------------------------
+      |////////////////////////////////////////////////////////////////////////
       |class Foo : Bar() {
       |  fun doIt() {
       |    // don't break in lambda, no argument breaks found
@@ -920,7 +920,7 @@ class FormatterTest {
   fun `indent parameters after a break when there's a lambda afterwards`() =
       assertFormatted(
           """
-      |---------------------------
+      |///////////////////////////
       |class C {
       |  fun method() {
       |    Foo.FooBar(
@@ -939,7 +939,7 @@ class FormatterTest {
   fun `no forward propagation of breaks in call expressions (at trailing lambda)`() =
       assertFormatted(
           """
-      |--------------------------
+      |//////////////////////////
       |fun test() {
       |  foo_bar_baz__zip<A>(b) {
       |    c
@@ -956,7 +956,7 @@ class FormatterTest {
   fun `forward propagation of breaks in call expressions (at value args)`() =
       assertFormatted(
           """
-      |----------------------
+      |//////////////////////
       |fun test() {
       |  foo_bar_baz__zip<A>(
       |      b) {
@@ -978,7 +978,7 @@ class FormatterTest {
   fun `forward propagation of breaks in call expressions (at type args)`() =
       assertFormatted(
           """
-      |-------------------
+      |///////////////////
       |fun test() {
       |  foo_bar_baz__zip<
       |      A>(
@@ -999,7 +999,7 @@ class FormatterTest {
   fun `expected indent in methods following single-line strings`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |"Hello %s"
       |    .format(expression)
       |"""
@@ -1010,7 +1010,7 @@ class FormatterTest {
   fun `forced break between multi-line strings and their selectors`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |val STRING =
       |    $TQ
       |    |foo
@@ -1020,7 +1020,7 @@ class FormatterTest {
       |val STRING =
       |    $TQ
       |    |foo
-      |    |----------------------------------$TQ
+      |    |//////////////////////////////////$TQ
       |        .wouldntFit()
       |
       |val STRING =
@@ -1585,7 +1585,7 @@ class FormatterTest {
   fun `Arguments are blocks`() =
       assertFormatted(
           """
-      |--------------------------------------------------
+      |//////////////////////////////////////////////////
       |override fun visitProperty(property: KtProperty) {
       |  builder.sync(property)
       |  builder.block(ZERO) {
@@ -1735,7 +1735,7 @@ class FormatterTest {
   fun `when() expression with multiline condition`() =
       assertFormatted(
           """
-      |--------------------------
+      |//////////////////////////
       |fun foo() {
       |  when (expressions1 +
       |      expression2 +
@@ -1823,7 +1823,7 @@ class FormatterTest {
   fun `multi line function without a block body`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |fun longFunctionNoBlock():
       |    Int =
       |    1234567 + 1234567
@@ -1838,7 +1838,7 @@ class FormatterTest {
   fun `return type doesn't fit in one line`() =
       assertFormatted(
           """
-      |--------------------------------------------------
+      |//////////////////////////////////////////////////
       |interface X {
       |  fun f(
       |      arg1: Arg1Type,
@@ -1878,7 +1878,7 @@ class FormatterTest {
   fun `list of superclasses over multiple lines`() =
       assertFormatted(
           """
-      |--------------------
+      |////////////////////
       |class Derived2 :
       |    Super1,
       |    Super2 {}
@@ -2154,7 +2154,7 @@ class FormatterTest {
   fun `if expression with break before else`() =
       assertFormatted(
           """
-      |------------------------------
+      |//////////////////////////////
       |fun compute(b: Boolean) {
       |  val c =
       |      if (a + b < 20) a + b
@@ -2170,7 +2170,7 @@ class FormatterTest {
   fun `if expression with break before expressions`() =
       assertFormatted(
           """
-      |--------------------------
+      |//////////////////////////
       |fun compute(b: Boolean) {
       |  val c =
       |      if (a + b < 20)
@@ -2208,7 +2208,7 @@ class FormatterTest {
   fun `if expression with multiline condition`() =
       assertFormatted(
           """
-      |----------------------------
+      |////////////////////////////
       |fun foo() {
       |  if (expressions1 &&
       |      expression2 &&
@@ -2231,7 +2231,7 @@ class FormatterTest {
   fun `assignment expression on multiple lines`() =
       assertFormatted(
           """
-      |--------------------------------------------------
+      |//////////////////////////////////////////////////
       |fun f() {
       |  var myVariable = 5
       |  myVariable =
@@ -2253,7 +2253,7 @@ class FormatterTest {
   fun `a few variations of constructors`() =
       assertFormatted(
           """
-      |------------------------------------------------------
+      |//////////////////////////////////////////////////////
       |class Foo constructor(number: Int) {}
       |
       |class Foo2 private constructor(number: Int) {}
@@ -2290,7 +2290,7 @@ class FormatterTest {
   fun `a primary constructor without a class body `() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |data class Foo(
       |    val number: Int = 0
       |)
@@ -2302,7 +2302,7 @@ class FormatterTest {
   fun `a secondary constructor without a body`() =
       assertFormatted(
           """
-      |---------------------------
+      |///////////////////////////
       |data class Foo {
       |  constructor(
       |      val number: Int = 0
@@ -2316,7 +2316,7 @@ class FormatterTest {
   fun `a secondary constructor with a body breaks before closing parenthesis`() =
       assertFormatted(
           """
-      |---------------------------
+      |///////////////////////////
       |data class Foo {
       |  constructor(
       |      val number: Int = 0
@@ -2359,7 +2359,7 @@ class FormatterTest {
   fun `a constructor with many arguments over multiple lines`() =
       assertFormatted(
           """
-      |--------------------------------------------------
+      |//////////////////////////////////////////////////
       |data class Foo
       |constructor(
       |    val number: Int,
@@ -2390,7 +2390,7 @@ class FormatterTest {
   fun `a secondary constructor with many arguments over multiple lines`() =
       assertFormatted(
           """
-      |--------------------------------------------------
+      |//////////////////////////////////////////////////
       |data class Foo {
       |  constructor(
       |      val number: Int,
@@ -2408,7 +2408,7 @@ class FormatterTest {
   fun `a secondary constructor with many arguments passed to delegate`() =
       assertFormatted(
           """
-      |--------------------------------------------------
+      |//////////////////////////////////////////////////
       |data class Foo {
       |  constructor(
       |      val number: Int,
@@ -2432,7 +2432,7 @@ class FormatterTest {
   fun `a secondary constructor with no arguments passed to delegate`() =
       assertFormatted(
           """
-      |--------------------------------------------------
+      |//////////////////////////////////////////////////
       |data class Foo {
       |  constructor() :
       |      this(
@@ -2553,7 +2553,7 @@ class FormatterTest {
   fun `keep array indexing grouped with expression is possible`() =
       assertFormatted(
           """
-      |-----------------------
+      |///////////////////////
       |fun f(a: Magic) {
       |  foo.bar()
       |      .foobar[1, 2, 3]
@@ -2576,7 +2576,7 @@ class FormatterTest {
   fun `mixed chains`() =
       assertFormatted(
           """
-      |-----------------------
+      |///////////////////////
       |fun f(a: Magic) {
       |  foo.bar()
       |      .foobar[1, 2, 3]
@@ -2599,7 +2599,7 @@ class FormatterTest {
   fun `handle destructuring declaration`() =
       assertFormatted(
           """
-      |-----------------------------------------------
+      |///////////////////////////////////////////////
       |fun f() {
       |  val (a, b: Int) = listOf(1, 2)
       |  val (asd, asd, asd, asd, asd, asd, asd) =
@@ -2617,7 +2617,7 @@ class FormatterTest {
   fun `chains with derferences and array indexing`() =
       assertFormatted(
           """
-      |-----------------------
+      |///////////////////////
       |fun f() {
       |  foo.bam()
       |      .uber!![0, 1, 2]
@@ -2635,7 +2635,7 @@ class FormatterTest {
   fun `block like syntax after dereferences and indexing with short lines`() =
       assertFormatted(
           """
-      |-----------------------
+      |///////////////////////
       |fun f() {
       |  foo.bam()
       |      .uber!![0, 1, 2]
@@ -2651,7 +2651,7 @@ class FormatterTest {
   fun `block like syntax after dereferences and indexing with long lines`() =
       assertFormatted(
           """
-      |----------------------------------
+      |//////////////////////////////////
       |fun f() {
       |  foo.uber!![0, 1, 2].forEach {
       |    println(it)
@@ -2665,7 +2665,7 @@ class FormatterTest {
   fun `try to keep type names together`() =
       assertFormatted(
           """
-      |-----------------------
+      |///////////////////////
       |fun f() {
       |  com.facebook.foo.Foo(
       |      1, 2)
@@ -2692,7 +2692,7 @@ class FormatterTest {
   fun `avoid breaking brackets and keep them with array name`() =
       assertFormatted(
           """
-      |-------------------------------------------------------------------------
+      |/////////////////////////////////////////////////////////////////////////
       |fun f() {
       |  val a =
       |      invokeIt(context.packageName)
@@ -2725,7 +2725,7 @@ class FormatterTest {
   fun `array access in middle of chain and end of it behaves similarly`() =
       assertFormatted(
           """
-      |--------------------------------------
+      |//////////////////////////////////////
       |fun f() {
       |  if (aaaaa == null ||
       |      aaaaa.bbbbb[0] == null ||
@@ -2889,7 +2889,7 @@ class FormatterTest {
   fun `handle for loops with long dot chains`() =
       assertFormatted(
           """
-      |-----------------------------------
+      |///////////////////////////////////
       |fun f(a: Node<Int>) {
       |  for (child in node.next.data()) {
       |    println(child)
@@ -2912,7 +2912,7 @@ class FormatterTest {
   fun `when two lambdas following a call, indent the lambda properly`() =
       assertFormatted(
           """
-      |----------------------------
+      |////////////////////////////
       |fun f() {
       |  doIt()
       |      .apply {
@@ -2931,7 +2931,7 @@ class FormatterTest {
   fun `when two lambdas following a field, indent the lambda properly`() =
       assertFormatted(
           """
-      |----------------------------
+      |////////////////////////////
       |fun f() {
       |  field
       |      .apply {
@@ -2965,7 +2965,7 @@ class FormatterTest {
   fun `keep last expression in qualified indented`() =
       assertFormatted(
           """
-      |----------------------------
+      |////////////////////////////
       |fun f() {
       |  Stuff()
       |      .doIt(
@@ -2983,7 +2983,7 @@ class FormatterTest {
   fun `properly place lambda arguments into blocks`() =
       assertFormatted(
           """
-      |-----------------------
+      |///////////////////////
       |fun f() {
       |  foo {
       |    red.orange.yellow()
@@ -3001,7 +3001,7 @@ class FormatterTest {
   fun `properly handle one statement lambda with comment`() =
       assertFormatted(
           """
-      |-----------------------
+      |///////////////////////
       |fun f() {
       |  foo {
       |    // this is a comment
@@ -3032,7 +3032,7 @@ class FormatterTest {
   fun `properly handle one statement lambda with comment after body statements`() =
       assertFormatted(
           """
-      |-----------------------
+      |///////////////////////
       |fun f() {
       |  foo {
       |    red.orange.yellow()
@@ -3065,7 +3065,7 @@ class FormatterTest {
   fun `try to keep expression in the same line until the first lambda`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |fun f() {
       |  foo.bar.bar?.let {
       |    a()
@@ -3090,7 +3090,7 @@ class FormatterTest {
   fun `different indentation in chained calls`() =
       assertFormatted(
           """
-      |---------------------------
+      |///////////////////////////
       |fun f() {
       |  fooDdoIt(
       |      foo1, foo2, foo3)
@@ -3108,7 +3108,7 @@ class FormatterTest {
   fun `always add a conditional break for a lambda which is not last`() =
       assertFormatted(
           """
-      |--------------------
+      |////////////////////
       |fun f() {
       |  foofoo
       |      .doIt {
@@ -3169,7 +3169,7 @@ class FormatterTest {
   fun `handle function references`() =
       assertFormatted(
           """
-      |--------------------------------
+      |////////////////////////////////
       |fun f(a: List<Int>) {
       |  a.forEach(::println)
       |  a.map(Int::toString)
@@ -3228,7 +3228,7 @@ class FormatterTest {
   fun `no newlines after annotations if entire expr fits in one line`() =
       assertFormatted(
           """
-      |-----------------------------------------------
+      |///////////////////////////////////////////////
       |@Px @Px fun f(): Int = 5
       |
       |@Px
@@ -3287,7 +3287,7 @@ class FormatterTest {
   fun `no newlines after annotations on properties if entire expression fits in one line`() =
       assertFormatted(
           """
-      |--------------------------------------------
+      |////////////////////////////////////////////
       |@Suppress("UnsafeCast")
       |val ClassA.methodA
       |  get() = foo as Bar
@@ -3299,7 +3299,7 @@ class FormatterTest {
   fun `when annotations cause line breaks, and constant has no type dont break before value`() =
       assertFormatted(
           """
-      |----------------------------------------------------------
+      |//////////////////////////////////////////////////////////
       |object Foo {
       |  @LongLongLongLongAnnotation
       |  @LongLongLongLongLongAnnotation
@@ -3533,7 +3533,7 @@ class FormatterTest {
   fun `handle top level constants`() =
       assertFormatted(
           """
-      |-----------------------------
+      |/////////////////////////////
       |val a = 5
       |
       |const val b = "a"
@@ -3594,7 +3594,7 @@ class FormatterTest {
   fun `handle extension methods with very long names`() =
       assertFormatted(
           """
-      |------------------------------------------
+      |//////////////////////////////////////////
       |fun LongReceiverNameThatRequiresBreaking
       |    .doIt() {}
       |
@@ -3717,7 +3717,7 @@ class FormatterTest {
   fun `handle property delegation with type and breaks`() =
       assertFormatted(
           """
-      |---------------------------------
+      |/////////////////////////////////
       |val importantValue: Int by lazy {
       |  1 + 1
       |}
@@ -3807,7 +3807,7 @@ class FormatterTest {
   fun `handle casting with breaks`() =
       assertFormatted(
           """
-      |-----------------------
+      |///////////////////////
       |fun castIt(
       |    something: Any
       |) {
@@ -4256,7 +4256,7 @@ class FormatterTest {
   fun `handle multi line one statement lambda`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |fun f() {
       |  a {
       |    println(foo.bar.boom)
@@ -4283,7 +4283,7 @@ class FormatterTest {
   fun `properly break fully qualified nested user types`() =
       assertFormatted(
           """
-      |-------------------------------------------------------
+      |///////////////////////////////////////////////////////
       |val complicated:
       |    com.example.interesting.SomeType<
       |        com.example.interesting.SomeType<Int, Nothing>,
@@ -4330,7 +4330,7 @@ class FormatterTest {
   fun `handle multi line lambdas with explicit args`() =
       assertFormatted(
           """
-      |--------------------
+      |////////////////////
       |fun f() {
       |  a { (x, y) ->
       |    x + y
@@ -4382,7 +4382,7 @@ class FormatterTest {
   fun `handle break of lambda args per line with indentation`() =
       assertFormatted(
           """
-      |-----------
+      |///////////
       |fun f() {
       |  a() {
       |      arg1,
@@ -4408,7 +4408,7 @@ class FormatterTest {
   fun `handle trailing comma in lambda`() =
       assertFormatted(
           """
-      |-----------
+      |///////////
       |fun f() {
       |  a() {
       |      arg1,
@@ -4427,7 +4427,7 @@ class FormatterTest {
   fun `break before Elvis operator`() =
       assertFormatted(
           """
-        |--------------------------------------------------
+        |//////////////////////////////////////////////////
         |fun f() {
         |  someObject
         |      .someMethodReturningCollection()
@@ -4443,7 +4443,7 @@ class FormatterTest {
   fun `chain of Elvis operator`() =
       assertFormatted(
           """
-        |---------------------------
+        |///////////////////////////
         |fun f() {
         |  return option1()
         |      ?: option2()
@@ -4459,7 +4459,7 @@ class FormatterTest {
   fun `Elvis operator mixed with plus operator breaking on plus`() =
       assertFormatted(
           """
-        |------------------------
+        |////////////////////////
         |fun f() {
         |  return option1()
         |      ?: option2() +
@@ -4475,7 +4475,7 @@ class FormatterTest {
   fun `Elvis operator mixed with plus operator breaking on elvis`() =
       assertFormatted(
           """
-        |---------------------------------
+        |/////////////////////////////////
         |fun f() {
         |  return option1()
         |      ?: option2() + option3()
@@ -4489,7 +4489,7 @@ class FormatterTest {
   fun `handle comments in the middle of calling chain`() =
       assertFormatted(
           """
-        |---------------------------
+        |///////////////////////////
         |fun f() {
         |  someObject
         |      .letsDoIt()
@@ -4759,7 +4759,7 @@ class FormatterTest {
   fun `handle typealias`() =
       assertFormatted(
           """
-      |----------------------------------------------
+      |//////////////////////////////////////////////
       |private typealias TextChangedListener =
       |    (string: String) -> Unit
       |
@@ -4897,7 +4897,7 @@ class FormatterTest {
   fun `handle annotations more`() =
       assertFormatted(
           """
-      |-------------------------------------------------
+      |/////////////////////////////////////////////////
       |@Anno1
       |@Anno2(param = Param1::class)
       |@Anno3
@@ -4918,7 +4918,7 @@ class FormatterTest {
   fun `annotated expressions`() =
       assertFormatted(
           """
-      |------------------------------------------------
+      |////////////////////////////////////////////////
       |fun f() {
       |  @Suppress("MagicNumber") add(10) && add(20)
       |
@@ -5355,7 +5355,7 @@ class FormatterTest {
   fun `handle trailing commas (constructors)`() =
       assertFormatted(
           """
-      |--------------------
+      |////////////////////
       |class Foo(
       |    a: Int,
       |)
@@ -5377,7 +5377,7 @@ class FormatterTest {
   fun `handle trailing commas (explicit constructors)`() =
       assertFormatted(
           """
-      |------------------------
+      |////////////////////////
       |class Foo
       |constructor(
       |    a: Int,
@@ -5402,7 +5402,7 @@ class FormatterTest {
   fun `handle trailing commas (secondary constructors)`() =
       assertFormatted(
           """
-      |------------------------
+      |////////////////////////
       |class Foo {
       |  constructor(
       |      a: Int,
@@ -5430,7 +5430,7 @@ class FormatterTest {
   fun `handle trailing commas (function definitions)`() =
       assertFormatted(
           """
-      |------------------------
+      |////////////////////////
       |fun <
       |    T,
       |> foo() {}
@@ -5467,7 +5467,7 @@ class FormatterTest {
   fun `handle trailing commas (function calls)`() =
       assertFormatted(
           """
-      |------------------------
+      |////////////////////////
       |fun main() {
       |  foo(
       |      3,
@@ -5508,7 +5508,7 @@ class FormatterTest {
   fun `handle trailing commas (proprties)`() =
       assertFormatted(
           """
-      |--------------------------
+      |//////////////////////////
       |val foo: String
       |  set(
       |      value,
@@ -5521,7 +5521,7 @@ class FormatterTest {
   fun `handle trailing commas (higher-order functions)`() =
       assertFormatted(
           """
-      |--------------------------
+      |//////////////////////////
       |fun foo(
       |    x:
       |        (
@@ -5536,7 +5536,7 @@ class FormatterTest {
   fun `handle trailing commas (after lambda arg)`() =
       assertFormatted(
           """
-      |--------------------------
+      |//////////////////////////
       |fun foo() {
       |  foo(
       |      { it },
@@ -5550,7 +5550,7 @@ class FormatterTest {
   fun `handle trailing commas (other)`() =
       assertFormatted(
           """
-      |--------------------------
+      |//////////////////////////
       |fun main() {
       |  val (
       |      x: Int,
@@ -5615,7 +5615,7 @@ class FormatterTest {
   fun `assignment of a scoping function`() =
       assertFormatted(
           """
-      |----------------------------
+      |////////////////////////////
       |val foo = coroutineScope {
       |  foo()
       |  //
@@ -5667,7 +5667,7 @@ class FormatterTest {
   fun `top level properties with other types preserve newline spacing`() {
     assertFormatted(
         """
-      |---------------------------------
+      |/////////////////////////////////
       |fun something() {
       |  println("hi")
       |}
@@ -5907,7 +5907,7 @@ class FormatterTest {
   fun `chaining - many dereferences`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -5924,7 +5924,7 @@ class FormatterTest {
   fun `chaining - many dereferences, fit on one line`() =
       assertFormatted(
           """
-      |---------------------------------------------------------------------------
+      |///////////////////////////////////////////////////////////////////////////
       |rainbow.red.orange.yellow.green.blue.indigo.violet.cyan.magenta.key
       |"""
               .trimMargin(),
@@ -5934,7 +5934,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one invocation at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -5952,7 +5952,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one invocation at end, fit on one line`() =
       assertFormatted(
           """
-      |---------------------------------------------------------------------------
+      |///////////////////////////////////////////////////////////////////////////
       |rainbow.red.orange.yellow.green.blue.indigo.violet.cyan.magenta.key.build()
       |"""
               .trimMargin(),
@@ -5962,7 +5962,7 @@ class FormatterTest {
   fun `chaining - many dereferences, two invocations at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -5981,7 +5981,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one invocation in the middle`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -5999,7 +5999,7 @@ class FormatterTest {
   fun `chaining - many dereferences, two invocations in the middle`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -6018,7 +6018,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one lambda at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -6036,7 +6036,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one short lambda at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -6054,7 +6054,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one multiline lambda at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -6075,7 +6075,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one short lambda in the middle`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -6093,7 +6093,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one multiline lambda in the middle`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -6114,7 +6114,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one multiline lambda in the middle, remainder could fit on one line`() =
       assertFormatted(
           """
-      |-----------------------------------------------------------------------------------------
+      |/////////////////////////////////////////////////////////////////////////////////////////
       |rainbow.red.orange.yellow.green.blue
       |    .z {
       |      it
@@ -6133,7 +6133,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one multiline lambda and two invocations in the middle, remainder could fit on one line`() =
       assertFormatted(
           """
-      |-----------------------------------------------------------------------------------------
+      |/////////////////////////////////////////////////////////////////////////////////////////
       |rainbow.red.orange.yellow.green.blue
       |    .z {
       |      it
@@ -6154,7 +6154,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one lambda and invocation at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -6173,7 +6173,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one multiline lambda and invocation at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -6195,7 +6195,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one invocation and lambda at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -6214,7 +6214,7 @@ class FormatterTest {
   fun `chaining - many dereferences, one short lambda and invocation in the middle`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -6233,7 +6233,7 @@ class FormatterTest {
   fun `chaining - many dereferences, invocation and one short lambda in the middle`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .green
       |    .blue
@@ -6252,7 +6252,7 @@ class FormatterTest {
   fun `chaining - many dereferences, starting with this`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |this.red.orange.yellow
       |    .green
       |    .blue
@@ -6269,7 +6269,7 @@ class FormatterTest {
   fun `chaining - many dereferences, starting with this, one invocation at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |this.red.orange.yellow
       |    .green
       |    .blue
@@ -6287,7 +6287,7 @@ class FormatterTest {
   fun `chaining - many dereferences, starting with super`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |super.red.orange.yellow
       |    .green
       |    .blue
@@ -6304,7 +6304,7 @@ class FormatterTest {
   fun `chaining - many dereferences, starting with super, one invocation at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |super.red.orange.yellow
       |    .green
       |    .blue
@@ -6322,7 +6322,7 @@ class FormatterTest {
   fun `chaining - many dereferences, starting with short variable`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |z123.red.orange.yellow
       |    .green
       |    .blue
@@ -6339,7 +6339,7 @@ class FormatterTest {
   fun `chaining - many dereferences, starting with short variable, one invocation at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |z123.red.orange.yellow
       |    .green
       |    .blue
@@ -6357,7 +6357,7 @@ class FormatterTest {
   fun `chaining - many dereferences, starting with short variable and lambda, invocation at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |z12.z { it }
       |    .red
       |    .orange
@@ -6378,7 +6378,7 @@ class FormatterTest {
   fun `chaining - many dereferences, starting with this and lambda, invocation at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |this.z { it }
       |    .red
       |    .orange
@@ -6399,7 +6399,7 @@ class FormatterTest {
   fun `chaining - many invocations`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.a().b().c()
       |"""
               .trimMargin(),
@@ -6409,7 +6409,7 @@ class FormatterTest {
   fun `chaining - many invocations, with multiline lambda at end`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.a().b().c().zz {
       |  it
       |  it
@@ -6422,7 +6422,7 @@ class FormatterTest {
   fun `chaining - many dereferences, starting type name`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |com.sky.Rainbow.red
       |    .orange
       |    .yellow
@@ -6441,7 +6441,7 @@ class FormatterTest {
   fun `chaining - many invocations, starting with short variable, lambda at end`() =
       assertFormatted(
           """
-      |-------------
+      |/////////////
       |z12.shine()
       |    .bright()
       |    .z { it }
@@ -6453,7 +6453,7 @@ class FormatterTest {
   fun `chaining - start with invocation, lambda at end`() =
       assertFormatted(
           """
-      |---------------------
+      |/////////////////////
       |getRainbow(
       |        aa, bb, cc)
       |    .z { it }
@@ -6465,7 +6465,7 @@ class FormatterTest {
   fun `chaining - many invocations, start with lambda`() =
       assertFormatted(
           """
-      |---------------------
+      |/////////////////////
       |z { it }
       |    .shine()
       |    .bright()
@@ -6477,7 +6477,7 @@ class FormatterTest {
   fun `chaining - start with type name, end with invocation`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |com.sky.Rainbow
       |    .colorFactory
       |    .build()
@@ -6489,7 +6489,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline lambda`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.z {
       |  it
       |  it
@@ -6502,7 +6502,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline lambda with trailing dereferences`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow
       |    .z {
       |      it
@@ -6517,7 +6517,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline lambda with long name`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow
       |    .someLongLambdaName {
       |      it
@@ -6531,7 +6531,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline lambda with long name and trailing dereferences`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow
       |    .someLongLambdaName {
       |      it
@@ -6546,7 +6546,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline lambda with prefix`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.z {
       |  it
       |  it
@@ -6559,7 +6559,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline lambda with prefix, forced to next line`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .longLambdaName {
       |      it
@@ -6573,7 +6573,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline lambda with prefix, forced to next line with another expression`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .key
       |    .longLambdaName {
@@ -6588,7 +6588,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline arguments`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.shine(
       |    infrared,
       |    ultraviolet,
@@ -6601,7 +6601,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline arguments with trailing dereferences`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow
       |    .shine(
       |        infrared,
@@ -6616,7 +6616,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline arguments, forced to next line`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .shine(
       |        infrared,
@@ -6630,7 +6630,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline arguments, forced to next line with another expression`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .key
       |    .shine(
@@ -6645,7 +6645,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline arguments, forced to next line with another expression, with trailing dereferences`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow.red.orange.yellow
       |    .key
       |    .shine(
@@ -6661,7 +6661,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline arguments, with trailing invocation`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow
       |    .shine(
       |        infrared,
@@ -6676,7 +6676,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline arguments, with trailing lambda`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |rainbow
       |    .shine(
       |        infrared,
@@ -6691,7 +6691,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline arguments, prefixed with super, with trailing invocation`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |super.shine(
       |        infrared,
       |        ultraviolet,
@@ -6705,7 +6705,7 @@ class FormatterTest {
   fun `chaining (indentation) - multiline arguments, starting with short variable, with trailing invocation`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |z12.shine(
       |        infrared,
       |        ultraviolet,
@@ -6719,7 +6719,7 @@ class FormatterTest {
   fun `chaining (indentation) - start with multiline arguments`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |getRainbow(
       |    infrared,
       |    ultraviolet,
@@ -6732,7 +6732,7 @@ class FormatterTest {
   fun `chaining (indentation) - start with multiline arguments, with trailing invocation`() =
       assertFormatted(
           """
-      |-------------------------
+      |/////////////////////////
       |getRainbow(
       |        infrared,
       |        ultraviolet,
@@ -6793,7 +6793,7 @@ class FormatterTest {
   fun `function call following long multiline string`() =
       assertFormatted(
           """
-      |--------------------------------
+      |////////////////////////////////
       |fun stringFitsButNotMethod() {
       |  val str1 =
       |      $TQ Some string $TQ
@@ -6825,7 +6825,7 @@ class FormatterTest {
   fun `array-literal in annotation`() =
       assertFormatted(
           """
-      |--------------------------------
+      |////////////////////////////////
       |@Anno(
       |    array =
       |        [
@@ -7103,7 +7103,7 @@ class FormatterTest {
   fun `line break on base class`() =
       assertFormatted(
           """
-      |---------------------------
+      |///////////////////////////
       |class Basket<T>() :
       |    WovenObject {
       |  // some body
@@ -7116,7 +7116,7 @@ class FormatterTest {
   fun `line break on type specifier`() =
       assertFormatted(
           """
-      |---------------------------
+      |///////////////////////////
       |class Basket<T>() where
       |T : Fruit {
       |  // some body
@@ -7129,7 +7129,7 @@ class FormatterTest {
   fun `don't crash on empty enum with semicolons`() {
     assertFormatted(
         """
-      |---------------------------
+      |///////////////////////////
       |enum class Foo {
       |  ;
       |
@@ -7141,7 +7141,7 @@ class FormatterTest {
 
     assertFormatted(
         """
-      |---------------------------
+      |///////////////////////////
       |enum class Foo {
       |  ;
       |
