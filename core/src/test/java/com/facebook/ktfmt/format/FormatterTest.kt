@@ -2795,8 +2795,14 @@ class FormatterTest {
       assertFormatted(
           """
       |fun doIt(world: String) {
-      |  println(${"\"".repeat(3)}Hello
-      |      world!${"\"".repeat(3)})
+      |  println(
+      |      ${TQ}Hello
+      |      world!${TQ})
+      |  println(
+      |      ${TQ}Hello
+      |      world!${TQ},
+      |      ${TQ}Goodbye
+      |      world!${TQ})
       |}
       |"""
               .trimMargin())
@@ -2806,14 +2812,18 @@ class FormatterTest {
     val code =
         listOf(
                 "fun doIt(world: String) {",
-                "  println(\"\"\"This line has trailing whitespace         ",
-                "      world!\"\"\")",
-                "  println(\"\"\"This line has trailing whitespace \$s     ",
-                "      world!\"\"\")",
-                "  println(\"\"\"This line has trailing whitespace \${s}   ",
-                "      world!\"\"\")",
-                "  println(\"\"\"This line has trailing whitespace \$      ",
-                "      world!\"\"\")",
+                "  println(",
+                "      ${TQ}This line has trailing whitespace         ",
+                "      world!${TQ})",
+                "  println(",
+                "      ${TQ}This line has trailing whitespace \$s     ",
+                "      world!${TQ})",
+                "  println(",
+                "      ${TQ}This line has trailing whitespace \${s}   ",
+                "      world!${TQ})",
+                "  println(",
+                "      ${TQ}This line has trailing whitespace \$      ",
+                "      world!${TQ})",
                 "}",
                 "")
             .joinToString("\n")
@@ -2824,7 +2834,8 @@ class FormatterTest {
   fun `Consecutive line breaks in multiline strings are preserved`() =
       assertFormatted(
           """
-      |val x = $TQ
+      |val x =
+      |    $TQ
       |
       |
       |

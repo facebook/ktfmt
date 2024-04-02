@@ -1549,6 +1549,26 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `multiline string literals as function params`() =
+      assertFormatted(
+          """
+      |fun doIt(world: String) {
+      |  println(
+      |    ${TQ}Hello
+      |    world!${TQ}
+      |  )
+      |  println(
+      |    ${TQ}Hello
+      |    world!${TQ},
+      |    ${TQ}Goodbye
+      |    world!${TQ},
+      |  )
+      |}
+      |"""
+              .trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT)
+
+  @Test
   fun `array-literal in annotation`() =
       assertFormatted(
           """
