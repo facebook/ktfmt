@@ -59,4 +59,4 @@ tasks {
   runPluginVerifier { ideVersions.set(listOf("221")) }
 }
 
-spotless { java { googleJavaFormat() } }
+spotless { java { googleJavaFormat("1.21.0") } }
