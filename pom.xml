@@ -10,7 +10,7 @@
 
   <name>Ktfmt Parent</name>
   <description>A program that reformats Kotlin source code to comply with the common community standard for Kotlin code conventions.</description>
-  <url>https://github.com/facebookincubator/ktfmt</url>
+  <url>https://github.com/facebook/ktfmt</url>
   <inceptionYear>2019</inceptionYear>
   <licenses>
     <license>
@@ -24,9 +24,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:https://github.com/facebookincubator/ktfmt.git</connection>
-    <developerConnection>scm:git:git@github.com:facebookincubator/ktfmt.git</developerConnection>
-    <url>https://github.com/facebookincubator/ktfmt.git</url>
+    <connection>scm:git:https://github.com/facebook/ktfmt.git</connection>
+    <developerConnection>scm:git:git@github.com:facebook/ktfmt.git</developerConnection>
+    <url>https://github.com/facebook/ktfmt.git</url>
   </scm>
 
   <modules>

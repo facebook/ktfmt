@@ -425,7 +425,7 @@ class Paragraph(private val task: FormattingTask) {
     }
 
     if (prev == "@sample") {
-      return false // https://github.com/facebookincubator/ktfmt/issues/310
+      return false // https://github.com/facebook/ktfmt/issues/310
     }
 
     if (!word.first().isLetter()) {

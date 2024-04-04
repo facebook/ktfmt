@@ -2939,7 +2939,7 @@ class KDocFormatterTest {
 
   @Test
   fun test203584301() {
-    // https://github.com/facebookincubator/ktfmt/issues/310
+    // https://github.com/facebook/ktfmt/issues/310
     val source =
         """
             /**

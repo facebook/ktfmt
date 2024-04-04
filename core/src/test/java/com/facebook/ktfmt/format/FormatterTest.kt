@@ -712,7 +712,7 @@ class FormatterTest {
           """
       |/////////////////////////////////////
       |fun f() {
-      |  // Regression test: https://github.com/facebookincubator/ktfmt/issues/56
+      |  // Regression test: https://github.com/facebook/ktfmt/issues/56
       |  kjsdfglkjdfgkjdfkgjhkerjghkdfj
       |      ?.methodName1()
       |
@@ -5841,7 +5841,7 @@ class FormatterTest {
     assertThatFormatting(code).isEqualTo(code)
   }
 
-  // Regression test against https://github.com/facebookincubator/ktfmt/issues/243
+  // Regression test against https://github.com/facebook/ktfmt/issues/243
   @Test
   fun `regression test against Issue 243`() {
     val code =

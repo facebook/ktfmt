@@ -1148,7 +1148,7 @@ class GoogleStyleFormatterKtTest {
           """
       |//////////////////////////////////////
       |fun f() {
-      |  // Regression test: https://github.com/facebookincubator/ktfmt/issues/56
+      |  // Regression test: https://github.com/facebook/ktfmt/issues/56
       |  kjsdfglkjdfgkjdfkgjhkerjghkdfj
       |    ?.methodName1()
       |

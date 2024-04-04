@@ -56,7 +56,7 @@ the project's code style settings.
 
 ### from the command-line
 
-[Download the formatter](https://github.com/facebookincubator/ktfmt/releases)
+[Download the formatter](https://github.com/facebook/ktfmt/releases)
 and run it with:
 
 ```

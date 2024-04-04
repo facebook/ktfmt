@@ -1,7 +1,7 @@
-<idea-plugin url="https://github.com/facebookincubator/ktfmt/tree/main/ktfmt_idea_plugin">
+<idea-plugin url="https://github.com/facebook/ktfmt/tree/main/ktfmt_idea_plugin">
     <id>com.facebook.ktfmt_idea_plugin</id>
     <name>ktfmt</name>
-    <vendor url="https://github.com/facebookincubator/ktfmt">Facebook</vendor>
+    <vendor url="https://github.com/facebook/ktfmt">Facebook</vendor>
 
     <description>ktfmt is a program that reformats Kotlin source code to comply with the common community standard for
         Kotlin code conventions.
