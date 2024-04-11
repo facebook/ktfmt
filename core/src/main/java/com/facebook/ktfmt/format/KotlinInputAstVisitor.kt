@@ -860,8 +860,9 @@ class KotlinInputAstVisitor(
 
     val valueParams = lambdaExpression.valueParameters
     val hasParams = valueParams.isNotEmpty()
-    val statements = (lambdaExpression.bodyExpression ?: fail()).children
-    val hasStatements = statements.isNotEmpty()
+    val bodyExpression = lambdaExpression.bodyExpression ?: fail()
+    val expressionStatements = bodyExpression.children
+    val hasStatements = expressionStatements.isNotEmpty()
     val hasArrow = lambdaExpression.functionLiteral.arrow != null
 
     fun ifBrokeBeforeBrace(onTrue: Indent, onFalse: Indent): Indent {
@@ -906,12 +907,12 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusBlockIndent)
       builder.block(bracePlusBlockIndent) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
-        if (statements.size == 1 &&
-            statements.first() !is KtReturnExpression &&
-            lambdaExpression.bodyExpression?.startsWithComment() != true) {
-          visitStatement(statements[0])
+        if (expressionStatements.size == 1 &&
+            expressionStatements.first() !is KtReturnExpression &&
+            !bodyExpression.startsWithComment()) {
+          visitStatement(expressionStatements[0])
         } else {
-          visitStatements(statements)
+          visitStatements(expressionStatements)
         }
       }
     }

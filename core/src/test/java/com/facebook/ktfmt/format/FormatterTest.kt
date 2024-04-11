@@ -5904,6 +5904,220 @@ class FormatterTest {
               .trimMargin())
 
   @Test
+  fun `lambda with only comments`() {
+    assertFormatted(
+        """
+        |val a = { /* do nothing */}
+        |val b = { /* do nothing */ /* also do nothing */}
+        |val c = { -> /* do nothing */ }
+        |val d = { _ -> /* do nothing */ }
+        |private val e =
+        |    Runnable {
+        |      // do nothing
+        |    }
+        |private val f: () -> Unit =
+        |    {
+        |      // no-op
+        |    }
+        |private val g: () -> Unit = { /* no-op */}
+        |"""
+            .trimMargin())
+
+    assertFormatted(
+        """
+        |//////////////////////////////
+        |val a = { /* do nothing */}
+        |val b =
+        |    {
+        |      /* do nothing */
+        |      /* also do nothing */
+        |    }
+        |val c = { -> /* do nothing */
+        |}
+        |val d =
+        |    { _ -> /* do nothing */
+        |    }
+        |private val e =
+        |    Runnable {
+        |      // do nothing
+        |    }
+        |private val f: () -> Unit =
+        |    {
+        |      // no-op
+        |    }
+        |private val g: () -> Unit =
+        |    {
+        |      /* no-op */
+        |    }
+        |"""
+            .trimMargin(),
+        deduceMaxWidth = true)
+  }
+
+  @Test
+  fun `lambda block with single and multiple statements`() =
+      assertFormatted(
+          """
+      |private val a = Runnable {
+      |  foo()
+      |  TODO("implement me")
+      |}
+      |
+      |private val b = Runnable { TODO("implement me") }
+      |
+      |private val c: () -> Unit = {
+      |  foo()
+      |  TODO("implement me")
+      |}
+      |
+      |private val d: () -> Unit = { TODO("implement me") }
+      |"""
+              .trimMargin())
+
+  @Test
+  fun `lambda block with comments and statements mix`() =
+      assertFormatted(
+          """
+      |private val a = Runnable {
+      |  // no-op
+      |  TODO("implement me")
+      |}
+      |
+      |private val b = Runnable {
+      |  TODO("implement me")
+      |  // no-op
+      |}
+      |
+      |private val c: () -> Unit = {
+      |  /* no-op */ TODO("implement me")
+      |}
+      |
+      |private val d: () -> Unit = { ->
+      |  /* no-op */ TODO("implement me")
+      |}
+      |
+      |private val e: (String, Int) -> Unit = { _, i -> foo(i) /* do nothing ... */ }
+      |"""
+              .trimMargin())
+
+  @Test
+  fun `lambda block with comments and with statements have same formatting treatment`() =
+      assertFormatted(
+          """
+      |private val a = Runnable { /* no-op */}
+      |private val A = Runnable { TODO("...") }
+      |
+      |private val b =
+      |    Runnable {
+      |      /* no-op 1 */
+      |      /* no-op 2 */
+      |    }
+      |private val B = Runnable {
+      |  TODO("no-op")
+      |  TODO("no-op")
+      |}
+      |
+      |private val c: () -> Unit =
+      |    {
+      |      /* no-op */
+      |    }
+      |private val C: () -> Unit = { TODO("...") }
+      |
+      |private val d: () -> Unit =
+      |    {
+      |      /*.*/
+      |      /* do nothing ... */
+      |    }
+      |private val D: () -> Unit = {
+      |  foo()
+      |  TODO("implement me")
+      |}
+      |"""
+              .trimMargin())
+
+  @Test
+  fun `last parameter with comment and with statements have same formatting treatment`() {
+    assertFormatted(
+        """
+        |private val a =
+        |    call(param) {
+        |      // no-op
+        |      /* comment */
+        |    }
+        |private val A =
+        |    call(param) {
+        |      a.run()
+        |      TODO("implement me")
+        |    }
+        |
+        |private val b = call(param) { /* no-op */}
+        |private val B = call(param) { TODO("implement me") }
+        |
+        |private val c = firstCall().prop.call(param) { /* no-op */}
+        |private val C = firstCall().prop.call(param) { TODO("implement me") }
+        |"""
+            .trimMargin())
+
+    assertFormatted(
+        """
+        |////////////////////////////////////////
+        |private val a =
+        |    firstCall().prop.call(
+        |        mySuperInterestingParameter) {
+        |          /* no-op */
+        |        }
+        |private val A =
+        |    firstCall().prop.call(
+        |        mySuperInterestingParameter) {
+        |          TODO("...")
+        |        }
+        |
+        |fun b() {
+        |  myProp.funCall(param) { /* 12345 */}
+        |  myProp.funCall(param) { TODO("123") }
+        |
+        |  myProp.funCall(param) { /* 123456 */}
+        |  myProp.funCall(param) { TODO("1234") }
+        |
+        |  myProp.funCall(param) { /* 1234567 */}
+        |  myProp.funCall(param) {
+        |    TODO("12345")
+        |  }
+        |
+        |  myProp.funCall(
+        |      param) { /* 12345678 */}
+        |  myProp.funCall(param) {
+        |    TODO("123456")
+        |  }
+        |
+        |  myProp.funCall(
+        |      param) { /* 123456789 */}
+        |  myProp.funCall(param) {
+        |    TODO("1234567")
+        |  }
+        |
+        |  myProp.funCall(
+        |      param) { /* very_very_long_comment_that_should_go_on_its_own_line */}
+        |  myProp.funCall(param) {
+        |    TODO(
+        |        "_a_very_long_comment_that_should_go_on_its_own_line")
+        |  }
+        |}
+        |
+        |private val c =
+        |    firstCall().prop.call(param) {
+        |      /* no-op */
+        |    }
+        |private val C =
+        |    firstCall().prop.call(param) {
+        |      TODO("...")
+        |    }
+        |"""
+            .trimMargin(),
+        deduceMaxWidth = true)
+  }
+
+  @Test
   fun `chaining - many dereferences`() =
       assertFormatted(
           """
