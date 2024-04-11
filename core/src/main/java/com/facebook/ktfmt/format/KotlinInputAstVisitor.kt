@@ -863,6 +863,7 @@ class KotlinInputAstVisitor(
     val bodyExpression = lambdaExpression.bodyExpression ?: fail()
     val expressionStatements = bodyExpression.children
     val hasStatements = expressionStatements.isNotEmpty()
+    val hasComments = bodyExpression.children().any { it is PsiComment }
     val hasArrow = lambdaExpression.functionLiteral.arrow != null
 
     fun ifBrokeBeforeBrace(onTrue: Indent, onFalse: Indent): Indent {
@@ -900,11 +901,14 @@ class KotlinInputAstVisitor(
         }
         builder.token("->")
       }
-      builder.breakOp(Doc.FillMode.UNIFIED, "", bracePlusZeroIndent)
+    }
+
+    if (hasParams || hasArrow || hasStatements || hasComments) {
+      builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusZeroIndent)
     }
 
     if (hasStatements) {
-      builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusBlockIndent)
+      builder.breakOp(Doc.FillMode.UNIFIED, "", bracePlusBlockIndent)
       builder.block(bracePlusBlockIndent) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
         if (expressionStatements.size == 1 &&
@@ -914,12 +918,13 @@ class KotlinInputAstVisitor(
         } else {
           visitStatements(expressionStatements)
         }
+        builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusZeroIndent)
       }
     }
 
     if (hasParams || hasArrow || hasStatements) {
       // If we had to break in the body, ensure there is a break before the closing brace
-      builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusZeroIndent)
+      builder.breakOp(Doc.FillMode.UNIFIED, "", bracePlusZeroIndent)
     }
     builder.block(bracePlusZeroIndent) {
       builder.fenceComments()
