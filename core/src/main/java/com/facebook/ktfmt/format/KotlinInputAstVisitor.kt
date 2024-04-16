@@ -771,13 +771,17 @@ class KotlinInputAstVisitor(
           }
         }
       }
-      if (lambdaArguments.isNotEmpty()) {
-        builder.space()
-        visitArgumentInternal(
-            lambdaArguments.single(),
-            wrapInBlock = false,
-            brokeBeforeBrace = brokeBeforeBrace,
-        )
+      when (lambdaArguments.size) {
+        0 -> {}
+        1 -> {
+          builder.space()
+          visitArgumentInternal(
+              lambdaArguments.single(),
+              wrapInBlock = false,
+              brokeBeforeBrace = brokeBeforeBrace,
+          )
+        }
+        else -> throw ParseError("Maximum one trailing lambda is allowed", lambdaArguments[1])
       }
     }
   }

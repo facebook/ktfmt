@@ -17,7 +17,24 @@
 package com.facebook.ktfmt.format
 
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.LineColumn
+import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 
 class ParseError(val errorDescription: String, val lineColumn: LineColumn) :
     IllegalArgumentException(
-        "${lineColumn.line + 1}:${lineColumn.column + 1}: error: $errorDescription")
+        "${lineColumn.line + 1}:${lineColumn.column + 1}: error: $errorDescription") {
+
+  constructor(
+      errorDescription: String,
+      element: PsiElement,
+  ) : this(errorDescription, positionOf(element))
+
+  companion object {
+    private fun positionOf(element: PsiElement): LineColumn {
+      val doc = element.containingFile.viewProvider.document!!
+      val offset = element.textOffset
+      val lineZero = doc.getLineNumber(offset)
+      val colZero = offset - doc.getLineStartOffset(lineZero)
+      return LineColumn.of(lineZero, colZero)
+    }
+  }
+}

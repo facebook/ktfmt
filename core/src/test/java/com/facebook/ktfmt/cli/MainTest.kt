@@ -160,6 +160,18 @@ class MainTest {
   }
 
   @Test
+  fun `Parsing error for multiple trailing lambdas`() {
+    val fooBar = root.resolve("foo.kt")
+    fooBar.writeText("val x = foo(bar { } { zap = 2 })")
+    val returnValue =
+        Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf(fooBar.toString())).run()
+
+    assertThat(returnValue).isEqualTo(1)
+    assertThat(err.toString(testCharset))
+        .contains("foo.kt:1:21: error: Maximum one trailing lambda is allowed")
+  }
+
+  @Test
   fun `all files in args are processed, even if one of them has an error`() {
     val file1 = root.resolve("file1.kt")
     val file2Broken = root.resolve("file2.kt")
