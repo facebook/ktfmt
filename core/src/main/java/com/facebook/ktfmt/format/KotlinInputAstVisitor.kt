@@ -479,10 +479,9 @@ class KotlinInputAstVisitor(
         }
       }
       receiver is KtStringTemplateExpression -> {
-        val isMultiline = receiver.text.contains('\n')
         builder.block(expressionBreakIndent) {
           visit(receiver)
-          builder.breakOp(if (isMultiline) Doc.FillMode.FORCED else Doc.FillMode.UNIFIED, "", ZERO)
+          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
           builder.token(expression.operationSign.value)
           visit(expression.selectorExpression)
         }
