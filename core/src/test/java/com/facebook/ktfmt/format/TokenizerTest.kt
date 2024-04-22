@@ -94,10 +94,13 @@ class TokenizerTest {
 
   @Test
   fun `Token index is advanced after a string token`() {
-    val code = """
+    val code =
+        """
       |val b="a"
       |val a=5
-      |""".trimMargin().trimMargin()
+      |"""
+            .trimMargin()
+            .trimMargin()
 
     val file = Parser.parse(code)
     val tokenizer = Tokenizer(code, file)
