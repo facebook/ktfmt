@@ -1715,6 +1715,25 @@ class GoogleStyleFormatterKtTest {
           deduceMaxWidth = true)
 
   @Test
+  fun `trailing commas on multline enum entries`() =
+      assertFormatted(
+          """
+      |enum class MultilineEntries {
+      |  A(
+      |    arg = 0, //
+      |    arg = 0,
+      |  ),
+      |  /* Comment */
+      |  B,
+      |  C {
+      |    fun foo() {}
+      |  },
+      |}
+      |"""
+              .trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT)
+
+  @Test
   fun `trailing commas in enums`() {
     val code =
         """
