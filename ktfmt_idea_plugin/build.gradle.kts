@@ -20,12 +20,13 @@ plugins {
   id("com.diffplug.spotless") version "5.10.2"
 }
 
-val ktfmtVersion = rootProject.file("../version.txt").readText().trim().replace("-SNAPSHOT", "")
+val currentKtfmtVersion = rootProject.file("../version.txt").readText().trim()
+val stableKtfmtVersion = rootProject.file("../stable_version.txt").readText().trim()
 val pluginVersion = "1.1"
 
 group = "com.facebook"
 
-version = "$pluginVersion.$ktfmtVersion"
+version = "$pluginVersion.$currentKtfmtVersion"
 
 repositories {
   mavenCentral()
@@ -38,8 +39,8 @@ java {
 }
 
 dependencies {
-  implementation("com.facebook", "ktfmt", ktfmtVersion)
-  implementation("com.google.googlejavaformat", "google-java-format", "1.8")
+  implementation("com.facebook", "ktfmt", stableKtfmtVersion)
+  implementation("com.google.googlejavaformat", "google-java-format", "1.22.0")
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
@@ -59,4 +60,4 @@ tasks {
   runPluginVerifier { ideVersions.set(listOf("221")) }
 }
 
-spotless { java { googleJavaFormat("1.21.0") } }
+spotless { java { googleJavaFormat("1.22.0") } }
