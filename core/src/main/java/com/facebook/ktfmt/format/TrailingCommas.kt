@@ -82,6 +82,7 @@ object TrailingCommas {
       }
 
       when (element) {
+        is KtEnumEntry, // Only suggest on the KtClassBody container
         is KtWhenEntry -> return
         is KtParameterList -> {
           if (element.parent is KtFunctionLiteral && element.parent.parent is KtLambdaExpression) {
