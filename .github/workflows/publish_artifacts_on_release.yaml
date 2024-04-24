@@ -21,7 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        ref: ref/tags/${{ github.events.release.tag_name || inputs.release_tag }}
+        with:
+          ref: ${{ github.events.release.tag_name || inputs.release_tag || github.ref }}
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v1
         with:
