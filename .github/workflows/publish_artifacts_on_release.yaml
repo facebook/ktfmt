@@ -11,11 +11,17 @@ on:
   release:
     types: [created]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag'
+        required: true
+        type: stringe
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        ref: ref/tags/${{ github.events.release.tag_name || inputs.release_tag }}
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v1
         with:
