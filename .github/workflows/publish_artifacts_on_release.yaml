@@ -10,6 +10,7 @@ name: Publish package to Maven Central and JetBrains Marketplace
 on:
   release:
     types: [created]
+  workflow_dispatch:
 jobs:
   publish:
     runs-on: ubuntu-latest
