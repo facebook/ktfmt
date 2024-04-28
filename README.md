@@ -79,6 +79,10 @@ Alternatively, you can use [Spotless](https://github.com/diffplug/spotless) with
 
 Consider using [Spotless](https://github.com/diffplug/spotless) with the [ktfmt Maven plugin](https://github.com/diffplug/spotless/tree/main/plugin-maven#ktfmt).
 
+### using pre-commit hooks
+
+A [pre-commit hook](https://pre-commit.com/hooks.html) is implemented in [language-formatters-pre-commit-hooks](https://github.com/macisamuele/language-formatters-pre-commit-hooks)
+
 ## FAQ
 
 ### `ktfmt` vs `ktlint` vs IntelliJ
