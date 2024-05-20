@@ -36,7 +36,7 @@ class Main(
     private val input: InputStream,
     private val out: PrintStream,
     private val err: PrintStream,
-    private val args: Array<String>
+    private val inputArgs: Array<String>
 ) {
   companion object {
     @JvmStatic
@@ -72,7 +72,7 @@ class Main(
 
 
   fun run(): Int {
-    val processArgs = ParsedArgs.processArgs(args)
+    val processArgs = ParsedArgs.processArgs(inputArgs)
     val parsedArgs = when (processArgs) {
       is ParseResult.Ok -> processArgs.parsedValue
       is ParseResult.Error-> exitFatal(processArgs.errorMessage, 1)
