@@ -122,6 +122,12 @@ class ParsedArgsTest {
   }
 
   @Test
+  fun `parseOptions rejects '-' and files at the same time`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("-", "File.kt"))
+    assertThat(parseResult).isInstanceOf(ParseResult.Error::class.java)
+  }
+
+  @Test
   fun `processArgs use the @file option with non existing file`() {
     val e =
         assertFailsWith<FileNotFoundException> {

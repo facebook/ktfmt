@@ -76,6 +76,14 @@ data class ParsedArgs(
         }
       }
 
+      if (fileNames.contains("-") && fileNames.size > 1) {
+        val filesExceptStdin = fileNames - "-"
+        return ParseResult.Error(
+          "Cannot read from stdin and files in same run. Found stdin specifier '-'" +
+              " and files ${filesExceptStdin.joinToString(", ")} "
+        )
+      }
+
       return ParseResult.Ok(
           ParsedArgs(
               fileNames,

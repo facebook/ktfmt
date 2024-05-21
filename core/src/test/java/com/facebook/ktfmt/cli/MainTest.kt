@@ -105,16 +105,6 @@ class MainTest {
   }
 
   @Test
-  fun `expandArgsToFileNames - a dash is an error`() {
-    try {
-      Main.expandArgsToFileNames(listOf(root.resolve("foo.bar").toString(), File("-").toString()))
-      fail("expected exception, but nothing was thrown")
-    } catch (e: IllegalStateException) {
-      assertThat(e.message).contains("Error")
-    }
-  }
-
-  @Test
   fun `Using '-' as the filename formats an InputStream`() {
     val code = "fun    f1 (  ) :    Int =    0"
     Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("-")).run()

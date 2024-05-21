@@ -56,10 +56,6 @@ class Main(
       }
       val result = mutableListOf<File>()
       for (arg in args) {
-        if (arg == "-") {
-          error(
-              "Error: '-', which causes ktfmt to read from stdin, should not be mixed with file name")
-        }
         result.addAll(
             File(arg).walkTopDown().filter {
               it.isFile && (it.extension == "kt" || it.extension == "kts")
@@ -95,14 +91,8 @@ class Main(
       return 1
     }
 
-    val files: List<File>
-    try {
-      files = expandArgsToFileNames(parsedArgs.fileNames)
-    } catch (e: java.lang.IllegalStateException) {
-      err.println(e.message)
-      return 1
-    }
-
+    val files: List<File> = expandArgsToFileNames(parsedArgs.fileNames)
+    
     if (files.isEmpty()) {
       err.println("Error: no .kt files found")
       return 1
