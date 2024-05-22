@@ -54,6 +54,16 @@ Not all of ktfmt's rules can be represented as IntelliJ editor settings, so you 
 need to run ktfmt. Alternately, that file can be used as a reference to manually change
 the project's code style settings.
 
+### Installation
+
+#### Homebrew
+
+If you're a [Homebrew](https://brew.sh) user, you can install [ktfmt](https://formulae.brew.sh/formula/ktfmt) via:
+
+```
+$ brew install ktfmt
+```
+
 ### from the command-line
 
 [Download the formatter](https://github.com/facebook/ktfmt/releases)
