@@ -1832,6 +1832,30 @@ class GoogleStyleFormatterKtTest {
     assertThatFormatting(code).withOptions(Formatter.GOOGLE_FORMAT).isEqualTo(expected)
   }
 
+  @Test
+  fun `trailing commas are not inserted over the max width`() =
+      assertFormatted(
+          """
+      |//////////////////
+      |fun foo() {
+      |  bar(
+      |    someArg,
+      |    justBeforeMax,
+      |  )
+      |  bar(
+      |    someArg,
+      |    exactlyAtMaaax
+      |  )
+      |  bar(
+      |    someArg,
+      |    justAfterMaaaax
+      |  )
+      |}
+      |"""
+              .trimMargin(),
+          formattingOptions = Formatter.GOOGLE_FORMAT,
+          deduceMaxWidth = true)
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""

@@ -107,13 +107,22 @@ object RedundantElementManager {
         })
 
     val result = StringBuilder(code)
-    val suggestionElements = trailingCommaSuggestor.getTrailingCommaSuggestions()
-
-    for (element in suggestionElements.sortedByDescending(PsiElement::endOffset)) {
-      result.insert(element.endOffset, ',')
-    }
+    trailingCommaSuggestor.getTrailingCommaSuggestions()
+        .asSequence()
+        .sortedByDescending(PsiElement::endOffset)
+        .filter {
+          // https://github.com/facebook/ktfmt/issues/472
+          it.endColumnZero() < options.maxWidth
+        }
+        .forEach { result.insert(it.endOffset, ',') }
 
     return result.toString()
+  }
+
+  private fun PsiElement.endColumnZero(): Int {
+    val document = this.containingFile.viewProvider.document!!
+    val zeroLineNumber = document.getLineNumber(this.endOffset)
+    return this.endOffset - document.getLineStartOffset(zeroLineNumber)
   }
 
   private fun PsiElement?.containsNewline(): Boolean {
