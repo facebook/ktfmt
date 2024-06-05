@@ -65,7 +65,7 @@ data class ParsedArgs(
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
           arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
           arg == "--do-not-order-doc-tags" -> orderDocTags = false
-            arg.startsWith("--stdin-name=") ->
+          arg.startsWith("--stdin-name=") ->
               stdinName =
                   parseKeyValueArg("--stdin-name", arg)
                       ?: return ParseResult.Error(
