@@ -19,9 +19,7 @@ package com.facebook.ktfmt.cli
 import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
 import com.google.common.truth.Truth.assertThat
-import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
-import java.io.PrintStream
 import kotlin.io.path.createTempDirectory
 import kotlin.test.assertFailsWith
 import org.junit.After
@@ -41,143 +39,106 @@ class ParsedArgsTest {
   }
 
   @Test
-  fun `files to format are returned and unknown flags are reported`() {
-    val (parsed, out) = parseTestOptions("foo.kt", "--unknown")
-
-    assertThat(parsed.fileNames).containsExactly("foo.kt")
-    assertThat(out.toString()).isEqualTo("Unexpected option: --unknown\n")
+  fun `unknown flags return an error`() {
+    val result = ParsedArgs.parseOptions(arrayOf("--unknown"))
+    assertThat(result).isInstanceOf(ParseResult.Error::class.java)
   }
 
   @Test
-  fun `files to format are returned and flags starting with @ are reported`() {
-    val (parsed, out) = parseTestOptions("foo.kt", "@unknown")
-
-    assertThat(parsed.fileNames).containsExactly("foo.kt")
-    assertThat(out.toString()).isEqualTo("Unexpected option: @unknown\n")
+  fun `unknown flags starting with '@' return an error`() {
+    val result = ParsedArgs.parseOptions(arrayOf("@unknown"))
+    assertThat(result).isInstanceOf(ParseResult.Error::class.java)
   }
 
   @Test
   fun `parseOptions uses default values when args are empty`() {
-    val (parsed, _) = parseTestOptions("foo.kt")
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("foo.kt")))
 
     val formattingOptions = parsed.formattingOptions
-    assertThat(formattingOptions.style).isEqualTo(FormattingOptions.Style.FACEBOOK)
-    assertThat(formattingOptions.maxWidth).isEqualTo(100)
-    assertThat(formattingOptions.blockIndent).isEqualTo(2)
-    assertThat(formattingOptions.continuationIndent).isEqualTo(4)
-    assertThat(formattingOptions.removeUnusedImports).isTrue()
-    assertThat(formattingOptions.debuggingPrintOpsAfterFormatting).isFalse()
 
-    assertThat(parsed.dryRun).isFalse()
-    assertThat(parsed.setExitIfChanged).isFalse()
-    assertThat(parsed.stdinName).isNull()
+    val defaultFormattingOptions = FormattingOptions()
+    assertThat(formattingOptions).isEqualTo(defaultFormattingOptions)
   }
 
   @Test
-  fun `parseOptions recognizes --dropbox-style and rejects unknown flags`() {
-    val (parsed, out) = parseTestOptions("--dropbox-style", "foo.kt", "--unknown")
-
-    assertThat(parsed.fileNames).containsExactly("foo.kt")
-    assertThat(parsed.formattingOptions.blockIndent).isEqualTo(4)
-    assertThat(parsed.formattingOptions.continuationIndent).isEqualTo(4)
-    assertThat(out.toString()).isEqualTo("Unexpected option: --unknown\n")
+  fun `parseOptions recognizes --dropbox-style`() {
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--dropbox-style", "foo.kt")))
+    assertThat(parsed.formattingOptions).isEqualTo(Formatter.DROPBOX_FORMAT)
   }
 
   @Test
   fun `parseOptions recognizes --google-style`() {
-    val (parsed, _) = parseTestOptions("--google-style", "foo.kt")
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--google-style", "foo.kt")))
     assertThat(parsed.formattingOptions).isEqualTo(Formatter.GOOGLE_FORMAT)
   }
 
   @Test
   fun `parseOptions recognizes --dry-run`() {
-    val (parsed, _) = parseTestOptions("--dry-run", "foo.kt")
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--dry-run", "foo.kt")))
     assertThat(parsed.dryRun).isTrue()
   }
 
   @Test
   fun `parseOptions recognizes -n as --dry-run`() {
-    val (parsed, _) = parseTestOptions("-n", "foo.kt")
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("-n", "foo.kt")))
     assertThat(parsed.dryRun).isTrue()
   }
 
   @Test
   fun `parseOptions recognizes --set-exit-if-changed`() {
-    val (parsed, _) = parseTestOptions("--set-exit-if-changed", "foo.kt")
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--set-exit-if-changed", "foo.kt")))
     assertThat(parsed.setExitIfChanged).isTrue()
   }
 
   @Test
   fun `parseOptions defaults to removing imports`() {
-    val (parsed, _) = parseTestOptions("foo.kt")
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("foo.kt")))
     assertThat(parsed.formattingOptions.removeUnusedImports).isTrue()
   }
 
   @Test
   fun `parseOptions recognizes --do-not-remove-unused-imports to removing imports`() {
-    val (parsed, _) = parseTestOptions("--do-not-remove-unused-imports", "foo.kt")
+    val parsed =
+        assertSucceeds(ParsedArgs.parseOptions(arrayOf("--do-not-remove-unused-imports", "foo.kt")))
     assertThat(parsed.formattingOptions.removeUnusedImports).isFalse()
   }
 
   @Test
-  fun `parseOptions handles dropbox style and --do-not-remove-unused-imports`() {
-    val (parsed, _) =
-        parseTestOptions("--do-not-remove-unused-imports", "--dropbox-style", "foo.kt")
-    assertThat(parsed.formattingOptions.removeUnusedImports).isFalse()
-    assertThat(parsed.formattingOptions.style).isEqualTo(FormattingOptions.Style.DROPBOX)
-  }
-
-  @Test
-  fun `parseOptions handles google style and --do-not-remove-unused-imports`() {
-    val (parsed, _) = parseTestOptions("--do-not-remove-unused-imports", "--google-style", "foo.kt")
-    assertThat(parsed.formattingOptions.removeUnusedImports).isFalse()
-    assertThat(parsed.formattingOptions.style).isEqualTo(FormattingOptions.Style.GOOGLE)
-  }
-
-  @Test
-  fun `parseOptions --stdin-name`() {
-    val (parsed, _) = parseTestOptions("--stdin-name=my/foo.kt")
+  fun `parseOptions recognizes --stdin-name`() {
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--stdin-name=my/foo.kt")))
     assertThat(parsed.stdinName).isEqualTo("my/foo.kt")
   }
 
   @Test
-  fun `parseOptions --stdin-name with empty value`() {
-    val (parsed, _) = parseTestOptions("--stdin-name=")
+  fun `parseOptions accepts --stdin-name with empty value`() {
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--stdin-name=")))
     assertThat(parsed.stdinName).isEqualTo("")
   }
 
   @Test
   fun `parseOptions --stdin-name without value`() {
-    val (parsed, out) = parseTestOptions("--stdin-name")
-    assertThat(out).isEqualTo("Found option '--stdin-name', expected '--stdin-name=<value>'\n")
-    assertThat(parsed.stdinName).isNull()
-  }
-
-  @Test
-  fun `parseOptions --stdin-name prefix`() {
-    val (parsed, out) = parseTestOptions("--stdin-namea")
-    assertThat(out).isEqualTo("Found option '--stdin-namea', expected '--stdin-name=<value>'\n")
-    assertThat(parsed.stdinName).isNull()
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--stdin-name"))
+    assertThat(parseResult).isInstanceOf(ParseResult.Error::class.java)
   }
 
   @Test
   fun `processArgs use the @file option with non existing file`() {
-    val out = ByteArrayOutputStream()
-
     val e =
         assertFailsWith<FileNotFoundException> {
-          ParsedArgs.processArgs(PrintStream(out), arrayOf("@non-existing-file"))
+          ParsedArgs.processArgs(arrayOf("@non-existing-file"))
         }
     assertThat(e.message).contains("non-existing-file (No such file or directory)")
   }
 
   @Test
   fun `processArgs use the @file option with file containing arguments`() {
-    val out = ByteArrayOutputStream()
     val file = root.resolve("existing-file")
     file.writeText("--google-style\n--dry-run\n--set-exit-if-changed\nFile1.kt\nFile2.kt\n")
 
-    val parsed = ParsedArgs.processArgs(PrintStream(out), arrayOf("@" + file.absolutePath))
+    val result = ParsedArgs.processArgs(arrayOf("@" + file.absolutePath))
+    assertThat(result).isInstanceOf(ParseResult.Ok::class.java)
+
+    val parsed = (result as ParseResult.Ok).parsedValue
 
     assertThat(parsed.formattingOptions).isEqualTo(Formatter.GOOGLE_FORMAT)
     assertThat(parsed.dryRun).isTrue()
@@ -185,8 +146,57 @@ class ParsedArgsTest {
     assertThat(parsed.fileNames).containsExactlyElementsIn(listOf("File1.kt", "File2.kt"))
   }
 
-  private fun parseTestOptions(vararg args: String): Pair<ParsedArgs, String> {
-    val out = ByteArrayOutputStream()
-    return Pair(ParsedArgs.parseOptions(PrintStream(out), arrayOf(*args)), out.toString())
+  @Test
+  fun `parses multiple args successfully`() {
+    val testResult =
+        ParsedArgs.parseOptions(
+            arrayOf("--google-style", "--dry-run", "--set-exit-if-changed", "File.kt"),
+        )
+    assertThat(testResult)
+        .isEqualTo(
+            parseResultOk(
+                fileNames = listOf("File.kt"),
+                formattingOptions = Formatter.GOOGLE_FORMAT,
+                dryRun = true,
+                setExitIfChanged = true,
+            ))
+  }
+
+  @Test
+  fun `last style in args wins`() {
+    val testResult =
+        ParsedArgs.parseOptions(arrayOf<String>("--google-style", "--dropbox-style", "File.kt"))
+    assertThat(testResult)
+        .isEqualTo(
+            parseResultOk(
+                fileNames = listOf("File.kt"),
+                formattingOptions = Formatter.DROPBOX_FORMAT,
+            ))
+  }
+
+  @Test
+  fun `error when parsing multiple args and one is unknown`() {
+    val testResult =
+        ParsedArgs.parseOptions(arrayOf<String>("@unknown", "--google-style", "File.kt"))
+    assertThat(testResult).isEqualTo(ParseResult.Error("Unexpected option: @unknown"))
+  }
+
+  private fun assertSucceeds(parseResult: ParseResult): ParsedArgs {
+    assertThat(parseResult).isInstanceOf(ParseResult.Ok::class.java)
+    return (parseResult as ParseResult.Ok).parsedValue
+  }
+
+  private fun parseResultOk(
+      fileNames: List<String> = emptyList(),
+      formattingOptions: FormattingOptions = FormattingOptions(),
+      dryRun: Boolean = false,
+      setExitIfChanged: Boolean = false,
+      removedUnusedImports: Boolean = true,
+      stdinName: String? = null
+  ): ParseResult.Ok {
+    val returnedFormattingOptions =
+        formattingOptions.copy(removeUnusedImports = removedUnusedImports)
+    return ParseResult.Ok(
+        ParsedArgs(fileNames, returnedFormattingOptions, dryRun, setExitIfChanged, stdinName))
   }
 }

@@ -36,7 +36,7 @@ class Main(
     private val input: InputStream,
     private val out: PrintStream,
     private val err: PrintStream,
-    args: Array<String>
+    private val inputArgs: Array<String>
 ) {
   companion object {
     @JvmStatic
@@ -69,9 +69,13 @@ class Main(
     }
   }
 
-  private val parsedArgs: ParsedArgs = ParsedArgs.processArgs(err, args)
-
   fun run(): Int {
+    val processArgs = ParsedArgs.processArgs(inputArgs)
+    val parsedArgs =
+        when (processArgs) {
+          is ParseResult.Ok -> processArgs.parsedValue
+          is ParseResult.Error -> exitFatal(processArgs.errorMessage, 1)
+        }
     if (parsedArgs.fileNames.isEmpty()) {
       err.println(
           "Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...")
@@ -81,7 +85,7 @@ class Main(
 
     if (parsedArgs.fileNames.size == 1 && parsedArgs.fileNames[0] == "-") {
       return try {
-        val alreadyFormatted = format(null)
+        val alreadyFormatted = format(null, parsedArgs)
         if (!alreadyFormatted && parsedArgs.setExitIfChanged) 1 else 0
       } catch (e: Exception) {
         1
@@ -107,7 +111,7 @@ class Main(
     val retval = AtomicInteger(0)
     files.parallelStream().forEach {
       try {
-        if (!format(it) && parsedArgs.setExitIfChanged) {
+        if (!format(it, parsedArgs) && parsedArgs.setExitIfChanged) {
           retval.set(1)
         }
       } catch (e: Exception) {
@@ -126,17 +130,17 @@ class Main(
    * @param file The file to format. If null, the code is read from <stdin>.
    * @return true iff input is valid and already formatted.
    */
-  private fun format(file: File?): Boolean {
-    val fileName = file?.toString() ?: parsedArgs.stdinName ?: "<stdin>"
+  private fun format(file: File?, args: ParsedArgs): Boolean {
+    val fileName = file?.toString() ?: args.stdinName ?: "<stdin>"
     try {
       val bytes = if (file == null) input else FileInputStream(file)
       val code = BufferedReader(InputStreamReader(bytes, UTF_8)).readText()
-      val formattedCode = Formatter.format(parsedArgs.formattingOptions, code)
+      val formattedCode = Formatter.format(args.formattingOptions, code)
       val alreadyFormatted = code == formattedCode
 
       // stdin
       if (file == null) {
-        if (parsedArgs.dryRun) {
+        if (args.dryRun) {
           if (!alreadyFormatted) {
             out.println(fileName)
           }
@@ -146,7 +150,7 @@ class Main(
         return alreadyFormatted
       }
 
-      if (parsedArgs.dryRun) {
+      if (args.dryRun) {
         if (!alreadyFormatted) {
           out.println(fileName)
         }
@@ -172,5 +176,16 @@ class Main(
       e.printStackTrace(err)
       throw e
     }
+  }
+
+  /**
+   * Finishes the process with result `returnCode`.
+   *
+   * **WARNING**: If you call this method, this is the last that will happen and no code after it
+   * will be executed.
+   */
+  private fun exitFatal(message: String, returnCode: Int): Nothing {
+    err.println(message)
+    exitProcess(returnCode)
   }
 }

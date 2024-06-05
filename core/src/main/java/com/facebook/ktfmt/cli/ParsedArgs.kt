@@ -19,7 +19,6 @@ package com.facebook.ktfmt.cli
 import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
 import java.io.File
-import java.io.PrintStream
 import java.nio.charset.StandardCharsets.UTF_8
 
 /** ParsedArgs holds the arguments passed to ktfmt on the command-line, after parsing. */
@@ -39,16 +38,16 @@ data class ParsedArgs(
 ) {
   companion object {
 
-    fun processArgs(err: PrintStream, args: Array<String>): ParsedArgs {
+    fun processArgs(args: Array<String>): ParseResult {
       if (args.size == 1 && args[0].startsWith("@")) {
-        return parseOptions(err, File(args[0].substring(1)).readLines(UTF_8).toTypedArray())
+        return parseOptions(File(args[0].substring(1)).readLines(UTF_8).toTypedArray())
       } else {
-        return parseOptions(err, args)
+        return parseOptions(args)
       }
     }
 
     /** parseOptions parses command-line arguments passed to ktfmt. */
-    fun parseOptions(err: PrintStream, args: Array<String>): ParsedArgs {
+    fun parseOptions(args: Array<out String>): ParseResult {
       val fileNames = mutableListOf<String>()
       var formattingOptions = FormattingOptions()
       var dryRun = false
@@ -64,29 +63,36 @@ data class ParsedArgs(
           arg == "--dry-run" || arg == "-n" -> dryRun = true
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
           arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
-          arg.startsWith("--stdin-name") -> stdinName = parseKeyValueArg(err, "--stdin-name", arg)
-          arg.startsWith("--") -> err.println("Unexpected option: $arg")
-          arg.startsWith("@") -> err.println("Unexpected option: $arg")
+          arg.startsWith("--stdin-name=") ->
+              stdinName =
+                  parseKeyValueArg("--stdin-name", arg)
+                      ?: return ParseResult.Error(
+                          "Found option '${arg}', expected '${"--stdin-name"}=<value>'")
+          arg.startsWith("--") -> return ParseResult.Error("Unexpected option: $arg")
+          arg.startsWith("@") -> return ParseResult.Error("Unexpected option: $arg")
           else -> fileNames.add(arg)
         }
       }
 
-      return ParsedArgs(
-          fileNames,
-          formattingOptions.copy(removeUnusedImports = removeUnusedImports),
-          dryRun,
-          setExitIfChanged,
-          stdinName,
-      )
+      return ParseResult.Ok(
+          ParsedArgs(
+              fileNames,
+              formattingOptions.copy(removeUnusedImports = removeUnusedImports),
+              dryRun,
+              setExitIfChanged,
+              stdinName,
+          ))
     }
 
-    private fun parseKeyValueArg(err: PrintStream, key: String, arg: String): String? {
+    private fun parseKeyValueArg(key: String, arg: String): String? {
       val parts = arg.split('=', limit = 2)
-      if (parts[0] != key || parts.size != 2) {
-        err.println("Found option '${arg}', expected '${key}=<value>'")
-        return null
-      }
-      return parts[1]
+      return parts[1].takeIf { parts[0] == key || parts.size == 2 }
     }
   }
+}
+
+sealed interface ParseResult {
+  data class Ok(val parsedValue: ParsedArgs) : ParseResult
+
+  data class Error(val errorMessage: String) : ParseResult
 }
