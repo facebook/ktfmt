@@ -41,7 +41,12 @@ class KDocFormattingOptions(
     /**
      * Limit comment to be at most [maxCommentWidth] characters even if more would fit on the line.
      */
-    var maxCommentWidth: Int = min(maxLineWidth, 72)
+    var maxCommentWidth: Int = min(maxLineWidth, 72),
+
+    /**
+     * If true, moves any kdoc tags to the end of the comment and `@return` tags after `@param` tags.
+     */
+    var orderDocTags: Boolean = true
 ) {
   /** Whether to collapse multi-line comments that would fit on a single line into a single line. */
   var collapseSingleLine: Boolean = true
@@ -92,11 +97,6 @@ class KDocFormattingOptions(
    * tables are left alone (except for left hand side cleanup.)
    */
   var alignTableColumns: Boolean = true
-
-  /**
-   * If true, moves any kdoc tags to the end of the comment and `@return` tags after `@param` tags.
-   */
-  var orderDocTags: Boolean = true
 
   /**
    * If true, perform "alternative" formatting. This is only relevant in the IDE. You can invoke the

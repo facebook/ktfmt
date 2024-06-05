@@ -120,6 +120,12 @@ class ParsedArgsTest {
   }
 
   @Test
+  fun `parseOptions recognizes --do-not-order-doc-tags to keeping tag order`() {
+    val (parsed, _) = parseTestOptions("--do-not-order-doc-tags", "foo.kt")
+    assertThat(parsed.formattingOptions.orderDocTags).isFalse()
+  }
+
+  @Test
   fun `parseOptions handles dropbox style and --do-not-remove-unused-imports`() {
     val (parsed, _) =
         parseTestOptions("--do-not-remove-unused-imports", "--dropbox-style", "foo.kt")

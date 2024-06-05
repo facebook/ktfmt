@@ -104,7 +104,7 @@ object Formatter {
     val file = Parser.parse(code)
     val kotlinInput = KotlinInput(code, file)
     val javaOutput =
-        JavaOutput(lineSeparator, kotlinInput, KDocCommentsHelper(lineSeparator, options.maxWidth))
+        JavaOutput(lineSeparator, kotlinInput, KDocCommentsHelper(lineSeparator, options.maxWidth, options.orderDocTags))
     val builder = OpsBuilder(kotlinInput, javaOutput)
     file.accept(createAstVisitor(options, builder))
     builder.sync(kotlinInput.text.length)

@@ -29,11 +29,11 @@ import java.util.ArrayList
 import java.util.regex.Pattern
 
 /** `KDocCommentsHelper` extends [CommentsHelper] to rewrite KDoc comments. */
-class KDocCommentsHelper(private val lineSeparator: String, maxLineLength: Int) : CommentsHelper {
+class KDocCommentsHelper(private val lineSeparator: String, maxLineLength: Int, orderDocTags: Boolean) : CommentsHelper {
 
   private val kdocFormatter =
       KDocFormatter(
-          KDocFormattingOptions(maxLineLength, maxLineLength).also {
+          KDocFormattingOptions(maxLineLength, maxLineLength, orderDocTags).also {
             it.allowParamBrackets = true // TODO Do we want this?
             it.convertMarkup = false
             it.nestedListIndent = 4

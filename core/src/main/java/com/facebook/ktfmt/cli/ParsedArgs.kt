@@ -54,6 +54,7 @@ data class ParsedArgs(
       var dryRun = false
       var setExitIfChanged = false
       var removeUnusedImports = true
+      var orderDocTags = true
       var stdinName: String? = null
 
       for (arg in args) {
@@ -64,6 +65,7 @@ data class ParsedArgs(
           arg == "--dry-run" || arg == "-n" -> dryRun = true
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
           arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
+          arg == "--do-not-order-doc-tags" -> orderDocTags = false
           arg.startsWith("--stdin-name") -> stdinName = parseKeyValueArg(err, "--stdin-name", arg)
           arg.startsWith("--") -> err.println("Unexpected option: $arg")
           arg.startsWith("@") -> err.println("Unexpected option: $arg")
@@ -73,7 +75,7 @@ data class ParsedArgs(
 
       return ParsedArgs(
           fileNames,
-          formattingOptions.copy(removeUnusedImports = removeUnusedImports),
+          formattingOptions.copy(removeUnusedImports = removeUnusedImports, orderDocTags = orderDocTags),
           dryRun,
           setExitIfChanged,
           stdinName,
