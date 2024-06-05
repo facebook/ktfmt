@@ -7199,6 +7199,13 @@ class FormatterTest {
       |  context(SomethingElse)
       |
       |  private class NestedClass {}
+      |
+      |  fun <T> testSuspend(
+      |    mock: T,
+      |    block: suspend context(SomeContext) T.() -> Unit,
+      |  ) = startCoroutine {
+      |    T.block()
+      |  }
       |}
       |"""
             .trimMargin()
@@ -7216,6 +7223,13 @@ class FormatterTest {
       |
       |  context(SomethingElse)
       |  private class NestedClass {}
+      |
+      |  fun <T> testSuspend(
+      |      mock: T,
+      |      block:
+      |          suspend context(SomeContext)
+      |          T.() -> Unit,
+      |  ) = startCoroutine { T.block() }
       |}
       |"""
             .trimMargin()

@@ -2290,6 +2290,9 @@ class KotlinInputAstVisitor(
 
   override fun visitFunctionType(type: KtFunctionType) {
     builder.sync(type)
+
+    type.contextReceiverList?.let { visitContextReceiverList(it) }
+
     val receiver = type.receiver
     if (receiver != null) {
       visit(receiver)
