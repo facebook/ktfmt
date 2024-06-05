@@ -46,7 +46,7 @@ class KDocFormattingOptions(
     /**
      * If true, moves any kdoc tags to the end of the comment and `@return` tags after `@param` tags.
      */
-    var orderDocTags: Boolean = true
+    var orderDocTags: Boolean = true,
 ) {
   /** Whether to collapse multi-line comments that would fit on a single line into a single line. */
   var collapseSingleLine: Boolean = true
