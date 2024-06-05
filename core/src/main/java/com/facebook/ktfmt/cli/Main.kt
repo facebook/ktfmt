@@ -78,7 +78,7 @@ class Main(
         }
     if (parsedArgs.fileNames.isEmpty()) {
       err.println(
-          "Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...")
+          "Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] [--max-width=<number>] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...")
       err.println("Or: ktfmt @file")
       return 1
     }

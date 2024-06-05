@@ -54,6 +54,7 @@ data class ParsedArgs(
       var setExitIfChanged = false
       var removeUnusedImports = true
       var stdinName: String? = null
+      var maxWidth = FormattingOptions.DEFAULT_MAX_WIDTH
 
       for (arg in args) {
         when {
@@ -63,6 +64,11 @@ data class ParsedArgs(
           arg == "--dry-run" || arg == "-n" -> dryRun = true
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
           arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
+          arg.startsWith("--max-width=") ->
+            maxWidth = parseKeyValueArg("--max-width", arg)?.let {
+              try { it.toInt() } catch (e: NumberFormatException) { null }
+            }
+              ?: return ParseResult.Error("Found option '${arg}', expected '${"--max-width"}=<number>'")
           arg.startsWith("--stdin-name=") ->
               stdinName =
                   parseKeyValueArg("--stdin-name", arg)
@@ -75,13 +81,17 @@ data class ParsedArgs(
       }
 
       return ParseResult.Ok(
-          ParsedArgs(
-              fileNames,
-              formattingOptions.copy(removeUnusedImports = removeUnusedImports),
-              dryRun,
-              setExitIfChanged,
-              stdinName,
-          ))
+        ParsedArgs(
+          fileNames,
+          formattingOptions.copy(
+            removeUnusedImports = removeUnusedImports,
+            maxWidth = maxWidth,
+          ),
+          dryRun,
+          setExitIfChanged,
+          stdinName,
+        )
+      )
     }
 
     private fun parseKeyValueArg(key: String, arg: String): String? {

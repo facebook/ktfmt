@@ -104,6 +104,24 @@ class ParsedArgsTest {
   }
 
   @Test
+  fun `parseOptions recognizes --max-width`() {
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--max-width=120")))
+    assertThat(parsed.formattingOptions.maxWidth).isEqualTo(120)
+  }
+
+  @Test
+  fun `parseOptions accepts --max-width with empty value`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--max-width="))
+    assertThat(parseResult).isInstanceOf(ParseResult.Error::class.java)
+  }
+
+  @Test
+  fun `parseOptions --max-width without value`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--max-width"))
+    assertThat(parseResult).isInstanceOf(ParseResult.Error::class.java)
+  }
+
+  @Test
   fun `parseOptions recognizes --stdin-name`() {
     val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--stdin-name=my/foo.kt")))
     assertThat(parsed.stdinName).isEqualTo("my/foo.kt")
