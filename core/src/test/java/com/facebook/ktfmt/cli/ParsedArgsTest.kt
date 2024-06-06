@@ -103,13 +103,6 @@ class ParsedArgsTest {
     assertThat(parsed.formattingOptions.removeUnusedImports).isFalse()
   }
 
-    @Test
-    fun `parseOptions recognizes --do-not-order-doc-tags to keeping tag order`() {
-        val parsed =
-            assertSucceeds(ParsedArgs.parseOptions(arrayOf("--do-not-order-doc-tags", "foo.kt")))
-        assertThat(parsed.formattingOptions.orderDocTags).isFalse()
-    }
-
   @Test
   fun `parseOptions recognizes --stdin-name`() {
     val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--stdin-name=my/foo.kt")))
