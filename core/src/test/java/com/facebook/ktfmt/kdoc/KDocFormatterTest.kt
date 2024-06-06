@@ -2072,12 +2072,12 @@ class KDocFormatterTest {
              * @sample xyz
              *
              * Makes sense?
-             * 
+             *
              * @return Something
              * @sample foo
              *
              * Note that samples after another tag don't get special treatment.
-             * 
+             *
              * @see more
              */
             """
