@@ -702,6 +702,7 @@ class ParagraphListBuilder(
       paragraph.separate =
           when {
             prev == null -> false
+            prev.text.startsWith("@sample") -> true
             paragraph.preformatted && prev.preformatted -> false
             paragraph.table ->
                 paragraph.separate && (!prev.block || prev.text.isKDocTag() || prev.table)

@@ -1355,6 +1355,7 @@ class FormatterTest {
             | * Old {@link JavaDocLink} that gets removed.
             | *
             | * @sample Example
+            | *
             | * @param unused [Param]
             | * @return [Unit] as [ReturnedValue]
             | * @property JavaDocLink [Param]
@@ -5298,6 +5299,7 @@ class FormatterTest {
       | * @param marginPrefix non-blank string, which is used as a margin delimiter. Default is `|` (pipe
       | *   character).
       | * @sample samples.text.Strings.trimMargin
+      | *
       | * @see trimIndent
       | * @see kotlin.text.isWhitespace
       | */

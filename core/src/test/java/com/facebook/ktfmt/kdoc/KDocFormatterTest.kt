@@ -1990,9 +1990,9 @@ class KDocFormatterTest {
             /**
              * Constructs a new location range for the given file, from start to
              * end. If the length of the range is not known, end may be null.
-             *
-             * @return Something
              * @sample Other
+             * 
+             * @return Something
              * @param file the associated file (but see the documentation for
              * [Location.file] for more information on what the file
              * represents)
@@ -2017,13 +2017,14 @@ class KDocFormatterTest {
              * Constructs a new location range for the given file, from start to
              * end. If the length of the range is not known, end may be null.
              *
+             * @sample Other
+             *
              * @param file the associated file (but see the documentation for
              *   [Location.file] for more information on what the file
              *   represents)
              * @param start the starting position, or null
              * @param end the ending position, or null
              * @return Something
-             * @sample Other
              * @see More
              */
             """
@@ -4321,6 +4322,7 @@ class KDocFormatterTest {
              * `stateSaver` param.
              *
              * @sample androidx.compose.runtime.saveable.samples.RememberSaveableWithMutableStateAndCustomSaver
+             *
              * @param inputs A set of inputs such that, when any of them have changed,
              *   will cause the state to reset and [init] to be rerun
              * @param saver The [Saver] object which defines how the state is saved and
