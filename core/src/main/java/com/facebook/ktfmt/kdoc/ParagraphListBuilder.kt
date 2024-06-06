@@ -576,12 +576,11 @@ class ParagraphListBuilder(
       tag.startsWith("@property") -> 4
       tag.startsWith("@throws") -> 5
       tag.startsWith("@exception") -> 6
-      tag.startsWith("@sample") -> 7
-      tag.startsWith("@see") -> 8
-      tag.startsWith("@author") -> 9
-      tag.startsWith("@since") -> 10
-      tag.startsWith("@suppress") -> 11
-      tag.startsWith("@deprecated") -> 12
+      tag.startsWith("@see") -> 7
+      tag.startsWith("@author") -> 8
+      tag.startsWith("@since") -> 9
+      tag.startsWith("@suppress") -> 10
+      tag.startsWith("@deprecated") -> 11
       else -> 100 // custom tags
     }
   }
@@ -616,6 +615,11 @@ class ParagraphListBuilder(
               // Sort TODOs to the end
               if (p1.text.isTodo() != p2.text.isTodo()) {
                 return if (p1.text.isTodo()) 1 else -1
+              }
+
+              // Skip sorting for @sample tags
+              if (p1.text.startsWith("@sample") || p2.text.startsWith("@sample")) {
+                return o1 - o2
               }
 
               if (p1.doc == p2.doc) {
@@ -666,7 +670,7 @@ class ParagraphListBuilder(
       val units = mutableListOf<List<Paragraph>>()
       var tag: MutableList<Paragraph>? = null
       for (paragraph in paragraphs) {
-        if (paragraph.doc) {
+        if (paragraph.doc && !paragraph.text.startsWith("@sample")) {
           tag = mutableListOf()
           units.add(tag)
         }

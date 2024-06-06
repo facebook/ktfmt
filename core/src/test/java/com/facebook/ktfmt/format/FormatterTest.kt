@@ -1322,12 +1322,14 @@ class FormatterTest {
             | *
             | * Old {@link JavaDocLink} that gets removed.
             | *
+            | * @sample Example
+            | *
+            | * 
             | * @throws AnException
             | * @exception Sample.SampleException
             | * @param unused [Param]
             | * @property JavaDocLink [Param]
             | * @return [Unit] as [ReturnedValue]
-            | * @sample Example
             | * @see Bar for more info
             | * @throws AnException
             | */
@@ -1352,13 +1354,13 @@ class FormatterTest {
             | *
             | * Old {@link JavaDocLink} that gets removed.
             | *
+            | * @sample Example
             | * @param unused [Param]
             | * @return [Unit] as [ReturnedValue]
             | * @property JavaDocLink [Param]
             | * @throws AnException
             | * @throws AnException
             | * @exception Sample.SampleException
-            | * @sample Example
             | * @see Bar for more info
             | */
             |class Dummy
