@@ -565,10 +565,11 @@ class ParagraphListBuilder(
     return false
   }
 
-  private fun docTagRank(tag: String): Int {
+  private fun docTagRank(tag: String, isPriority: Boolean): Int {
     // Canonical kdoc order -- https://kotlinlang.org/docs/kotlin-doc.html#block-tags
     // Full list in Dokka's sources: plugins/base/src/main/kotlin/parsers/Parser.kt
     return when {
+      isPriority -> -1
       tag.startsWith("@param") -> 0
       tag.startsWith("@return") -> 1
       tag.startsWith("@constructor") -> 2
@@ -583,6 +584,21 @@ class ParagraphListBuilder(
       tag.startsWith("@suppress") -> 11
       tag.startsWith("@deprecated") -> 12
       else -> 100 // custom tags
+    }
+  }
+
+  /**
+   * Tags that are "priority" are placed before other tags, with their order unchanged.
+   *
+   * Note that if a priority tag comes after a regular tag (before formatting), it doesn't get
+   * treated as priority.
+   *
+   * See: https://github.com/facebook/ktfmt/issues/406
+   */
+  private fun docTagIsPriority(tag: String): Boolean {
+    return when {
+      tag.startsWith("@sample") -> true
+      else -> false
     }
   }
 
@@ -605,6 +621,7 @@ class ParagraphListBuilder(
   private fun sortDocTags() {
     if (options.orderDocTags && paragraphs.any { it.doc }) {
       val order = paragraphs.mapIndexed { index, paragraph -> paragraph to index }.toMap()
+      val firstNonPriorityDocTag = paragraphs.indexOfFirst { it.doc && !docTagIsPriority(it.text) }
       val comparator =
           object : Comparator<List<Paragraph>> {
             override fun compare(l1: List<Paragraph>, l2: List<Paragraph>): Int {
@@ -612,6 +629,8 @@ class ParagraphListBuilder(
               val p2 = l2.first()
               val o1 = order[p1]!!
               val o2 = order[p2]!!
+              val isPriority1 = p1.doc && docTagIsPriority(p1.text) && o1 < firstNonPriorityDocTag
+              val isPriority2 = p2.doc && docTagIsPriority(p2.text) && o2 < firstNonPriorityDocTag
 
               // Sort TODOs to the end
               if (p1.text.isTodo() != p2.text.isTodo()) {
@@ -621,8 +640,8 @@ class ParagraphListBuilder(
               if (p1.doc == p2.doc) {
                 if (p1.doc) {
                   // Sort @return after @param etc
-                  val r1 = docTagRank(p1.text)
-                  val r2 = docTagRank(p2.text)
+                  val r1 = docTagRank(p1.text, isPriority1)
+                  val r2 = docTagRank(p2.text, isPriority2)
                   if (r1 != r2) {
                     return r1 - r2
                   }

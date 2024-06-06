@@ -2032,6 +2032,60 @@ class KDocFormatterTest {
   }
 
   @Test
+  fun testNoReorderSample() {
+    val source =
+        """
+            /**
+             * Constructs a new location range for the given file, from start to
+             * end. If the length of the range is not known, end may be null.
+             *
+             * @sample abc
+             *
+             * You might want to see another sample.
+             *
+             * @sample xyz
+             *
+             * Makes sense?
+             * @return Something
+             * @see more
+             * @sample foo
+             *
+             * Note that samples after another tag don't get special treatment.
+             */
+            """
+            .trimIndent()
+    checkFormatter(
+        FormattingTask(
+            KDocFormattingOptions(72),
+            source,
+            "    ",
+            orderedParameterNames = listOf("file", "start", "end")),
+        """
+            /**
+             * Constructs a new location range for the given file, from start to
+             * end. If the length of the range is not known, end may be null.
+             *
+             * @sample abc
+             *
+             * You might want to see another sample.
+             *
+             * @sample xyz
+             *
+             * Makes sense?
+             * 
+             * @return Something
+             * @sample foo
+             *
+             * Note that samples after another tag don't get special treatment.
+             * 
+             * @see more
+             */
+            """
+            .trimIndent(),
+    )
+  }
+
+  @Test
   fun testKDocOrdering() {
     // From AndroidX'
     // frameworks/support/biometric/biometric-ktx/src/main/java/androidx/biometric/auth/CredentialAuthExtensions.kt
