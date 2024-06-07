@@ -19,11 +19,10 @@ package com.facebook.ktfmt.onlineformatter
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
+import com.facebook.ktfmt.cli.ParseResult
 import com.facebook.ktfmt.cli.ParsedArgs
 import com.facebook.ktfmt.format.Formatter
 import com.google.gson.Gson
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 
 class Handler : RequestHandler<APIGatewayProxyRequestEvent, String> {
   init {
@@ -35,16 +34,24 @@ class Handler : RequestHandler<APIGatewayProxyRequestEvent, String> {
     return gson.toJson(
         try {
           val request = gson.fromJson(event.body, Request::class.java)
-          val parsingErrors = ByteArrayOutputStream()
           val style = request.style
-          val parsedArgs =
-              ParsedArgs.parseOptions(
-                  PrintStream(parsingErrors), if (style == null) arrayOf() else arrayOf(style))
-          Response(
-              Formatter.format(
-                  parsedArgs.formattingOptions.copy(maxWidth = request.maxWidth ?: 100),
-                  request.source ?: ""),
-              parsingErrors.toString().ifEmpty { null })
+          val parseResult = ParsedArgs.parseOptions(listOfNotNull(style).toTypedArray())
+          when (parseResult) {
+            is ParseResult.Ok -> {
+              val parsedArgs = parseResult.parsedValue
+              Response(
+                  source =
+                      Formatter.format(
+                          parsedArgs.formattingOptions.copy(maxWidth = request.maxWidth ?: 100),
+                          request.source.orEmpty(),
+                      ),
+                  err = null,
+              )
+            }
+            is ParseResult.Error -> {
+              Response(null, parseResult.errorMessage)
+            }
+          }
         } catch (e: Exception) {
           Response(null, e.message)
         })
