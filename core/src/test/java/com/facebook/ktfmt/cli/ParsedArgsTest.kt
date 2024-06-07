@@ -165,7 +165,7 @@ class ParsedArgsTest {
   @Test
   fun `last style in args wins`() {
     val testResult =
-        ParsedArgs.parseOptions(arrayOf<String>("--google-style", "--dropbox-style", "File.kt"))
+        ParsedArgs.parseOptions(arrayOf("--google-style", "--dropbox-style", "File.kt"))
     assertThat(testResult)
         .isEqualTo(
             parseResultOk(
@@ -176,8 +176,7 @@ class ParsedArgsTest {
 
   @Test
   fun `error when parsing multiple args and one is unknown`() {
-    val testResult =
-        ParsedArgs.parseOptions(arrayOf<String>("@unknown", "--google-style", "File.kt"))
+    val testResult = ParsedArgs.parseOptions(arrayOf("@unknown", "--google-style", "File.kt"))
     assertThat(testResult).isEqualTo(ParseResult.Error("Unexpected option: @unknown"))
   }
 

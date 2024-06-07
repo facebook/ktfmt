@@ -39,11 +39,13 @@ data class ParsedArgs(
   companion object {
 
     fun processArgs(args: Array<String>): ParseResult {
-      if (args.size == 1 && args[0].startsWith("@")) {
-        return parseOptions(File(args[0].substring(1)).readLines(UTF_8).toTypedArray())
-      } else {
-        return parseOptions(args)
-      }
+      val arguments =
+          if (args.size == 1 && args[0].startsWith("@")) {
+            File(args[0].substring(1)).readLines(UTF_8).toTypedArray()
+          } else {
+            args
+          }
+      return parseOptions(arguments)
     }
 
     /** parseOptions parses command-line arguments passed to ktfmt. */

@@ -41,7 +41,7 @@ class KDocFormattingOptions(
     /**
      * Limit comment to be at most [maxCommentWidth] characters even if more would fit on the line.
      */
-    var maxCommentWidth: Int = min(maxLineWidth, 72)
+    var maxCommentWidth: Int = min(maxLineWidth, 72),
 ) {
   /** Whether to collapse multi-line comments that would fit on a single line into a single line. */
   var collapseSingleLine: Boolean = true
