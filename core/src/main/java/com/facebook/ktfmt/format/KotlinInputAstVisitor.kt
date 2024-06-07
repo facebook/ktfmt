@@ -1882,8 +1882,12 @@ class KotlinInputAstVisitor(
       builder.space()
       builder.token("{", Doc.Token.RealOrImaginary.REAL, blockIndent, Optional.of(blockIndent))
 
-      expression.entries.forEach { whenEntry ->
+      expression.entries.forEachIndexed { index, whenEntry ->
         builder.block(blockIndent) {
+          if (index != 0) {
+            // preserve new line if there's one
+            builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
+          }
           builder.forcedBreak()
           if (whenEntry.isElse) {
             builder.token("else")

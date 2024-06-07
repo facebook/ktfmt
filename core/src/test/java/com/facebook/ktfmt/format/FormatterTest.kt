@@ -1636,6 +1636,50 @@ class FormatterTest {
               .trimMargin())
 
   @Test
+  fun `newlines between clauses of when() are preserved`() {
+    assertThatFormatting(
+            """
+        |fun f(x: Int) {
+        |  when (x) {
+        |
+        |
+        |    1 -> print(1)
+        |    2 -> print(2)
+        |
+        |
+        |    3 ->
+        |        // Comment
+        |        print(3)
+        |
+        |    else -> {
+        |      print("else")
+        |    }
+        |
+        |  }
+        |}
+        |"""
+                .trimMargin())
+        .isEqualTo(
+            """
+        |fun f(x: Int) {
+        |  when (x) {
+        |    1 -> print(1)
+        |    2 -> print(2)
+        |
+        |    3 ->
+        |        // Comment
+        |        print(3)
+        |
+        |    else -> {
+        |      print("else")
+        |    }
+        |  }
+        |}
+        |"""
+                .trimMargin())
+  }
+
+  @Test
   fun `when() with a subject expression`() =
       assertFormatted(
           """
