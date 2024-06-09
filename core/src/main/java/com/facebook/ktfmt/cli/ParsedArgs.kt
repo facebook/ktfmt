@@ -60,19 +60,17 @@ data class ParsedArgs(
       for (arg in args) {
         when {
           arg.startsWith("--style=") -> {
-              val parsedStyle =
-                  parseKeyValueArg("--style", arg)
-                      ?: return ParseResult.Error(
-                          unexpectedArg(arg)
-                      )
-              formattingOptions = when (parsedStyle) {
+            val parsedStyle =
+                parseKeyValueArg("--style", arg) ?: return ParseResult.Error(unexpectedArg(arg))
+            formattingOptions =
+                when (parsedStyle) {
                   "dropbox" -> Formatter.DROPBOX_FORMAT
                   "google" -> Formatter.GOOGLE_FORMAT
                   "kotlinlang" -> Formatter.KOTLINLANG_FORMAT
-                  else -> return ParseResult.Error(
-                      "Unknown style '${parsedStyle}'. Style must be one of [dropbox, google, kotlinlang]."
-                  )
-              }
+                  else ->
+                      return ParseResult.Error(
+                          "Unknown style '${parsedStyle}'. Style must be one of [dropbox, google, kotlinlang].")
+                }
           }
           arg == "--dry-run" || arg == "-n" -> dryRun = true
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
@@ -88,12 +86,16 @@ data class ParsedArgs(
         }
       }
 
-      if (fileNames.contains("-") && fileNames.size > 1) {
-        val filesExceptStdin = fileNames - "-"
-        return ParseResult.Error(
-          "Cannot read from stdin and files in same run. Found stdin specifier '-'" +
-              " and files ${filesExceptStdin.joinToString(", ")} "
-        )
+      if (fileNames.contains("-")) {
+        // We're reading from stdin
+        if (fileNames.size > 1) {
+          val filesExceptStdin = fileNames - "-"
+          return ParseResult.Error(
+              "Cannot read from stdin and files in same run. Found stdin specifier '-'" +
+                  " and files ${filesExceptStdin.joinToString(", ")} ")
+        }
+      } else if (stdinName != null) {
+        return ParseResult.Error("--stdin-name can only be specified when reading from stdin")
       }
 
       return ParseResult.Ok(

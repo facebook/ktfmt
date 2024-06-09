@@ -117,18 +117,18 @@ class ParsedArgsTest {
 
   @Test
   fun `parseOptions recognizes --stdin-name`() {
-    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--stdin-name=my/foo.kt")))
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--stdin-name=my/foo.kt", "-")))
     assertThat(parsed.stdinName).isEqualTo("my/foo.kt")
   }
 
   @Test
   fun `parseOptions accepts --stdin-name with empty value`() {
-    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--stdin-name=")))
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--stdin-name=", "-")))
     assertThat(parsed.stdinName).isEqualTo("")
   }
 
   @Test
-  fun `parseOptions --stdin-name without value`() {
+  fun `parseOptions rejects --stdin-name without value`() {
     val parseResult = ParsedArgs.parseOptions(arrayOf("--stdin-name"))
     assertThat(parseResult).isInstanceOf(ParseResult.Error::class.java)
   }
@@ -136,6 +136,12 @@ class ParsedArgsTest {
   @Test
   fun `parseOptions rejects '-' and files at the same time`() {
     val parseResult = ParsedArgs.parseOptions(arrayOf("-", "File.kt"))
+    assertThat(parseResult).isInstanceOf(ParseResult.Error::class.java)
+  }
+
+  @Test
+  fun `parseOptions rejects --stdin-name when not reading from stdin`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--stdin-name=foo","file1.kt"))
     assertThat(parseResult).isInstanceOf(ParseResult.Error::class.java)
   }
 

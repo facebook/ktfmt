@@ -86,10 +86,7 @@ class Main(
       } catch (e: Exception) {
         1
       }
-    } else if (parsedArgs.stdinName != null) {
-      err.println("Error: --stdin-name can only be used with stdin")
-      return 1
-    }
+    } 
 
     val files: List<File> = expandArgsToFileNames(parsedArgs.fileNames)
 

@@ -461,27 +461,6 @@ class MainTest {
   }
 
   @Test
-  fun `--stdin-name can only be used with stdin`() {
-    val code = """fun f () =    println( "hello, world" )"""
-    val file = root.resolve("foo.kt")
-    file.writeText(code, UTF_8)
-
-    val exitCode =
-        Main(
-                emptyInput,
-                PrintStream(out),
-                PrintStream(err),
-                arrayOf("--stdin-name=bar.kt", file.toString()))
-            .run()
-
-    assertThat(file.readText()).isEqualTo(code)
-    assertThat(out.toString(UTF_8)).isEmpty()
-    assertThat(err.toString(testCharset))
-        .isEqualTo("Error: --stdin-name can only be used with stdin\n")
-    assertThat(exitCode).isEqualTo(1)
-  }
-
-  @Test
   fun `Always use UTF8 encoding (stdin, stdout)`() {
     val code = """fun f () =    println( "hello, world" )"""
     val expected = """fun f() = println("hello, world")""" + "\n"
