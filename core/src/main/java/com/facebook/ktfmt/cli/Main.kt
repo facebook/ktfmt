@@ -32,6 +32,8 @@ import java.nio.charset.StandardCharsets.UTF_8
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.exitProcess
 
+private const val EXIT_CODE_FAILURE = 1
+
 class Main(
     private val input: InputStream,
     private val out: PrintStream,
@@ -70,39 +72,41 @@ class Main(
     val parsedArgs =
         when (processArgs) {
           is ParseResult.Ok -> processArgs.parsedValue
-          is ParseResult.Error -> exitFatal(processArgs.errorMessage, 1)
+          is ParseResult.Error -> {
+            err.println(processArgs.errorMessage)
+            return EXIT_CODE_FAILURE
+          }
         }
     if (parsedArgs.fileNames.isEmpty()) {
       err.println(
-          "Usage: ktfmt [--style=dropbox|google|kotlinlang] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...")
-      err.println("Or: ktfmt @file")
-      return 1
+          "Usage: ktfmt [--style=dropbox|google|kotlinlang] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...\nOr: ktfmt @file")
+      return EXIT_CODE_FAILURE
     }
 
     if (parsedArgs.fileNames.size == 1 && parsedArgs.fileNames[0] == "-") {
       return try {
         val alreadyFormatted = format(null, parsedArgs)
-        if (!alreadyFormatted && parsedArgs.setExitIfChanged) 1 else 0
+        if (!alreadyFormatted && parsedArgs.setExitIfChanged) EXIT_CODE_FAILURE else 0
       } catch (e: Exception) {
-        1
+        EXIT_CODE_FAILURE
       }
-    } 
+    }
 
     val files: List<File> = expandArgsToFileNames(parsedArgs.fileNames)
 
     if (files.isEmpty()) {
       err.println("Error: no .kt files found")
-      return 1
+      return EXIT_CODE_FAILURE
     }
 
     val retval = AtomicInteger(0)
     files.parallelStream().forEach {
       try {
         if (!format(it, parsedArgs) && parsedArgs.setExitIfChanged) {
-          retval.set(1)
+          retval.set(EXIT_CODE_FAILURE)
         }
       } catch (e: Exception) {
-        retval.set(1)
+        retval.set(EXIT_CODE_FAILURE)
       }
     }
     return retval.get()
