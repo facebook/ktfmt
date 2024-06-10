@@ -90,15 +90,15 @@ class Main(
 
     if (parsedArgs.fileNames.size == 1 && parsedArgs.fileNames[0] == "-") {
       // Format code read from stdin
-      try {
+      return try {
         val alreadyFormatted = format(null, parsedArgs)
-        return if (!alreadyFormatted && parsedArgs.setExitIfChanged)
-          EXIT_CODE_FAILURE
+        if (!alreadyFormatted && parsedArgs.setExitIfChanged)
+            EXIT_CODE_FAILURE
         else
-          EXIT_CODE_SUCCESS
+            EXIT_CODE_SUCCESS
       } catch (e: Exception) {
         e.printStackTrace(err)
-        return EXIT_CODE_FAILURE
+        EXIT_CODE_FAILURE
       }
     }
 
