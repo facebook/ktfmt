@@ -103,7 +103,7 @@ class Main(
     }
 
     val files: List<File> = expandArgsToFileNames(parsedArgs.fileNames)
-
+    
     if (files.isEmpty()) {
       err.println("Error: no .kt files found")
       return EXIT_CODE_FAILURE

@@ -244,7 +244,7 @@ class MainTest {
             emptyInput,
             PrintStream(out),
             PrintStream(err),
-            arrayOf("--style=dropbox", fooBar.toString()))
+            arrayOf("--dropbox-style", fooBar.toString()))
         .run()
 
     assertThat(fooBar.readText()).isEqualTo(code)
@@ -274,7 +274,7 @@ class MainTest {
             code.byteInputStream(),
             PrintStream(out),
             PrintStream(err),
-            arrayOf("--style=dropbox", "-"))
+            arrayOf("--dropbox-style", "-"))
         .run()
 
     assertThat(out.toString(UTF_8)).isEqualTo(formatted)

@@ -59,19 +59,9 @@ data class ParsedArgs(
 
       for (arg in args) {
         when {
-          arg.startsWith("--style=") -> {
-            val parsedStyle =
-                parseKeyValueArg("--style", arg) ?: return ParseResult.Error(unexpectedArg(arg))
-            formattingOptions =
-                when (parsedStyle) {
-                  "dropbox" -> Formatter.DROPBOX_FORMAT
-                  "google" -> Formatter.GOOGLE_FORMAT
-                  "kotlinlang" -> Formatter.KOTLINLANG_FORMAT
-                  else ->
-                      return ParseResult.Error(
-                          "Unknown style '${parsedStyle}'. Style must be one of [dropbox, google, kotlinlang].")
-                }
-          }
+          arg == "--dropbox-style" -> formattingOptions = Formatter.DROPBOX_FORMAT
+          arg == "--google-style" -> formattingOptions = Formatter.GOOGLE_FORMAT
+          arg == "--kotlinlang-style" -> formattingOptions = Formatter.KOTLINLANG_FORMAT
           arg == "--dry-run" || arg == "-n" -> dryRun = true
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
           arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
@@ -80,8 +70,8 @@ data class ParsedArgs(
                   parseKeyValueArg("--stdin-name", arg)
                       ?: return ParseResult.Error(
                           "Found option '${arg}', expected '${"--stdin-name"}=<value>'")
-          arg.startsWith("--") -> return ParseResult.Error(unexpectedArg(arg))
-          arg.startsWith("@") -> return ParseResult.Error(unexpectedArg(arg))
+          arg.startsWith("--") -> return ParseResult.Error("Unexpected option: $arg")
+          arg.startsWith("@") -> return ParseResult.Error("Unexpected option: $arg")
           else -> fileNames.add(arg)
         }
       }
@@ -107,8 +97,6 @@ data class ParsedArgs(
               stdinName,
           ))
     }
-
-    private fun unexpectedArg(arg: String) = "Unexpected option: $arg"
 
     private fun parseKeyValueArg(key: String, arg: String): String? {
       val parts = arg.split('=', limit = 2)
