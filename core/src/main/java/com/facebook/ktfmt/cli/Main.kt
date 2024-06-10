@@ -179,15 +179,4 @@ class Main(
       throw e
     }
   }
-
-  /**
-   * Finishes the process with result `returnCode`.
-   *
-   * **WARNING**: If you call this method, this is the last that will happen and no code after it
-   * will be executed.
-   */
-  private fun exitFatal(message: String, returnCode: Int): Nothing {
-    err.println(message)
-    exitProcess(returnCode)
-  }
 }
