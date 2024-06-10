@@ -34,6 +34,8 @@ import kotlin.system.exitProcess
 
 private const val EXIT_CODE_FAILURE = 1
 
+private const val EXIT_CODE_SUCCESS = 0
+
 class Main(
     private val input: InputStream,
     private val out: PrintStream,
@@ -84,11 +86,16 @@ class Main(
     }
 
     if (parsedArgs.fileNames.size == 1 && parsedArgs.fileNames[0] == "-") {
-      return try {
+      // Format code read from stdin
+      try {
         val alreadyFormatted = format(null, parsedArgs)
-        if (!alreadyFormatted && parsedArgs.setExitIfChanged) EXIT_CODE_FAILURE else 0
+        return if (!alreadyFormatted && parsedArgs.setExitIfChanged)
+          EXIT_CODE_FAILURE
+        else
+          EXIT_CODE_SUCCESS
       } catch (e: Exception) {
-        EXIT_CODE_FAILURE
+        e.printStackTrace(err)
+        return EXIT_CODE_FAILURE
       }
     }
 
@@ -99,13 +106,14 @@ class Main(
       return EXIT_CODE_FAILURE
     }
 
-    val retval = AtomicInteger(0)
+    val retval = AtomicInteger(EXIT_CODE_SUCCESS)
     files.parallelStream().forEach {
       try {
         if (!format(it, parsedArgs) && parsedArgs.setExitIfChanged) {
           retval.set(EXIT_CODE_FAILURE)
         }
       } catch (e: Exception) {
+        e.printStackTrace(err)
         retval.set(EXIT_CODE_FAILURE)
       }
     }
