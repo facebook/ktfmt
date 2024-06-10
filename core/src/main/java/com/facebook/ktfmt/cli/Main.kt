@@ -36,6 +36,10 @@ private const val EXIT_CODE_FAILURE = 1
 
 private const val EXIT_CODE_SUCCESS = 0
 
+private const val USAGE =
+    """Usage: ktfmt [--style=dropbox|google|kotlinlang] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...
+Or: ktfmt @file"""
+
 class Main(
     private val input: InputStream,
     private val out: PrintStream,
@@ -80,8 +84,7 @@ class Main(
           }
         }
     if (parsedArgs.fileNames.isEmpty()) {
-      err.println(
-          "Usage: ktfmt [--style=dropbox|google|kotlinlang] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...\nOr: ktfmt @file")
+      err.println(USAGE)
       return EXIT_CODE_FAILURE
     }
 
