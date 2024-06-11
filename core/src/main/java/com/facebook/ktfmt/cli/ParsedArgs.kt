@@ -70,9 +70,9 @@ data class ParsedArgs(
       |Commands options:
       |  -n, --dry-run                     Don't write to files, only report files which 
       |                                        would have changed
-      |  --style=dropbox                   Use 4-space block indenting
-      |  --style=google                    Google style
-      |  --style=kotlinlang                Kotlin language guidelines style
+      |  --dropbox-style                   Use 4-space block indenting
+      |  --google-style                    Google style
+      |  --kotlinlang-style                Kotlin language guidelines style
       |  --set-exit-if-changed             Sets exit code to 1 if any input code was not 
       |                                        correctly formatted
       |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used
