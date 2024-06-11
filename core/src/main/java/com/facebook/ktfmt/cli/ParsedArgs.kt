@@ -55,9 +55,9 @@ data class ParsedArgs(
       |        [--do-not-remove-unused-imports] <File1.kt> <File2.kt> ...
       |  ktfmt @ARGFILE
       |
-      |      ktfmt formats Kotlin source code files in-place, reporting for each file whether the
-      |      formatting succeeded or failed on standard error. If none of the style options are
-      |passed, Facebook's style is used.
+      |ktfmt formats Kotlin source code files in-place, reporting for each file whether the
+      |formatting succeeded or failed on standard error. If none of the style options are
+      |passed, Meta's style is used.
       |
       |Alternatively, ktfmt can read Kotlin source code from standard in and write the 
       |formatted result on standard output.
