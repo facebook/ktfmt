@@ -51,7 +51,7 @@ data class ParsedArgs(
     /** parseOptions parses command-line arguments passed to ktfmt. */
     fun parseOptions(args: Array<out String>): ParseResult {
       val fileNames = mutableListOf<String>()
-      var formattingOptions = FormattingOptions()
+      var formattingOptions = Formatter.META_FORMAT
       var dryRun = false
       var setExitIfChanged = false
       var removeUnusedImports = true
@@ -59,6 +59,7 @@ data class ParsedArgs(
 
       for (arg in args) {
         when {
+          arg == "--meta-style" -> formattingOptions = Formatter.META_FORMAT
           arg == "--google-style" -> formattingOptions = Formatter.GOOGLE_FORMAT
           arg == "--kotlinlang-style" -> formattingOptions = Formatter.KOTLINLANG_FORMAT
           arg == "--dry-run" || arg == "-n" -> dryRun = true

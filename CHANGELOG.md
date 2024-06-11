@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 - Preserves blank spaces between when clauses (https://github.com/facebook/ktfmt/issues/342)
+- Named the default style as `Formatter.META_FORMAT` / `--meta-style`
 
 ### Fixed
 - Compilation issues with online formatter (https://github.com/facebook/ktfmt/commit/8605080cb0aadb7eaba20f3b469d6ddafe32c941)

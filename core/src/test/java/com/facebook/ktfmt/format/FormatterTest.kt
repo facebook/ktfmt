@@ -16,6 +16,7 @@
 
 package com.facebook.ktfmt.format
 
+import com.facebook.ktfmt.format.Formatter.META_FORMAT
 import com.facebook.ktfmt.testutil.assertFormatted
 import com.facebook.ktfmt.testutil.assertThatFormatting
 import com.google.common.truth.Truth.assertThat
@@ -1470,7 +1471,7 @@ class FormatterTest {
             .trimMargin()
 
     assertThatFormatting(code)
-        .withOptions(FormattingOptions(removeUnusedImports = false))
+        .withOptions(META_FORMAT.copy(removeUnusedImports = false))
         .isEqualTo(code)
   }
 
@@ -4281,7 +4282,7 @@ class FormatterTest {
       |}
       |"""
             .trimMargin()
-    assertThatFormatting(code).withOptions(FormattingOptions(maxWidth = 22)).isEqualTo(expected)
+    assertThatFormatting(code).withOptions(META_FORMAT.copy(maxWidth = 22)).isEqualTo(expected)
   }
 
   @Test
@@ -5366,7 +5367,7 @@ class FormatterTest {
       |class MyClass {}
       |"""
             .trimMargin()
-    assertThatFormatting(code).withOptions(FormattingOptions(maxWidth = 33)).isEqualTo(expected)
+    assertThatFormatting(code).withOptions(META_FORMAT.copy(maxWidth = 33)).isEqualTo(expected)
   }
 
   @Test

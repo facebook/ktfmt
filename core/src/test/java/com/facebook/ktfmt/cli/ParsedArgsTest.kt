@@ -56,8 +56,14 @@ class ParsedArgsTest {
 
     val formattingOptions = parsed.formattingOptions
 
-    val defaultFormattingOptions = FormattingOptions()
+    val defaultFormattingOptions = Formatter.META_FORMAT
     assertThat(formattingOptions).isEqualTo(defaultFormattingOptions)
+  }
+
+  @Test
+  fun `parseOptions recognizes --meta-style`() {
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--meta-style", "foo.kt")))
+    assertThat(parsed.formattingOptions).isEqualTo(Formatter.META_FORMAT)
   }
 
   @Test
@@ -199,7 +205,7 @@ class ParsedArgsTest {
 
   private fun parseResultOk(
       fileNames: List<String> = emptyList(),
-      formattingOptions: FormattingOptions = FormattingOptions(),
+      formattingOptions: FormattingOptions = Formatter.META_FORMAT,
       dryRun: Boolean = false,
       setExitIfChanged: Boolean = false,
       removedUnusedImports: Boolean = true,

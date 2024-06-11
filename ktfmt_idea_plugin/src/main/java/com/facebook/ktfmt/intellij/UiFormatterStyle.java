@@ -18,12 +18,13 @@ package com.facebook.ktfmt.intellij;
 
 import static com.facebook.ktfmt.format.Formatter.GOOGLE_FORMAT;
 import static com.facebook.ktfmt.format.Formatter.KOTLINLANG_FORMAT;
+import static com.facebook.ktfmt.format.Formatter.META_FORMAT;
 
 import com.facebook.ktfmt.format.FormattingOptions;
 
 /** Configuration options for the formatting style. */
 enum UiFormatterStyle {
-  DEFAULT("Default", new FormattingOptions()),
+  META("Meta (default)", META_FORMAT),
   GOOGLE("Google (internal)", GOOGLE_FORMAT),
   KOTLINLANG("Kotlinlang", KOTLINLANG_FORMAT);
 

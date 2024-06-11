@@ -44,7 +44,7 @@ import org.junit.Assert
  */
 fun assertFormatted(
     @Language("kts") code: String,
-    formattingOptions: FormattingOptions = FormattingOptions(),
+    formattingOptions: FormattingOptions = Formatter.META_FORMAT,
     deduceMaxWidth: Boolean = false,
 ) {
   val first = code.lines().first()
@@ -81,7 +81,7 @@ fun assertThatFormatting(@Language("kts") code: String): FormattedCodeSubject {
 
 class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) :
     Subject(metadata, code) {
-  private var options: FormattingOptions = FormattingOptions()
+  private var options: FormattingOptions = Formatter.META_FORMAT
   private var allowTrailingWhitespace = false
 
   fun withOptions(options: FormattingOptions): FormattedCodeSubject {
