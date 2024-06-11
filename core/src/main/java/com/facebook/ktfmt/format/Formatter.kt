@@ -42,7 +42,13 @@ import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
 object Formatter {
 
-  @JvmField val META_FORMAT = FormattingOptions()
+  @JvmField
+  val META_FORMAT =
+      FormattingOptions(
+          blockIndent = 2,
+          continuationIndent = 4,
+          manageTrailingCommas = false,
+      )
 
   @JvmField
   val GOOGLE_FORMAT =
@@ -58,6 +64,7 @@ object Formatter {
       FormattingOptions(
           blockIndent = 4,
           continuationIndent = 4,
+          manageTrailingCommas = false,
       )
 
   private val MINIMUM_KOTLIN_VERSION = KotlinVersion(1, 4)

@@ -5384,7 +5384,14 @@ class FormatterTest {
         |"""
             .trimMargin()
     assertThatFormatting(code)
-        .withOptions(FormattingOptions(maxWidth = 35, blockIndent = 4, continuationIndent = 4))
+        .withOptions(
+            FormattingOptions(
+                maxWidth = 35,
+                blockIndent = 4,
+                continuationIndent = 4,
+                manageTrailingCommas = false,
+            ),
+        )
         .isEqualTo(code)
   }
 

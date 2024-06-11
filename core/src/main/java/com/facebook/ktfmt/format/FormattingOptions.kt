@@ -30,7 +30,7 @@ data class FormattingOptions(
      * }
      * ```
      */
-    val blockIndent: Int = 2,
+    val blockIndent: Int,
 
     /**
      * continuationIndent is the size of the indent used when a line is broken because it's too
@@ -42,7 +42,16 @@ data class FormattingOptions(
      *     1)
      * ```
      */
-    val continuationIndent: Int = 4,
+    val continuationIndent: Int,
+
+    /**
+     * Automatically remove and insert trialing commas.
+     *
+     * Lists that cannot fit on one line will have trailing commas inserted. Lists that span
+     * multiple lines will have them removed. Manually inserted trailing commas cannot be used as a
+     * hint to force breaking lists to multiple lines.
+     */
+    val manageTrailingCommas: Boolean,
 
     /** Whether ktfmt should remove imports that are not used. */
     val removeUnusedImports: Boolean = true,
@@ -52,15 +61,6 @@ data class FormattingOptions(
      * newline) decisions
      */
     val debuggingPrintOpsAfterFormatting: Boolean = false,
-
-    /**
-     * Automatically remove and insert trialing commas.
-     *
-     * Lists that cannot fit on one line will have trailing commas inserted. Lists that span
-     * multiple lines will have them removed. Manually inserted trailing commas cannot be used as a
-     * hint to force breaking lists to multiple lines.
-     */
-    val manageTrailingCommas: Boolean = false,
 ) {
   companion object {
     const val DEFAULT_MAX_WIDTH: Int = 100
