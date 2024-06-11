@@ -32,6 +32,16 @@ import java.nio.charset.StandardCharsets.UTF_8
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.exitProcess
 
+private const val EXIT_CODE_FAILURE = 1
+private const val EXIT_CODE_SUCCESS = 0
+
+private val USAGE =
+    """
+        Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...
+        Or: ktfmt @file
+        """
+        .trimIndent()
+
 class Main(
     private val input: InputStream,
     private val out: PrintStream,
@@ -56,10 +66,6 @@ class Main(
       }
       val result = mutableListOf<File>()
       for (arg in args) {
-        if (arg == "-") {
-          error(
-              "Error: '-', which causes ktfmt to read from stdin, should not be mixed with file name")
-        }
         result.addAll(
             File(arg).walkTopDown().filter {
               it.isFile && (it.extension == "kt" || it.extension == "kts")
@@ -74,48 +80,44 @@ class Main(
     val parsedArgs =
         when (processArgs) {
           is ParseResult.Ok -> processArgs.parsedValue
-          is ParseResult.Error -> exitFatal(processArgs.errorMessage, 1)
+          is ParseResult.Error -> {
+            err.println(processArgs.errorMessage)
+            return EXIT_CODE_FAILURE
+          }
         }
     if (parsedArgs.fileNames.isEmpty()) {
-      err.println(
-          "Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...")
-      err.println("Or: ktfmt @file")
-      return 1
+      err.println(USAGE)
+      return EXIT_CODE_FAILURE
     }
 
     if (parsedArgs.fileNames.size == 1 && parsedArgs.fileNames[0] == "-") {
+      // Format code read from stdin
       return try {
         val alreadyFormatted = format(null, parsedArgs)
-        if (!alreadyFormatted && parsedArgs.setExitIfChanged) 1 else 0
+        if (!alreadyFormatted && parsedArgs.setExitIfChanged) EXIT_CODE_FAILURE
+        else EXIT_CODE_SUCCESS
       } catch (e: Exception) {
-        1
+        e.printStackTrace(err)
+        EXIT_CODE_FAILURE
       }
-    } else if (parsedArgs.stdinName != null) {
-      err.println("Error: --stdin-name can only be used with stdin")
-      return 1
     }
 
-    val files: List<File>
-    try {
-      files = expandArgsToFileNames(parsedArgs.fileNames)
-    } catch (e: java.lang.IllegalStateException) {
-      err.println(e.message)
-      return 1
-    }
+    val files: List<File> = expandArgsToFileNames(parsedArgs.fileNames)
 
     if (files.isEmpty()) {
       err.println("Error: no .kt files found")
-      return 1
+      return EXIT_CODE_FAILURE
     }
 
-    val retval = AtomicInteger(0)
+    val retval = AtomicInteger(EXIT_CODE_SUCCESS)
     files.parallelStream().forEach {
       try {
         if (!format(it, parsedArgs) && parsedArgs.setExitIfChanged) {
-          retval.set(1)
+          retval.set(EXIT_CODE_FAILURE)
         }
       } catch (e: Exception) {
-        retval.set(1)
+        e.printStackTrace(err)
+        retval.set(EXIT_CODE_FAILURE)
       }
     }
     return retval.get()
@@ -176,16 +178,5 @@ class Main(
       e.printStackTrace(err)
       throw e
     }
-  }
-
-  /**
-   * Finishes the process with result `returnCode`.
-   *
-   * **WARNING**: If you call this method, this is the last that will happen and no code after it
-   * will be executed.
-   */
-  private fun exitFatal(message: String, returnCode: Int): Nothing {
-    err.println(message)
-    exitProcess(returnCode)
   }
 }

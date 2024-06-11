@@ -18,9 +18,7 @@ package com.facebook.ktfmt.cli
 
 import com.google.common.truth.Truth.assertThat
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.io.PrintStream
-import java.lang.IllegalStateException
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.nio.charset.StandardCharsets.UTF_8
@@ -28,7 +26,6 @@ import java.nio.file.Files
 import java.util.concurrent.ForkJoinPool
 import kotlin.io.path.createTempDirectory
 import org.junit.After
-import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -102,16 +99,6 @@ class MainTest {
 
     assertThat(Main.expandArgsToFileNames(listOf(dir1.toString(), dir2.toString())))
         .containsExactly(foo1, bar1, foo2, bar2)
-  }
-
-  @Test
-  fun `expandArgsToFileNames - a dash is an error`() {
-    try {
-      Main.expandArgsToFileNames(listOf(root.resolve("foo.bar").toString(), File("-").toString()))
-      fail("expected exception, but nothing was thrown")
-    } catch (e: IllegalStateException) {
-      assertThat(e.message).contains("Error")
-    }
   }
 
   @Test
@@ -467,27 +454,6 @@ class MainTest {
 
     assertThat(out.toString(UTF_8)).doesNotContain("hello, world")
     assertThat(out.toString(testCharset)).isEqualTo("<stdin>\n")
-    assertThat(exitCode).isEqualTo(1)
-  }
-
-  @Test
-  fun `--stdin-name can only be used with stdin`() {
-    val code = """fun f () =    println( "hello, world" )"""
-    val file = root.resolve("foo.kt")
-    file.writeText(code, UTF_8)
-
-    val exitCode =
-        Main(
-                emptyInput,
-                PrintStream(out),
-                PrintStream(err),
-                arrayOf("--stdin-name=bar.kt", file.toString()))
-            .run()
-
-    assertThat(file.readText()).isEqualTo(code)
-    assertThat(out.toString(UTF_8)).isEmpty()
-    assertThat(err.toString(testCharset))
-        .isEqualTo("Error: --stdin-name can only be used with stdin\n")
     assertThat(exitCode).isEqualTo(1)
   }
 
