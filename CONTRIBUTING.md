@@ -14,6 +14,10 @@ We actively welcome your pull requests.
 5. Make sure your code lints.
 6. If you haven't already, complete the Contributor License Agreement ("CLA").
 
+Note that pull requests are imported into Facebook's internal repository and code is
+formatted as part of that process (using ktfmt!). It's not necessary for PRs to stick
+to the existing style of this repository, though that does make code reviews easier.
+
 ## Contributor License Agreement ("CLA")
 In order to accept your pull request, we need you to submit a CLA. You only need
 to do this once to work on any of Facebook's open source projects.
