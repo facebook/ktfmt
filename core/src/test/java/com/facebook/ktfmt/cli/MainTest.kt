@@ -225,7 +225,7 @@ class MainTest {
   }
 
   @Test
-  fun `dropbox-style is passed to formatter (file)`() {
+  fun `kotlinlang-style is passed to formatter (file)`() {
     val code =
         """fun f() {
     for (child in
@@ -241,14 +241,14 @@ class MainTest {
             emptyInput,
             PrintStream(out),
             PrintStream(err),
-            arrayOf("--dropbox-style", fooBar.toString()))
+            arrayOf("--kotlinlang-style", fooBar.toString()))
         .run()
 
     assertThat(fooBar.readText()).isEqualTo(code)
   }
 
   @Test
-  fun `dropbox-style is passed to formatter (stdin)`() {
+  fun `kotlinlang-style is passed to formatter (stdin)`() {
     val code =
         """fun f() {
           |for (child in
@@ -271,7 +271,7 @@ class MainTest {
             code.byteInputStream(),
             PrintStream(out),
             PrintStream(err),
-            arrayOf("--dropbox-style", "-"))
+            arrayOf("--kotlinlang-style", "-"))
         .run()
 
     assertThat(out.toString(UTF_8)).isEqualTo(formatted)

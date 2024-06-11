@@ -70,14 +70,15 @@ $ brew install ktfmt
 and run it with:
 
 ```
-java -jar /path/to/ktfmt-<VERSION>-jar-with-dependencies.jar [--dropbox-style] [files...]
+java -jar /path/to/ktfmt-<VERSION>-jar-with-dependencies.jar [--kotlinlang-style | --google-style] [files...]
 ```
 
-`--dropbox-style` makes `ktfmt` use a block indent of 4 spaces instead of 2. See below for details.
+`--kotlinlang-style` makes `ktfmt` use a block indent of 4 spaces instead of 2. See below for details.
 
-***Note:*** *There is no configurability as to the formatter's algorithm for
-formatting (apart from `--dropbox-style`). This is a deliberate design decision to unify our code
-formatting on a single format.*
+***Note:***
+*There is no configurability as to the formatter's algorithm for formatting (apart from the
+different styles). This is a deliberate design decision to unify our code formatting on a single
+format.*
 
 ### using Gradle
 
@@ -113,7 +114,7 @@ Two reasons -
 1. Many of our projects use a mixture of Kotlin and Java, and we found the back-and-forth in styles to be distracting.
 2. From a pragmatic standpoint, the formatting engine behind google-java-format uses more whitespace and newlines than other formatters. Using an indentation of 4 spaces quickly reaches the maximal column width.
 
-However, we do offer an escape-hatch for projects that absolutely cannot make the move to `ktfmt` because of 2-space: the `--dropbox-style` flag changes block indents to 4-space.
+However, we do offer an alternative style for projects that absolutely cannot make the move to `ktfmt` because of 2-space: the style `--kotlinlang-style` changes block indents to 4-space.
 
 ## Developer's Guide
 

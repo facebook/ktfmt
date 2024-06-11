@@ -59,7 +59,6 @@ data class ParsedArgs(
 
       for (arg in args) {
         when {
-          arg == "--dropbox-style" -> formattingOptions = Formatter.DROPBOX_FORMAT
           arg == "--google-style" -> formattingOptions = Formatter.GOOGLE_FORMAT
           arg == "--kotlinlang-style" -> formattingOptions = Formatter.KOTLINLANG_FORMAT
           arg == "--dry-run" || arg == "-n" -> dryRun = true

@@ -62,8 +62,8 @@ class ParsedArgsTest {
 
   @Test
   fun `parseOptions recognizes --dropbox-style`() {
-    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--dropbox-style", "foo.kt")))
-    assertThat(parsed.formattingOptions).isEqualTo(Formatter.DROPBOX_FORMAT)
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--kotlinlang-style", "foo.kt")))
+    assertThat(parsed.formattingOptions).isEqualTo(Formatter.KOTLINLANG_FORMAT)
   }
 
   @Test
@@ -177,12 +177,12 @@ class ParsedArgsTest {
   @Test
   fun `last style in args wins`() {
     val testResult =
-        ParsedArgs.parseOptions(arrayOf("--google-style", "--dropbox-style", "File.kt"))
+        ParsedArgs.parseOptions(arrayOf("--google-style", "--kotlinlang-style", "File.kt"))
     assertThat(testResult)
         .isEqualTo(
             parseResultOk(
                 fileNames = listOf("File.kt"),
-                formattingOptions = Formatter.DROPBOX_FORMAT,
+                formattingOptions = Formatter.KOTLINLANG_FORMAT,
             ))
   }
 

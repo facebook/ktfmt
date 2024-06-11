@@ -37,7 +37,7 @@ private const val EXIT_CODE_SUCCESS = 0
 
 private val USAGE =
     """
-        Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...
+        Usage: ktfmt [--google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...
         Or: ktfmt @file
         """
         .trimIndent()

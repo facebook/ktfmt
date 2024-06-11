@@ -58,13 +58,6 @@ object Formatter {
           continuationIndent = 4,
       )
 
-  @JvmField
-  val DROPBOX_FORMAT =
-      FormattingOptions(
-          blockIndent = 4,
-          continuationIndent = 4,
-      )
-
   private val MINIMUM_KOTLIN_VERSION = KotlinVersion(1, 4)
 
   /**

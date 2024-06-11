@@ -16,4 +16,5 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Compilation issues with online formatter (https://github.com/facebook/ktfmt/commit/8605080cb0aadb7eaba20f3b469d6ddafe32c941)
 
 ### Removed
+- **Deleted `Formatter.DROPBOX_FORMAT` / `--dropbox-style` (BREAKING CHANGE)**
 - Deleted `FormattingOptions.Style` enum
