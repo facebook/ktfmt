@@ -17,8 +17,6 @@
 package com.facebook.ktfmt.format
 
 import com.facebook.ktfmt.debughelpers.printOps
-import com.facebook.ktfmt.format.FormattingOptions.Style.DROPBOX
-import com.facebook.ktfmt.format.FormattingOptions.Style.GOOGLE
 import com.facebook.ktfmt.format.RedundantElementManager.addRedundantElements
 import com.facebook.ktfmt.format.RedundantElementManager.dropRedundantElements
 import com.facebook.ktfmt.format.WhitespaceTombstones.indexOfWhitespaceTombstone
@@ -47,14 +45,25 @@ object Formatter {
   @JvmField
   val GOOGLE_FORMAT =
       FormattingOptions(
-          style = GOOGLE, blockIndent = 2, continuationIndent = 2, manageTrailingCommas = true)
+          blockIndent = 2,
+          continuationIndent = 2,
+          manageTrailingCommas = true,
+      )
 
   /** A format that attempts to reflect https://kotlinlang.org/docs/coding-conventions.html. */
   @JvmField
-  val KOTLINLANG_FORMAT = FormattingOptions(style = GOOGLE, blockIndent = 4, continuationIndent = 4)
+  val KOTLINLANG_FORMAT =
+      FormattingOptions(
+          blockIndent = 4,
+          continuationIndent = 4,
+      )
 
   @JvmField
-  val DROPBOX_FORMAT = FormattingOptions(style = DROPBOX, blockIndent = 4, continuationIndent = 4)
+  val DROPBOX_FORMAT =
+      FormattingOptions(
+          blockIndent = 4,
+          continuationIndent = 4,
+      )
 
   private val MINIMUM_KOTLIN_VERSION = KotlinVersion(1, 4)
 

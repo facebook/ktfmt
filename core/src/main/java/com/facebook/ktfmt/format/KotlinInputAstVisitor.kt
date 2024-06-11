@@ -135,7 +135,7 @@ class KotlinInputAstVisitor(
     private val builder: OpsBuilder
 ) : KtTreeVisitorVoid() {
 
-  private val isGoogleStyle = options.style == FormattingOptions.Style.GOOGLE
+  private val isGoogleStyle = options.manageTrailingCommas
 
   /** Standard indentation for a block */
   private val blockIndent: Indent.Const = Indent.Const.make(options.blockIndent, 1)

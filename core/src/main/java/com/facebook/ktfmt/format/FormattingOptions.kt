@@ -17,8 +17,6 @@
 package com.facebook.ktfmt.format
 
 data class FormattingOptions(
-    val style: Style = Style.FACEBOOK,
-
     /** ktfmt breaks lines longer than maxWidth. */
     val maxWidth: Int = DEFAULT_MAX_WIDTH,
 
@@ -64,14 +62,7 @@ data class FormattingOptions(
      */
     val manageTrailingCommas: Boolean = false,
 ) {
-
   companion object {
     const val DEFAULT_MAX_WIDTH: Int = 100
-  }
-
-  enum class Style {
-    FACEBOOK,
-    DROPBOX,
-    GOOGLE
   }
 }
