@@ -140,6 +140,18 @@ class ParsedArgsTest {
   }
 
   @Test
+  fun `parseOptions recognises --help`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--help"))
+    assertThat(parseResult).isInstanceOf(ParseResult.ShowMessage::class.java)
+  }
+
+  @Test
+  fun `arg --help overrides all others`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--style=google", "@unknown", "--help", "file.kt"))
+    assertThat(parseResult).isInstanceOf(ParseResult.ShowMessage::class.java)
+  }
+
+  @Test
   fun `processArgs use the @file option with non existing file`() {
     val e =
         assertFailsWith<FileNotFoundException> {

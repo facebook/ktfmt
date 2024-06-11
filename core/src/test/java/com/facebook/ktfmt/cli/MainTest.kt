@@ -493,4 +493,17 @@ class MainTest {
     assertThat(exitCode).isEqualTo(0)
     assertThat(file.readText(UTF_8)).isEqualTo("""fun f() = println("hello, world")""" + "\n")
   }
+
+  @Test
+  fun `--help gives return code of 0`() {
+    val exitCode = Main(
+      emptyInput,
+      PrintStream(out),
+      PrintStream(err),
+      arrayOf("--help"),
+    )
+      .run()
+
+    assertThat(exitCode).isEqualTo(0)
+  }
 }

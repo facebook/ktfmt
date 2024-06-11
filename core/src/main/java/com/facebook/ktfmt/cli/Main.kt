@@ -80,6 +80,10 @@ class Main(
     val parsedArgs =
         when (processArgs) {
           is ParseResult.Ok -> processArgs.parsedValue
+          is ParseResult.ShowMessage -> {
+            err.println(processArgs.message)
+            return EXIT_CODE_SUCCESS
+          }
           is ParseResult.Error -> {
             err.println(processArgs.errorMessage)
             return EXIT_CODE_FAILURE
