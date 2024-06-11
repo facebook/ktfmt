@@ -101,7 +101,7 @@ data class ParsedArgs(
       var removeUnusedImports = true
       var stdinName: String? = null
 
-      if (args.contains("--help"))
+      if ("--help" in args || "-h" in args)
         return ParseResult.ShowMessage(HELP_TEXT)
 
       for (arg in args) {

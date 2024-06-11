@@ -146,6 +146,12 @@ class ParsedArgsTest {
   }
 
   @Test
+  fun `parseOptions recognises -`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("-h"))
+    assertThat(parseResult).isInstanceOf(ParseResult.ShowMessage::class.java)
+  }
+
+  @Test
   fun `arg --help overrides all others`() {
     val parseResult = ParsedArgs.parseOptions(arrayOf("--style=google", "@unknown", "--help", "file.kt"))
     assertThat(parseResult).isInstanceOf(ParseResult.ShowMessage::class.java)
