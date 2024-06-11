@@ -1451,6 +1451,7 @@ class FormatterTest {
               |import com.example.timesAssign
               |import com.example.unaryMinus
               |import com.example.unaryPlus
+              |import org.gradle.kotlin.dsl.assign
               |"""
               .trimMargin())
 
