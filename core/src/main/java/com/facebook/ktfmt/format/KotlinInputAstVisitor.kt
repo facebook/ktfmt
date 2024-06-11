@@ -135,8 +135,6 @@ class KotlinInputAstVisitor(
     private val builder: OpsBuilder
 ) : KtTreeVisitorVoid() {
 
-  private val isGoogleStyle = options.manageTrailingCommas
-
   /** Standard indentation for a block */
   private val blockIndent: Indent.Const = Indent.Const.make(options.blockIndent, 1)
 
@@ -257,7 +255,7 @@ class KotlinInputAstVisitor(
     visitEachCommaSeparated(
         typeArgumentList.arguments,
         typeArgumentList.trailingComma != null,
-        wrapInBlock = !isGoogleStyle,
+        wrapInBlock = !options.manageTrailingCommas,
         prefix = "<",
         postfix = ">",
     )
@@ -817,8 +815,8 @@ class KotlinInputAstVisitor(
       leadingBreak = !hasEmptyParens && hasTrailingComma
       breakAfterPrefix = false
     } else {
-      wrapInBlock = !isGoogleStyle
-      breakBeforePostfix = isGoogleStyle && !hasEmptyParens
+      wrapInBlock = !options.manageTrailingCommas
+      breakBeforePostfix = options.manageTrailingCommas && !hasEmptyParens
       leadingBreak = !hasEmptyParens
       breakAfterPrefix = !hasEmptyParens
     }
@@ -1053,7 +1051,7 @@ class KotlinInputAstVisitor(
       prefix: String? = null,
       postfix: String? = null,
       breakAfterPrefix: Boolean = true,
-      breakBeforePostfix: Boolean = isGoogleStyle,
+      breakBeforePostfix: Boolean = options.manageTrailingCommas,
   ): BreakTag? {
     val breakAfterLastElement = hasTrailingComma || (postfix != null && breakBeforePostfix)
     val nameTag = if (breakAfterLastElement) null else genSym()
@@ -2138,7 +2136,7 @@ class KotlinInputAstVisitor(
           hasTrailingComma = list.trailingComma != null,
           prefix = "<",
           postfix = ">",
-          wrapInBlock = !isGoogleStyle,
+          wrapInBlock = !options.manageTrailingCommas,
       )
     }
   }
@@ -2370,7 +2368,7 @@ class KotlinInputAstVisitor(
           expression.trailingComma != null,
           prefix = "[",
           postfix = "]",
-          wrapInBlock = !isGoogleStyle)
+          wrapInBlock = !options.manageTrailingCommas)
     }
   }
 
@@ -2611,7 +2609,7 @@ class KotlinInputAstVisitor(
       builder.token(keyword)
       builder.space()
       builder.token("(")
-      if (isGoogleStyle) {
+      if (options.manageTrailingCommas) {
         builder.block(expressionBreakIndent) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
           visit(condition)
