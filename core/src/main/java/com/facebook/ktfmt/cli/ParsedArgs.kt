@@ -60,7 +60,7 @@ data class ParsedArgs(
       |formatting succeeded or failed on standard error. If none of the style options are
       |passed, Meta's style is used.
       |
-      |Alternatively, ktfmt can read Kotlin source code from standard in and write the 
+      |Alternatively, ktfmt can read Kotlin source code from standard input and write the 
       |formatted result on standard output.
       |
       |Example:
