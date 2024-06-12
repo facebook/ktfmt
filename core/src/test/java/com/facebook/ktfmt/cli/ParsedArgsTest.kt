@@ -146,7 +146,7 @@ class ParsedArgsTest {
   }
 
   @Test
-  fun `parseOptions recognises -`() {
+  fun `parseOptions recognises -h`() {
     val parseResult = ParsedArgs.parseOptions(arrayOf("-h"))
     assertThat(parseResult).isInstanceOf(ParseResult.ShowMessage::class.java)
   }
