@@ -4164,6 +4164,8 @@ class FormatterTest {
       |
       |  // Literally any callable expression is dangerous
       |  val x = (if (cond) x::foo else x::bar); { dead -> lambda }
+      |
+      |  funcCall(); { dead -> lambda }.withChained(call)
       |}
       |"""
             .trimMargin()
@@ -4205,6 +4207,9 @@ class FormatterTest {
       |  // Literally any callable expression is dangerous
       |  val x = (if (cond) x::foo else x::bar);
       |  { dead -> lambda }
+      |
+      |  funcCall();
+      |  { dead -> lambda }.withChained(call)
       |}
       |"""
             .trimMargin()
