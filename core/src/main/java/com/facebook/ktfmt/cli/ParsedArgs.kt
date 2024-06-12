@@ -48,7 +48,8 @@ data class ParsedArgs(
       return parseOptions(arguments)
     }
 
-    val HELP_TEXT = """ktfmt - command line Kotlin source code pretty-printer
+    val HELP_TEXT = """
+      |ktfmt - command line Kotlin source code pretty-printer
       |
       |Usage:
       |  ktfmt [--style=dropbox | --style=google | --style=kotlinlang ] [-n | --dry-run] [--set-exit-if-changed] 
