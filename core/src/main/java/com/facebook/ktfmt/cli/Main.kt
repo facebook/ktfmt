@@ -37,10 +37,12 @@ private const val EXIT_CODE_SUCCESS = 0
 
 private val USAGE =
     """
-        Usage: ktfmt [--meta-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...
-        Or: ktfmt @file
+        |Usage: ktfmt [--dropbox-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...
+        |Or: ktfmt @file
+        |
+        |For more detail see ktfmt --help
         """
-        .trimIndent()
+        .trimMargin()
 
 class Main(
     private val input: InputStream,
