@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 - Compilation issues with online formatter (https://github.com/facebook/ktfmt/commit/8605080cb0aadb7eaba20f3b469d6ddafe32c941)
+- Removing valid semicolons (https://github.com/facebook/ktfmt/issues/459)
+- Incorrect detection of unused `assign` import (https://github.com/facebook/ktfmt/issues/411)
 
 ### Removed
 - **Deleted `Formatter.DROPBOX_FORMAT` / `--dropbox-style` (BREAKING CHANGE)**
