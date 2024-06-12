@@ -6,7 +6,7 @@
   "devDependencies": {
     "clean-css": "^5.1.1",
     "event-stream": "4.0.1",
-    "gulp": "^4.0.2",
+    "gulp": "^5.0.0",
     "monaco-editor": "^0.23.0",
     "rimraf": "^3.0.2",
     "uncss": "^0.17.3",
