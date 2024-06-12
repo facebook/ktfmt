@@ -78,7 +78,7 @@ class KtfmtSettings implements PersistentStateComponent<KtfmtSettings.State> {
   static class State {
 
     private EnabledState enabled = EnabledState.UNKNOWN;
-    public UiFormatterStyle uiFormatterStyle = UiFormatterStyle.DEFAULT;
+    public UiFormatterStyle uiFormatterStyle = UiFormatterStyle.META;
 
     // enabled used to be a boolean so we use bean property methods for backwards
     // compatibility
