@@ -21,7 +21,7 @@ repositories {
   mavenCentral()
 }
 
-val ktfmtVersion = rootProject.file("../stable_version.txt").readText().trim()
+val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
 
 dependencies {
   implementation("com.facebook:ktfmt:$ktfmtVersion")

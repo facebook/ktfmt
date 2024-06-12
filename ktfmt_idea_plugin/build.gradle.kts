@@ -20,13 +20,12 @@ plugins {
   id("com.diffplug.spotless") version "5.10.2"
 }
 
-val currentKtfmtVersion = rootProject.file("../version.txt").readText().trim()
-val stableKtfmtVersion = rootProject.file("../stable_version.txt").readText().trim()
+val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
 val pluginVersion = "1.1"
 
 group = "com.facebook"
 
-version = "$pluginVersion.$currentKtfmtVersion"
+version = "$pluginVersion.$ktfmtVersion"
 
 repositories {
   mavenCentral()
@@ -39,7 +38,7 @@ java {
 }
 
 dependencies {
-  implementation("com.facebook", "ktfmt", stableKtfmtVersion)
+  implementation("com.facebook", "ktfmt", ktfmtVersion)
   implementation("com.google.googlejavaformat", "google-java-format", "1.22.0")
 }
 
