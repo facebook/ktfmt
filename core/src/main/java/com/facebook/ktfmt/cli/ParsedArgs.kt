@@ -76,6 +76,7 @@ data class ParsedArgs(
       |  --kotlinlang-style                Kotlin language guidelines style (4 spaces
       |  --set-exit-if-changed             Sets exit code to 1 if any input code was not 
       |                                        correctly formatted
+      |  --stdin-name=NAME                 Name to use when reading from standard input                                      
       |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used
       |  
       |ARGFILE:
