@@ -37,10 +37,13 @@ private const val EXIT_CODE_SUCCESS = 0
 
 private val USAGE =
     """
-        Usage: ktfmt [--meta-style | --google-style | --kotlinlang-style] [--dry-run] [--set-exit-if-changed] [--stdin-name=<name>] [--do-not-remove-unused-imports] File1.kt File2.kt ...
-        Or: ktfmt @file
-        """
-        .trimIndent()
+        |Usage:
+        |  ktfmt [OPTIONS] File1.kt File2.kt ...
+        |  ktfmt @ARGFILE
+        |
+        |For more details see `ktfmt --help`
+        |"""
+        .trimMargin()
 
 class Main(
     private val input: InputStream,
@@ -80,6 +83,10 @@ class Main(
     val parsedArgs =
         when (processArgs) {
           is ParseResult.Ok -> processArgs.parsedValue
+          is ParseResult.ShowMessage -> {
+            out.println(processArgs.message)
+            return EXIT_CODE_SUCCESS
+          }
           is ParseResult.Error -> {
             err.println(processArgs.errorMessage)
             return EXIT_CODE_FAILURE

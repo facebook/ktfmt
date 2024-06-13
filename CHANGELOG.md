@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 - Created CHANGELOG.md
+- Added --help option to CLI (https://github.com/facebook/ktfmt/pull/477)
 
 ### Changed
 - Preserves blank spaces between when clauses (https://github.com/facebook/ktfmt/issues/342)

@@ -35,8 +35,7 @@ class Handler : RequestHandler<APIGatewayProxyRequestEvent, String> {
         try {
           val request = gson.fromJson(event.body, Request::class.java)
           val style = request.style
-          val parseResult = ParsedArgs.parseOptions(listOfNotNull(style).toTypedArray())
-          when (parseResult) {
+          when (val parseResult = ParsedArgs.parseOptions(listOfNotNull(style).toTypedArray())) {
             is ParseResult.Ok -> {
               val parsedArgs = parseResult.parsedValue
               Response(
@@ -50,6 +49,9 @@ class Handler : RequestHandler<APIGatewayProxyRequestEvent, String> {
             }
             is ParseResult.Error -> {
               Response(null, parseResult.errorMessage)
+            }
+            is ParseResult.ShowMessage -> {
+              Response(null, parseResult.message)
             }
           }
         } catch (e: Exception) {

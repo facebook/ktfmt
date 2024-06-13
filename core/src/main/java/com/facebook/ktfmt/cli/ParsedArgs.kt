@@ -48,6 +48,54 @@ data class ParsedArgs(
       return parseOptions(arguments)
     }
 
+    val HELP_TEXT =
+        """
+        |ktfmt - command line Kotlin source code pretty-printer
+        |
+        |Usage:
+        |  ktfmt [OPTIONS] <File1.kt> <File2.kt> ...
+        |  ktfmt @ARGFILE
+        |
+        |ktfmt formats Kotlin source code files in-place, reporting for each file whether the
+        |formatting succeeded or failed on standard error. If none of the style options are
+        |passed, Meta's style is used.
+        |
+        |Alternatively, ktfmt can read Kotlin source code from standard input and write the 
+        |formatted result on standard output.
+        |
+        |Example:
+        |     $ ktfmt --kotlinlang-style Main.kt src/Parser.kt
+        |     Done formatting Main.kt
+        |     Error formatting src/Parser.kt: @@@ERROR@@@; skipping.
+        |    
+        |Commands options:
+        |  -h, --help                        Show this help message
+        |  -n, --dry-run                     Don't write to files, only report files which 
+        |                                        would have changed
+        |  --meta-style                      Use 2-space block indenting (default)
+        |  --google-style                    Google internal style (2 spaces)
+        |  --kotlinlang-style                Kotlin language guidelines style (4 spaces)
+        |  --stdin-name=<name>               Name to report when formatting code from stdin
+        |  --set-exit-if-changed             Sets exit code to 1 if any input file was not 
+        |                                        formatted/touched
+        |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used
+        |  
+        |ARGFILE:
+        |  If the only argument begins with '@', the remainder of the argument is treated
+        |  as the name of a file to read options and arguments from, one per line.
+        |  
+        |  e.g.
+        |      $ cat arg-file.txt
+        |      --google-style
+        |      -n
+        |      File1.kt
+        |      File2.kt
+        |      $ ktfmt @arg-file1.txt
+        |      Done formatting File1.kt
+        |      Done formatting File2.kt
+        |"""
+            .trimMargin()
+
     /** parseOptions parses command-line arguments passed to ktfmt. */
     fun parseOptions(args: Array<out String>): ParseResult {
       val fileNames = mutableListOf<String>()
@@ -56,6 +104,8 @@ data class ParsedArgs(
       var setExitIfChanged = false
       var removeUnusedImports = true
       var stdinName: String? = null
+
+      if ("--help" in args || "-h" in args) return ParseResult.ShowMessage(HELP_TEXT)
 
       for (arg in args) {
         when {
@@ -107,6 +157,8 @@ data class ParsedArgs(
 
 sealed interface ParseResult {
   data class Ok(val parsedValue: ParsedArgs) : ParseResult
+
+  data class ShowMessage(val message: String) : ParseResult
 
   data class Error(val errorMessage: String) : ParseResult
 }
