@@ -64,16 +64,17 @@ data class ParsedArgs(
       |formatted result on standard output.
       |
       |Example:
-      |     $ ktfmt --dropbox-style Main.kt src/Parser.kt
+      |     $ ktfmt --kotlinlang-style Main.kt src/Parser.kt
       |     Done formatting Main.kt
       |     Error formatting src/Parser.kt: @@@ERROR@@@; skipping.
       |    
       |Commands options:
+      |  -h, --help                        Show this help message
       |  -n, --dry-run                     Don't write to files, only report files which 
       |                                        would have changed
-      |  --dropbox-style                   Use 4-space block indenting
-      |  --google-style                    Google style
-      |  --kotlinlang-style                Kotlin language guidelines style
+      |  --meta-style                      Use 2-space block indenting (default)
+      |  --google-style                    Google internal style (2 spaces)
+      |  --kotlinlang-style                Kotlin language guidelines style (4 spaces
       |  --set-exit-if-changed             Sets exit code to 1 if any input code was not 
       |                                        correctly formatted
       |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used
