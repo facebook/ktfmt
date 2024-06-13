@@ -61,21 +61,27 @@ class ParsedArgsTest {
   }
 
   @Test
-  fun `parseOptions recognizes --meta-style`() {
-    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--meta-style", "foo.kt")))
+  fun `parseOptions recognizes --style=meta`() {
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--style=meta", "foo.kt")))
     assertThat(parsed.formattingOptions).isEqualTo(Formatter.META_FORMAT)
   }
 
   @Test
-  fun `parseOptions recognizes --dropbox-style`() {
-    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--kotlinlang-style", "foo.kt")))
+  fun `parseOptions recognizes --style=kotlinlang`() {
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--style=kotlinlang", "foo.kt")))
     assertThat(parsed.formattingOptions).isEqualTo(Formatter.KOTLINLANG_FORMAT)
   }
 
   @Test
-  fun `parseOptions recognizes --google-style`() {
-    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--google-style", "foo.kt")))
+  fun `parseOptions recognizes --style=google`() {
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--style=google", "foo.kt")))
     assertThat(parsed.formattingOptions).isEqualTo(Formatter.GOOGLE_FORMAT)
+  }
+
+  @Test
+  fun `parseOptions rejects unknown style`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--style=custom-style", "foo.kt"))
+    assertThat(parseResult).isInstanceOf(ParseResult.Error::class.java)
   }
 
   @Test
@@ -170,7 +176,7 @@ class ParsedArgsTest {
   @Test
   fun `processArgs use the @file option with file containing arguments`() {
     val file = root.resolve("existing-file")
-    file.writeText("--google-style\n--dry-run\n--set-exit-if-changed\nFile1.kt\nFile2.kt\n")
+    file.writeText("--style=google\n--dry-run\n--set-exit-if-changed\nFile1.kt\nFile2.kt\n")
 
     val result = ParsedArgs.processArgs(arrayOf("@" + file.absolutePath))
     assertThat(result).isInstanceOf(ParseResult.Ok::class.java)
@@ -187,7 +193,7 @@ class ParsedArgsTest {
   fun `parses multiple args successfully`() {
     val testResult =
         ParsedArgs.parseOptions(
-            arrayOf("--google-style", "--dry-run", "--set-exit-if-changed", "File.kt"),
+            arrayOf("--style=google", "--dry-run", "--set-exit-if-changed", "File.kt"),
         )
     assertThat(testResult)
         .isEqualTo(
@@ -202,7 +208,7 @@ class ParsedArgsTest {
   @Test
   fun `last style in args wins`() {
     val testResult =
-        ParsedArgs.parseOptions(arrayOf("--google-style", "--kotlinlang-style", "File.kt"))
+        ParsedArgs.parseOptions(arrayOf("--style=google", "--style=kotlinlang", "File.kt"))
     assertThat(testResult)
         .isEqualTo(
             parseResultOk(
@@ -213,7 +219,7 @@ class ParsedArgsTest {
 
   @Test
   fun `error when parsing multiple args and one is unknown`() {
-    val testResult = ParsedArgs.parseOptions(arrayOf("@unknown", "--google-style", "File.kt"))
+    val testResult = ParsedArgs.parseOptions(arrayOf("@unknown", "--style=google", "File.kt"))
     assertThat(testResult).isEqualTo(ParseResult.Error("Unexpected option: @unknown"))
   }
 
