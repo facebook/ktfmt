@@ -52,8 +52,7 @@ data class ParsedArgs(
       |ktfmt - command line Kotlin source code pretty-printer
       |
       |Usage:
-      |  ktfmt [--style=dropbox | --style=google | --style=kotlinlang ] [-n | --dry-run] [--set-exit-if-changed] 
-      |        [--do-not-remove-unused-imports] <File1.kt> <File2.kt> ...
+      |  ktfmt [OPTIONS] <File1.kt> <File2.kt> ...
       |  ktfmt @ARGFILE
       |
       |ktfmt formats Kotlin source code files in-place, reporting for each file whether the
