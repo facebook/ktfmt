@@ -79,9 +79,8 @@ class Main(
   }
 
   fun run(): Int {
-    val processArgs = ParsedArgs.processArgs(inputArgs)
     val parsedArgs =
-        when (processArgs) {
+        when (val processArgs = ParsedArgs.processArgs(inputArgs)) {
           is ParseResult.Ok -> processArgs.parsedValue
           is ParseResult.ShowMessage -> {
             out.println(processArgs.message)
@@ -103,8 +102,7 @@ class Main(
         val alreadyFormatted = format(null, parsedArgs)
         if (!alreadyFormatted && parsedArgs.setExitIfChanged) EXIT_CODE_FAILURE
         else EXIT_CODE_SUCCESS
-      } catch (e: Exception) {
-        e.printStackTrace(err)
+      } catch (_: Exception) {
         EXIT_CODE_FAILURE
       }
     }
@@ -116,18 +114,17 @@ class Main(
       return EXIT_CODE_FAILURE
     }
 
-    val retval = AtomicInteger(EXIT_CODE_SUCCESS)
+    val returnCode = AtomicInteger(EXIT_CODE_SUCCESS)
     files.parallelStream().forEach {
       try {
         if (!format(it, parsedArgs) && parsedArgs.setExitIfChanged) {
-          retval.set(EXIT_CODE_FAILURE)
+          returnCode.set(EXIT_CODE_FAILURE)
         }
-      } catch (e: Exception) {
-        e.printStackTrace(err)
-        retval.set(EXIT_CODE_FAILURE)
+      } catch (_: Exception) {
+        returnCode.set(EXIT_CODE_FAILURE)
       }
     }
-    return retval.get()
+    return returnCode.get()
   }
 
   /**
