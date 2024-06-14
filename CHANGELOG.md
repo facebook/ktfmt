@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+
+## [0.51]
+
 ### Added
 - Created CHANGELOG.md
 - Added --help option to CLI (https://github.com/facebook/ktfmt/pull/477)
