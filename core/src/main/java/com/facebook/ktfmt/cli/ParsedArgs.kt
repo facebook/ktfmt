@@ -60,30 +60,30 @@ data class ParsedArgs(
         |formatting succeeded or failed on standard error. If none of the style options are
         |passed, Meta's style is used.
         |
-        |Alternatively, ktfmt can read Kotlin source code from standard input and write the 
+        |Alternatively, ktfmt can read Kotlin source code from standard input and write the
         |formatted result on standard output.
         |
         |Example:
         |     $ ktfmt --kotlinlang-style Main.kt src/Parser.kt
         |     Done formatting Main.kt
         |     Error formatting src/Parser.kt: @@@ERROR@@@; skipping.
-        |    
+        |
         |Commands options:
         |  -h, --help                        Show this help message
-        |  -n, --dry-run                     Don't write to files, only report files which 
+        |  -n, --dry-run                     Don't write to files, only report files which
         |                                        would have changed
         |  --meta-style                      Use 2-space block indenting (default)
         |  --google-style                    Google internal style (2 spaces)
         |  --kotlinlang-style                Kotlin language guidelines style (4 spaces)
         |  --stdin-name=<name>               Name to report when formatting code from stdin
-        |  --set-exit-if-changed             Sets exit code to 1 if any input file was not 
+        |  --set-exit-if-changed             Sets exit code to 1 if any input file was not
         |                                        formatted/touched
         |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used
-        |  
+        |
         |ARGFILE:
         |  If the only argument begins with '@', the remainder of the argument is treated
         |  as the name of a file to read options and arguments from, one per line.
-        |  
+        |
         |  e.g.
         |      $ cat arg-file.txt
         |      --google-style
@@ -109,9 +109,21 @@ data class ParsedArgs(
 
       for (arg in args) {
         when {
-          arg == "--meta-style" -> formattingOptions = Formatter.META_FORMAT
-          arg == "--google-style" -> formattingOptions = Formatter.GOOGLE_FORMAT
-          arg == "--kotlinlang-style" -> formattingOptions = Formatter.KOTLINLANG_FORMAT
+          arg.startsWith("--style=") -> {
+            val parsedStyle =
+              parseKeyValueArg("--style", arg)
+                ?: return ParseResult.Error(
+                  unexpectedArg(arg)
+                )
+            formattingOptions = when (parsedStyle) {
+              "meta" -> Formatter.META_FORMAT
+              "google" -> Formatter.GOOGLE_FORMAT
+              "kotlinlang" -> Formatter.KOTLINLANG_FORMAT
+              else -> return ParseResult.Error(
+                "Unknown style '${parsedStyle}'. Style must be one of [dropbox, google, kotlinlang]."
+              )
+            }
+          }
           arg == "--dry-run" || arg == "-n" -> dryRun = true
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
           arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
@@ -120,8 +132,8 @@ data class ParsedArgs(
                   parseKeyValueArg("--stdin-name", arg)
                       ?: return ParseResult.Error(
                           "Found option '${arg}', expected '${"--stdin-name"}=<value>'")
-          arg.startsWith("--") -> return ParseResult.Error("Unexpected option: $arg")
-          arg.startsWith("@") -> return ParseResult.Error("Unexpected option: $arg")
+          arg.startsWith("--") -> return ParseResult.Error(unexpectedArg(arg))
+          arg.startsWith("@") -> return ParseResult.Error(unexpectedArg(arg))
           else -> fileNames.add(arg)
         }
       }
@@ -147,6 +159,8 @@ data class ParsedArgs(
               stdinName,
           ))
     }
+
+    private fun unexpectedArg(arg: String) = "Unexpected option: $arg"
 
     private fun parseKeyValueArg(key: String, arg: String): String? {
       val parts = arg.split('=', limit = 2)

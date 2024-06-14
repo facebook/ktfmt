@@ -225,7 +225,7 @@ class MainTest {
   }
 
   @Test
-  fun `kotlinlang-style is passed to formatter (file)`() {
+  fun `--style=kotlinlang is passed to formatter (file)`() {
     val code =
         """fun f() {
     for (child in
@@ -241,14 +241,14 @@ class MainTest {
             emptyInput,
             PrintStream(out),
             PrintStream(err),
-            arrayOf("--kotlinlang-style", fooBar.toString()))
+            arrayOf("--style=kotlinlang", fooBar.toString()))
         .run()
 
     assertThat(fooBar.readText()).isEqualTo(code)
   }
 
   @Test
-  fun `kotlinlang-style is passed to formatter (stdin)`() {
+  fun `--style=kotlinlang is passed to formatter (stdin)`() {
     val code =
         """fun f() {
           |for (child in
@@ -271,7 +271,7 @@ class MainTest {
             code.byteInputStream(),
             PrintStream(out),
             PrintStream(err),
-            arrayOf("--kotlinlang-style", "-"))
+            arrayOf("--style=kotlinlang", "-"))
         .run()
 
     assertThat(out.toString(UTF_8)).isEqualTo(formatted)
