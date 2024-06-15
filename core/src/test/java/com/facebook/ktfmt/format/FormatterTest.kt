@@ -7463,6 +7463,34 @@ class FormatterTest {
                 .trimMargin())
   }
 
+  @Test
+  fun `comment stable test`() {
+    val first =
+        """
+        |class Foo { // This is a very long comment that is very long and needs to be line broken because it is long
+        |}
+        |"""
+            .trimMargin()
+    val second =
+        """
+        |class Foo { // This is a very long comment that is very long and needs to be line broken because it
+        |            // is long
+        |}
+        |"""
+            .trimMargin()
+    val third =
+        """
+        |class Foo { // This is a very long comment that is very long and needs to be line broken because it
+        |  // is long
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(first).isEqualTo(second)
+    assertThatFormatting(second).isEqualTo(third)
+    assertFormatted(third)
+  }
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""
