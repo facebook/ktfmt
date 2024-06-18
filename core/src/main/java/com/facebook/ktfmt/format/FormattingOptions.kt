@@ -51,7 +51,7 @@ data class FormattingOptions(
      * multiple lines will have them removed. Manually inserted trailing commas cannot be used as a
      * hint to force breaking lists to multiple lines.
      */
-    val manageTrailingCommas: Boolean,
+    val manageTrailingCommas: Boolean = true,
 
     /** Whether ktfmt should remove imports that are not used. */
     val removeUnusedImports: Boolean = true,

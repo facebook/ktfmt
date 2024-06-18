@@ -19,8 +19,10 @@ package com.facebook.ktfmt.format
 import com.facebook.ktfmt.format.Formatter.META_FORMAT
 import com.facebook.ktfmt.testutil.assertFormatted
 import com.facebook.ktfmt.testutil.assertThatFormatting
+import com.facebook.ktfmt.testutil.defaultTestFormattingOptions
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.fail
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -1472,7 +1474,7 @@ class FormatterTest {
             .trimMargin()
 
     assertThatFormatting(code)
-        .withOptions(META_FORMAT.copy(removeUnusedImports = false))
+        .withOptions(defaultTestFormattingOptions.copy(removeUnusedImports = false))
         .isEqualTo(code)
   }
 
@@ -4288,7 +4290,9 @@ class FormatterTest {
       |}
       |"""
             .trimMargin()
-    assertThatFormatting(code).withOptions(META_FORMAT.copy(maxWidth = 22)).isEqualTo(expected)
+    assertThatFormatting(code)
+        .withOptions(defaultTestFormattingOptions.copy(maxWidth = 22))
+        .isEqualTo(expected)
   }
 
   @Test
@@ -5373,7 +5377,9 @@ class FormatterTest {
       |class MyClass {}
       |"""
             .trimMargin()
-    assertThatFormatting(code).withOptions(META_FORMAT.copy(maxWidth = 33)).isEqualTo(expected)
+    assertThatFormatting(code)
+        .withOptions(defaultTestFormattingOptions.copy(maxWidth = 33))
+        .isEqualTo(expected)
   }
 
   @Test
@@ -7494,5 +7500,11 @@ class FormatterTest {
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""
+
+    @JvmStatic
+    @BeforeClass
+    fun setUp(): Unit {
+      defaultTestFormattingOptions = META_FORMAT.copy(manageTrailingCommas = false)
+    }
   }
 }

@@ -47,7 +47,6 @@ object Formatter {
       FormattingOptions(
           blockIndent = 2,
           continuationIndent = 4,
-          manageTrailingCommas = false,
       )
 
   @JvmField
@@ -55,7 +54,6 @@ object Formatter {
       FormattingOptions(
           blockIndent = 2,
           continuationIndent = 2,
-          manageTrailingCommas = true,
       )
 
   /** A format that attempts to reflect https://kotlinlang.org/docs/coding-conventions.html. */
@@ -64,7 +62,6 @@ object Formatter {
       FormattingOptions(
           blockIndent = 4,
           continuationIndent = 4,
-          manageTrailingCommas = false,
       )
 
   private val MINIMUM_KOTLIN_VERSION = KotlinVersion(1, 4)
