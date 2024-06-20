@@ -67,12 +67,6 @@ class ParsedArgsTest {
   }
 
   @Test
-  fun `parseOptions recognizes --dropbox-style`() {
-    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--kotlinlang-style", "foo.kt")))
-    assertThat(parsed.formattingOptions).isEqualTo(Formatter.KOTLINLANG_FORMAT)
-  }
-
-  @Test
   fun `parseOptions recognizes --google-style`() {
     val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--google-style", "foo.kt")))
     assertThat(parsed.formattingOptions).isEqualTo(Formatter.GOOGLE_FORMAT)
