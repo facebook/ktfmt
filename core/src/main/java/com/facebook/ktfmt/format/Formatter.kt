@@ -47,6 +47,7 @@ object Formatter {
       FormattingOptions(
           blockIndent = 2,
           continuationIndent = 4,
+          manageTrailingCommas = false,
       )
 
   @JvmField
