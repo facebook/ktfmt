@@ -1585,7 +1585,81 @@ class FormatterTest {
       |"""
               .trimMargin())
 
-  @Test
+    @Test
+    fun `Trailing comma forces variable value in list onto new line with manageTrailingCommas turned off`() =
+        assertFormatted(
+            """
+            val aVar =
+                setOf(
+                    Env.Dev,
+                    Env.Prod,
+                )
+            val aVar = setOf(Env.Dev, Env.Prod)
+    
+            """.trimIndent(),
+            formattingOptions = FormattingOptions(
+                blockIndent = 4,
+                continuationIndent = 4,
+                manageTrailingCommas = false
+            ),
+            deduceMaxWidth = false,
+        )
+
+    @Test
+    fun `nested functions, maps, and statements in named parameters - default`() =
+        assertFormatted(
+            """
+            |////////////////////////////////////////////////////////////////////
+            |function(
+            |    param =
+            |        (rate downTo min step step).drop(1).map {
+            |          nestedFun(
+            |              rate =
+            |                  rate(
+            |                      value =
+            |                          firstArg<Input>().info.get(0).rate.value))
+            |        })
+            |""".trimMargin(),
+            deduceMaxWidth = true,
+        )
+    
+    @Test
+    fun `nested functions, maps, and statements in named parameters kotlin lang formats differently than default`() =
+        assertFormatted(
+            """
+            |/////////////////////////////////////////////////////////////////////
+            |function(
+            |    param =
+            |        (rate downTo min step step).drop(1).map {
+            |            nestedFun(
+            |                rate =
+            |                    rate(
+            |                        value =
+            |                            firstArg<Input>().info.get(0).rate.value
+            |                    )
+            |            )
+            |        }
+            |)
+            |""".trimMargin(),
+            formattingOptions = Formatter.KOTLINLANG_FORMAT,
+            deduceMaxWidth = true,
+        )
+    @Test
+    fun `complex calls and calculation in named parameters without wrapping`() =
+        assertFormatted(
+            """
+            calculateMath(
+                r = apr.sc(10) / BigDecimal(100) / BigDecimal(12),
+                n = 12 * term,
+                numerator = ((BigDecimal.ONE + r).pow(n)) - BigDecimal.ONE,
+                denominator = r * (BigDecimal.ONE + r).pow(n),
+            )
+
+            """.trimIndent(),
+            deduceMaxWidth = false,
+        )
+
+    @Test
   fun `Arguments are blocks`() =
       assertFormatted(
           """
