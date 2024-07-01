@@ -7545,6 +7545,7 @@ class FormatterTest {
 
   @Test
   fun `comment stable test`() {
+    // currently unstable
     val first =
         """
         |class Foo { // This is a very long comment that is very long and needs to be line broken because it is long
@@ -7561,6 +7562,88 @@ class FormatterTest {
     val third =
         """
         |class Foo { // This is a very long comment that is very long and needs to be line broken because it
+        |  // is long
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(first).isEqualTo(second)
+    assertThatFormatting(second).isEqualTo(third)
+    assertFormatted(third)
+  }
+
+  @Test
+  fun `comment stable test - no block`() {
+    val first =
+        """
+        |class Fooez // This is a very long comment that is very long and needs to be line broken because it is long
+        |"""
+            .trimMargin()
+    val second =
+        """
+        |class Fooez // This is a very long comment that is very long and needs to be line broken because it
+        |            // is long
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(first).isEqualTo(second)
+    assertFormatted(second)
+  }
+
+  @Test
+  fun `comment stable test - two blocks`() {
+    // currently unstable
+    val first =
+        """
+        |class Fooez // This is a very long comment that is very long and needs to be line broken because it is long
+        |class Bar
+        |"""
+            .trimMargin()
+    val second =
+        """
+        |class Fooez // This is a very long comment that is very long and needs to be line broken because it
+        |            // is long
+        |
+        |class Bar
+        |"""
+            .trimMargin()
+    val third =
+        """
+        |class Fooez // This is a very long comment that is very long and needs to be line broken because it
+        |
+        |// is long
+        |
+        |class Bar
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(first).isEqualTo(second)
+    assertThatFormatting(second).isEqualTo(third)
+    assertFormatted(third)
+  }
+
+  @Test
+  fun `comment stable test - within block`() {
+    // currently unstable
+    val first =
+        """
+        |class Foo {
+        |  class Bar // This is a very long comment that is very long and needs to be line broken because it is long
+        |}
+        |"""
+            .trimMargin()
+    val second =
+        """
+        |class Foo {
+        |  class Bar // This is a very long comment that is very long and needs to be line broken because it
+        |            // is long
+        |}
+        |"""
+            .trimMargin()
+    val third =
+        """
+        |class Foo {
+        |  class Bar // This is a very long comment that is very long and needs to be line broken because it
         |  // is long
         |}
         |"""
