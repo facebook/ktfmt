@@ -18,6 +18,7 @@ package com.facebook.ktfmt.intellij;
 
 import static com.facebook.ktfmt.format.Formatter.format;
 
+import com.facebook.ktfmt.format.FormattingOptions;
 import com.google.googlejavaformat.java.FormatterException;
 import com.intellij.formatting.service.AsyncDocumentFormattingService;
 import com.intellij.formatting.service.AsyncFormattingRequest;
@@ -34,9 +35,10 @@ public class KtfmtFormattingService extends AsyncDocumentFormattingService {
   @Override
   protected FormattingTask createFormattingTask(AsyncFormattingRequest request) {
     Project project = request.getContext().getProject();
-
-    UiFormatterStyle style = KtfmtSettings.getInstance(project).getUiFormatterStyle();
-    return new KtfmtFormattingTask(request, style);
+    KtfmtSettings settings = KtfmtSettings.getInstance(project);
+    UiFormatterStyle style = settings.getUiFormatterStyle();
+    int maxWidth = settings.getMaxWidth();
+    return new KtfmtFormattingTask(request, style, maxWidth);
   }
 
   @Override
@@ -63,16 +65,28 @@ public class KtfmtFormattingService extends AsyncDocumentFormattingService {
   private static final class KtfmtFormattingTask implements FormattingTask {
     private final AsyncFormattingRequest request;
     private final UiFormatterStyle style;
+    private final int maxWidth;
 
-    private KtfmtFormattingTask(AsyncFormattingRequest request, UiFormatterStyle style) {
+    private KtfmtFormattingTask(AsyncFormattingRequest request, UiFormatterStyle style, int maxWidth) {
       this.request = request;
       this.style = style;
+      this.maxWidth = maxWidth;
     }
 
     @Override
     public void run() {
       try {
-        String formattedText = format(style.getFormattingOptions(), request.getDocumentText());
+        FormattingOptions formattingOptions = style.getFormattingOptions();
+        // This works as long as the maxWidth is declared as the first in the data class
+        FormattingOptions overridenOptions = new FormattingOptions(
+                maxWidth,
+                formattingOptions.getBlockIndent(),
+                formattingOptions.getContinuationIndent(),
+                formattingOptions.getManageTrailingCommas(),
+                formattingOptions.getRemoveUnusedImports(),
+                formattingOptions.getDebuggingPrintOpsAfterFormatting()
+        );
+        String formattedText = format(overridenOptions, request.getDocumentText());
         request.onTextReady(formattedText);
       } catch (FormatterException e) {
         request.onError(

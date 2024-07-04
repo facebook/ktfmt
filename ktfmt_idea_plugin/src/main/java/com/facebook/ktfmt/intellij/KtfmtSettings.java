@@ -69,6 +69,14 @@ class KtfmtSettings implements PersistentStateComponent<KtfmtSettings.State> {
     state.uiFormatterStyle = uiFormatterStyle;
   }
 
+  int getMaxWidth() {
+    return state.maxWidth;
+  }
+
+  void setMaxWidth(int maxWidth) {
+    state.maxWidth = maxWidth;
+  }
+
   enum EnabledState {
     UNKNOWN,
     ENABLED,
@@ -79,6 +87,7 @@ class KtfmtSettings implements PersistentStateComponent<KtfmtSettings.State> {
 
     private EnabledState enabled = EnabledState.UNKNOWN;
     public UiFormatterStyle uiFormatterStyle = UiFormatterStyle.META;
+    public int maxWidth = 100;
 
     // enabled used to be a boolean so we use bean property methods for backwards
     // compatibility
