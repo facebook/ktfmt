@@ -23,72 +23,79 @@ import com.intellij.formatting.service.AsyncDocumentFormattingService;
 import com.intellij.formatting.service.AsyncFormattingRequest;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
+
 import java.util.EnumSet;
 import java.util.Set;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.idea.KotlinFileType;
 
-/** Uses {@code ktfmt} to reformat code. */
+/**
+ * Uses {@code ktfmt} to reformat code.
+ */
 public class KtfmtFormattingService extends AsyncDocumentFormattingService {
 
-  @Override
-  protected FormattingTask createFormattingTask(AsyncFormattingRequest request) {
-    Project project = request.getContext().getProject();
+    @Override
+    protected FormattingTask createFormattingTask(AsyncFormattingRequest request) {
+        Project project = request.getContext().getProject();
 
-    UiFormatterStyle style = KtfmtSettings.getInstance(project).getUiFormatterStyle();
-    return new KtfmtFormattingTask(request, style);
-  }
-
-  @Override
-  protected @NotNull String getNotificationGroupId() {
-    return Notifications.PARSING_ERROR_NOTIFICATION_GROUP;
-  }
-
-  @Override
-  protected @NotNull String getName() {
-    return "ktfmt";
-  }
-
-  @Override
-  public @NotNull Set<Feature> getFeatures() {
-    return EnumSet.noneOf(Feature.class);
-  }
-
-  @Override
-  public boolean canFormat(@NotNull PsiFile file) {
-    return KotlinFileType.INSTANCE.getName().equals(file.getFileType().getName())
-        && KtfmtSettings.getInstance(file.getProject()).isEnabled();
-  }
-
-  private static final class KtfmtFormattingTask implements FormattingTask {
-    private final AsyncFormattingRequest request;
-    private final UiFormatterStyle style;
-
-    private KtfmtFormattingTask(AsyncFormattingRequest request, UiFormatterStyle style) {
-      this.request = request;
-      this.style = style;
+        KtfmtSettings ktfmtSettings = KtfmtSettings.getInstance(project);
+        UiFormatterStyle style = ktfmtSettings.getUiFormatterStyle();
+        return new KtfmtFormattingTask(request, style, ktfmtSettings.getMaxWidth());
     }
 
     @Override
-    public void run() {
-      try {
-        String formattedText = format(style.getFormattingOptions(), request.getDocumentText());
-        request.onTextReady(formattedText);
-      } catch (FormatterException e) {
-        request.onError(
-            Notifications.PARSING_ERROR_TITLE,
-            Notifications.parsingErrorMessage(request.getContext().getContainingFile().getName()));
-      }
+    protected @NotNull String getNotificationGroupId() {
+        return Notifications.PARSING_ERROR_NOTIFICATION_GROUP;
     }
 
     @Override
-    public boolean isRunUnderProgress() {
-      return true;
+    protected @NotNull String getName() {
+        return "ktfmt";
     }
 
     @Override
-    public boolean cancel() {
-      return false;
+    public @NotNull Set<Feature> getFeatures() {
+        return EnumSet.noneOf(Feature.class);
     }
-  }
+
+    @Override
+    public boolean canFormat(@NotNull PsiFile file) {
+        return KotlinFileType.INSTANCE.getName().equals(file.getFileType().getName())
+                && KtfmtSettings.getInstance(file.getProject()).isEnabled();
+    }
+
+    private static final class KtfmtFormattingTask implements FormattingTask {
+        private final AsyncFormattingRequest request;
+        private final UiFormatterStyle style;
+        private final Integer maxWidth;
+
+        private KtfmtFormattingTask(AsyncFormattingRequest request, UiFormatterStyle style, Integer maxWidth) {
+            this.request = request;
+            this.style = style;
+            this.maxWidth = maxWidth;
+        }
+
+        @Override
+        public void run() {
+            try {
+                String formattedText = format(style.getFormattingOptions(maxWidth), request.getDocumentText());
+                request.onTextReady(formattedText);
+            } catch (FormatterException e) {
+                request.onError(
+                        Notifications.PARSING_ERROR_TITLE,
+                        Notifications.parsingErrorMessage(request.getContext().getContainingFile().getName()));
+            }
+        }
+
+        @Override
+        public boolean isRunUnderProgress() {
+            return true;
+        }
+
+        @Override
+        public boolean cancel() {
+            return false;
+        }
+    }
 }

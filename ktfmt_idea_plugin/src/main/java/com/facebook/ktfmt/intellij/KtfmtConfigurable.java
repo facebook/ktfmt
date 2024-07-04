@@ -26,11 +26,13 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import java.awt.Insets;
+import java.util.Objects;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +43,7 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
   private JPanel panel;
   private JCheckBox enable;
   private JComboBox styleComboBox;
+  private JTextField maxWidthTextField;
 
   public KtfmtConfigurable(Project project) {
     this.project = project;
@@ -81,6 +84,7 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
     settings.setEnabled(enable.isSelected() ? EnabledState.ENABLED : getDisabledState());
     settings.setUiFormatterStyle(((UiFormatterStyle) styleComboBox.getSelectedItem()));
+    settings.setMaxWidth(integerFromTextField(maxWidthTextField));
   }
 
   private EnabledState getDisabledState() {
@@ -94,15 +98,35 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
   @Override
   public void reset() {
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
+    Integer maxWidth = settings.getMaxWidth();
     enable.setSelected(settings.isEnabled());
     styleComboBox.setSelectedItem(settings.getUiFormatterStyle());
+    maxWidthTextField.setText(maxWidth != null ? maxWidth.toString() : "");
   }
 
   @Override
   public boolean isModified() {
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
+    Integer maxWidthFromUI = integerFromTextField(maxWidthTextField);
     return enable.isSelected() != settings.isEnabled()
-        || !styleComboBox.getSelectedItem().equals(settings.getUiFormatterStyle());
+        || !Objects.equals(styleComboBox.getSelectedItem(), settings.getUiFormatterStyle())
+          || !equalsOrNull(maxWidthFromUI, settings.getMaxWidth());
+  }
+
+  private Integer integerFromTextField(JTextField textField) {
+    try {
+      return Integer.parseInt(textField.getText());
+    } catch (NumberFormatException e) {
+      return null;
+    }
+  }
+
+  private boolean equalsOrNull(Integer a, Integer b) {
+    if (a != null) {
+      return a.equals(b);
+    } else {
+      return b == null;
+    }
   }
 
   @Override

@@ -16,32 +16,58 @@
 
 package com.facebook.ktfmt.intellij;
 
-import static com.facebook.ktfmt.format.Formatter.GOOGLE_FORMAT;
-import static com.facebook.ktfmt.format.Formatter.KOTLINLANG_FORMAT;
-import static com.facebook.ktfmt.format.Formatter.META_FORMAT;
-
 import com.facebook.ktfmt.format.FormattingOptions;
+import com.intellij.lang.Language;
+import com.intellij.psi.codeStyle.*;
 
-/** Configuration options for the formatting style. */
+import static com.facebook.ktfmt.format.Formatter.*;
+
+/**
+ * Configuration options for the formatting style.
+ */
 enum UiFormatterStyle {
-  META("Meta (default)", META_FORMAT),
-  GOOGLE("Google (internal)", GOOGLE_FORMAT),
-  KOTLINLANG("Kotlinlang", KOTLINLANG_FORMAT);
+    META("Meta (default)", META_FORMAT),
+    GOOGLE("Google (internal)", GOOGLE_FORMAT),
+    KOTLINLANG("Kotlinlang", KOTLINLANG_FORMAT);
 
-  private final String description;
-  private final FormattingOptions formattingOptions;
+    private final String description;
+    private final FormattingOptions formattingOptions;
 
-  UiFormatterStyle(String description, FormattingOptions formattingOptions) {
-    this.description = description;
-    this.formattingOptions = formattingOptions;
-  }
+    UiFormatterStyle(String description, FormattingOptions formattingOptions) {
+        this.description = description;
+        this.formattingOptions = formattingOptions;
+    }
 
-  FormattingOptions getFormattingOptions() {
-    return formattingOptions;
-  }
+    FormattingOptions getFormattingOptions(Integer maxWidthFromUser) {
+        CodeStyleScheme currentScheme = CodeStyleSchemes.getInstance().getCurrentScheme();
+        Language kotlinLang = Language.findLanguageByID("kotlin");
 
-  @Override
-  public String toString() {
-    return description;
-  }
+        int maxWidth = -1;
+        if (maxWidthFromUser == null) {
+            CodeStyleSettings codeStyleSettings = currentScheme.getCodeStyleSettings();
+            while (codeStyleSettings != null && maxWidth == -1) {
+                maxWidth = codeStyleSettings.getRightMargin(kotlinLang);
+                codeStyleSettings = codeStyleSettings.getParentSettings();
+            }
+            if (maxWidth == -1) {
+                maxWidth = 120;
+            }
+        } else {
+            maxWidth = maxWidthFromUser;
+        }
+
+        return new FormattingOptions(
+                maxWidth,
+                formattingOptions.getBlockIndent(),
+                formattingOptions.getContinuationIndent(),
+                formattingOptions.getManageTrailingCommas(),
+                formattingOptions.getRemoveUnusedImports(),
+                formattingOptions.getDebuggingPrintOpsAfterFormatting()
+        );
+    }
+
+    @Override
+    public String toString() {
+        return description;
+    }
 }
