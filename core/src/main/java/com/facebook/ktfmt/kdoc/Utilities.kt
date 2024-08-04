@@ -139,19 +139,19 @@ fun String.isKDocTag(): Boolean {
 }
 
 /**
- * If this String represents a KDoc `@param` tag, returns the corresponding parameter name,
+ * If this String represents a KDoc tag named [tag], returns the corresponding parameter name,
  * otherwise null.
  */
-fun String.getParamName(): String? {
+fun String.getTagName(tag: String): String? {
   val length = this.length
   var start = 0
   while (start < length && this[start].isWhitespace()) {
     start++
   }
-  if (!this.startsWith("@param", start)) {
+  if (!this.startsWith(tag, start)) {
     return null
   }
-  start += "@param".length
+  start += tag.length
 
   while (start < length) {
     if (this[start].isWhitespace()) {
@@ -186,6 +186,12 @@ fun String.getParamName(): String? {
 
   return null
 }
+
+/**
+ * If this String represents a KDoc `@param` or `@property` tag, returns the corresponding parameter
+ * name, otherwise null.
+ */
+fun String.getParamName(): String? = getTagName("@param") ?: getTagName("@property")
 
 private fun getIndent(start: Int, lookup: (Int) -> Char): String {
   var i = start - 1

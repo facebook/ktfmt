@@ -3146,6 +3146,34 @@ class KDocFormatterTest {
   }
 
   @Test
+  fun testPropertiesAreParams() {
+    val source =
+        """
+            /**
+             * @param bar lorem ipsum
+             * @property baz dolor sit
+             * @property foo amet, consetetur
+             */
+            """
+            .trimIndent()
+    checkFormatter(
+        FormattingTask(
+            KDocFormattingOptions(72, 72),
+            source.trim(),
+            initialIndent = "    ",
+            orderedParameterNames = listOf("foo", "bar", "baz"),
+        ),
+        """
+            /**
+             * @property foo amet, consetetur
+             * @param bar lorem ipsum
+             * @property baz dolor sit
+             */
+            """
+            .trimIndent())
+  }
+
+  @Test
   fun testKnit() {
     // Some tests for the knit plugin -- https://github.com/Kotlin/kotlinx-knit
     val source =

@@ -571,18 +571,20 @@ class ParagraphListBuilder(
     return when {
       isPriority -> -1
       tag.startsWith("@param") -> 0
+      tag.startsWith("@property") -> 0
+      // @param and @property must be sorted by parameter order
+      // a @property is dedicated syntax for a main constructor @param that also sets a class property
       tag.startsWith("@return") -> 1
       tag.startsWith("@constructor") -> 2
       tag.startsWith("@receiver") -> 3
-      tag.startsWith("@property") -> 4
-      tag.startsWith("@throws") -> 5
-      tag.startsWith("@exception") -> 6
-      tag.startsWith("@sample") -> 7
-      tag.startsWith("@see") -> 8
-      tag.startsWith("@author") -> 9
-      tag.startsWith("@since") -> 10
-      tag.startsWith("@suppress") -> 11
-      tag.startsWith("@deprecated") -> 12
+      tag.startsWith("@throws") -> 4
+      tag.startsWith("@exception") -> 5
+      tag.startsWith("@sample") -> 6
+      tag.startsWith("@see") -> 7
+      tag.startsWith("@author") -> 8
+      tag.startsWith("@since") -> 9
+      tag.startsWith("@suppress") -> 10
+      tag.startsWith("@deprecated") -> 11
       else -> 100 // custom tags
     }
   }
