@@ -17,7 +17,7 @@
 plugins {
   id("org.jetbrains.intellij") version "1.17.3"
   java
-  id("com.diffplug.spotless") version "5.10.2"
+  id("com.diffplug.spotless") version "6.25.0"
 }
 
 val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
