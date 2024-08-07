@@ -40,18 +40,22 @@ final class InitialConfigurationStartupActivity implements StartupActivity.Backg
   }
 
   private void displayNewUserNotification(Project project, KtfmtSettings settings) {
-    new Notification(
+    Notification notification =
+        new Notification(
             NotificationGroupManager.getInstance()
                 .getNotificationGroup(NOTIFICATION_TITLE)
                 .getDisplayId(),
             NOTIFICATION_TITLE,
             "The ktfmt plugin is disabled by default.",
-            NotificationType.INFORMATION)
+            NotificationType.INFORMATION);
+
+    notification
         .addAction(
             new AnAction("Enable for This Project") {
               @Override
               public void actionPerformed(@NotNull AnActionEvent e) {
                 settings.setEnabled(true);
+                notification.expire();
               }
             })
         .notify(project);
