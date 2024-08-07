@@ -39,7 +39,7 @@ java {
 
 dependencies {
   implementation("com.facebook", "ktfmt", ktfmtVersion)
-  implementation("com.google.googlejavaformat", "google-java-format", "1.22.0")
+  implementation("com.google.googlejavaformat", "google-java-format", "1.23.0")
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
@@ -59,4 +59,4 @@ tasks {
   runPluginVerifier { ideVersions.set(listOf("221")) }
 }
 
-spotless { java { googleJavaFormat("1.22.0") } }
+spotless { java { googleJavaFormat("1.23.0") } }
