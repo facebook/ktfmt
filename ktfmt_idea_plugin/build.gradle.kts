@@ -59,6 +59,7 @@ dependencies {
 intellijPlatform {
   pluginConfiguration.ideaVersion {
     sinceBuild = "223.7571.182" // 2022.3
+    untilBuild = provider { null }
   }
 
   publishing {
