@@ -19,10 +19,10 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaCommunity
 
 plugins {
-  java
-  alias(libs.plugins.kotlin)
-  alias(libs.plugins.intelliJPlatform)
-  alias(libs.plugins.spotless)
+    java
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.intelliJPlatform)
+    alias(libs.plugins.spotless)
 }
 
 val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
@@ -35,37 +35,38 @@ version = "$pluginVersion.$ktfmtVersion"
 kotlin { jvmToolchain(17) }
 
 repositories {
-  mavenCentral()
-  intellijPlatform { defaultRepositories() }
-  mavenLocal()
+    mavenCentral()
+    intellijPlatform { defaultRepositories() }
+    mavenLocal()
 }
 
 dependencies {
-  intellijPlatform {
-    create(IntellijIdeaCommunity, "2022.3")
-    instrumentationTools()
-    pluginVerifier()
-    zipSigner()
-  }
+    intellijPlatform {
+        create(IntellijIdeaCommunity, "2022.3")
+        instrumentationTools()
+        pluginVerifier()
+        zipSigner()
+    }
 
-  implementation("com.facebook", "ktfmt", ktfmtVersion)
-  implementation(libs.googleJavaFormat)
+    implementation("com.facebook", "ktfmt", ktfmtVersion)
+    implementation(libs.googleJavaFormat)
 }
 
 intellijPlatform {
-  pluginConfiguration.ideaVersion {
-    sinceBuild = "223.7571.182" // 2022.3
-    untilBuild = provider { null }
-  }
+    pluginConfiguration.ideaVersion {
+        sinceBuild = "223.7571.182" // 2022.3
+        untilBuild = provider { null }
+    }
 
-  publishing { token = System.getenv("JETBRAINS_MARKETPLACE_TOKEN") }
+    publishing { token = System.getenv("JETBRAINS_MARKETPLACE_TOKEN") }
 
-  pluginVerification { ides { recommended() } }
+    pluginVerification { ides { recommended() } }
 }
 
 spotless { java { googleJavaFormat(libs.versions.googleJavaFormat.get()) } }
 
-val runIntellij242 by intellijPlatformTesting.runIde.registering {
-  type = IntellijIdeaCommunity
-  version = "2024.2"
-}
+val runIntellij242 by
+    intellijPlatformTesting.runIde.registering {
+        type = IntellijIdeaCommunity
+        version = "2024.2"
+    }
