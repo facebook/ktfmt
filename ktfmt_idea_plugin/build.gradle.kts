@@ -1,3 +1,5 @@
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.*
+
 /*
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -15,9 +17,9 @@
  */
 
 plugins {
-  id("org.jetbrains.intellij") version "1.17.3"
   java
-  id("com.diffplug.spotless") version "6.25.0"
+  alias(libs.plugins.intelliJPlatform)
+  alias(libs.plugins.spotless)
 }
 
 val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
@@ -27,36 +29,47 @@ group = "com.facebook"
 
 version = "$pluginVersion.$ktfmtVersion"
 
+java {
+  toolchain {
+    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_17
+  }
+}
+
 repositories {
   mavenCentral()
+  intellijPlatform {
+    defaultRepositories()
+  }
   mavenLocal()
 }
 
-java {
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
-}
-
 dependencies {
-  implementation("com.facebook", "ktfmt", ktfmtVersion)
-  implementation("com.google.googlejavaformat", "google-java-format", "1.23.0")
-}
-
-// See https://github.com/JetBrains/gradle-intellij-plugin/
-intellij {
-  // Version with which to build (and run; unless alternativeIdePath is specified)
-  version.set("2022.1")
-  // To run on a different IDE, uncomment and specify a path.
-  // localPath = "/Applications/Android Studio.app"
-}
-
-tasks {
-  patchPluginXml {
-    sinceBuild.set("221")
-    untilBuild.set("")
+  intellijPlatform {
+    create(IntellijIdeaCommunity, "2022.3")
+    instrumentationTools()
+    pluginVerifier()
+    zipSigner()
   }
-  publishPlugin { token.set(System.getenv("JETBRAINS_MARKETPLACE_TOKEN")) }
-  runPluginVerifier { ideVersions.set(listOf("221")) }
+  
+  implementation("com.facebook", "ktfmt", ktfmtVersion)
+  implementation(libs.googleJavaFormat)
 }
 
-spotless { java { googleJavaFormat("1.23.0") } }
+intellijPlatform {
+  pluginConfiguration.ideaVersion {
+    sinceBuild = "223.7571.182" // 2022.3
+  }
+
+  publishing {
+    token = System.getenv("JETBRAINS_MARKETPLACE_TOKEN")
+  }
+
+  pluginVerification {
+    ides {
+      recommended()
+    }
+  }
+}
+
+spotless { java { googleJavaFormat(libs.versions.googleJavaFormat.get()) } }

@@ -1,5 +1,6 @@
 .gradle/
 ktfmt_idea_plugin/build/
+ktfmt_idea_plugin/.intellijPlatform/
 .idea/
 *.ims
 *.iml
