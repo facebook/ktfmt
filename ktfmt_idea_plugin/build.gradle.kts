@@ -1,3 +1,5 @@
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.*
+
 /*
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
