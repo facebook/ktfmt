@@ -20,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaC
 
 plugins {
   java
+  alias(libs.plugins.kotlin)
   alias(libs.plugins.intelliJPlatform)
   alias(libs.plugins.spotless)
 }
@@ -31,12 +32,7 @@ group = "com.facebook"
 
 version = "$pluginVersion.$ktfmtVersion"
 
-java {
-  toolchain {
-    targetCompatibility = JavaVersion.VERSION_17
-    sourceCompatibility = JavaVersion.VERSION_17
-  }
-}
+kotlin { jvmToolchain(17) }
 
 repositories {
   mavenCentral()
