@@ -17,7 +17,6 @@
 package com.facebook.ktfmt.intellij;
 
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
@@ -27,12 +26,9 @@ import org.jetbrains.annotations.NotNull;
 final class InitialConfigurationStartupActivity implements StartupActivity.Background {
 
   private static final String NOTIFICATION_TITLE = "Enable ktfmt";
-  private static final NotificationGroup NOTIFICATION_GROUP =
-      NotificationGroupManager.getInstance().getNotificationGroup(NOTIFICATION_TITLE);
 
   @Override
   public void runActivity(@NotNull Project project) {
-
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
 
     if (settings.isUninitialized()) {
@@ -43,7 +39,7 @@ final class InitialConfigurationStartupActivity implements StartupActivity.Backg
 
   private void displayNewUserNotification(Project project, KtfmtSettings settings) {
     new Notification(
-            NOTIFICATION_GROUP.getDisplayId(),
+            NotificationGroupManager.getInstance().getNotificationGroup(NOTIFICATION_TITLE).getDisplayId(),
             NOTIFICATION_TITLE,
             "The ktfmt plugin is disabled by default. "
                 + "<a href=\"enable\">Enable for this project</a>.",
