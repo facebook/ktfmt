@@ -68,3 +68,8 @@ intellijPlatform {
 }
 
 spotless { java { googleJavaFormat(libs.versions.googleJavaFormat.get()) } }
+
+val runIntellij242 by intellijPlatformTesting.runIde.registering {
+  type = IntellijIdeaCommunity
+  version = "2024.2"
+}
