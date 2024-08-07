@@ -26,7 +26,7 @@ plugins {
 }
 
 val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
-val pluginVersion = "1.1"
+val pluginVersion = "1.2"
 
 group = "com.facebook"
 
