@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package com.facebook.ktfmt.intellij;
+package com.facebook.ktfmt.intellij
 
-class Notifications {
+import com.facebook.ktfmt.format.Formatter.GOOGLE_FORMAT
+import com.facebook.ktfmt.format.Formatter.KOTLINLANG_FORMAT
+import com.facebook.ktfmt.format.Formatter.META_FORMAT
+import com.facebook.ktfmt.format.FormattingOptions
 
-  static final String PARSING_ERROR_NOTIFICATION_GROUP = "ktfmt parsing error";
-  static final String PARSING_ERROR_TITLE = PARSING_ERROR_NOTIFICATION_GROUP;
+/** Configuration options for the formatting style. */
+internal enum class UiFormatterStyle(
+    private val description: String,
+    val formattingOptions: FormattingOptions,
+) {
+  Meta("Meta (default)", META_FORMAT),
+  Google("Google (internal)", GOOGLE_FORMAT),
+  KotlinLang("Kotlinlang", KOTLINLANG_FORMAT);
 
-  static String parsingErrorMessage(String filename) {
-    return "ktfmt failed. Does " + filename + " have syntax errors?";
-  }
+  override fun toString(): String = description
 }

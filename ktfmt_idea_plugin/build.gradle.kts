@@ -18,23 +18,19 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaC
 
 plugins {
   java
+  alias(libs.plugins.kotlin)
   alias(libs.plugins.intelliJPlatform)
-  alias(libs.plugins.spotless)
+  alias(libs.plugins.ktfmt)
 }
 
 val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
-val pluginVersion = "1.1"
+val pluginVersion = "1.2"
 
 group = "com.facebook"
 
 version = "$pluginVersion.$ktfmtVersion"
 
-java {
-  toolchain {
-    targetCompatibility = JavaVersion.VERSION_17
-    sourceCompatibility = JavaVersion.VERSION_17
-  }
-}
+kotlin { jvmToolchain(17) }
 
 repositories {
   mavenCentral()
@@ -50,8 +46,7 @@ dependencies {
     zipSigner()
   }
 
-  implementation("com.facebook", "ktfmt", ktfmtVersion)
-  implementation(libs.googleJavaFormat)
+  implementation("com.facebook:ktfmt:$ktfmtVersion")
 }
 
 intellijPlatform {
@@ -64,8 +59,6 @@ intellijPlatform {
 
   pluginVerification { ides { recommended() } }
 }
-
-spotless { java { googleJavaFormat(libs.versions.googleJavaFormat.get()) } }
 
 val runIntellij242 by
     intellijPlatformTesting.runIde.registering {

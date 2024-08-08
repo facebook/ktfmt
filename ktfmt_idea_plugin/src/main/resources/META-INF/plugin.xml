@@ -19,7 +19,6 @@
                              id="com.facebook.ktfmt_idea_plugin.settings"
                              displayName="ktfmt Settings"
                              parentId="editor"/>
-        <projectService serviceImplementation="com.facebook.ktfmt.intellij.KtfmtSettings"/>
         <notificationGroup displayType="STICKY_BALLOON" id="Enable ktfmt"
                            isLogByDefault="false"/>
     </extensions>

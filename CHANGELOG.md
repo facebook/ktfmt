@@ -4,10 +4,24 @@ All notable changes to the ktfmt project (starting on v0.51) should be documente
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [Unreleased]
+## [1.0.0 Unreleased]
 
 ### Changed
 - All styles managing trailing commas now (https://github.com/facebook/ktfmt/issues/216, https://github.com/facebook/ktfmt/issues/442)
+
+
+## [0.52 Unreleased]
+
+### Fixed
+- IntelliJ plugin crash (https://github.com/facebook/ktfmt/pull/501)
+- Ordering of `@property` and `@param` in KDoc (https://github.com/facebook/ktfmt/pull/498)
+
+### Changed
+- KotlinLang style also managing trailing commas (https://github.com/facebook/ktfmt/issues/216, https://github.com/facebook/ktfmt/issues/442)
+- Converted IntelliJ plugin to Kotlin (https://github.com/facebook/ktfmt/pull/502)
+
+### Added
+- More stability tests (https://github.com/facebook/ktfmt/pull/488)
 
 
 ## [0.51]
