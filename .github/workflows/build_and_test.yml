@@ -30,10 +30,10 @@ jobs:
     - name: Build ktfmt_idea_plugin
       run: |
         pushd ktfmt_idea_plugin
-        ./gradlew build
+        ./gradlew build --no-daemon
         popd
     - name: Build the Online Formatter
       run: |
         pushd online_formatter
-        ./gradlew build
+        ./gradlew build --no-daemon
         popd
