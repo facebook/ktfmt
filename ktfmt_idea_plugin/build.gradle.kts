@@ -22,7 +22,7 @@ plugins {
     java
     alias(libs.plugins.kotlin)
     alias(libs.plugins.intelliJPlatform)
-    alias(libs.plugins.spotless)
+    alias(libs.plugins.ktfmt)
 }
 
 val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
@@ -48,8 +48,7 @@ dependencies {
         zipSigner()
     }
 
-    implementation("com.facebook", "ktfmt", ktfmtVersion)
-    implementation(libs.googleJavaFormat)
+    implementation("com.facebook:ktfmt:$ktfmtVersion")
 }
 
 intellijPlatform {
@@ -62,8 +61,6 @@ intellijPlatform {
 
     pluginVerification { ides { recommended() } }
 }
-
-spotless { java { googleJavaFormat(libs.versions.googleJavaFormat.get()) } }
 
 val runIntellij242 by
     intellijPlatformTesting.runIde.registering {
