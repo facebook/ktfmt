@@ -26,11 +26,14 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import java.awt.Insets;
+import java.text.NumberFormat;
+import javax.swing.JFormattedTextField;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.text.NumberFormatter;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +44,7 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
   private JPanel panel;
   private JCheckBox enable;
   private JComboBox styleComboBox;
+  private JFormattedTextField maxWidthField;
 
   public KtfmtConfigurable(Project project) {
     this.project = project;
@@ -80,7 +84,9 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
   public void apply() throws ConfigurationException {
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
     settings.setEnabled(enable.isSelected() ? EnabledState.ENABLED : getDisabledState());
-    settings.setUiFormatterStyle(((UiFormatterStyle) styleComboBox.getSelectedItem()));
+    UiFormatterStyle selectedStyle = (UiFormatterStyle) styleComboBox.getSelectedItem();
+    settings.setMaxWidth((Integer) maxWidthField.getValue());
+    settings.setUiFormatterStyle(selectedStyle);
   }
 
   private EnabledState getDisabledState() {
@@ -96,13 +102,15 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
     enable.setSelected(settings.isEnabled());
     styleComboBox.setSelectedItem(settings.getUiFormatterStyle());
+    maxWidthField.setValue(settings.getMaxWidth());
   }
 
   @Override
   public boolean isModified() {
     KtfmtSettings settings = KtfmtSettings.getInstance(project);
     return enable.isSelected() != settings.isEnabled()
-        || !styleComboBox.getSelectedItem().equals(settings.getUiFormatterStyle());
+        || !styleComboBox.getSelectedItem().equals(settings.getUiFormatterStyle())
+        || !maxWidthField.getValue().equals(settings.getMaxWidth());
   }
 
   @Override
@@ -110,6 +118,15 @@ public class KtfmtConfigurable extends BaseConfigurable implements SearchableCon
 
   private void createUIComponents() {
     styleComboBox = new ComboBox<>(UiFormatterStyle.values());
+
+    NumberFormat format = NumberFormat.getInstance();
+    NumberFormatter formatter = new NumberFormatter(format);
+    formatter.setValueClass(Integer.class);
+    formatter.setMinimum(0);
+    formatter.setMaximum(500);
+    formatter.setAllowsInvalid(false);
+
+    maxWidthField = new JFormattedTextField(formatter);
   }
 
   {
