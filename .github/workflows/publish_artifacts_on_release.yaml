@@ -15,7 +15,7 @@ on:
       release_tag:
         description: 'Release tag'
         required: true
-        type: stringe
+        type: string
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -24,12 +24,13 @@ jobs:
         with:
           ref: ${{ github.events.release.tag_name || inputs.release_tag || github.ref }}
       - name: Set up Maven Central Repository
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4
         with:
-          java-version: 11
+          java-version: 17
           server-id: ossrh
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
+          distribution: zulu
       - id: install-secret-key
         name: Install gpg secret key
         run: |
@@ -53,7 +54,7 @@ jobs:
           popd
         env:
           JETBRAINS_MARKETPLACE_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
       - name: Deploy website
         run: |
           KTFMT_TMP_DIR=$(mktemp -d)
