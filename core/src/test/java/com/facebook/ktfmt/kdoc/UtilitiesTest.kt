@@ -101,6 +101,7 @@ class UtilitiesTest {
     assertThat("@param[foo]".getParamName()).isEqualTo("foo")
     assertThat("@param  [foo]".getParamName()).isEqualTo("foo")
     assertThat("@param ".getParamName()).isNull()
+    assertThat("@property foo".getParamName()).isEqualTo("foo")
   }
 
   @Test
