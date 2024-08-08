@@ -50,7 +50,7 @@ jobs:
       - name: Publish IntelliJ plugin to JetBrains Marketplace
         run: |
           pushd ktfmt_idea_plugin
-          ./gradlew publishPlugin --stacktrace
+          ./gradlew publishPlugin --stacktrace --no-daemon
           popd
         env:
           JETBRAINS_MARKETPLACE_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
