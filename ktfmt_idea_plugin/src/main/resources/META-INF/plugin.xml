@@ -1,5 +1,6 @@
 <idea-plugin url="https://github.com/facebook/ktfmt/tree/main/ktfmt_idea_plugin">
     <id>com.facebook.ktfmt_idea_plugin</id>
+    <!--suppress PluginXmlCapitalization -->
     <name>ktfmt</name>
     <vendor url="https://github.com/facebook/ktfmt">Facebook</vendor>
 
@@ -13,6 +14,7 @@
         <formattingService
                 implementation="com.facebook.ktfmt.intellij.KtfmtFormattingService"/>
         <postStartupActivity implementation="com.facebook.ktfmt.intellij.InitialConfigurationStartupActivity"/>
+        <!--suppress PluginXmlCapitalization -->
         <projectConfigurable instance="com.facebook.ktfmt.intellij.KtfmtConfigurable"
                              id="com.facebook.ktfmt_idea_plugin.settings"
                              displayName="ktfmt Settings"
