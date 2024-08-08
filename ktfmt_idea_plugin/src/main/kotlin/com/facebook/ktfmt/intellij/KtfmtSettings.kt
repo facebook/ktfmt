@@ -29,65 +29,64 @@ import com.intellij.openapi.project.Project
 @Service(PROJECT)
 @State(name = "KtfmtSettings", storages = [Storage("ktfmt.xml")])
 internal class KtfmtSettings : PersistentStateComponent<KtfmtSettings.State> {
-    private var state = State()
+  private var state = State()
 
-    override fun getState(): State = state
+  override fun getState(): State = state
 
-    override fun loadState(state: State) {
-        this.state = state
+  override fun loadState(state: State) {
+    this.state = state
+  }
+
+  var isEnabled: Boolean
+    get() = state.enabled == Enabled
+    set(enabled) {
+      setEnabled(if (enabled) Enabled else Disabled)
     }
 
-    var isEnabled: Boolean
-        get() = state.enabled == Enabled
-        set(enabled) {
-            setEnabled(if (enabled) Enabled else Disabled)
+  fun setEnabled(enabled: EnabledState) {
+    state.enabled = enabled
+  }
+
+  val isUninitialized: Boolean
+    get() = state.enabled == Unknown
+
+  var uiFormatterStyle: UiFormatterStyle
+    get() = state.uiFormatterStyle
+    set(uiFormatterStyle) {
+      state.uiFormatterStyle = uiFormatterStyle
+    }
+
+  internal enum class EnabledState {
+    Unknown,
+    Enabled,
+    Disabled,
+  }
+
+  internal class State {
+    @JvmField var enabled: EnabledState = Unknown
+    var uiFormatterStyle: UiFormatterStyle = Meta
+
+    // enabled used to be a boolean so we use bean property methods for backwards
+    // compatibility
+    fun setEnabled(enabledStr: String?) {
+      enabled =
+          when {
+            enabledStr == null -> Unknown
+            enabledStr.toBoolean() -> Enabled
+            else -> Disabled
+          }
+    }
+
+    fun getEnabled(): String? =
+        when (enabled) {
+          Enabled -> "true"
+          Disabled -> "false"
+          else -> null
         }
+  }
 
-    fun setEnabled(enabled: EnabledState) {
-        state.enabled = enabled
-    }
-
-    val isUninitialized: Boolean
-        get() = state.enabled == Unknown
-
-    var uiFormatterStyle: UiFormatterStyle
-        get() = state.uiFormatterStyle
-        set(uiFormatterStyle) {
-            state.uiFormatterStyle = uiFormatterStyle
-        }
-
-    internal enum class EnabledState {
-        Unknown,
-        Enabled,
-        Disabled,
-    }
-
-    internal class State {
-        @JvmField var enabled: EnabledState = Unknown
-        var uiFormatterStyle: UiFormatterStyle = Meta
-
-        // enabled used to be a boolean so we use bean property methods for backwards
-        // compatibility
-        fun setEnabled(enabledStr: String?) {
-            enabled =
-                when {
-                    enabledStr == null -> Unknown
-                    enabledStr.toBoolean() -> Enabled
-                    else -> Disabled
-                }
-        }
-
-        fun getEnabled(): String? =
-            when (enabled) {
-                Enabled -> "true"
-                Disabled -> "false"
-                else -> null
-            }
-    }
-
-    companion object {
-        @JvmStatic
-        fun getInstance(project: Project): KtfmtSettings =
-            project.getService(KtfmtSettings::class.java)
-    }
+  companion object {
+    @JvmStatic
+    fun getInstance(project: Project): KtfmtSettings = project.getService(KtfmtSettings::class.java)
+  }
 }

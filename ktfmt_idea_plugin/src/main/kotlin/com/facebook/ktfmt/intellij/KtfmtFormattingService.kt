@@ -28,40 +28,40 @@ private const val PARSING_ERROR_TITLE: String = PARSING_ERROR_NOTIFICATION_GROUP
 
 /** Uses `ktfmt` to reformat code. */
 class KtfmtFormattingService : AsyncDocumentFormattingService() {
-    override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask {
-        val project = request.context.project
-        val style = KtfmtSettings.getInstance(project).uiFormatterStyle
-        return KtfmtFormattingTask(request, style)
+  override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask {
+    val project = request.context.project
+    val style = KtfmtSettings.getInstance(project).uiFormatterStyle
+    return KtfmtFormattingTask(request, style)
+  }
+
+  override fun getNotificationGroupId(): String = PARSING_ERROR_NOTIFICATION_GROUP
+
+  override fun getName(): String = "ktfmt"
+
+  override fun getFeatures(): Set<Feature> = emptySet()
+
+  override fun canFormat(file: PsiFile): Boolean =
+      KotlinFileType.INSTANCE.name == file.fileType.name &&
+          KtfmtSettings.getInstance(file.project).isEnabled
+
+  private class KtfmtFormattingTask(
+      private val request: AsyncFormattingRequest,
+      private val style: UiFormatterStyle,
+  ) : FormattingTask {
+    override fun run() {
+      try {
+        val formattedText = format(style.formattingOptions, request.documentText)
+        request.onTextReady(formattedText)
+      } catch (e: FormatterException) {
+        request.onError(
+            PARSING_ERROR_TITLE,
+            "ktfmt failed. Does ${request.context.containingFile.name} have syntax errors?",
+        )
+      }
     }
 
-    override fun getNotificationGroupId(): String = PARSING_ERROR_NOTIFICATION_GROUP
+    override fun isRunUnderProgress(): Boolean = true
 
-    override fun getName(): String = "ktfmt"
-
-    override fun getFeatures(): Set<Feature> = emptySet()
-
-    override fun canFormat(file: PsiFile): Boolean =
-        KotlinFileType.INSTANCE.name == file.fileType.name &&
-            KtfmtSettings.getInstance(file.project).isEnabled
-
-    private class KtfmtFormattingTask(
-        private val request: AsyncFormattingRequest,
-        private val style: UiFormatterStyle,
-    ) : FormattingTask {
-        override fun run() {
-            try {
-                val formattedText = format(style.formattingOptions, request.documentText)
-                request.onTextReady(formattedText)
-            } catch (e: FormatterException) {
-                request.onError(
-                    PARSING_ERROR_TITLE,
-                    "ktfmt failed. Does ${request.context.containingFile.name} have syntax errors?",
-                )
-            }
-        }
-
-        override fun isRunUnderProgress(): Boolean = true
-
-        override fun cancel(): Boolean = false
-    }
+    override fun cancel(): Boolean = false
+  }
 }

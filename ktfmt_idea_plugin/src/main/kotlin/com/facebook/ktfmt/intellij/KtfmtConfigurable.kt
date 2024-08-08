@@ -18,28 +18,28 @@ class KtfmtConfigurable(project: Project) :
         _id = "com.facebook.ktfmt_idea_plugin.settings",
         helpTopic = "ktfmt",
     ) {
-    private val settings = KtfmtSettings.getInstance(project)
+  private val settings = KtfmtSettings.getInstance(project)
 
-    override fun createPanel(): DialogPanel = panel {
-        lateinit var enabledCheckbox: JCheckBox
-        row {
-            enabledCheckbox =
-                checkBox("Enable ktfmt")
-                    .bindSelected(
-                        getter = { settings.isEnabled },
-                        setter = { settings.setEnabled(if (it) Enabled else Disabled) },
-                    )
-                    .component
-        }
-
-        row {
-            comboBox(UiFormatterStyle.entries.toList())
-                .label("Code style:")
-                .bindItem(
-                    getter = { settings.uiFormatterStyle },
-                    setter = { settings.uiFormatterStyle = it ?: UiFormatterStyle.Meta },
-                )
-                .enabledIf(enabledCheckbox.selected)
-        }
+  override fun createPanel(): DialogPanel = panel {
+    lateinit var enabledCheckbox: JCheckBox
+    row {
+      enabledCheckbox =
+          checkBox("Enable ktfmt")
+              .bindSelected(
+                  getter = { settings.isEnabled },
+                  setter = { settings.setEnabled(if (it) Enabled else Disabled) },
+              )
+              .component
     }
+
+    row {
+      comboBox(UiFormatterStyle.entries.toList())
+          .label("Code style:")
+          .bindItem(
+              getter = { settings.uiFormatterStyle },
+              setter = { settings.uiFormatterStyle = it ?: UiFormatterStyle.Meta },
+          )
+          .enabledIf(enabledCheckbox.selected)
+    }
+  }
 }

@@ -24,39 +24,38 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.StartupActivity.Background
 
 class InitialConfigurationStartupActivity : Background {
-    override fun runActivity(project: Project) {
-        val settings = KtfmtSettings.getInstance(project)
+  override fun runActivity(project: Project) {
+    val settings = KtfmtSettings.getInstance(project)
 
-        if (settings.isUninitialized) {
-            settings.isEnabled = false
-            displayNewUserNotification(project, settings)
-        }
+    if (settings.isUninitialized) {
+      settings.isEnabled = false
+      displayNewUserNotification(project, settings)
     }
+  }
 
-    private fun displayNewUserNotification(project: Project, settings: KtfmtSettings) {
-        val notification =
-            Notification(
-                NotificationGroupManager.getInstance()
-                    .getNotificationGroup(NOTIFICATION_TITLE)
-                    .displayId,
-                NOTIFICATION_TITLE,
-                "The ktfmt plugin is disabled by default.",
-                INFORMATION,
-            )
+  private fun displayNewUserNotification(project: Project, settings: KtfmtSettings) {
+    val notification =
+        Notification(
+            NotificationGroupManager.getInstance()
+                .getNotificationGroup(NOTIFICATION_TITLE)
+                .displayId,
+            NOTIFICATION_TITLE,
+            "The ktfmt plugin is disabled by default.",
+            INFORMATION,
+        )
 
-        notification
-            .addAction(
-                object : AnAction("Enable for This Project") {
-                    override fun actionPerformed(e: AnActionEvent) {
-                        settings.isEnabled = true
-                        notification.expire()
-                    }
-                }
-            )
-            .notify(project)
-    }
+    notification
+        .addAction(
+            object : AnAction("Enable for This Project") {
+              override fun actionPerformed(e: AnActionEvent) {
+                settings.isEnabled = true
+                notification.expire()
+              }
+            })
+        .notify(project)
+  }
 
-    companion object {
-        private const val NOTIFICATION_TITLE = "Enable ktfmt"
-    }
+  companion object {
+    private const val NOTIFICATION_TITLE = "Enable ktfmt"
+  }
 }

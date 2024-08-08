@@ -25,9 +25,9 @@ internal enum class UiFormatterStyle(
     private val description: String,
     val formattingOptions: FormattingOptions,
 ) {
-    Meta("Meta (default)", META_FORMAT),
-    Google("Google (internal)", GOOGLE_FORMAT),
-    KotlinLang("Kotlinlang", KOTLINLANG_FORMAT);
+  Meta("Meta (default)", META_FORMAT),
+  Google("Google (internal)", GOOGLE_FORMAT),
+  KotlinLang("Kotlinlang", KOTLINLANG_FORMAT);
 
-    override fun toString(): String = description
+  override fun toString(): String = description
 }
