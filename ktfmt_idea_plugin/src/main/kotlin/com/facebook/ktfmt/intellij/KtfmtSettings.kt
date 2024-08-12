@@ -23,20 +23,21 @@ import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Enabled
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Unknown
 import com.facebook.ktfmt.intellij.UiFormatterStyle.Meta
 import com.intellij.openapi.components.BaseState
-import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.Service.Level.PROJECT
+import com.intellij.openapi.components.SimplePersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 
 @Service(PROJECT)
 @State(name = "KtfmtSettings", storages = [Storage("ktfmt.xml")])
-internal class KtfmtSettings : PersistentStateComponent<KtfmtSettings.State> {
-  private var state = State()
-
+internal class KtfmtSettings(private val project: Project) :
+    SimplePersistentStateComponent<KtfmtSettings.State>(State()) {
   val isUninitialized: Boolean
-    get() = state.enabled == Unknown
+    get() = state.enableKtfmt == Unknown
 
   var uiFormatterStyle: UiFormatterStyle
     get() = state.uiFormatterStyle
@@ -88,19 +89,31 @@ internal class KtfmtSettings : PersistentStateComponent<KtfmtSettings.State> {
     }
 
   var isEnabled: Boolean
-    get() = state.enabled == Enabled
+    get() = state.enableKtfmt == Enabled
     set(enabled) {
       setEnabled(if (enabled) Enabled else Disabled)
     }
 
   fun setEnabled(enabled: EnabledState) {
-    state.enabled = enabled
+    state.enableKtfmt = enabled
   }
 
-  override fun getState(): State = state
-
   override fun loadState(state: State) {
-    this.state = state
+    val migrated = loadOrMigrateIfNeeded(state)
+    super.loadState(migrated)
+  }
+
+  private fun loadOrMigrateIfNeeded(state: State): State {
+    val migrationSettings = project.service<KtfmtSettingsMigration>()
+
+    return when (val stateVersion = migrationSettings.stateVersion) {
+      KtfmtSettingsMigration.CURRENT_VERSION -> state
+      1 -> migrationSettings.migrateFromV1ToCurrent(state)
+      else -> {
+        thisLogger().error("Cannot migrate settings from $stateVersion. Using defaults.")
+        State()
+      }
+    }
   }
 
   internal enum class EnabledState {
@@ -110,7 +123,9 @@ internal class KtfmtSettings : PersistentStateComponent<KtfmtSettings.State> {
   }
 
   internal class State : BaseState() {
-    var enabled by enum<EnabledState>(Unknown)
+    @Deprecated("Deprecated in V2. Use enableKtfmt instead.") var enabled by string()
+
+    var enableKtfmt by enum<EnabledState>(Unknown)
     var uiFormatterStyle by enum<UiFormatterStyle>(Meta)
 
     var customMaxLineLength by property(Formatter.META_FORMAT.maxWidth)
@@ -118,24 +133,6 @@ internal class KtfmtSettings : PersistentStateComponent<KtfmtSettings.State> {
     var customContinuationIndent by property(Formatter.META_FORMAT.continuationIndent)
     var customManageTrailingCommas by property(Formatter.META_FORMAT.manageTrailingCommas)
     var customRemoveUnusedImports by property(Formatter.META_FORMAT.removeUnusedImports)
-
-    // enabled used to be a boolean so we use bean property methods for backwards
-    // compatibility
-    fun setEnabled(enabledStr: String?) {
-      enabled =
-          when {
-            enabledStr == null -> Unknown
-            enabledStr.toBoolean() -> Enabled
-            else -> Disabled
-          }
-    }
-
-    fun getEnabled(): String? =
-        when (enabled) {
-          Enabled -> "true"
-          Disabled -> "false"
-          else -> null
-        }
 
     fun applyCustomFormattingOptions(formattingOptions: FormattingOptions) {
       customMaxLineLength = formattingOptions.maxWidth
