@@ -16,10 +16,13 @@
 
 package com.facebook.ktfmt.intellij
 
+import com.facebook.ktfmt.format.Formatter
+import com.facebook.ktfmt.format.FormattingOptions
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Disabled
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Enabled
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Unknown
 import com.facebook.ktfmt.intellij.UiFormatterStyle.Meta
+import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.Service.Level.PROJECT
@@ -39,6 +42,49 @@ internal class KtfmtSettings : PersistentStateComponent<KtfmtSettings.State> {
     get() = state.uiFormatterStyle
     set(uiFormatterStyle) {
       state.uiFormatterStyle = uiFormatterStyle
+    }
+
+  var customFormattingOptions: FormattingOptions
+    get() =
+        FormattingOptions(
+            state.customMaxLineLength,
+            state.customBlockIndent,
+            state.customContinuationIndent,
+            state.customManageTrailingCommas,
+            state.customRemoveUnusedImports,
+        )
+    set(customFormattingOptions) {
+      state.applyCustomFormattingOptions(customFormattingOptions)
+    }
+
+  var customMaxLineLength: Int
+    get() = state.customMaxLineLength
+    set(maxLineLength) {
+      state.customMaxLineLength = maxLineLength.coerceAtLeast(1)
+    }
+
+  var customBlockIndent: Int
+    get() = state.customBlockIndent
+    set(blockIndent) {
+      state.customBlockIndent = blockIndent.coerceAtLeast(1)
+    }
+
+  var customContinuationIndent: Int
+    get() = state.customContinuationIndent
+    set(continuationIndent) {
+      state.customContinuationIndent = continuationIndent.coerceAtLeast(1)
+    }
+
+  var customManageTrailingCommas: Boolean
+    get() = state.customManageTrailingCommas
+    set(manageTrailingCommas) {
+      state.customManageTrailingCommas = manageTrailingCommas
+    }
+
+  var customRemoveUnusedImports: Boolean
+    get() = state.customRemoveUnusedImports
+    set(removeUnusedImports) {
+      state.customRemoveUnusedImports = removeUnusedImports
     }
 
   var isEnabled: Boolean
@@ -63,9 +109,15 @@ internal class KtfmtSettings : PersistentStateComponent<KtfmtSettings.State> {
     Disabled,
   }
 
-  internal class State {
-    @JvmField var enabled: EnabledState = Unknown
-    var uiFormatterStyle: UiFormatterStyle = Meta
+  internal class State : BaseState() {
+    var enabled by enum<EnabledState>(Unknown)
+    var uiFormatterStyle by enum<UiFormatterStyle>(Meta)
+
+    var customMaxLineLength by property(Formatter.META_FORMAT.maxWidth)
+    var customBlockIndent by property(Formatter.META_FORMAT.blockIndent)
+    var customContinuationIndent by property(Formatter.META_FORMAT.continuationIndent)
+    var customManageTrailingCommas by property(Formatter.META_FORMAT.manageTrailingCommas)
+    var customRemoveUnusedImports by property(Formatter.META_FORMAT.removeUnusedImports)
 
     // enabled used to be a boolean so we use bean property methods for backwards
     // compatibility
@@ -84,6 +136,16 @@ internal class KtfmtSettings : PersistentStateComponent<KtfmtSettings.State> {
           Disabled -> "false"
           else -> null
         }
+
+    fun applyCustomFormattingOptions(formattingOptions: FormattingOptions) {
+      customMaxLineLength = formattingOptions.maxWidth
+      customBlockIndent = formattingOptions.blockIndent
+      customContinuationIndent = formattingOptions.continuationIndent
+      customManageTrailingCommas = formattingOptions.manageTrailingCommas
+      customRemoveUnusedImports = formattingOptions.removeUnusedImports
+
+      incrementModificationCount()
+    }
   }
 
   companion object {

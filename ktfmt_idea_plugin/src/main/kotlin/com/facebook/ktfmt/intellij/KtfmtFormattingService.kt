@@ -17,6 +17,7 @@
 package com.facebook.ktfmt.intellij
 
 import com.facebook.ktfmt.format.Formatter.format
+import com.facebook.ktfmt.format.FormattingOptions
 import com.google.googlejavaformat.java.FormatterException
 import com.intellij.formatting.service.AsyncDocumentFormattingService
 import com.intellij.formatting.service.AsyncFormattingRequest
@@ -31,8 +32,15 @@ private const val PARSING_ERROR_TITLE: String = PARSING_ERROR_NOTIFICATION_GROUP
 class KtfmtFormattingService : AsyncDocumentFormattingService() {
   override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask {
     val project = request.context.project
-    val style = KtfmtSettings.getInstance(project).uiFormatterStyle
-    return KtfmtFormattingTask(request, style)
+    val settings = KtfmtSettings.getInstance(project)
+    val style = settings.uiFormatterStyle
+    val formattingOptions =
+        if (style == UiFormatterStyle.Custom) {
+          settings.customFormattingOptions
+        } else {
+          UiFormatterStyle.getStandardFormattingOptions(style)
+        }
+    return KtfmtFormattingTask(request, formattingOptions)
   }
 
   override fun getNotificationGroupId(): String = PARSING_ERROR_NOTIFICATION_GROUP
@@ -47,11 +55,11 @@ class KtfmtFormattingService : AsyncDocumentFormattingService() {
 
   private class KtfmtFormattingTask(
       private val request: AsyncFormattingRequest,
-      private val style: UiFormatterStyle,
+      private val formattingOptions: FormattingOptions,
   ) : FormattingTask {
     override fun run() {
       try {
-        val formattedText = format(style.formattingOptions, request.documentText)
+        val formattedText = format(formattingOptions, request.documentText)
         request.onTextReady(formattedText)
       } catch (e: FormatterException) {
         request.onError(
