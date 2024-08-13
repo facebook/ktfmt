@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-plugins { kotlin("jvm") version "1.8.22" }
+import com.ncorti.ktfmt.gradle.tasks.*
+
+plugins {
+  kotlin("jvm") version "1.8.22"
+  id("com.ncorti.ktfmt.gradle") version "0.19.0"
+}
 
 repositories {
   mavenLocal()
@@ -58,6 +63,17 @@ tasks {
       creating(Zip::class) {
         from(compileKotlin)
         from(processResources)
+      }
+
+  val ktfmtFormatKts by
+      creating(KtfmtFormatTask::class) {
+        source = fileTree(rootDir)
+        include("**/*.gradle.kts")
+      }
+  val ktfmtCheckKts by
+      creating(KtfmtCheckTask::class) {
+        source = fileTree(rootDir)
+        include("**/*.gradle.kts")
       }
 
   build { dependsOn(packageSkinny) }
