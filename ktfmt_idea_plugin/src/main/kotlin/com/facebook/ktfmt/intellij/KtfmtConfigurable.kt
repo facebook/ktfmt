@@ -49,7 +49,7 @@ class KtfmtConfigurable(project: Project) :
     }
 
     row {
-      comboBox(UiFormatterStyle.entries.toList())
+      comboBox(UiFormatterStyle.values().toList())
           .label("Code style:")
           .bindItem(
               getter = { settings.uiFormatterStyle },
