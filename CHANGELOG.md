@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 - IntelliJ plugin crash (https://github.com/facebook/ktfmt/pull/501)
 - Ordering of `@property` and `@param` in KDoc (https://github.com/facebook/ktfmt/pull/498)
+- Annotation in return expressions (https://github.com/facebook/ktfmt/issues/497)
 
 ### Changed
 - KotlinLang style also managing trailing commas (https://github.com/facebook/ktfmt/issues/216, https://github.com/facebook/ktfmt/issues/442)

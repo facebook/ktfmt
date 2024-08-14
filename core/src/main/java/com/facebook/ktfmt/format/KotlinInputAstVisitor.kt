@@ -1765,6 +1765,7 @@ class KotlinInputAstVisitor(
         (baseExpression is KtBinaryExpression || baseExpression is KtBinaryExpressionWithTypeRHS) &&
             expression.parent is KtBlockExpression -> builder.forcedBreak()
         baseExpression is KtLambdaExpression -> builder.space()
+        baseExpression is KtReturnExpression -> builder.forcedBreak()
         else -> builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
       }
 

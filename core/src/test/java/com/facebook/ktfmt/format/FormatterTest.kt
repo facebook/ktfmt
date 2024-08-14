@@ -3501,6 +3501,17 @@ class FormatterTest {
               .trimMargin())
 
   @Test
+  fun `annotations on return statements`() =
+      assertFormatted(
+          """
+      |fun foo(): Map<String, Any> {
+      |  @Suppress("AsCollectionCall")
+      |  return map.asMap()
+      |}
+      |"""
+              .trimMargin())
+
+  @Test
   fun `Unary prefix expressions`() =
       assertFormatted(
           """
