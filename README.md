@@ -3,8 +3,6 @@
 `ktfmt` is a program that pretty-prints (formats) Kotlin code, based on
 [google-java-format](https://github.com/google/google-java-format).
 
-**Note** that `ktfmt` still has some rough edges which we're constantly working on fixing.
-
 The minimum supported runtime version is JDK 11, released September 2018.
 
 ## Demo
@@ -49,9 +47,9 @@ To configure IntelliJ to approximate ktfmt's formatting rules during code editin
 project's
 [`.editorconfig` file](https://www.jetbrains.com/help/idea/configuring-code-style.html#editorconfig)
 to include the Kotlin section from one of the files inside [`docs/editorconfig`](docs/editorconfig).
-Not all of ktfmt's rules can be represented as IntelliJ editor settings, so you will still need to
-run ktfmt. Alternately, that file can be used as a reference to manually change the project's code
-style settings.
+
+#### Share IntelliJ ktfmt settings
+In order to share the settings, make sure to commit the file `.idea/ktfmt.xml` into your codebase.
 
 ### Installation
 
@@ -107,12 +105,15 @@ A [pre-commit hook](https://pre-commit.com/hooks.html) is implemented in
 [google-java-format's FAQ](https://github.com/google/google-java-format/wiki/FAQ) apply to `ktfmt`
 as well.
 
-In particular,
+In particular, here are the principles that we try to adhere to:
 1. `ktfmt` ignores most existing formatting. It respects existing newlines in some places, but in
   general, its output is deterministic and is independent of the input code.
 2. `ktfmt` exposes no configuration options that govern formatting behavior. See
   https://github.com/google/google-java-format/wiki/FAQ#i-just-need-to-configure-it-a-bit-differently-how
   for the rationale.
+   1. For exposed configurations, like `style`, we aim to make sure that those are easily shared
+      across your organization/codebase to avoid
+      [bikeshedding discussions](https://thedecisionlab.com/biases/bikeshedding) about code format.
 
 These two properties make `ktfmt` a good fit in large Kotlin code bases, where consistency is very
 important.
