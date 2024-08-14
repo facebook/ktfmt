@@ -22,13 +22,21 @@ import com.facebook.ktfmt.format.Formatter.META_FORMAT
 import com.facebook.ktfmt.format.FormattingOptions
 
 /** Configuration options for the formatting style. */
-internal enum class UiFormatterStyle(
-    private val description: String,
-    val formattingOptions: FormattingOptions,
-) {
-  Meta("Meta (default)", META_FORMAT),
-  Google("Google (internal)", GOOGLE_FORMAT),
-  KotlinLang("Kotlinlang", KOTLINLANG_FORMAT);
+internal enum class UiFormatterStyle(private val description: String) {
+  Meta("Meta (default)"),
+  Google("Google (internal)"),
+  KotlinLang("Kotlinlang"),
+  Custom("Custom");
 
   override fun toString(): String = description
+
+  companion object {
+    internal fun getStandardFormattingOptions(style: UiFormatterStyle): FormattingOptions =
+        when (style) {
+          Meta -> META_FORMAT
+          Google -> GOOGLE_FORMAT
+          KotlinLang -> KOTLINLANG_FORMAT
+          Custom -> error("Custom style formatting options should be retrieved separately")
+        }
+  }
 }
