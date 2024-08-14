@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-plugins { kotlin("jvm") version "1.8.22" }
+import com.ncorti.ktfmt.gradle.tasks.KtfmtCheckTask
+import com.ncorti.ktfmt.gradle.tasks.KtfmtFormatTask
+
+plugins {
+  kotlin("jvm") version "1.8.22"
+  id("com.ncorti.ktfmt.gradle") version "0.19.0"
+}
 
 repositories {
   mavenLocal()
@@ -61,4 +67,22 @@ tasks {
       }
 
   build { dependsOn(packageSkinny) }
+
+  // Set up ktfmt formatting tasks
+  val ktfmtFormatKts by
+      creating(KtfmtFormatTask::class) {
+        source = fileTree(rootDir)
+        include("**/*.kts")
+      }
+  val ktfmtCheckKts by
+      creating(KtfmtCheckTask::class) {
+        source = fileTree(rootDir)
+        include("**/*.kts")
+        mustRunAfter("compileKotlin")
+        mustRunAfter("compileTestKotlin")
+        mustRunAfter("test")
+      }
+  val ktfmtFormat by getting { dependsOn(ktfmtFormatKts) }
+  val ktfmtCheck by getting { dependsOn(ktfmtCheckKts) }
+  val check by getting { dependsOn(ktfmtCheck) }
 }

@@ -17,6 +17,7 @@
     <properties>
         <dokka.version>0.10.1</dokka.version>
         <kotlin.version>1.8.22</kotlin.version>
+        <spotless.version>6.25.0</spotless.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <main.class>com.facebook.ktfmt.cli.Main</main.class>
@@ -34,6 +35,22 @@
         <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
         <plugins>
+            <!-- Spotless for formatting -->
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <kotlin>
+                        <includes>
+                            <include>src/main/java/**/*.kt</include>
+                            <include>src/test/java/**/*.kt</include>
+                        </includes>
+                        <ktfmt/>
+                    </kotlin>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>

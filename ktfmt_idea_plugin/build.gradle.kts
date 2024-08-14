@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import com.ncorti.ktfmt.gradle.tasks.KtfmtCheckTask
+import com.ncorti.ktfmt.gradle.tasks.KtfmtFormatTask
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaCommunity
 
 plugins {
@@ -65,3 +67,27 @@ val runIntellij242 by
       type = IntellijIdeaCommunity
       version = "2024.2"
     }
+
+tasks {
+  // Set up ktfmt formatting tasks
+  val ktfmtFormatKts by
+      creating(KtfmtFormatTask::class) {
+        source = fileTree(rootDir)
+        include("**/*.kts")
+      }
+  val ktfmtCheckKts by
+      creating(KtfmtCheckTask::class) {
+        source = fileTree(rootDir)
+        include("**/*.kts")
+        mustRunAfter("compileKotlin")
+        mustRunAfter("prepareSandbox")
+        mustRunAfter("prepareTestSandbox")
+        mustRunAfter("instrumentCode")
+        mustRunAfter("instrumentTestCode")
+        mustRunAfter("buildSearchableOptions")
+        mustRunAfter("prepareJarSearchableOptions")
+      }
+  val ktfmtFormat by getting { dependsOn(ktfmtFormatKts) }
+  val ktfmtCheck by getting { dependsOn(ktfmtCheckKts) }
+  val check by getting { dependsOn(ktfmtCheck) }
+}

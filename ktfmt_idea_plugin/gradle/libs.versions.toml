@@ -6,6 +6,6 @@ gradlePlugin-intelliJPlatform = "2.0.0"
 gradlePlugin-ktfmt = "0.19.0"
 
 [plugins]
-kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "gradlePlugin-intelliJPlatform" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "gradlePlugin-ktfmt" }
