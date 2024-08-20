@@ -68,7 +68,7 @@ class FormatterTest {
   fun `call chains`() =
       assertFormatted(
           """
-      |//////////////////////////////////////////////////
+      |////////////////////////////////////////////////////////
       |fun f() {
       |  // Static method calls are attached to the class name.
       |  ImmutableList.newBuilder()
@@ -715,12 +715,14 @@ class FormatterTest {
           """
       |/////////////////////////////////////
       |fun f() {
-      |  // Regression test: https://github.com/facebook/ktfmt/issues/56
+      |  // Regression test:
+      |  // https://github.com/facebook/ktfmt/issues/56
       |  kjsdfglkjdfgkjdfkgjhkerjghkdfj
       |      ?.methodName1()
       |
-      |  // a series of field accesses followed by a single call expression
-      |  // is kept together.
+      |  // a series of field accesses
+      |  // followed by a single call
+      |  // expression is kept together.
       |  abcdefghijkl.abcdefghijkl
       |      ?.methodName2()
       |
@@ -729,30 +731,35 @@ class FormatterTest {
       |      ?.methodName3
       |      ?.abcdefghijkl()
       |
-      |  // Multiple call expressions cause each part of the expression
+      |  // Multiple call expressions cause
+      |  // each part of the expression
       |  // to be placed on its own line.
       |  abcdefghijkl
       |      ?.abcdefghijkl
       |      ?.methodName4()
       |      ?.abcdefghijkl()
       |
-      |  // Don't break first call expression if it fits.
+      |  // Don't break first call
+      |  // expression if it fits.
       |  foIt(something.something.happens())
       |      .thenReturn(result)
       |
-      |  // Break after `longerThanFour(` because it's longer than 4 chars
+      |  // Break after `longerThanFour(`
+      |  // because it's longer than 4 chars
       |  longerThanFour(
       |          something.something
       |              .happens())
       |      .thenReturn(result)
       |
-      |  // Similarly to above, when part of qualified expression.
+      |  // Similarly to above, when part of
+      |  // qualified expression.
       |  foo.longerThanFour(
       |          something.something
       |              .happens())
       |      .thenReturn(result)
       |
-      |  // Keep 'super' attached to the method name
+      |  // Keep 'super' attached to the
+      |  // method name
       |  super.abcdefghijkl
       |      .methodName4()
       |      .abcdefghijkl()
@@ -765,7 +772,7 @@ class FormatterTest {
   fun `an assortment of tests for emitQualifiedExpression with lambdas`() =
       assertFormatted(
           """
-      |////////////////////////////////////////////////////////////////////////////
+      |//////////////////////////////////////////////////////////////////////////////
       |fun f() {
       |  val items =
       |      items.toMutableList.apply {
@@ -865,7 +872,7 @@ class FormatterTest {
   fun `don't one-line lambdas following argument breaks`() =
       assertFormatted(
           """
-      |////////////////////////////////////////////////////////////////////////
+      |///////////////////////////////////////////////////////////////////////////////
       |class Foo : Bar() {
       |  fun doIt() {
       |    // don't break in lambda, no argument breaks found
@@ -3134,7 +3141,7 @@ class FormatterTest {
   fun `properly handle one statement lambda with comment`() =
       assertFormatted(
           """
-      |///////////////////////
+      |////////////////////////
       |fun f() {
       |  foo {
       |    // this is a comment
@@ -3165,7 +3172,7 @@ class FormatterTest {
   fun `properly handle one statement lambda with comment after body statements`() =
       assertFormatted(
           """
-      |///////////////////////
+      |////////////////////////
       |fun f() {
       |  foo {
       |    red.orange.yellow()
@@ -5827,7 +5834,7 @@ class FormatterTest {
   fun `top level properties with other types preserve newline spacing`() {
     assertFormatted(
         """
-      |/////////////////////////////////
+      |/////////////////////////////////////////
       |fun something() {
       |  println("hi")
       |}
