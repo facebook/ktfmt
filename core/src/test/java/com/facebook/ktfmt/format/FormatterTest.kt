@@ -7665,6 +7665,19 @@ class FormatterTest {
     assertFormatted(third)
   }
 
+  @Test
+  fun `comment formatting respects max width`() {
+    val code =
+        """
+      |// This is a very long comment that is very long but does not need to be line broken as it is within maxWidth
+      |class MyClass {}
+      |"""
+            .trimMargin()
+    assertThatFormatting(code)
+        .withOptions(defaultTestFormattingOptions.copy(maxWidth = 120))
+        .isEqualTo(code)
+  }
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""
