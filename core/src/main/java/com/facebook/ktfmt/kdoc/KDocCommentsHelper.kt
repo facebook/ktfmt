@@ -24,12 +24,12 @@ import com.google.common.base.Strings
 import com.google.googlejavaformat.CommentsHelper
 import com.google.googlejavaformat.Input.Tok
 import com.google.googlejavaformat.Newlines
-import com.google.googlejavaformat.java.Formatter
 import java.util.ArrayList
 import java.util.regex.Pattern
 
 /** `KDocCommentsHelper` extends [CommentsHelper] to rewrite KDoc comments. */
-class KDocCommentsHelper(private val lineSeparator: String, maxLineLength: Int) : CommentsHelper {
+class KDocCommentsHelper(private val lineSeparator: String, private val maxLineLength: Int) :
+    CommentsHelper {
 
   private val kdocFormatter =
       KDocFormatter(
@@ -119,8 +119,8 @@ class KDocCommentsHelper(private val lineSeparator: String, maxLineLength: Int) 
         result.add(line)
         continue
       }
-      while (line.length + column0 > Formatter.MAX_LINE_LENGTH) {
-        var idx = Formatter.MAX_LINE_LENGTH - column0
+      while (line.length + column0 > maxLineLength) {
+        var idx = maxLineLength - column0
         // only break on whitespace characters, and ignore the leading `// `
         while (idx >= 2 && !CharMatcher.whitespace().matches(line[idx])) {
           idx--

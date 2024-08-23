@@ -157,8 +157,10 @@ class GoogleStyleFormatterKtTest {
       |  TypeA : Int,
       |  TypeC : String,
       |> {
-      |  // Class name + type params too long for one line
-      |  // Type params could fit on one line but break
+      |  // Class name + type params too
+      |  // long for one line
+      |  // Type params could fit on one
+      |  // line but break
       |}
       |
       |class Foo<
@@ -166,7 +168,8 @@ class GoogleStyleFormatterKtTest {
       |  TypeB : Double,
       |  TypeC : String,
       |> {
-      |  // Type params can't fit on one line
+      |  // Type params can't fit on one
+      |  // line
       |}
       |
       |class Foo<
@@ -188,12 +191,14 @@ class GoogleStyleFormatterKtTest {
       |  TypeB : Double,
       |  TypeC : String,
       |>(a: Int, var b: Int, val c: Int) {
-      |  // TODO: Breaking the type param list
-      |  // should propagate to the value param list
+      |  // TODO: Breaking the type param
+      |  // list should propagate to the
+      |  //  value param list
       |}
       |
       |class C<A : Int, B : Int, C : Int> {
-      |  // Class name + type params fit on one line
+      |  // Class name + type params fit on
+      |  // one line
       |}
       |"""
               .trimMargin(),
@@ -418,7 +423,7 @@ class GoogleStyleFormatterKtTest {
   fun `don't one-line lambdas following argument breaks`() =
       assertFormatted(
           """
-      |////////////////////////////////////////////////////////////////////////
+      |///////////////////////////////////////////////////////////////////////////////
       |class Foo : Bar() {
       |  fun doIt() {
       |    // don't break in lambda, no argument breaks found
@@ -1185,12 +1190,14 @@ class GoogleStyleFormatterKtTest {
           """
       |//////////////////////////////////////
       |fun f() {
-      |  // Regression test: https://github.com/facebook/ktfmt/issues/56
+      |  // Regression test:
+      |  // https://github.com/facebook/ktfmt/issues/56
       |  kjsdfglkjdfgkjdfkgjhkerjghkdfj
       |    ?.methodName1()
       |
-      |  // a series of field accesses followed by a single call expression
-      |  // is kept together.
+      |  // a series of field accesses
+      |  // followed by a single call
+      |  // expression is kept together.
       |  abcdefghijkl.abcdefghijkl
       |    ?.methodName2()
       |
@@ -1199,25 +1206,29 @@ class GoogleStyleFormatterKtTest {
       |    ?.methodName3
       |    ?.abcdefghijkl()
       |
-      |  // Multiple call expressions cause each part of the expression
+      |  // Multiple call expressions cause
+      |  // each part of the expression
       |  // to be placed on its own line.
       |  abcdefghijkl
       |    ?.abcdefghijkl
       |    ?.methodName4()
       |    ?.abcdefghijkl()
       |
-      |  // Don't break first call expression if it fits.
+      |  // Don't break first call
+      |  // expression if it fits.
       |  foIt(something.something.happens())
       |    .thenReturn(result)
       |
-      |  // Break after `longerThanFour(` because it's longer than 4 chars
+      |  // Break after `longerThanFour(`
+      |  // because it's longer than 4 chars
       |  longerThanFour(
       |      something.somethingBlaBla
       |        .happens()
       |    )
       |    .thenReturn(result)
       |
-      |  // Similarly to above, when part of qualified expression.
+      |  // Similarly to above, when part of
+      |  // qualified expression.
       |  foo
       |    .longerThanFour(
       |      something.somethingBlaBla
@@ -1225,7 +1236,8 @@ class GoogleStyleFormatterKtTest {
       |    )
       |    .thenReturn(result)
       |
-      |  // Keep 'super' attached to the method name
+      |  // Keep 'super' attached to the
+      |  // method name
       |  super.abcdefghijkl
       |    .methodName4()
       |    .abcdefghijkl()
