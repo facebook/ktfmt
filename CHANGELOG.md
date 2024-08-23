@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - All styles managing trailing commas now (https://github.com/facebook/ktfmt/issues/216, https://github.com/facebook/ktfmt/issues/442)
 
 
-## [0.52 Unreleased]
+## [0.52]
 
 ### Fixed
 - IntelliJ plugin crash (https://github.com/facebook/ktfmt/pull/501)
@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 - More stability tests (https://github.com/facebook/ktfmt/pull/488)
+- Custom profile in plugin settings, mirroring Gradle/Maven plugins (https://github.com/facebook/ktfmt/pull/503)
 
 
 ## [0.51]
