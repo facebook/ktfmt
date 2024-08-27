@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - All styles managing trailing commas now (https://github.com/facebook/ktfmt/issues/216, https://github.com/facebook/ktfmt/issues/442)
 
 
+## [Unreleased]
+
+### Fixed
+- Comments respecting max line width (https://github.com/facebook/ktfmt/pull/511)
+
+
 ## [0.52]
 
 ### Fixed
