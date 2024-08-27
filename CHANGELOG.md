@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 - Comments respecting max line width (https://github.com/facebook/ktfmt/pull/511)
-
+- Workaround non-null parent requirement of StubBase (https://github.com/facebook/ktfmt/pull/513)
 
 ## [0.52]
 

@@ -29,6 +29,7 @@ import java.util.Optional
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.com.intellij.psi.stubs.PsiFileStubImpl
 import org.jetbrains.kotlin.lexer.KtModifierKeywordToken
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtAnnotatedExpression
@@ -1415,15 +1416,18 @@ class KotlinInputAstVisitor(
     return 0
   }
 
-  // Bug in Kotlin 1.9.10: KtProperyAccessor is the direct parent of the left and right paren
+  // Bug in Kotlin 1.9.10: KtPropertyAccessor is the direct parent of the left and right paren
   // elements. Also parameterList is always null for getters. As a workaround, we create our own
   // fake KtParameterList.
+  // TODO: won't need this after https://youtrack.jetbrains.com/issue/KT-70922
   private fun getParameterListWithBugFixes(accessor: KtPropertyAccessor): KtParameterList? {
     if (accessor.bodyExpression == null && accessor.bodyBlockExpression == null) return null
 
+    val stub = accessor.stub ?: PsiFileStubImpl(accessor.containingFile)
+
     return object :
         KtParameterList(
-            KotlinPlaceHolderStubImpl(accessor.stub, KtStubElementTypes.VALUE_PARAMETER_LIST)) {
+            KotlinPlaceHolderStubImpl(stub, KtStubElementTypes.VALUE_PARAMETER_LIST)) {
       override fun getParameters(): List<KtParameter> {
         return accessor.valueParameters
       }
