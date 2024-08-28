@@ -17,7 +17,7 @@
     <properties>
         <dokka.version>0.10.1</dokka.version>
         <kotlin.version>1.8.22</kotlin.version>
-        <spotless.version>6.25.0</spotless.version>
+        <spotless.version>2.44.0.BETA2</spotless.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <main.class>com.facebook.ktfmt.cli.Main</main.class>
