@@ -23,7 +23,7 @@ ROOT_DIR=$(dirname "$SCRIPT")
 echo "Testing ktfmt core library"
 echo
 cd "$ROOT_DIR"
-mvn clean install
+mvn install spotless:check
 echo
 
 echo "Testing ktfmt IDEA plugin"
