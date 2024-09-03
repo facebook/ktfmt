@@ -737,7 +737,7 @@ class KDocFormatterTest {
   }
 
   @Test
-  fun testWrapingOfLinkText() {
+  fun testWrappingOfLinkText() {
     val source =
         """
              /**
@@ -5072,7 +5072,7 @@ class KDocFormatterTest {
           end++
         }
         val word = s.substring(i, end)
-        if (i > 0 && s[i - 1] == '@' || word == "http" || word == "https" || word == "com") {
+        if ((i > 0 && s[i - 1] == '@') || word == "http" || word == "https" || word == "com") {
           // Don't translate URL prefix/suffixes and doc tags
           sb.append(word)
         } else {

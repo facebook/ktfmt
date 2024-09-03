@@ -38,8 +38,8 @@ class Paragraph(private val task: FormattingTask) {
   private val options: KDocFormattingOptions
     get() = task.options
 
-  var content = StringBuilder()
-  val text
+  var content: StringBuilder = StringBuilder()
+  val text: String
     get() = content.toString()
 
   var prev: Paragraph? = null
@@ -348,7 +348,7 @@ class Paragraph(private val task: FormattingTask) {
   private fun reflow(words: List<String>, lineWidth: Int, hangingIndentSize: Int): List<String> {
     if (options.alternate ||
         !options.optimal ||
-        hanging && hangingIndentSize > 0 ||
+        (hanging && hangingIndentSize > 0) ||
         // An unbreakable long word may make other lines shorter and won't look good
         words.any { it.length > lineWidth }) {
       // Switch to greedy if explicitly turned on, and for hanging indent
@@ -430,7 +430,7 @@ class Paragraph(private val task: FormattingTask) {
 
     if (!word.first().isLetter()) {
       val wordWithSpace = "$word " // for regex matching in below checks
-      if (wordWithSpace.isListItem() && !word.equals("<li>", true) || wordWithSpace.isQuoted()) {
+      if ((wordWithSpace.isListItem() && !word.equals("<li>", true)) || wordWithSpace.isQuoted()) {
         return false
       }
     }
@@ -468,7 +468,7 @@ class Paragraph(private val task: FormattingTask) {
     val end = words.size
     while (from < end) {
       val start =
-          if (from == 0 && (quoted || hanging && !text.isKDocTag())) {
+          if (from == 0 && (quoted || (hanging && !text.isKDocTag()))) {
             from + 2
           } else {
             from + 1

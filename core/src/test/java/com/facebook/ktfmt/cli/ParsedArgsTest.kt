@@ -166,7 +166,7 @@ class ParsedArgsTest {
     val file = root.resolve("existing-file")
     file.writeText("--google-style\n--dry-run\n--set-exit-if-changed\nFile1.kt\nFile2.kt\n")
 
-    val result = ParsedArgs.processArgs(arrayOf("@" + file.absolutePath))
+    val result = ParsedArgs.processArgs(arrayOf("@" + file.canonicalPath))
     assertThat(result).isInstanceOf(ParseResult.Ok::class.java)
 
     val parsed = (result as ParseResult.Ok).parsedValue

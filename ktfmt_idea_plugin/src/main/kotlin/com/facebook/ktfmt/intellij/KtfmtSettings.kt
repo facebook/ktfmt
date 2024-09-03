@@ -123,16 +123,16 @@ internal class KtfmtSettings(private val project: Project) :
   }
 
   internal class State : BaseState() {
-    @Deprecated("Deprecated in V2. Use enableKtfmt instead.") var enabled by string()
+    @Deprecated("Deprecated in V2. Use enableKtfmt instead.") var enabled: String? by string()
 
-    var enableKtfmt by enum<EnabledState>(Unknown)
-    var uiFormatterStyle by enum<UiFormatterStyle>(Meta)
+    var enableKtfmt: EnabledState by enum(Unknown)
+    var uiFormatterStyle: UiFormatterStyle by enum(Meta)
 
-    var customMaxLineLength by property(Formatter.META_FORMAT.maxWidth)
-    var customBlockIndent by property(Formatter.META_FORMAT.blockIndent)
-    var customContinuationIndent by property(Formatter.META_FORMAT.continuationIndent)
-    var customManageTrailingCommas by property(Formatter.META_FORMAT.manageTrailingCommas)
-    var customRemoveUnusedImports by property(Formatter.META_FORMAT.removeUnusedImports)
+    var customMaxLineLength: Int by property(Formatter.META_FORMAT.maxWidth)
+    var customBlockIndent: Int by property(Formatter.META_FORMAT.blockIndent)
+    var customContinuationIndent: Int by property(Formatter.META_FORMAT.continuationIndent)
+    var customManageTrailingCommas: Boolean by property(Formatter.META_FORMAT.manageTrailingCommas)
+    var customRemoveUnusedImports: Boolean by property(Formatter.META_FORMAT.removeUnusedImports)
 
     fun applyCustomFormattingOptions(formattingOptions: FormattingOptions) {
       customMaxLineLength = formattingOptions.maxWidth

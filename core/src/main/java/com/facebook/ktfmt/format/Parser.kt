@@ -61,9 +61,8 @@ object Parser {
   fun parse(code: String): KtFile {
     val virtualFile = LightVirtualFile("temp.kts", KotlinFileType.INSTANCE, code)
     val ktFile = PsiManager.getInstance(env.project).findFile(virtualFile) as KtFile
-    ktFile.collectDescendantsOfType<PsiErrorElement>().let {
-      if (it.isNotEmpty()) throwParseError(code, it[0])
-    }
+    val descendants = ktFile.collectDescendantsOfType<PsiErrorElement>()
+    if (descendants.isNotEmpty()) throwParseError(code, descendants[0])
     return ktFile
   }
 

@@ -48,7 +48,7 @@ data class ParsedArgs(
       return parseOptions(arguments)
     }
 
-    val HELP_TEXT =
+    val HELP_TEXT: String =
         """
         |ktfmt - command line Kotlin source code pretty-printer
         |

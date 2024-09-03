@@ -23,7 +23,7 @@ object WhitespaceTombstones {
   /** See [replaceTrailingWhitespaceWithTombstone]. */
   const val SPACE_TOMBSTONE = '\u0003'
 
-  fun String.indexOfWhitespaceTombstone() = this.indexOf(SPACE_TOMBSTONE)
+  fun String.indexOfWhitespaceTombstone(): Int = this.indexOf(SPACE_TOMBSTONE)
 
   /**
    * Google-java-format removes trailing spaces when it emits formatted code, which is a problem for

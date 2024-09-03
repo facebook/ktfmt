@@ -1,4 +1,20 @@
 /*
+ * Portions Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
  * Copyright (c) Tor Norbye.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -236,7 +252,7 @@ class ParagraphListBuilder(
           // Make sure it's not just deeply indented inside a different block
           (paragraph.prev == null ||
               lineWithIndentation.length - lineWithoutIndentation.length >=
-                  paragraph.prev!!.originalIndent + 4)) {
+                  checkNotNull(paragraph.prev).originalIndent + 4)) {
         i = addPreformatted(i - 1, includeEnd = false, expectClose = false) { !it.startsWith(" ") }
       } else if (lineWithoutIndentation.startsWith("-") &&
           lineWithoutIndentation.containsOnly('-', '|', ' ')) {
@@ -361,7 +377,7 @@ class ParagraphListBuilder(
                 })
         newParagraph(i)
       } else if (lineWithoutIndentation.isListItem() ||
-          lineWithoutIndentation.isKDocTag() && task.type == CommentType.KDOC ||
+          (lineWithoutIndentation.isKDocTag() && task.type == CommentType.KDOC) ||
           lineWithoutIndentation.isTodo()) {
         i--
         newParagraph(i).hanging = true
@@ -388,10 +404,10 @@ class ParagraphListBuilder(
                         w.isLine() ||
                         w.isHeader() ||
                         // Not indented by at least two spaces following a blank line?
-                        s.length > 2 &&
+                        (s.length > 2 &&
                             (!s[0].isWhitespace() || !s[1].isWhitespace()) &&
                             j < lines.size - 1 &&
-                            lineContent(lines[j - 1]).isBlank()
+                            lineContent(lines[j - 1]).isBlank())
                   }
                 },
                 shouldBreak = { w, _ -> w.isBlank() },
@@ -455,7 +471,7 @@ class ParagraphListBuilder(
           newParagraph(i - 1).block = true
           if (lineWithoutIndentation.equals("<p>", true) ||
               lineWithoutIndentation.equals("<p/>", true) ||
-              options.convertMarkup && lineWithoutIndentation.equals("</p>", true)) {
+              (options.convertMarkup && lineWithoutIndentation.equals("</p>", true))) {
             if (options.convertMarkup) {
               // Replace <p> with a blank line
               paragraph.separate = true
@@ -630,8 +646,8 @@ class ParagraphListBuilder(
             override fun compare(l1: List<Paragraph>, l2: List<Paragraph>): Int {
               val p1 = l1.first()
               val p2 = l2.first()
-              val o1 = order[p1]!!
-              val o2 = order[p2]!!
+              val o1 = checkNotNull(order[p1])
+              val o2 = checkNotNull(order[p2])
               val isPriority1 = p1.doc && docTagIsPriority(p1.text) && o1 < firstNonPriorityDocTag
               val isPriority2 = p2.doc && docTagIsPriority(p2.text) && o2 < firstNonPriorityDocTag
 
@@ -750,7 +766,7 @@ class ParagraphListBuilder(
         if (paragraph.doc || text.startsWith("<li>", true) || text.isTodo()) {
           paragraph.hangingIndent = getIndent(options.hangingIndent)
         } else if (paragraph.continuation && paragraph.prev != null) {
-          paragraph.hangingIndent = paragraph.prev!!.hangingIndent
+          paragraph.hangingIndent = checkNotNull(paragraph.prev).hangingIndent
           // Dedent to match hanging indent
           val s = paragraph.text.trimStart()
           paragraph.content.clear()
@@ -830,7 +846,7 @@ class ParagraphListBuilder(
       return
     }
     val last = paragraphs.last()
-    if (last.preformatted || last.doc || last.hanging && !last.continuation || last.isEmpty()) {
+    if (last.preformatted || last.doc || (last.hanging && !last.continuation) || last.isEmpty()) {
       return
     }
 
@@ -862,7 +878,7 @@ fun String.containsOnly(vararg s: Char): Boolean {
   return true
 }
 
-fun StringBuilder.startsWithUpperCaseLetter() =
+fun StringBuilder.startsWithUpperCaseLetter(): Boolean =
     this.isNotEmpty() && this[0].isUpperCase() && this[0].isLetter()
 
-fun Char.isCloseSquareBracket() = this == ']'
+fun Char.isCloseSquareBracket(): Boolean = this == ']'

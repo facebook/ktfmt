@@ -22,7 +22,7 @@ object Escaping {
 
   private const val STAR_SLASH_ESCAPE = "\u0005\u0004"
 
-  fun indexOfCommentEscapeSequences(s: String) =
+  fun indexOfCommentEscapeSequences(s: String): Int =
       s.indexOfAny(listOf(SLASH_STAR_ESCAPE, STAR_SLASH_ESCAPE))
 
   /**

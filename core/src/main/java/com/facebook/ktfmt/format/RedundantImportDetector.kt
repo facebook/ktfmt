@@ -166,11 +166,11 @@ internal class RedundantImportDetector(val enabled: Boolean) {
     val identifierCounts =
         importCleanUpCandidates.groupBy { it.identifier }.mapValues { it.value.size }
 
-    return importCleanUpCandidates.filter {
-      val isUsed = it.identifier in usedReferences
-      val isFromThisPackage = it.importedFqName?.parent() == thisPackage
-      val hasAlias = it.alias != null
-      val isOverload = requireNotNull(identifierCounts[it.identifier]) > 1
+    return importCleanUpCandidates.filter { importCandidate ->
+      val isUsed = importCandidate.identifier in usedReferences
+      val isFromThisPackage = importCandidate.importedFqName?.parent() == thisPackage
+      val hasAlias = importCandidate.alias != null
+      val isOverload = requireNotNull(identifierCounts[importCandidate.identifier]) > 1
       // Remove if...
       !isUsed || (isFromThisPackage && !hasAlias && !isOverload)
     }

@@ -38,7 +38,7 @@ internal class KtfmtSettingsMigration :
   //
   // v2 enabled [bool] -> enableKtfmt [enum], custom styles (0.52+)
   // v1 initial version - enabled is a boolean, only preset styles
-  var stateVersion
+  var stateVersion: Int
     get() = state.stateVersion.takeIf { it > 0 } ?: 1
     set(value) {
       state.stateVersion = value
@@ -63,7 +63,7 @@ internal class KtfmtSettingsMigration :
   }
 
   class MigrationState : BaseState() {
-    var stateVersion by property(-1)
+    var stateVersion: Int by property(-1)
   }
 
   companion object {

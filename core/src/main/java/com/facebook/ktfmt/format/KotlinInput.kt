@@ -219,9 +219,9 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
 
   override fun getText(): String = text
 
-  override fun getLineNumber(inputPosition: Int) =
+  override fun getLineNumber(inputPosition: Int): Int =
       StringUtil.offsetToLineColumn(text, inputPosition).line + 1
 
-  override fun getColumnNumber(inputPosition: Int) =
+  override fun getColumnNumber(inputPosition: Int): Int =
       StringUtil.offsetToLineColumn(text, inputPosition).column
 }

@@ -35,7 +35,7 @@ private constructor(
 ) {
   companion object {
     fun extractParentList(enumEntry: KtEnumEntry): EnumEntryList {
-      return extractChildList(enumEntry.parent as KtClassBody)!!
+      return checkNotNull(extractChildList(enumEntry.parent as KtClassBody))
     }
 
     fun extractChildList(classBody: KtClassBody): EnumEntryList? {
@@ -61,10 +61,12 @@ private constructor(
       var semicolon: PsiElement? = null
       var comma: PsiElement? = null
       val lastToken =
-          enumEntries
-              .last()
-              .lastChild
-              .getPrevSiblingIgnoringWhitespaceAndComments(withItself = true)!!
+          checkNotNull(
+              enumEntries
+                  .last()
+                  .lastChild
+                  .getPrevSiblingIgnoringWhitespaceAndComments(withItself = true),
+          )
       when (lastToken.text) {
         "," -> {
           comma = lastToken

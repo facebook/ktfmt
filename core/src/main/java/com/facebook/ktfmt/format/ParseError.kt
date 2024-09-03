@@ -30,7 +30,7 @@ class ParseError(val errorDescription: String, val lineColumn: LineColumn) :
 
   companion object {
     private fun positionOf(element: PsiElement): LineColumn {
-      val doc = element.containingFile.viewProvider.document!!
+      val doc = checkNotNull(element.containingFile.viewProvider.document)
       val offset = element.textOffset
       val lineZero = doc.getLineNumber(offset)
       val colZero = offset - doc.getLineStartOffset(lineZero)

@@ -81,6 +81,7 @@ fun assertThatFormatting(@Language("kts") code: String): FormattedCodeSubject {
   return Truth.assertAbout(codes()).that(code)
 }
 
+@Suppress("ClassNameDoesNotMatchFileName")
 class FormattedCodeSubject(metadata: FailureMetadata, private val code: String) :
     Subject(metadata, code) {
   private var options: FormattingOptions = defaultTestFormattingOptions

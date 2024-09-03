@@ -2427,9 +2427,9 @@ class KotlinInputAstVisitor(
       visit(enumEntry.modifierList)
       builder.token(enumEntry.nameIdentifier?.text ?: fail())
       enumEntry.initializerList?.initializers?.forEach { visit(it) }
-      enumEntry.body?.let {
+      enumEntry.body?.let { enumBody ->
         builder.space()
-        visit(it)
+        visit(enumBody)
       }
     }
   }
