@@ -12,9 +12,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+
+## [0.53]
+
 ### Fixed
 - Comments respecting max line width (https://github.com/facebook/ktfmt/pull/511)
 - Exception while parsing property accessor on Kotlin 2.0.20-Beta2+ (https://github.com/facebook/ktfmt/pull/513)
+
+## Changed
+- Updated Google Java Format to 1.23.0 (https://github.com/facebook/ktfmt/commit/ed949e89eea22843ac10d4fb91685453754abd25)
 
 
 ## [0.52]
