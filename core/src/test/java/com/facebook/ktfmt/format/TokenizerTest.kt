@@ -17,6 +17,7 @@
 package com.facebook.ktfmt.format
 
 import com.google.common.truth.Truth.assertThat
+import kotlin.test.assertFailsWith
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -217,5 +218,64 @@ class TokenizerTest {
             -1,
             23)
         .inOrder()
+  }
+
+  @Test
+  fun `Unclosed comment obvious`() {
+    assertParseError(
+        """
+      |package a.b
+      |/*
+      |class A {}
+      |"""
+            .trimMargin(),
+        "2:1: error: Unclosed comment")
+  }
+
+  @Test
+  fun `Unclosed comment too short`() {
+    assertParseError(
+        """
+      |package a.b
+      |/*/
+      |class A {}
+      |"""
+            .trimMargin(),
+        "2:1: error: Unclosed comment")
+  }
+
+  @Test
+  fun `Unclosed comment nested`() {
+    assertParseError(
+        """
+      |package a.b
+      |/* /* */
+      |class A {}
+      |"""
+            .trimMargin(),
+        "2:1: error: Unclosed comment")
+  }
+
+  @Test
+  fun `Unclosed comment nested EOF`() {
+    // TODO: https://youtrack.jetbrains.com/issue/KT-72887 - This should be an error.
+    assertParseError(
+        """
+      |package a.b
+      |class A {}
+      |/* /* */"""
+            .trimMargin(),
+        null)
+  }
+
+  private fun assertParseError(code: String, message: String?) {
+    val file = Parser.parse(code)
+    val tokenizer = Tokenizer(code, file)
+    if (message == null) {
+      file.accept(tokenizer)
+    } else {
+      val e = assertFailsWith<ParseError> { file.accept(tokenizer) }
+      assertThat(e).hasMessageThat().isEqualTo(message)
+    }
   }
 }
