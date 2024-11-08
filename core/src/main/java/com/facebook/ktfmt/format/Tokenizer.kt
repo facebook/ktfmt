@@ -17,6 +17,7 @@
 package com.facebook.ktfmt.format
 
 import java.util.regex.Pattern
+import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtil
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
@@ -53,6 +54,10 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
     val originalText = fileText.substring(startIndex, endIndex)
     when (element) {
       is PsiComment -> {
+        if (element.text.startsWith("/*") && !element.text.endsWith("*/")) {
+          throw ParseError(
+              "Unclosed comment", StringUtil.offsetToLineColumn(fileText, element.startOffset))
+        }
         toks.add(
             KotlinTok(
                 index = index,
