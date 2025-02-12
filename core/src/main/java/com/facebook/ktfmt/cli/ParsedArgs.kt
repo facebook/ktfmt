@@ -79,6 +79,14 @@ data class ParsedArgs(
         |  --set-exit-if-changed             Sets exit code to 1 if any input file was not 
         |                                        formatted/touched
         |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used
+        |  --max-line-length=<length>        Max line length. Overrides the style.
+        |  --block-indent=<size>             Size of the indent used when a new block is
+        |                                        opened, in spaces. Overrides the style.
+        |  --continuation-indent=<size>      Size of the indent used when a line is broken
+        |                                        because it's too long, in spaces. Overrides
+        |                                        the style.
+        |  --manage-trailing-commas=(y|n)    Automatically remove and insert trailing commas.
+        |                                        Overrides the style.
         |  
         |ARGFILE:
         |  If the only argument begins with '@', the remainder of the argument is treated
@@ -100,6 +108,10 @@ data class ParsedArgs(
     fun parseOptions(args: Array<out String>): ParseResult {
       val fileNames = mutableListOf<String>()
       var formattingOptions = Formatter.META_FORMAT
+      var maxWidth: Int? = null
+      var blockIndent: Int? = null
+      var continuationIndent: Int? = null
+      var manageTrailingCommas: Boolean? = null
       var dryRun = false
       var setExitIfChanged = false
       var removeUnusedImports = true
@@ -120,6 +132,30 @@ data class ParsedArgs(
                   parseKeyValueArg("--stdin-name", arg)
                       ?: return ParseResult.Error(
                           "Found option '${arg}', expected '${"--stdin-name"}=<value>'")
+          arg.startsWith("--max-line-length=") ->
+              maxWidth =
+                  parseKeyValueArg("--max-line-length", arg)?.toIntOrNull()?.takeIf { it > 0 }
+                      ?: return ParseResult.Error(
+                          "Found option '${arg}', expected '${"--max-line-length=<length>"}'")
+          arg.startsWith("--block-indent=") ->
+              blockIndent =
+                  parseKeyValueArg("--block-indent", arg)?.toIntOrNull()?.takeIf { it > 0 }
+                      ?: return ParseResult.Error(
+                          "Found option '${arg}', expected '${"--block-indent=<size>"}'")
+          arg.startsWith("--continuation-indent=") ->
+              continuationIndent =
+                  parseKeyValueArg("--continuation-indent", arg)?.toIntOrNull()?.takeIf { it > 0 }
+                      ?: return ParseResult.Error(
+                          "Found option '${arg}', expected '${"--continuation-indent=<size>"}'")
+          arg.startsWith("--manage-trailing-commas=") ->
+              manageTrailingCommas =
+                  when (parseKeyValueArg("--manage-trailing-commas", arg)) {
+                    in listOf("y", "t", "yes", "true", "on") -> true
+                    in listOf("n", "f", "no", "false", "off") -> false
+                    else -> null
+                  }
+                      ?: return ParseResult.Error(
+                          "Found option '${arg}', expected '${"--manage-trailing-commas=(y|n)"}'")
           arg.startsWith("--") -> return ParseResult.Error("Unexpected option: $arg")
           arg.startsWith("@") -> return ParseResult.Error("Unexpected option: $arg")
           else -> fileNames.add(arg)
@@ -141,7 +177,14 @@ data class ParsedArgs(
       return ParseResult.Ok(
           ParsedArgs(
               fileNames,
-              formattingOptions.copy(removeUnusedImports = removeUnusedImports),
+              formattingOptions.copy(
+                  maxWidth = maxWidth ?: formattingOptions.maxWidth,
+                  blockIndent = blockIndent ?: formattingOptions.blockIndent,
+                  continuationIndent = continuationIndent ?: formattingOptions.continuationIndent,
+                  manageTrailingCommas =
+                      manageTrailingCommas ?: formattingOptions.manageTrailingCommas,
+                  removeUnusedImports = removeUnusedImports,
+              ),
               dryRun,
               setExitIfChanged,
               stdinName,
