@@ -101,7 +101,6 @@ class TokenizerTest {
       |val a=5
       |"""
             .trimMargin()
-            .trimMargin()
 
     val file = Parser.parse(code)
     val tokenizer = Tokenizer(code, file)
@@ -127,7 +126,6 @@ class TokenizerTest {
       |  fun test() {}
       |}
       |"""
-            .trimMargin()
             .trimMargin()
 
     val file = Parser.parse(code)
@@ -217,6 +215,127 @@ class TokenizerTest {
             22,
             -1,
             23)
+        .inOrder()
+  }
+
+  @Test
+  fun `Guard conditions with subject are parsed correctly`() {
+    // language=kotlin
+    val code =
+        """
+      |fun feedAnimal(animal: Animal) {
+      |    when (animal) {
+      |        is Animal.Cat if !animal.mouseHunter -> animal.feedCat()
+      |    }
+      |}
+      |"""
+            .trimMargin()
+
+    val file = Parser.parse(code)
+    val tokenizer = Tokenizer(code, file)
+    file.accept(tokenizer)
+
+    assertThat(tokenizer.toks.map { it.originalText })
+        .containsExactly(
+            "fun",
+            " ",
+            "feedAnimal",
+            "(",
+            "animal",
+            ":",
+            " ",
+            "Animal",
+            ")",
+            " ",
+            "{",
+            "\n",
+            "    ",
+            "when",
+            " ",
+            "(",
+            "animal",
+            ")",
+            " ",
+            "{",
+            "\n",
+            "        ",
+            "is",
+            " ",
+            "Animal",
+            ".",
+            "Cat",
+            " ",
+            "if",
+            " ",
+            "!",
+            "animal",
+            ".",
+            "mouseHunter",
+            " ",
+            "->",
+            " ",
+            "animal",
+            ".",
+            "feedCat",
+            "(",
+            ")",
+            "\n",
+            "    ",
+            "}",
+            "\n",
+            "}",
+            "\n")
+        .inOrder()
+    assertThat(tokenizer.toks.map { it.index })
+        .containsExactly(
+            0,
+            -1,
+            1,
+            2,
+            3,
+            4,
+            -1,
+            5,
+            6,
+            -1,
+            7,
+            -1,
+            -1,
+            8,
+            -1,
+            9,
+            10,
+            11,
+            -1,
+            12,
+            -1,
+            -1,
+            13,
+            -1,
+            14,
+            15,
+            16,
+            -1,
+            17,
+            -1,
+            18,
+            19,
+            20,
+            21,
+            -1,
+            22,
+            -1,
+            23,
+            24,
+            25,
+            26,
+            27,
+            -1,
+            -1,
+            28,
+            -1,
+            29,
+            -1)
         .inOrder()
   }
 
