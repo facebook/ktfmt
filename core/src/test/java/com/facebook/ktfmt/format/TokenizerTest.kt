@@ -221,6 +221,129 @@ class TokenizerTest {
   }
 
   @Test
+  fun `Context parameters are parsed correctly`() {
+    val code =
+        """
+      |context(something: Something)
+      |class A {
+      |  context(
+      |  // Test comment.
+      |  logger: Logger, raise: Raise<Error>, _: Ignored)
+      |  fun test() {}
+      |}
+      |"""
+            .trimMargin()
+            .trimMargin()
+
+    val file = Parser.parse(code)
+    val tokenizer = Tokenizer(code, file)
+    file.accept(tokenizer)
+
+    assertThat(tokenizer.toks.map { it.originalText })
+        .containsExactly(
+            "context",
+            "(",
+            "something",
+            ":",
+            " ",
+            "Something",
+            ")",
+            "\n",
+            "class",
+            " ",
+            "A",
+            " ",
+            "{",
+            "\n",
+            "  ",
+            "context",
+            "(",
+            "\n",
+            "  ",
+            "// Test comment.",
+            "\n",
+            "  ",
+            "logger",
+            ":",
+            " ",
+            "Logger",
+            ",",
+            " ",
+            "raise",
+            ":",
+            " ",
+            "Raise",
+            "<",
+            "Error",
+            ">",
+            ")",
+            "\n",
+            "  ",
+            "fun",
+            " ",
+            "test",
+            "(",
+            ")",
+            " ",
+            "{",
+            "}",
+            "\n",
+            "}")
+        .inOrder()
+    assertThat(tokenizer.toks.map { it.index })
+        .containsExactly(
+            0,
+            1,
+            2,
+            3,
+            -1,
+            4,
+            5,
+            -1,
+            6,
+            -1,
+            7,
+            -1,
+            8,
+            -1,
+            -1,
+            9,
+            10,
+            -1,
+            -1,
+            11,
+            -1,
+            -1,
+            12,
+            13,
+            -1,
+            14,
+            15,
+            -1,
+            16,
+            17,
+            -1,
+            18,
+            19,
+            20,
+            21,
+            22,
+            -1,
+            -1,
+            23,
+            -1,
+            24,
+            25,
+            26,
+            -1,
+            27,
+            28,
+            -1,
+            29)
+        .inOrder()
+  }
+
+  @Test
   fun `Unclosed comment obvious`() {
     assertParseError(
         """
