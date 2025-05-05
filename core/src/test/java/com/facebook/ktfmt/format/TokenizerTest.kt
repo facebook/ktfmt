@@ -221,6 +221,164 @@ class TokenizerTest {
   }
 
   @Test
+  fun `Long binary expressions are parsed correctly`() {
+    //language=kotlin
+    val code =
+        """
+      |//////////////////////////////////////
+      |fun foo() {
+      |  val sentence =
+      |      "The" +
+      |          "quick" +
+      |          ("brown" + "fox") +
+      |          "jumps" +
+      |          "over" +
+      |          "the" +
+      |          "lazy" +
+      |          "dog"
+      |}
+      |"""
+            .trimMargin()
+
+    val file = Parser.parse(code)
+    val tokenizer = Tokenizer(code, file)
+    file.accept(tokenizer)
+
+    assertThat(tokenizer.toks.map { it.originalText })
+        .containsExactly(
+          "//////////////////////////////////////",
+          "\n",
+          "fun",
+          " ",
+          "foo",
+          "(",
+          ")",
+          " ",
+          "{",
+          "\n",
+          "  ",
+          "val",
+          " ",
+          "sentence",
+          " ",
+          "=",
+          "\n",
+          "      ",
+          "\"The\"",
+          " ",
+          "+",
+          "\n",
+          "          ",
+          "\"quick\"",
+          " ",
+          "+",
+          "\n",
+          "          ",
+          "(",
+          "\"brown\"",
+          " ",
+          "+",
+          " ",
+          "\"fox\"",
+          ")",
+          " ",
+          "+",
+          "\n",
+          "          ",
+          "\"jumps\"",
+          " ",
+          "+",
+          "\n",
+          "          ",
+          "\"over\"",
+          " ",
+          "+",
+          "\n",
+          "          ",
+          "\"the\"",
+          " ",
+          "+",
+          "\n",
+          "          ",
+          "\"lazy\"",
+          " ",
+          "+",
+          "\n",
+          "          ",
+          "\"dog\"",
+          "\n",
+          "}",
+          "\n")
+        .inOrder()
+    assertThat(tokenizer.toks.map { it.index })
+        .containsExactly(
+          0,
+          -1,
+          1,
+          -1,
+          2,
+          3,
+          4,
+          -1,
+          5,
+          -1,
+          -1,
+          6,
+          -1,
+          7,
+          -1,
+          8,
+          -1,
+          -1,
+          9,
+          -1,
+          10,
+          -1,
+          -1,
+          11,
+          -1,
+          12,
+          -1,
+          -1,
+          13,
+          14,
+          -1,
+          15,
+          -1,
+          16,
+          17,
+          -1,
+          18,
+          -1,
+          -1,
+          19,
+          -1,
+          20,
+          -1,
+          -1,
+          21,
+          -1,
+          22,
+          -1,
+          -1,
+          23,
+          -1,
+          24,
+          -1,
+          -1,
+          25,
+          -1,
+          26,
+          -1,
+          -1,
+          27,
+          -1,
+          28,
+          -1)
+        .inOrder()
+  }
+
+  @Test
   fun `Unclosed comment obvious`() {
     assertParseError(
         """
