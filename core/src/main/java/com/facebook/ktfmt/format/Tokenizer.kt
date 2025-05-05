@@ -48,6 +48,7 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
     private set
 
   override fun visitElement(element: PsiElement) {
+    println("Visiting ${element.javaClass.simpleName} $element at $index: '${element.text}'")
     val startIndex = element.startOffset
     val endIndex = element.endOffset
     val elementText = element.text
