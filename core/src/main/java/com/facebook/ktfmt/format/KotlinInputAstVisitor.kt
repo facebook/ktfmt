@@ -1689,12 +1689,19 @@ class KotlinInputAstVisitor(
     builder.forcedBreak()
   }
 
-  /** Example `context(Logger, Raise<Error>)` */
+  /**
+   * Example `context(logger: Logger, raise: Raise<Error>)`
+   *
+   * Note this also supports the legacy receiver format of `context(Logger, Raise<Error>)`
+   * for backward compatibility.
+   */
   override fun visitContextReceiverList(contextReceiverList: KtContextReceiverList) {
     builder.sync(contextReceiverList)
     builder.token("context")
+    val listToVisit =
+        contextReceiverList.contextParameters().ifEmpty { contextReceiverList.contextReceivers() }
     visitEachCommaSeparated(
-        contextReceiverList.contextReceivers(),
+        listToVisit,
         prefix = "(",
         postfix = ")",
         breakAfterPrefix = false,
