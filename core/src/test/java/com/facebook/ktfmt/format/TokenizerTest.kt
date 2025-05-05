@@ -222,6 +222,7 @@ class TokenizerTest {
 
   @Test
   fun `Context parameters are parsed correctly`() {
+    //language=kotlin
     val code =
         """
       |context(something: Something)
@@ -232,7 +233,6 @@ class TokenizerTest {
       |  fun test() {}
       |}
       |"""
-            .trimMargin()
             .trimMargin()
 
     val file = Parser.parse(code)
