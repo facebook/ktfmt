@@ -7696,6 +7696,7 @@ class FormatterTest {
       |        is Animal.Cat           if     !animal.birdHunter -> animal.feedCat()
       |        is Animal.Cat if         
       |          !animal.birdHunter -> animal.feedCat()
+      |        is Animal.Cat if     (!animal.birdHunter) -> animal.feedCat()
       |        else -> println("Unknown animal")
       |    }
       |}
@@ -7710,6 +7711,7 @@ class FormatterTest {
       |    is Animal.Cat if !animal.mouseHunter -> animal.feedCat()
       |    is Animal.Cat if !animal.birdHunter -> animal.feedCat()
       |    is Animal.Cat if !animal.birdHunter -> animal.feedCat()
+      |    is Animal.Cat if (!animal.birdHunter) -> animal.feedCat()
       |    else -> println("Unknown animal")
       |  }
       |}
