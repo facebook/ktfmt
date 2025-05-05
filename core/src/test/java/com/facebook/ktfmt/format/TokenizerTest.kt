@@ -107,10 +107,10 @@ class TokenizerTest {
     file.accept(tokenizer)
 
     assertThat(tokenizer.toks.map { it.originalText })
-        .containsExactly("val", " ", "b", "=", "\"a\"", "\n", "val", " ", "a", "=", "5")
+        .containsExactly("val", " ", "b", "=", "\"a\"", "\n", "val", " ", "a", "=", "5", "\n")
         .inOrder()
     assertThat(tokenizer.toks.map { it.index })
-        .containsExactly(0, -1, 1, 2, 3, -1, 4, -1, 5, 6, 7)
+        .containsExactly(0, -1, 1, 2, 3, -1, 4, -1, 5, 6, 7, -1)
         .inOrder()
   }
 
@@ -172,7 +172,8 @@ class TokenizerTest {
             "{",
             "}",
             "\n",
-            "}")
+            "}",
+            "\n")
         .inOrder()
     assertThat(tokenizer.toks.map { it.index })
         .containsExactly(
@@ -214,7 +215,8 @@ class TokenizerTest {
             21,
             22,
             -1,
-            23)
+            23,
+            -1)
         .inOrder()
   }
 
