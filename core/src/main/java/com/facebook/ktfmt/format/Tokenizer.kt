@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
+import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
@@ -47,8 +48,17 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
   var index: Int = 0
     private set
 
+  override fun visitBinaryExpression(expression: KtBinaryExpression) {
+    // In Kotlin 2.2.0+ this implementation in KtVisitor was changed to only visit
+    // the inner KtStringTemplateExpression expressions, omitting the operator tokens
+    // This overrides it to restore the previous impl and visit all parts of the expression,
+    // which we need in order to populate expected toks correctly
+    // See
+    // https://github.com/JetBrains/kotlin/commit/f33566e0d7883ca3c56d2552cc4da0cbf6ad966a#diff-5693f3044b6ae4210db1194385fdb3dd8efd8751a49f8a72deaccc025ad8c48e
+    return visitExpression(expression)
+  }
+
   override fun visitElement(element: PsiElement) {
-    println("Visiting ${element.javaClass.simpleName} $element at $index: '${element.text}'")
     val startIndex = element.startOffset
     val endIndex = element.endOffset
     val elementText = element.text
