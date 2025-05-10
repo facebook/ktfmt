@@ -18,7 +18,7 @@ import com.ncorti.ktfmt.gradle.tasks.KtfmtCheckTask
 import com.ncorti.ktfmt.gradle.tasks.KtfmtFormatTask
 
 plugins {
-  kotlin("jvm") version "2.0.21"
+  kotlin("jvm") version "2.2.0-Beta2"
   id("com.ncorti.ktfmt.gradle") version "0.19.0"
 }
 
