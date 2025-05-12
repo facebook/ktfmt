@@ -1692,8 +1692,8 @@ class KotlinInputAstVisitor(
   /**
    * Example `context(logger: Logger, raise: Raise<Error>)`
    *
-   * Note this also supports the legacy receiver format of `context(Logger, Raise<Error>)`
-   * for backward compatibility.
+   * Note this also supports the legacy receiver format of `context(Logger, Raise<Error>)` for
+   * backward compatibility.
    */
   override fun visitContextReceiverList(contextReceiverList: KtContextReceiverList) {
     builder.sync(contextReceiverList)
