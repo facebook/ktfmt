@@ -501,7 +501,7 @@ class TokenizerTest {
 
   @Test
   fun `Context parameters are parsed correctly`() {
-    //language=kotlin
+    // language=kotlin
     val code =
         """
       |context(something: Something)
@@ -555,6 +555,12 @@ class TokenizerTest {
             "<",
             "Error",
             ">",
+            ",",
+            " ",
+            "_",
+            ":",
+            " ",
+            "Ignored",
             ")",
             "\n",
             "  ",
@@ -567,7 +573,9 @@ class TokenizerTest {
             "{",
             "}",
             "\n",
-            "}")
+            "}",
+            "\n",
+        )
         .inOrder()
     assertThat(tokenizer.toks.map { it.index })
         .containsExactly(
@@ -608,17 +616,25 @@ class TokenizerTest {
             21,
             22,
             -1,
-            -1,
             23,
-            -1,
             24,
+            -1,
             25,
             26,
             -1,
-            27,
-            28,
             -1,
-            29)
+            27,
+            -1,
+            28,
+            29,
+            30,
+            -1,
+            31,
+            32,
+            -1,
+            33,
+            -1,
+        )
         .inOrder()
   }
 
