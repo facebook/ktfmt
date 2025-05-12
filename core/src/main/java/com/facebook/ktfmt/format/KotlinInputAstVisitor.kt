@@ -1910,6 +1910,11 @@ class KotlinInputAstVisitor(
                   builder.forcedBreak()
                 }
               }
+              whenEntry.guard?.let {
+                builder.space()
+                emitKeywordWithCondition(
+                    "if", it.getExpression(), surroundConditionWithParens = false)
+              }
             }
           }
           val whenExpression = whenEntry.expression
@@ -2609,8 +2614,17 @@ class KotlinInputAstVisitor(
     element?.accept(this)
   }
 
-  /** Emits a key word followed by a condition, e.g. `if (b)` or `while (c < d )` */
-  private fun emitKeywordWithCondition(keyword: String, condition: KtExpression?) {
+  /**
+   * Emits a key word followed by a condition, e.g. `if (b)` or `while (c < d )`
+   *
+   * @param surroundConditionWithParens a flag to control whether parens surrounds the condition.
+   *   For example, guard conditions do not use parens.
+   */
+  private fun emitKeywordWithCondition(
+      keyword: String,
+      condition: KtExpression?,
+      surroundConditionWithParens: Boolean = true,
+  ) {
     if (condition == null) {
       builder.token(keyword)
       return
@@ -2619,7 +2633,9 @@ class KotlinInputAstVisitor(
     builder.block(ZERO) {
       builder.token(keyword)
       builder.space()
-      builder.token("(")
+      if (surroundConditionWithParens) {
+        builder.token("(")
+      }
       if (options.manageTrailingCommas) {
         builder.block(expressionBreakIndent) {
           builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
@@ -2630,6 +2646,8 @@ class KotlinInputAstVisitor(
         builder.block(ZERO) { visit(condition) }
       }
     }
-    builder.token(")")
+    if (surroundConditionWithParens) {
+      builder.token(")")
+    }
   }
 }

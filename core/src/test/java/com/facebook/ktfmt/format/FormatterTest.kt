@@ -7742,6 +7742,42 @@ class FormatterTest {
         .isEqualTo(code)
   }
 
+  @Test
+  fun `guard conditions with subject`() {
+    val code =
+        """
+      |fun feedAnimal(animal: Animal) {
+      |    when (animal) {
+      |        is Animal.Dog -> animal.feedDog()
+      |        is Animal.Cat if !animal.mouseHunter -> animal.feedCat()
+      |        is Animal.Cat           if     !animal.birdHunter -> animal.feedCat()
+      |        is Animal.Cat if         
+      |          !animal.birdHunter -> animal.feedCat()
+      |        is Animal.Cat if     (!animal.birdHunter) -> animal.feedCat()
+      |        else -> println("Unknown animal")
+      |    }
+      |}
+      |"""
+            .trimMargin()
+
+    val expected =
+        """
+      |fun feedAnimal(animal: Animal) {
+      |  when (animal) {
+      |    is Animal.Dog -> animal.feedDog()
+      |    is Animal.Cat if !animal.mouseHunter -> animal.feedCat()
+      |    is Animal.Cat if !animal.birdHunter -> animal.feedCat()
+      |    is Animal.Cat if !animal.birdHunter -> animal.feedCat()
+      |    is Animal.Cat if (!animal.birdHunter) -> animal.feedCat()
+      |    else -> println("Unknown animal")
+      |  }
+      |}
+      |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""
