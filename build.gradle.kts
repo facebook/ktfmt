@@ -14,4 +14,13 @@
  * limitations under the License.
  */
 
-rootProject.name = "lambda"
+plugins {
+  alias(libs.plugins.kotlin) apply false
+  alias(libs.plugins.ktfmt) apply false
+  alias(libs.plugins.intelliJPlatform) apply false
+  alias(libs.plugins.shadowJar) apply false
+}
+
+version = providers.gradleProperty("ktfmt.version").get()
+
+tasks.wrapper { distributionType = Wrapper.DistributionType.ALL }

@@ -26,14 +26,8 @@ jobs:
         java-version: ${{ matrix.java }}
         distribution: zulu
     - name: Build ktfmt
-      run: mvn -B install --file pom.xml spotless:check
+      run: ./gradlew :ktfmt:build --stacktrace --no-daemon
     - name: Build ktfmt_idea_plugin
-      run: |
-        pushd ktfmt_idea_plugin
-        ./gradlew build --no-daemon
-        popd
+      run: ./gradlew :idea_plugin:build --stacktrace --no-daemon
     - name: Build the Online Formatter
-      run: |
-        pushd online_formatter
-        ./gradlew build --no-daemon
-        popd
+      run: ./gradlew :lambda:build --stacktrace --no-daemon

@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import com.ncorti.ktfmt.gradle.tasks.KtfmtCheckTask
-import com.ncorti.ktfmt.gradle.tasks.KtfmtFormatTask
-
 plugins {
-  kotlin("jvm") version "2.2.0-Beta2"
-  id("com.ncorti.ktfmt.gradle") version "0.19.0"
+  kotlin("jvm")
+  id("com.ncorti.ktfmt.gradle")
 }
 
 repositories {
@@ -27,62 +24,51 @@ repositories {
   mavenCentral()
 }
 
-val ktfmtVersion = rootProject.file("../version.txt").readText().trim()
-
 dependencies {
-  implementation("com.facebook:ktfmt:$ktfmtVersion")
-  implementation(platform("software.amazon.awssdk:bom:2.10.73"))
-  implementation("software.amazon.awssdk:lambda")
-  implementation("com.amazonaws:aws-lambda-java-core:1.2.1")
-  implementation("com.amazonaws:aws-lambda-java-events:2.2.9")
-  implementation("com.google.code.gson:gson:2.8.6")
+  implementation(libs.amazon.aws.lambda.core)
+  implementation(libs.amazon.aws.lambda.events)
+  implementation(platform(libs.amazon.aws.sdk.bom))
+  implementation(libs.amazon.aws.sdk.lambda)
+  implementation(libs.gson)
+  implementation(project(":ktfmt"))
   testImplementation(kotlin("test-junit"))
 }
 
-kotlin { jvmToolchain(17) }
+kotlin {
+  val javaVersion: String = rootProject.libs.versions.java.get()
+  jvmToolchain(javaVersion.toInt())
+}
 
 tasks {
   test { useJUnit() }
 
-  val packageFat by
-      creating(Zip::class) {
-        from(compileKotlin)
-        from(processResources)
-        into("lib") { from(configurations.runtimeClasspath) }
-        dirMode = 0b111101101 // 0755
-        fileMode = 0b111101101 // 0755
-      }
+  register("packageFat", Zip::class) {
+    from(compileKotlin)
+    from(processResources)
+    into("lib") { from(configurations.runtimeClasspath) }
+    // 0755
+    dirPermissions { unix("rwxr-xr-x") }
+    filePermissions { unix("rwxr-xr-x") }
+  }
 
-  val packageLibs by
-      creating(Zip::class) {
-        into("java/lib") { from(configurations.runtimeClasspath) }
-        dirMode = 0b111101101 // 0755
-        fileMode = 0b111101101 // 0755
-      }
+  register("packageLibs", Zip::class) {
+    into("java/lib") { from(configurations.runtimeClasspath) }
+    // 0755
+    dirPermissions { unix("rwxr-xr-x") }
+    filePermissions { unix("rwxr-xr-x") }
+  }
 
   val packageSkinny by
-      creating(Zip::class) {
+      registering(Zip::class) {
         from(compileKotlin)
         from(processResources)
       }
 
-  build { dependsOn(packageSkinny) }
+  check {
+    // Set up ktfmt formatting task dependencies
+    dependsOn(named("ktfmtCheck"))
+    dependsOn(named("ktfmtCheckScripts"))
+  }
 
-  // Set up ktfmt formatting tasks
-  val ktfmtFormatKts by
-      creating(KtfmtFormatTask::class) {
-        source = fileTree(rootDir)
-        include("**/*.kts")
-      }
-  val ktfmtCheckKts by
-      creating(KtfmtCheckTask::class) {
-        source = fileTree(rootDir)
-        include("**/*.kts")
-        mustRunAfter("compileKotlin")
-        mustRunAfter("compileTestKotlin")
-        mustRunAfter("test")
-      }
-  val ktfmtFormat by getting { dependsOn(ktfmtFormatKts) }
-  val ktfmtCheck by getting { dependsOn(ktfmtCheckKts) }
-  val check by getting { dependsOn(ktfmtCheck) }
+  build { dependsOn(packageSkinny) }
 }

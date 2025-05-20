@@ -14,4 +14,25 @@
  * limitations under the License.
  */
 
-rootProject.name = "ktfmt_idea_plugin"
+rootProject.name = "ktfmt-parent"
+
+include(
+    ":ktfmt",
+    ":lambda",
+    ":idea_plugin",
+)
+
+project(":ktfmt").projectDir = file("core")
+
+project(":lambda").projectDir = file("online_formatter")
+
+project(":idea_plugin").projectDir = file("ktfmt_idea_plugin")
+
+dependencyResolutionManagement {
+  versionCatalogs {
+    create("libs") {
+      val ktfmtVersion = providers.gradleProperty("ktfmt.version").get()
+      version("ktfmt", ktfmtVersion)
+    }
+  }
+}

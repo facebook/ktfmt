@@ -39,19 +39,14 @@ jobs:
       - id: publish-to-central
         name: Publish to Maven Central Repository
         env:
+          SIGN_BUILD: true
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-        run: |
-          mvn \
-            --no-transfer-progress \
-            --batch-mode \
-            -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} \
-            -Prelease clean deploy
+          GPG_SIGNING_KEY: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }
+        run: ./gradlew :ktfmt:publish --stacktrace --no-daemon
       - name: Publish IntelliJ plugin to JetBrains Marketplace
-        run: |
-          pushd ktfmt_idea_plugin
-          ./gradlew publishPlugin --stacktrace --no-daemon
-          popd
+        run: ./gradlew :idea_plugin:publishPlugin --stacktrace --no-daemon
         env:
           JETBRAINS_MARKETPLACE_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
       - uses: actions/setup-node@v4
