@@ -53,6 +53,16 @@ tasks {
     dependsOn(named("ktfmtCheckScripts"))
   }
 
+  // Handle multiple versions of Kotlin here
+  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    // Only get major and minor version, e.g. 1.8.0-beta1 -> 1.8
+    val kotlinVersion = rootProject.libs.versions.kotlin.get().substringBeforeLast(".")
+    exclude {
+      val path = it.file.path
+      "com/facebook/ktfmt/util/kotlin-" in path && "kotlin-$kotlinVersion" !in path
+    }
+  }
+
   // Add main class to jar manifest
   withType(Jar::class) { manifest { attributes["Main-Class"] = "com.facebook.ktfmt.cli.Main" } }
 

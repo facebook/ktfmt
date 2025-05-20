@@ -7394,6 +7394,64 @@ class FormatterTest {
   }
 
   @Test
+  fun `context parameters`() {
+    if (KotlinVersion.CURRENT < KotlinVersion(2, 2)) return
+    val code =
+        """
+      |context(something: Something)
+      |
+      |class A {
+      |  context(
+      |  // Test comment.
+      |  logger: Logger, raise: Raise<Error>, _: Ignored)
+      |
+      |  @SomeAnnotation
+      |
+      |  fun doNothing() {}
+      |
+      |  context(somethingElse: SomethingElse)
+      |
+      |  private class NestedClass {}
+      |
+      |  fun <T> testSuspend(
+      |    mock: T,
+      |    block: suspend context(someContext: SomeContext) T.() -> Unit,
+      |  ) = startCoroutine {
+      |    T.block()
+      |  }
+      |}
+      |"""
+            .trimMargin()
+
+    val expected =
+        """
+      |context(something: Something)
+      |class A {
+      |  context(
+      |  // Test comment.
+      |  logger: Logger,
+      |  raise: Raise<Error>,
+      |  _: Ignored)
+      |  @SomeAnnotation
+      |  fun doNothing() {}
+      |
+      |  context(somethingElse: SomethingElse)
+      |  private class NestedClass {}
+      |
+      |  fun <T> testSuspend(
+      |      mock: T,
+      |      block:
+      |          suspend context(someContext: SomeContext)
+      |          T.() -> Unit,
+      |  ) = startCoroutine { T.block() }
+      |}
+      |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
   fun `trailing comment after function in class`() =
       assertFormatted(
           """

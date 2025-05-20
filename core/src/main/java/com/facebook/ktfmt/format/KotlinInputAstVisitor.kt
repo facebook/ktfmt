@@ -16,6 +16,7 @@
 
 package com.facebook.ktfmt.format
 
+import com.facebook.ktfmt.util.listToVisit
 import com.google.common.base.Throwables
 import com.google.common.collect.ImmutableList
 import com.google.googlejavaformat.Doc
@@ -1689,12 +1690,17 @@ class KotlinInputAstVisitor(
     builder.forcedBreak()
   }
 
-  /** Example `context(Logger, Raise<Error>)` */
+  /**
+   * Example `context(logger: Logger, raise: Raise<Error>)`
+   *
+   * Note this also supports the legacy receiver format of `context(Logger, Raise<Error>)` for
+   * backward compatibility.
+   */
   override fun visitContextReceiverList(contextReceiverList: KtContextReceiverList) {
     builder.sync(contextReceiverList)
     builder.token("context")
     visitEachCommaSeparated(
-        contextReceiverList.contextReceivers(),
+        contextReceiverList.listToVisit(),
         prefix = "(",
         postfix = ")",
         breakAfterPrefix = false,
