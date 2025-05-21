@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import kotlin.io.path.writeText
+import org.jetbrains.intellij.platform.gradle.utils.asPath
+
 plugins {
   kotlin("jvm")
   id("com.ncorti.ktfmt.gradle")
@@ -38,12 +41,42 @@ dependencies {
   testImplementation(libs.junit)
 }
 
-kotlin {
-  val javaVersion: String = rootProject.libs.versions.java.get()
-  jvmToolchain(javaVersion.toInt())
-}
+val generateSources by
+    tasks.registering {
+      outputs.dir(layout.buildDirectory.dir("generated/main/java"))
+      dependsOn(tasks.named("generateKtfmtFile"))
+    }
 
 tasks {
+  // Create Ktfmt.kt file with version information
+  register("generateKtfmtFile") {
+    val genVersionFileScript = rootProject.rootDir.resolve("gen_version_file.sh")
+    val versionPropertiesFile = rootProject.rootDir.resolve("gradle.properties")
+    val versionFile =
+        layout.buildDirectory.file("generated/main/java/com/facebook/ktfmt/util/Ktfmt.kt")
+
+    inputs.files(genVersionFileScript, versionPropertiesFile)
+    outputs.file(versionFile)
+    outputs.cacheIf { true }
+
+    doLast {
+      // run the shell script genVersionFileScript with versionPropertiesFile as argument
+      val scriptProcess =
+          providers.exec {
+            workingDir = rootProject.rootDir
+            commandLine = listOf(genVersionFileScript.toString(), versionPropertiesFile.toString())
+          }
+
+      val scriptOutput = scriptProcess.standardOutput.asText.get()
+      if (scriptProcess.result.get().exitValue != 0) {
+        val scriptError = scriptProcess.standardError.asText.get()
+        error("Failed to generate version file!\nstdout:\n$scriptOutput\n\nstderr:\n$scriptError")
+      }
+      versionFile.get().asPath.writeText(scriptOutput)
+      logger.info("Generated version file at ${versionFile.get()}")
+    }
+  }
+
   // Run tests with UTF-16 encoding
   test { jvmArgs("-Dfile.encoding=UTF-16") }
 
@@ -68,6 +101,20 @@ tasks {
 
   // Fat jar
   shadowJar { archiveClassifier = "with-dependencies" }
+}
+
+kotlin {
+  val javaVersion: String = rootProject.libs.versions.java.get()
+  jvmToolchain(javaVersion.toInt())
+
+  sourceSets {
+    main {
+      kotlin {
+        // Include generated code
+        srcDir(generateSources)
+      }
+    }
+  }
 }
 
 group = "com.facebook"

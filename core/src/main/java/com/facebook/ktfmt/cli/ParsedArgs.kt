@@ -18,6 +18,7 @@ package com.facebook.ktfmt.cli
 
 import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
+import com.facebook.ktfmt.util.Ktfmt
 import java.io.File
 import java.nio.charset.StandardCharsets.UTF_8
 
@@ -70,6 +71,7 @@ data class ParsedArgs(
         |    
         |Commands options:
         |  -h, --help                        Show this help message
+        |  -v, --version                     Show version
         |  -n, --dry-run                     Don't write to files, only report files which 
         |                                        would have changed
         |  --meta-style                      Use 2-space block indenting (default)
@@ -106,6 +108,9 @@ data class ParsedArgs(
       var stdinName: String? = null
 
       if ("--help" in args || "-h" in args) return ParseResult.ShowMessage(HELP_TEXT)
+      if ("--version" in args || "-v" in args) {
+        return ParseResult.ShowMessage("ktfmt version ${Ktfmt.version}")
+      }
 
       for (arg in args) {
         when {

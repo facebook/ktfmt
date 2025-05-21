@@ -153,6 +153,25 @@ class ParsedArgsTest {
   }
 
   @Test
+  fun `parseOptions recognises --version`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--version"))
+    assertThat(parseResult).isInstanceOf(ParseResult.ShowMessage::class.java)
+  }
+
+  @Test
+  fun `parseOptions recognises -v`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("-v"))
+    assertThat(parseResult).isInstanceOf(ParseResult.ShowMessage::class.java)
+  }
+
+  @Test
+  fun `arg --version overrides all others`() {
+    val parseResult =
+        ParsedArgs.parseOptions(arrayOf("--style=google", "@unknown", "--version", "file.kt"))
+    assertThat(parseResult).isInstanceOf(ParseResult.ShowMessage::class.java)
+  }
+
+  @Test
   fun `processArgs use the @file option with non existing file`() {
     val e =
         assertFailsWith<FileNotFoundException> {
