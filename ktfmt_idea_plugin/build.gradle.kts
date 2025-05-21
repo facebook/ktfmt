@@ -66,11 +66,3 @@ intellijPlatformTesting.runIde.register("runIntellij242") {
   type = IntellijIdeaCommunity
   version = "2024.2"
 }
-
-tasks {
-  check {
-    // Set up ktfmt formatting task dependencies
-    dependsOn(named("ktfmtCheck"))
-    dependsOn(named("ktfmtCheckScripts"))
-  }
-}

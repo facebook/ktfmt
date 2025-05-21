@@ -47,12 +47,6 @@ tasks {
   // Run tests with UTF-16 encoding
   test { jvmArgs("-Dfile.encoding=UTF-16") }
 
-  check {
-    // Set up ktfmt formatting task dependencies
-    dependsOn(named("ktfmtCheck"))
-    dependsOn(named("ktfmtCheckScripts"))
-  }
-
   // Handle multiple versions of Kotlin here
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     // Only get major and minor version, e.g. 1.8.0-beta1 -> 1.8

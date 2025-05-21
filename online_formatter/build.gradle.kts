@@ -64,11 +64,5 @@ tasks {
         from(processResources)
       }
 
-  check {
-    // Set up ktfmt formatting task dependencies
-    dependsOn(named("ktfmtCheck"))
-    dependsOn(named("ktfmtCheckScripts"))
-  }
-
   build { dependsOn(packageSkinny) }
 }
