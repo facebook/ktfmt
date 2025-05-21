@@ -10,13 +10,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - All styles managing trailing commas now (https://github.com/facebook/ktfmt/issues/216, https://github.com/facebook/ktfmt/issues/442)
 
 
-## [Unreleased]
+## [0.55]
+
+### Added
+- Support guard conditions (https://github.com/facebook/ktfmt/issues/530, https://github.com/facebook/ktfmt/pull/537)
 
 ### Changed
-- Support guard conditions (https://github.com/facebook/ktfmt/issues/530, https://github.com/facebook/ktfmt/pull/537)
-- Support context parameters (https://github.com/facebook/ktfmt/issues/518, https://github.com/facebook/ktfmt/pull/536)
 - Update `kotlin-compiler-embeddable` to `2.2.0-Beta2` for forward compatibility with context parameters. (https://github.com/facebook/ktfmt/pull/538)
-- Moved ktfmt project to Gradle (away from Maven)
+- Moved ktfmt project to Gradle (away from Maven) (https://github.com/facebook/ktfmt/commit/d03a29e71ebf19873e8b9ac21d255c8f830ef00a)
+
+### Fixed
+- Support context parameters (https://github.com/facebook/ktfmt/issues/518, https://github.com/facebook/ktfmt/pull/536)
+- Indentation options in `.editorconfig-default` (https://github.com/facebook/ktfmt/issues/543)
 
 
 ## [0.53]
