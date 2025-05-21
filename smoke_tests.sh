@@ -21,18 +21,16 @@ SCRIPT=$(readlink -f "$0")
 ROOT_DIR=$(dirname "$SCRIPT")
 cd "$ROOT_DIR"
 
-echo "Testing ktfmt core library"
-echo
-./gradlew :ktfmt:build
-echo
+./gradlew clean
 
 echo "Testing ktfmt IDEA plugin"
-echo
 ./gradlew :idea_plugin:build
 echo
 
 echo "Testing online formatter"
-echo
 ./gradlew :lambda:build
-./gradlew :build
+echo
+
+echo "Testing ktfmt core library"
+./gradlew :ktfmt:build
 echo
