@@ -42,7 +42,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           GPG_SIGNING_KEY: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }
+          GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
         run: ./gradlew :ktfmt:publish --stacktrace --no-daemon
 
       - uses: actions/setup-node@v4
