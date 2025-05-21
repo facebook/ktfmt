@@ -501,6 +501,7 @@ class TokenizerTest {
 
   @Test
   fun `Context parameters are parsed correctly`() {
+    if (KotlinVersion.CURRENT < KotlinVersion(2, 2)) return
     // language=kotlin
     val code =
         """
