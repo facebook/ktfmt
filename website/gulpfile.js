@@ -26,7 +26,7 @@ const cp = require("child_process");
 const CleanCSS = require("clean-css");
 const uncss = require("uncss");
 
-const VERSION = fs.readFileSync("../version.txt", "utf-8").trim();
+const VERSION = fs.readFileSync("../gradle.properties", "utf-8").split("\n").find(line => line.startsWith("ktfmt.version=")).split("=")[1].trim();
 
 allow_deploy_to_github = process.env.KTFMT_WEBSITE_ALLOW_DEPLOY_TO_GITHUB == '1';
 outdir = process.env.KTFMT_WEBSITE_OUTPUT_DIR || path.join(__dirname, '../release-ktfmt-website');
