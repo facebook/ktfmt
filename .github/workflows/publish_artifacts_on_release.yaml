@@ -17,7 +17,7 @@ on:
         required: true
         type: string
 jobs:
-  publish:
+  publish_ide_plugin:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +28,13 @@ jobs:
         run: ./gradlew :idea_plugin:publishPlugin --stacktrace --no-daemon
         env:
           JETBRAINS_MARKETPLACE_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
+
+  publish_maven_artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.events.release.tag_name || inputs.release_tag || github.ref }}
 
       - id: install-secret-key
         name: Install gpg secret key
@@ -47,6 +54,13 @@ jobs:
               --stacktrace \
               --no-daemon \
               -Psigning.gnupg.passphrase="$GPG_PASSPHRASE"
+
+  deploy_website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.events.release.tag_name || inputs.release_tag || github.ref }}
 
       - uses: actions/setup-node@v4
 
