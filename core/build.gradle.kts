@@ -19,9 +19,9 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 
 plugins {
   kotlin("jvm")
+  id("com.gradleup.shadow")
   id("com.ncorti.ktfmt.gradle")
   id("maven-publish")
-  id("com.gradleup.shadow")
   id("signing")
 }
 
@@ -149,20 +149,6 @@ publishing {
           developerConnection = "scm:git:git@github.com:facebook/ktfmt.git"
           url = "https://github.com/facebook/ktfmt.git"
         }
-      }
-    }
-  }
-
-  repositories {
-    maven {
-      val isSnapshotVersion = "-SNAPSHOT" in rootProject.version.toString().uppercase()
-      val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-      val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-      url = if (isSnapshotVersion) snapshotsRepoUrl else releasesRepoUrl
-
-      credentials {
-        username = System.getenv("MAVEN_USERNAME")
-        password = System.getenv("MAVEN_PASSWORD")
       }
     }
   }

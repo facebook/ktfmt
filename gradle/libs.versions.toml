@@ -14,6 +14,7 @@ com-google-code-gson-gson = "2.10.1"
 gradlePlugin-intelliJPlatform = "2.6.0"
 gradlePlugin-ktfmt = "0.22.0"
 gradlePlugin-shadowJar = "9.0.0-beta13"
+gradlePlugin-nexusPublish = "2.0.0"
 
 [libraries]
 amazon-aws-lambda-core = { module = "com.amazonaws:aws-lambda-java-core", version.ref = "com-amazonaws-aws-lambda-java-core" }
@@ -36,3 +37,4 @@ intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "grad
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "gradlePlugin-ktfmt" }
 shadowJar = { id = "com.gradleup.shadow", version.ref = "gradlePlugin-shadowJar" }
+nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradlePlugin-nexusPublish" }

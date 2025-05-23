@@ -46,11 +46,11 @@ jobs:
         name: Publish to Maven Central Repository
         env:
           SIGN_BUILD: true
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
         run: |
-          ./gradlew :ktfmt:publish \
+          ./gradlew :ktfmt:publish closeAndReleaseStagingRepositories \
               --stacktrace \
               --no-daemon \
               -Psigning.gnupg.passphrase="$GPG_PASSPHRASE"
