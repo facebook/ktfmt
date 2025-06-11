@@ -4,7 +4,7 @@
 
   <groupId>com.facebook</groupId>
   <artifactId>ktfmt-parent</artifactId>
-  <version>0.55-SNAPSHOT</version>
+  <version>0.55</version>
   <packaging>pom</packaging>
 
   <name>Ktfmt Parent</name>
