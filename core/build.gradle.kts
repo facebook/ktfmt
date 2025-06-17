@@ -22,6 +22,7 @@ plugins {
   id("com.gradleup.shadow")
   id("com.ncorti.ktfmt.gradle")
   id("maven-publish")
+  id("org.jetbrains.dokka")
   id("signing")
 }
 
@@ -99,8 +100,16 @@ tasks {
     from(sourceSets["main"].allSource)
   }
 
+  // Javadoc
+  register("javadocJar", Jar::class) {
+    val dokkaJavadocTask = named("dokkaJavadoc", org.jetbrains.dokka.gradle.DokkaTask::class)
+    dependsOn(dokkaJavadocTask)
+    from(dokkaJavadocTask.flatMap { it.outputDirectory })
+    archiveClassifier.set("javadoc")
+  }
+
   // Fat jar
-  shadowJar { archiveClassifier = "with-dependencies" }
+  shadowJar { archiveClassifier.set("with-dependencies") }
 }
 
 kotlin {
@@ -130,6 +139,7 @@ publishing {
 
       from(components["java"])
       artifact(tasks.named("sourcesJar"))
+      artifact(tasks.named("javadocJar"))
 
       pom {
         name = "Ktfmt"

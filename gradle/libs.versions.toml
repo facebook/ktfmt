@@ -11,10 +11,11 @@ net-java-dev-jna-jna = "4.2.2"
 com-google-code-gson-gson = "2.10.1"
 
 # plugins
+gradlePlugin-dokka = "2.0.0"
 gradlePlugin-intelliJPlatform = "2.6.0"
 gradlePlugin-ktfmt = "0.22.0"
-gradlePlugin-shadowJar = "9.0.0-beta13"
 gradlePlugin-nexusPublish = "2.0.0"
+gradlePlugin-shadowJar = "9.0.0-beta13"
 
 [libraries]
 amazon-aws-lambda-core = { module = "com.amazonaws:aws-lambda-java-core", version.ref = "com-amazonaws-aws-lambda-java-core" }
@@ -33,8 +34,9 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
 [plugins]
+dokka = { id = "org.jetbrains.dokka", version.ref = "gradlePlugin-dokka" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "gradlePlugin-intelliJPlatform" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "gradlePlugin-ktfmt" }
-shadowJar = { id = "com.gradleup.shadow", version.ref = "gradlePlugin-shadowJar" }
 nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradlePlugin-nexusPublish" }
+shadowJar = { id = "com.gradleup.shadow", version.ref = "gradlePlugin-shadowJar" }

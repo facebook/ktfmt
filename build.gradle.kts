@@ -15,9 +15,10 @@
  */
 
 plugins {
+  alias(libs.plugins.dokka) apply false
+  alias(libs.plugins.intelliJPlatform) apply false
   alias(libs.plugins.kotlin) apply false
   alias(libs.plugins.ktfmt) apply false
-  alias(libs.plugins.intelliJPlatform) apply false
   alias(libs.plugins.nexusPublish)
   alias(libs.plugins.shadowJar) apply false
 }
