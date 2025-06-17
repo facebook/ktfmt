@@ -29,8 +29,10 @@ tasks.wrapper { distributionType = Wrapper.DistributionType.ALL }
 nexusPublishing {
   repositories {
     sonatype {
-      nexusUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-      snapshotRepositoryUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+      nexusUrl = uri("https://ossrh-staging-api.central.sonatype.com/service/local/")
+      snapshotRepositoryUrl = uri("https://central.sonatype.com/repository/maven-snapshots/")
+
+      stagingProfileId.set("com.facebook")
 
       username = System.getenv("OSSRH_USERNAME")
       password = System.getenv("OSSRH_PASSWORD")
