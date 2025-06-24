@@ -1,6 +1,6 @@
 [versions]
 java = "17"
-kotlin = "2.2.0-Beta2"
+kotlin = "2.2.0"
 com-amazonaws-aws-lambda-java-core = "1.2.1"
 com-amazonaws-aws-lambda-java-events = "2.2.9"
 com-google-googlejavaformat-google-java-format = "1.23.0"
