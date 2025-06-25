@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [Unreleased]
 
 ### Changed
+- Update to Kotlin 2.2.0 (https://github.com/facebook/ktfmt/commit/451be91d53aafcaae01cf0f7f3e389cfb8eefac3)
 
 
 ## [0.55]
