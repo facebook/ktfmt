@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - All styles managing trailing commas now (https://github.com/facebook/ktfmt/issues/216, https://github.com/facebook/ktfmt/issues/442)
 
 
-## [Unreleased]
+## [0.56]
 
 ### Changed
 - Update to Kotlin 2.2.0 (https://github.com/facebook/ktfmt/commit/451be91d53aafcaae01cf0f7f3e389cfb8eefac3)
