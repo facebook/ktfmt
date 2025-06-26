@@ -14,10 +14,18 @@
 # limitations under the License.
 
 set -eo pipefail
-./gradlew -q packageLibs
+
+# Absolute path to this script, e.g. ~/ktfmt/online_formatter/build_and_deploy.sh
+SCRIPT=$(readlink -f "$0")
+# Absolute path this script is in, thus ~/ktfmt/online_formatter/
+SCRIPT_DIR=$(dirname "${SCRIPT}")
+
+cd "$SCRIPT_DIR"
+
+../gradlew -q packageLibs
 mv build/distributions/lambda.zip build/lambda-lib.zip
 
-./gradlew build
+../gradlew :lambda:build
 
 ARTIFACT_BUCKET=ktfmt-online-formatter-lambda
 TEMPLATE=format.yaml

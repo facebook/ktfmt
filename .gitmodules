@@ -1,3 +1,0 @@
-[submodule "vendor/google-java-format"]
-	path = vendor/google-java-format
-	url = https://github.com/google/google-java-format.git

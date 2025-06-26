@@ -29,13 +29,18 @@ Give it a try! https://facebook.github.io/ktfmt/
 ### IntelliJ, Android Studio, and other JetBrains IDEs
 
 A [ktfmt IntelliJ plugin](https://plugins.jetbrains.com/plugin/14912-ktfmt) is available from the
-plugin repository. To install it, go to your IDE's settings and select the `Plugins` category. Click
-the `Marketplace` tab, search for the `ktfmt` plugin, and click the `Install` button.
+plugin repository.
+To install it:
+1. Go to your IDE's settings
+2. Select the `Plugins` category
+3. Go to the `Marketplace` tab
+4. Search for the `ktfmt` plugin
+5. Install it
 
 The plugin will be disabled by default. To enable it in the current project, go to
 `File → Settings... → ktfmt Settings` (or `IntelliJ IDEA → Preferences... → Editor → ktfmt Settings`
-on macOS) and check the `Enable ktfmt` checkbox. A notification will be presented when you first
-open a project offering to do this for you.
+on macOS) and check the `Enable ktfmt` checkbox.
+A notification will be presented when you first open a project offering to do this for you.
 
 To enable it by default in new projects, use
 `File → New Project Settings → Preferences for new Projects → Editor → ktfmt Settings`.
@@ -67,7 +72,7 @@ $ brew install ktfmt
 [Download the formatter](https://github.com/facebook/ktfmt/releases) and run it with:
 
 ```
-java -jar /path/to/ktfmt-<VERSION>-jar-with-dependencies.jar [--kotlinlang-style | --google-style] [files...]
+$ java -jar /path/to/ktfmt-<VERSION>-with-dependencies.jar [--kotlinlang-style | --google-style] [files...]
 ```
 
 `--kotlinlang-style` makes `ktfmt` use a block indent of 4 spaces instead of 2.
@@ -137,11 +142,8 @@ However, we do offer an alternative style for projects that absolutely cannot ma
 
 ### Setup
 
-* Open `pom.xml` in IntelliJ. Choose "Open as a Project"
-* The IntelliJ project will unfortunately be broken on import. To fix,
-  * Turn off ErrorProne by removing the compiler parameters in IntelliJ at the bottom of
-    `Settings → Build, Execution, Deployment → Compiler → Java Compiler` (see
-    https://github.com/google/google-java-format/issues/417)
+Open the `build.gradle.kts` at the root of the repo in IntelliJ.
+Choose "Open as a Project".
 
 ### Development
 
@@ -149,8 +151,8 @@ However, we do offer an alternative style for projects that absolutely cannot ma
 
 ### Building on the Command Line
 
-* Run `mvn install`
-* Run `java -jar core/target/ktfmt-<VERSION>-jar-with-dependencies.jar`
+* Run `./gradlew :ktfmt:shadowJar`
+* Run `java -jar core/build/libs/ktfmt-<VERSION>-with-dependencies.jar`
 
 ### Releasing
 

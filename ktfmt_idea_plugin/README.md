@@ -1,3 +1,5 @@
+NOTE: This file needs to be updated. Information here is no longer accurate.
+
 ## Tested with:
 
 Android Studio 4.1.1 (build 201)

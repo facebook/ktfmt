@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 
+### Removed
+- Removed mvn build scripts
+
+
 ## [0.56]
 
 ### Changed
