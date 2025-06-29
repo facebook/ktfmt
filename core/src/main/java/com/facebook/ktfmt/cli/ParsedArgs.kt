@@ -81,6 +81,7 @@ data class ParsedArgs(
         |  --set-exit-if-changed             Sets exit code to 1 if any input file was not 
         |                                        formatted/touched
         |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used
+        |  --max-width=<value>               Maximum line width (default: 100)
         |  
         |ARGFILE:
         |  If the only argument begins with '@', the remainder of the argument is treated
@@ -106,6 +107,7 @@ data class ParsedArgs(
       var setExitIfChanged = false
       var removeUnusedImports = true
       var stdinName: String? = null
+      var maxWidth: Int? = null
 
       if ("--help" in args || "-h" in args) return ParseResult.ShowMessage(HELP_TEXT)
       if ("--version" in args || "-v" in args) {
@@ -125,6 +127,20 @@ data class ParsedArgs(
                   parseKeyValueArg("--stdin-name", arg)
                       ?: return ParseResult.Error(
                           "Found option '${arg}', expected '${"--stdin-name"}=<value>'")
+          arg.startsWith("--max-width=") -> {
+            val string =
+                parseKeyValueArg("--max-width", arg)
+                    ?: return ParseResult.Error(
+                        "Found option '${arg}', expected '${"--max-width"}=<value>'")
+            maxWidth =
+                string.toIntOrNull()
+                    ?: return ParseResult.Error(
+                        "Invalid value for --max-width: '$string'. Must be a positive integer.")
+            if (maxWidth <= 0) {
+              return ParseResult.Error(
+                  "Invalid value for --max-width: $maxWidth. Must be a positive integer.")
+            }
+          }
           arg.startsWith("--") -> return ParseResult.Error("Unexpected option: $arg")
           arg.startsWith("@") -> return ParseResult.Error("Unexpected option: $arg")
           else -> fileNames.add(arg)
@@ -146,7 +162,9 @@ data class ParsedArgs(
       return ParseResult.Ok(
           ParsedArgs(
               fileNames,
-              formattingOptions.copy(removeUnusedImports = removeUnusedImports),
+              formattingOptions.copy(
+                  removeUnusedImports = removeUnusedImports,
+                  maxWidth = maxWidth ?: formattingOptions.maxWidth),
               dryRun,
               setExitIfChanged,
               stdinName,
