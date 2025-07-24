@@ -1909,10 +1909,10 @@ class KotlinInputAstVisitor(
                   builder.forcedBreak()
                 }
               }
-              whenEntry.guard?.let {
+              whenEntry.guard?.let { guard ->
                 builder.space()
                 emitKeywordWithCondition(
-                    "if", it.getExpression(), surroundConditionWithParens = false)
+                    "if", guard.getExpression(), surroundConditionWithParens = false)
               }
             }
           }
