@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Removed
 - Removed mvn build scripts
 
+### Fixed
+- Corrected reference to jar in formatter website's command line instructions https://facebook.github.io/ktfmt/
 
 ## [0.56]
 
