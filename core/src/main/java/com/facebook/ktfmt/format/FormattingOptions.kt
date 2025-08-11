@@ -16,6 +16,9 @@
 
 package com.facebook.ktfmt.format
 
+import com.facebook.ktfmt.format.TrailingCommaManagementStrategy.COMPLETE
+import com.facebook.ktfmt.format.TrailingCommaManagementStrategy.NONE
+
 data class FormattingOptions(
     /** ktfmt breaks lines longer than maxWidth. */
     val maxWidth: Int = DEFAULT_MAX_WIDTH,
@@ -45,13 +48,11 @@ data class FormattingOptions(
     val continuationIndent: Int,
 
     /**
-     * Automatically remove and insert trialing commas.
+     * Strategy for managing trailing commas.
      *
-     * Lists that cannot fit on one line will have trailing commas inserted. Lists that span
-     * multiple lines will have them removed. Manually inserted trailing commas cannot be used as a
-     * hint to force breaking lists to multiple lines.
+     * See [TrailingCommaManagementStrategy] for more details.
      */
-    val manageTrailingCommas: Boolean = true,
+    val trailingCommaManagementStrategy: TrailingCommaManagementStrategy = COMPLETE,
 
     /** Whether ktfmt should remove imports that are not used. */
     val removeUnusedImports: Boolean = true,
@@ -65,4 +66,48 @@ data class FormattingOptions(
   companion object {
     const val DEFAULT_MAX_WIDTH: Int = 100
   }
+
+  @Deprecated("Here just for retrocompatibility reasons. Will be removed on 1.0.0")
+  constructor(
+      maxWidth: Int,
+      blockIndent: Int,
+      continuationIndent: Int,
+      manageTrailingCommas: Boolean = true,
+      removeUnusedImports: Boolean = true,
+      debuggingPrintOpsAfterFormatting: Boolean = false,
+  ) : this(
+      maxWidth = maxWidth,
+      blockIndent = blockIndent,
+      continuationIndent = continuationIndent,
+      trailingCommaManagementStrategy = if (manageTrailingCommas) COMPLETE else NONE,
+      removeUnusedImports = removeUnusedImports,
+      debuggingPrintOpsAfterFormatting = debuggingPrintOpsAfterFormatting,
+  )
+
+  internal val manageTrailingCommas: Boolean
+    get() = trailingCommaManagementStrategy != NONE
+}
+
+enum class TrailingCommaManagementStrategy(
+    val removeRedundantTrailingCommas: Boolean,
+) {
+  /** Do not manage trailing commas at all, only format what is already present */
+  NONE(removeRedundantTrailingCommas = false),
+
+  /**
+   * Only add trailing commas when necessary, but do not remove them.
+   *
+   * Lists that cannot fit on one line will have trailing commas inserted. Trailing commas can to be
+   * used to "hint" ktfmt that the list should be broken to multiple lines.
+   */
+  ONLY_ADD(removeRedundantTrailingCommas = false),
+
+  /**
+   * Fully manage trailing commas, adding and removing them where necessary.
+   *
+   * Lists that cannot fit on one line will have trailing commas inserted. Lists that span multiple
+   * lines will have them removed. Manually inserted trailing commas cannot be used as a hint to
+   * force breaking lists to multiple lines.
+   */
+  COMPLETE(removeRedundantTrailingCommas = true),
 }

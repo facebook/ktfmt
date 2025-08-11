@@ -48,7 +48,7 @@ object RedundantElementManager {
             }
 
             redundantSemicolonDetector.takeElement(element)
-            if (options.manageTrailingCommas) {
+            if (options.trailingCommaManagementStrategy.removeRedundantTrailingCommas) {
               trailingCommaDetector.takeElement(element)
             }
             super.visitElement(element)

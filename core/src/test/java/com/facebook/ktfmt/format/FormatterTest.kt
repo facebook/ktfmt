@@ -7786,7 +7786,8 @@ class FormatterTest {
     @JvmStatic
     @BeforeClass
     fun setUp(): Unit {
-      defaultTestFormattingOptions = META_FORMAT.copy(manageTrailingCommas = false)
+      defaultTestFormattingOptions =
+          META_FORMAT.copy(trailingCommaManagementStrategy = TrailingCommaManagementStrategy.NONE)
     }
   }
 }
