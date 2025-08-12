@@ -5493,7 +5493,7 @@ class FormatterTest {
                 maxWidth = 35,
                 blockIndent = 4,
                 continuationIndent = 4,
-                manageTrailingCommas = false,
+                trailingCommaManagementStrategy = TrailingCommaManagementStrategy.NONE,
             ),
         )
         .isEqualTo(code)

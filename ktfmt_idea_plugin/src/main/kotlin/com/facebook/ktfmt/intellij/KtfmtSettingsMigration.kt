@@ -16,6 +16,7 @@
 
 package com.facebook.ktfmt.intellij
 
+import com.facebook.ktfmt.format.TrailingCommaManagementStrategy
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Disabled
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Enabled
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Unknown
@@ -36,6 +37,7 @@ internal class KtfmtSettingsMigration :
   // Changelog
   // ---------
   //
+  // v3 manageTrailingCommas -> trailingCommaManagementStrategy (0.57+)
   // v2 enabled [bool] -> enableKtfmt [enum], custom styles (0.52+)
   // v1 initial version - enabled is a boolean, only preset styles
   var stateVersion: Int
@@ -44,21 +46,51 @@ internal class KtfmtSettingsMigration :
       state.stateVersion = value
     }
 
-  @Suppress("DEPRECATION") // Accessing deprecated properties
-  fun migrateFromV1ToCurrent(v1State: KtfmtSettings.State): KtfmtSettings.State {
+  fun migrateToCurrent(oldState: KtfmtSettings.State): KtfmtSettings.State {
+    var migratedState = oldState
+    if (state.stateVersion == 1) {
+      migratedState = migrateFromV1(migratedState)
+    }
+    if (state.stateVersion == 2) {
+      migratedState = migrateFromV2(migratedState)
+    }
+    return migratedState
+  }
+
+  fun migrateFromV1(v1State: KtfmtSettings.State): KtfmtSettings.State {
+    check(state.stateVersion == 1) { "Should only be called when stateVersion is 1" }
     val migrated =
         KtfmtSettings.State().apply {
           copyFrom(v1State)
 
           enableKtfmt =
+              @Suppress("DEPRECATION")
               when (v1State.enabled) {
                 "true" -> Enabled
                 "false" -> Disabled
                 else -> Unknown
               }
+          @Suppress("DEPRECATION")
           enabled = null
         }
-    state.stateVersion = CURRENT_VERSION
+    state.stateVersion = 2
+    return migrated
+  }
+
+  fun migrateFromV2(v2State: KtfmtSettings.State): KtfmtSettings.State {
+    check(state.stateVersion == 2) { "Should only be called when stateVersion is 2" }
+    val migrated =
+        KtfmtSettings.State().apply {
+          copyFrom(v2State)
+
+          customTrailingCommaManagementStrategy =
+              @Suppress("DEPRECATION")
+              when (v2State.customManageTrailingCommas) {
+                true -> TrailingCommaManagementStrategy.COMPLETE
+                else -> TrailingCommaManagementStrategy.NONE
+              }.name
+        }
+    state.stateVersion = 3
     return migrated
   }
 
@@ -67,6 +99,6 @@ internal class KtfmtSettingsMigration :
   }
 
   companion object {
-    const val CURRENT_VERSION = 2
+    const val CURRENT_VERSION = 3
   }
 }

@@ -18,6 +18,7 @@ package com.facebook.ktfmt.intellij
 
 import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
+import com.facebook.ktfmt.format.TrailingCommaManagementStrategy
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Disabled
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Enabled
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Unknown
@@ -48,11 +49,12 @@ internal class KtfmtSettings(private val project: Project) :
   var customFormattingOptions: FormattingOptions
     get() =
         FormattingOptions(
-            state.customMaxLineLength,
-            state.customBlockIndent,
-            state.customContinuationIndent,
-            state.customManageTrailingCommas,
-            state.customRemoveUnusedImports,
+            maxWidth = state.customMaxLineLength,
+            blockIndent = state.customBlockIndent,
+            continuationIndent = state.customContinuationIndent,
+            trailingCommaManagementStrategy =
+                state.customTrailingCommaManagementStrategy.toTrailingCommaManagementStrategy(),
+            removeUnusedImports = state.customRemoveUnusedImports,
         )
     set(customFormattingOptions) {
       state.applyCustomFormattingOptions(customFormattingOptions)
@@ -76,10 +78,10 @@ internal class KtfmtSettings(private val project: Project) :
       state.customContinuationIndent = continuationIndent.coerceAtLeast(1)
     }
 
-  var customManageTrailingCommas: Boolean
-    get() = state.customManageTrailingCommas
-    set(manageTrailingCommas) {
-      state.customManageTrailingCommas = manageTrailingCommas
+  var customTrailingCommaManagementStrategy: String
+    get() = state.customTrailingCommaManagementStrategy
+    set(value) {
+      state.customTrailingCommaManagementStrategy = value
     }
 
   var customRemoveUnusedImports: Boolean
@@ -108,7 +110,8 @@ internal class KtfmtSettings(private val project: Project) :
 
     return when (val stateVersion = migrationSettings.stateVersion) {
       KtfmtSettingsMigration.CURRENT_VERSION -> state
-      1 -> migrationSettings.migrateFromV1ToCurrent(state)
+      1,
+      2 -> migrationSettings.migrateToCurrent(state)
       else -> {
         thisLogger().error("Cannot migrate settings from $stateVersion. Using defaults.")
         State()
@@ -123,7 +126,19 @@ internal class KtfmtSettings(private val project: Project) :
   }
 
   internal class State : BaseState() {
-    @Deprecated("Deprecated in V2. Use enableKtfmt instead.") var enabled: String? by string()
+    @Deprecated(
+        "Deprecated in V2. Use enableKtfmt instead.",
+        replaceWith = ReplaceWith("enableKtfmt"),
+    )
+    var enabled: String? by string()
+    @Deprecated(
+        "Deprecated in V3. Use customTrailingCommaManagementStrategy instead.",
+        replaceWith = ReplaceWith("customTrailingCommaManagementStrategy"),
+    )
+    var customManageTrailingCommas: Boolean by
+        property(
+            Formatter.META_FORMAT.trailingCommaManagementStrategy !=
+                TrailingCommaManagementStrategy.NONE)
 
     var enableKtfmt: EnabledState by enum(Unknown)
     var uiFormatterStyle: UiFormatterStyle by enum(Meta)
@@ -131,19 +146,29 @@ internal class KtfmtSettings(private val project: Project) :
     var customMaxLineLength: Int by property(Formatter.META_FORMAT.maxWidth)
     var customBlockIndent: Int by property(Formatter.META_FORMAT.blockIndent)
     var customContinuationIndent: Int by property(Formatter.META_FORMAT.continuationIndent)
-    var customManageTrailingCommas: Boolean by property(Formatter.META_FORMAT.manageTrailingCommas)
+    var customTrailingCommaManagementStrategy: String by
+        property(
+            Formatter.META_FORMAT.trailingCommaManagementStrategy.name,
+            isDefault = { it == Formatter.META_FORMAT.trailingCommaManagementStrategy.name },
+        )
     var customRemoveUnusedImports: Boolean by property(Formatter.META_FORMAT.removeUnusedImports)
 
     fun applyCustomFormattingOptions(formattingOptions: FormattingOptions) {
       customMaxLineLength = formattingOptions.maxWidth
       customBlockIndent = formattingOptions.blockIndent
       customContinuationIndent = formattingOptions.continuationIndent
-      customManageTrailingCommas = formattingOptions.manageTrailingCommas
+      customTrailingCommaManagementStrategy = formattingOptions.trailingCommaManagementStrategy.name
       customRemoveUnusedImports = formattingOptions.removeUnusedImports
 
       incrementModificationCount()
     }
   }
+
+  private fun String.toTrailingCommaManagementStrategy(
+      defaultValue: TrailingCommaManagementStrategy = TrailingCommaManagementStrategy.NONE,
+  ): TrailingCommaManagementStrategy =
+      runCatching { TrailingCommaManagementStrategy.valueOf(this.uppercase()) }
+          .getOrDefault(defaultValue)
 
   companion object {
     @JvmStatic

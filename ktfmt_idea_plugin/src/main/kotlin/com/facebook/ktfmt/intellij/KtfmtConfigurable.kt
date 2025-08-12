@@ -17,6 +17,7 @@
 package com.facebook.ktfmt.intellij
 
 import com.facebook.ktfmt.format.FormattingOptions
+import com.facebook.ktfmt.format.TrailingCommaManagementStrategy
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Disabled
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Enabled
 import com.facebook.ktfmt.intellij.UiFormatterStyle.Custom
@@ -36,6 +37,7 @@ import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.layout.selected
 import com.intellij.ui.layout.selectedValueMatches
 import javax.swing.JCheckBox
+import javax.swing.JComboBox
 import javax.swing.JTextField
 
 @Suppress("DialogTitleCapitalization")
@@ -100,11 +102,14 @@ class KtfmtConfigurable(project: Project) :
                     .component
           }
 
-          lateinit var manageTrailingCommas: JCheckBox
-          row {
-            manageTrailingCommas =
-                checkBox("Manage trailing commas")
-                    .bindSelected(settings::customManageTrailingCommas)
+          lateinit var trailingCommaManagementStrategy: JComboBox<String>
+          row("Trailing commas management") {
+            trailingCommaManagementStrategy =
+                comboBox(TrailingCommaManagementStrategy.values().map { it.toString() })
+                    .bindItem(
+                        getter = { settings.customTrailingCommaManagementStrategy },
+                        setter = { settings.customTrailingCommaManagementStrategy = it.orEmpty() },
+                    )
                     .component
           }
 
@@ -126,7 +131,7 @@ class KtfmtConfigurable(project: Project) :
                           maxLineLength,
                           blockIndent,
                           continuationIndent,
-                          manageTrailingCommas,
+                          trailingCommaManagementStrategy,
                           removeUnusedImports,
                       )
                 }
@@ -139,7 +144,7 @@ class KtfmtConfigurable(project: Project) :
                           maxLineLength,
                           blockIndent,
                           continuationIndent,
-                          manageTrailingCommas,
+                          trailingCommaManagementStrategy,
                           removeUnusedImports,
                       )
                 }
@@ -152,7 +157,7 @@ class KtfmtConfigurable(project: Project) :
                           maxLineLength,
                           blockIndent,
                           continuationIndent,
-                          manageTrailingCommas,
+                          trailingCommaManagementStrategy,
                           removeUnusedImports,
                       )
                 }
@@ -169,13 +174,13 @@ private fun FormattingOptions.updateFields(
     maxLineLength: JTextField,
     blockIndent: JTextField,
     continuationIndent: JTextField,
-    manageTrailingCommas: JCheckBox,
+    trailingCommaManagementStrategy: JComboBox<String>,
     removeUnusedImports: JCheckBox,
 ) {
   maxLineLength.text = maxWidth.toString()
   blockIndent.text = this.blockIndent.toString()
   continuationIndent.text = this.continuationIndent.toString()
-  manageTrailingCommas.isSelected = this.manageTrailingCommas
+  trailingCommaManagementStrategy.selectedItem = this.trailingCommaManagementStrategy.toString()
   removeUnusedImports.isSelected = this.removeUnusedImports
 }
 

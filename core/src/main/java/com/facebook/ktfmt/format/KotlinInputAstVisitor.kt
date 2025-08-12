@@ -27,6 +27,7 @@ import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.Output.BreakTag
 import java.util.ArrayDeque
 import java.util.Optional
+import kotlin.jvm.optionals.getOrNull
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
@@ -1437,11 +1438,11 @@ class KotlinInputAstVisitor(
       }
 
       override fun getLeftParenthesis(): PsiElement? {
-        return accessor.leftParenthesis
+        return accessor.parameterList?.leftParenthesis
       }
 
       override fun getRightParenthesis(): PsiElement? {
-        return accessor.rightParenthesis
+        return accessor.parameterList?.rightParenthesis
       }
     }
   }
@@ -1947,7 +1948,7 @@ class KotlinInputAstVisitor(
           builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
           for (value in enumEntryList.enumEntries) {
             visit(value)
-            if (builder.peekToken() == Optional.of(",")) {
+            if (builder.peekToken().getOrNull() == ",") {
               builder.token(",")
               builder.forcedBreak()
             }

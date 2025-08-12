@@ -110,4 +110,14 @@ enum class TrailingCommaManagementStrategy(
    * force breaking lists to multiple lines.
    */
   COMPLETE(removeRedundantTrailingCommas = true),
+  ;
+
+  override fun toString(): String {
+    // NONE -> "None"
+    // ONLY_ADD -> "Only add"
+    // COMPLETE -> "Complete"
+    return name.replace("_", " ").lowercase().replaceFirstChar {
+      if (it.isLowerCase()) it.titlecase() else it.toString()
+    }
+  }
 }
