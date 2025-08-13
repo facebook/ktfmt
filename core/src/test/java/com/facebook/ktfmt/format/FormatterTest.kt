@@ -3102,6 +3102,50 @@ class FormatterTest {
               .trimMargin())
 
   @Test
+  fun `handle where formatting, fits into single line`() =
+      assertFormatted(
+          """
+              |class Foo<T>(n: Int) where T : Bar, T : FooBar
+              |
+              |fun <T> foo(n: Int) where T : Bar, T : FooBar {}
+              |"""
+              .trimMargin())
+
+  @Test
+  fun `handle where formatting, full expression breaks into single line`() =
+      assertFormatted(
+          """
+              |////////////////////////////////
+              |class Foo<T>(n: Int)
+              |    where T : Bar, T : FooBar
+              |
+              |fun <T> foo(n: Int)
+              |    where T : Bar, T : FooBar {}
+              |"""
+              .trimMargin(),
+          deduceMaxWidth = true,
+      )
+
+  @Test
+  fun `handle where formatting, everything breaks into multiple lines`() =
+      assertFormatted(
+          """
+              |////////////////////////////
+              |class Foo<T>(n: Int)
+              |    where
+              |        T : Bar,
+              |        T : FooBar
+              |
+              |fun <T> foo(n: Int)
+              |    where
+              |        T : Bar,
+              |        T : FooBar {}
+              |"""
+              .trimMargin(),
+          deduceMaxWidth = true,
+      )
+
+  @Test
   fun `keep last expression in qualified indented`() =
       assertFormatted(
           """
@@ -3645,7 +3689,7 @@ class FormatterTest {
       assertFormatted(
           """
       |class Foo<T>() : Bar by bar
-      |where T : Qux
+      |    where T : Qux
       |"""
               .trimMargin())
 
@@ -7563,8 +7607,8 @@ class FormatterTest {
       assertFormatted(
           """
       |///////////////////////////
-      |class Basket<T>() where
-      |T : Fruit {
+      |class Basket<T>()
+      |    where T : Fruit {
       |  // some body
       |}
       |"""

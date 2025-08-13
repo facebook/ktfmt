@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 - `TrailingCommaManagementStrategy.ONLY_ADD` strategy that does not remove existing trailing commas (https://github.com/facebook/ktfmt/issues/461, https://github.com/facebook/ktfmt/issues/512, https://github.com/facebook/ktfmt/issues/514)
+- Formatting of where clauses (https://github.com/facebook/ktfmt/issues/541)
 
 ### Changed
 - `FormattingOptions.manageTrailingCommas` was replaced with `FormattingOptions.trailingCommaManagementStrategy`, which also added new `TrailingCommaManagementStrategy.ONLY_ADD` strategy (https://github.com/facebook/ktfmt/issues/461, https://github.com/facebook/ktfmt/issues/512, https://github.com/facebook/ktfmt/issues/514)

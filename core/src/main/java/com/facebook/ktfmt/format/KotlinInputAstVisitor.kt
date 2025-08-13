@@ -371,7 +371,6 @@ class KotlinInputAstVisitor(
       }
 
       if (typeConstraintList != null) {
-        builder.space()
         visit(typeConstraintList)
       }
       if (bodyExpression is KtBlockExpression) {
@@ -1350,7 +1349,6 @@ class KotlinInputAstVisitor(
 
       // For example `where T : Int` in a generic method
       if (typeConstraintList != null) {
-        builder.space()
         visit(typeConstraintList)
         builder.space()
       }
@@ -1541,13 +1539,14 @@ class KotlinInputAstVisitor(
           visit(superTypes)
         }
       }
-      builder.space()
       val typeConstraintList = classOrObject.typeConstraintList
       if (typeConstraintList != null) {
         if (superTypes?.entries?.lastOrNull() is KtDelegatedSuperTypeEntry) {
-          builder.forcedBreak()
+          builder.forcedBreak(expressionBreakIndent)
         }
         visit(typeConstraintList)
+        builder.space()
+      } else {
         builder.space()
       }
       visit(classOrObject.body)
@@ -2172,10 +2171,15 @@ class KotlinInputAstVisitor(
 
   /** Example `where T : View, T : Listener` */
   override fun visitTypeConstraintList(list: KtTypeConstraintList) {
-    builder.token("where")
-    builder.space()
-    builder.sync(list)
-    visitEachCommaSeparated(list.constraints)
+    builder.block(expressionBreakIndent) {
+      builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+      builder.token("where")
+      builder.block(expressionBreakIndent) {
+        builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+        builder.sync(list)
+        visitEachCommaSeparated(list.constraints, wrapInBlock = false)
+      }
+    }
   }
 
   /** Example `T : Foo` */
@@ -2579,7 +2583,11 @@ class KotlinInputAstVisitor(
    * @param plusIndent the block level to pass to the block
    * @param block a code block to be run in this block level
    */
-  private fun OpsBuilder.block(plusIndent: Indent, isEnabled: Boolean = true, block: () -> Unit) {
+  private fun OpsBuilder.block(
+      plusIndent: Indent = ZERO,
+      isEnabled: Boolean = true,
+      block: () -> Unit,
+  ) {
     if (isEnabled) {
       open(plusIndent)
     }
