@@ -47,7 +47,7 @@ object Formatter {
       FormattingOptions(
           blockIndent = 2,
           continuationIndent = 4,
-          trailingCommaManagementStrategy = TrailingCommaManagementStrategy.NONE,
+          trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
       )
 
   @JvmField

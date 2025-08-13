@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 - `FormattingOptions.manageTrailingCommas` was replaced with `FormattingOptions.trailingCommaManagementStrategy`, which also added new `TrailingCommaManagementStrategy.ONLY_ADD` strategy (https://github.com/facebook/ktfmt/issues/461, https://github.com/facebook/ktfmt/issues/512, https://github.com/facebook/ktfmt/issues/514)
+- All styles managing trailing commas by default now (https://github.com/facebook/ktfmt/issues/216, https://github.com/facebook/ktfmt/issues/442)
 
 ### Removed
 - Removed mvn build scripts
