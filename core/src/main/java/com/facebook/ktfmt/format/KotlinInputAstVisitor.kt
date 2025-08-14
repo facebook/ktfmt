@@ -1917,7 +1917,11 @@ class KotlinInputAstVisitor(
             }
           }
           val whenExpression = whenEntry.expression
-          builder.space()
+          if (whenEntry.trailingComma != null) {
+            builder.forcedBreak()
+          } else {
+            builder.space()
+          }
           builder.token("->")
           if (whenExpression is KtBlockExpression) {
             builder.space()

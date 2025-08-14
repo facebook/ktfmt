@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 - Corrected reference to jar in formatter website's command line instructions https://facebook.github.io/ktfmt/
+- Trailing comma on when cases (https://github.com/facebook/ktfmt/issues/376)
 
 ## [0.56]
 
