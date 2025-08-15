@@ -23,7 +23,7 @@ import com.google.googlejavaformat.Input
 class KotlinToken(
     private val toksBefore: ImmutableList<KotlinTok>,
     private val kotlinTok: KotlinTok,
-    private val toksAfter: ImmutableList<KotlinTok>
+    private val toksAfter: ImmutableList<KotlinTok>,
 ) : Input.Token {
 
   override fun getTok(): KotlinTok = kotlinTok

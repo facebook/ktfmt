@@ -392,7 +392,10 @@ class Paragraph(private val task: FormattingTask) {
               newLines.subList(0, newLines.size - 1).any { it.length > longestLine }) {
             return newLines +
                 reflowGreedy(
-                    lineWidth - hangingIndentSize, options, words.subList(lastWord, words.size))
+                    lineWidth - hangingIndentSize,
+                    options,
+                    words.subList(lastWord, words.size),
+                )
           }
           break
         }
@@ -611,7 +614,7 @@ class Paragraph(private val task: FormattingTask) {
   private fun reflowGreedy(
       lineWidth: Int,
       options: KDocFormattingOptions,
-      words: List<String>
+      words: List<String>,
   ): List<String> {
     // Greedy implementation
 

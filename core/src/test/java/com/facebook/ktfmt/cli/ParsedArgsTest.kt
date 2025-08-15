@@ -241,7 +241,7 @@ class ParsedArgsTest {
       dryRun: Boolean = false,
       setExitIfChanged: Boolean = false,
       removedUnusedImports: Boolean = true,
-      stdinName: String? = null
+      stdinName: String? = null,
   ): ParseResult.Ok {
     val returnedFormattingOptions =
         formattingOptions.copy(removeUnusedImports = removedUnusedImports)

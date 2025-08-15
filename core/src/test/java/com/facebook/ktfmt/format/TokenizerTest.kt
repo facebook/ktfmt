@@ -31,7 +31,8 @@ class TokenizerTest {
                 "val  a = ", //
                 "", //
                 "     ", //
-                "     15")
+                "     15",
+            )
             .joinToString("\n")
 
     val file = Parser.parse(code)
@@ -57,7 +58,8 @@ class TokenizerTest {
                 "      \"\"\"",
                 "val b=\"lorem ipsum\"",
                 "      ",
-                "    ")
+                "    ",
+            )
             .joinToString("\n")
 
     val file = Parser.parse(code)
@@ -78,7 +80,8 @@ class TokenizerTest {
                     "    Lorem",
                     "   ${WhitespaceTombstones.SPACE_TOMBSTONE}",
                     "    ${WhitespaceTombstones.SPACE_TOMBSTONE}",
-                    "      \"\"\"")
+                    "      \"\"\"",
+                )
                 .joinToString("\n"),
             "\n",
             "val",
@@ -89,7 +92,8 @@ class TokenizerTest {
             "\n",
             "      ",
             "\n",
-            "    ")
+            "    ",
+        )
         .inOrder()
   }
 
@@ -97,9 +101,9 @@ class TokenizerTest {
   fun `Token index is advanced after a string token`() {
     val code =
         """
-      |val b="a"
-      |val a=5
-      |"""
+        |val b="a"
+        |val a=5
+        |"""
             .trimMargin()
 
     val file = Parser.parse(code)
@@ -118,14 +122,14 @@ class TokenizerTest {
   fun `Context receivers are parsed correctly`() {
     val code =
         """
-      |context(Something)
-      |class A {
-      |  context(
-      |  // Test comment.
-      |  Logger, Raise<Error>)
-      |  fun test() {}
-      |}
-      |"""
+        |context(Something)
+        |class A {
+        |  context(
+        |  // Test comment.
+        |  Logger, Raise<Error>)
+        |  fun test() {}
+        |}
+        |"""
             .trimMargin()
 
     val file = Parser.parse(code)
@@ -173,7 +177,8 @@ class TokenizerTest {
             "}",
             "\n",
             "}",
-            "\n")
+            "\n",
+        )
         .inOrder()
     assertThat(tokenizer.toks.map { it.index })
         .containsExactly(
@@ -216,7 +221,8 @@ class TokenizerTest {
             22,
             -1,
             23,
-            -1)
+            -1,
+        )
         .inOrder()
   }
 
@@ -225,12 +231,12 @@ class TokenizerTest {
     // language=kotlin
     val code =
         """
-      |fun feedAnimal(animal: Animal) {
-      |    when (animal) {
-      |        is Animal.Cat if !animal.mouseHunter -> animal.feedCat()
-      |    }
-      |}
-      |"""
+        |fun feedAnimal(animal: Animal) {
+        |    when (animal) {
+        |        is Animal.Cat if !animal.mouseHunter -> animal.feedCat()
+        |    }
+        |}
+        |"""
             .trimMargin()
 
     val file = Parser.parse(code)
@@ -286,7 +292,8 @@ class TokenizerTest {
             "}",
             "\n",
             "}",
-            "\n")
+            "\n",
+        )
         .inOrder()
     assertThat(tokenizer.toks.map { it.index })
         .containsExactly(
@@ -337,7 +344,8 @@ class TokenizerTest {
             28,
             -1,
             29,
-            -1)
+            -1,
+        )
         .inOrder()
   }
 
@@ -346,19 +354,19 @@ class TokenizerTest {
     // language=kotlin
     val code =
         """
-      |//////////////////////////////////////
-      |fun foo() {
-      |  val sentence =
-      |      "The" +
-      |          "quick" +
-      |          ("brown" + "fox") +
-      |          "jumps" +
-      |          "over" +
-      |          "the" +
-      |          "lazy" +
-      |          "dog"
-      |}
-      |"""
+        |//////////////////////////////////////
+        |fun foo() {
+        |  val sentence =
+        |      "The" +
+        |          "quick" +
+        |          ("brown" + "fox") +
+        |          "jumps" +
+        |          "over" +
+        |          "the" +
+        |          "lazy" +
+        |          "dog"
+        |}
+        |"""
             .trimMargin()
 
     val file = Parser.parse(code)
@@ -429,7 +437,8 @@ class TokenizerTest {
             "\"dog\"",
             "\n",
             "}",
-            "\n")
+            "\n",
+        )
         .inOrder()
     assertThat(tokenizer.toks.map { it.index })
         .containsExactly(
@@ -495,7 +504,8 @@ class TokenizerTest {
             27,
             -1,
             28,
-            -1)
+            -1,
+        )
         .inOrder()
   }
 
@@ -505,14 +515,14 @@ class TokenizerTest {
     // language=kotlin
     val code =
         """
-      |context(something: Something)
-      |class A {
-      |  context(
-      |  // Test comment.
-      |  logger: Logger, raise: Raise<Error>, _: Ignored)
-      |  fun test() {}
-      |}
-      |"""
+        |context(something: Something)
+        |class A {
+        |  context(
+        |  // Test comment.
+        |  logger: Logger, raise: Raise<Error>, _: Ignored)
+        |  fun test() {}
+        |}
+        |"""
             .trimMargin()
 
     val file = Parser.parse(code)
@@ -643,36 +653,39 @@ class TokenizerTest {
   fun `Unclosed comment obvious`() {
     assertParseError(
         """
-      |package a.b
-      |/*
-      |class A {}
-      |"""
+        |package a.b
+        |/*
+        |class A {}
+        |"""
             .trimMargin(),
-        "2:1: error: Unclosed comment")
+        "2:1: error: Unclosed comment",
+    )
   }
 
   @Test
   fun `Unclosed comment too short`() {
     assertParseError(
         """
-      |package a.b
-      |/*/
-      |class A {}
-      |"""
+        |package a.b
+        |/*/
+        |class A {}
+        |"""
             .trimMargin(),
-        "2:1: error: Unclosed comment")
+        "2:1: error: Unclosed comment",
+    )
   }
 
   @Test
   fun `Unclosed comment nested`() {
     assertParseError(
         """
-      |package a.b
-      |/* /* */
-      |class A {}
-      |"""
+        |package a.b
+        |/* /* */
+        |class A {}
+        |"""
             .trimMargin(),
-        "2:1: error: Unclosed comment")
+        "2:1: error: Unclosed comment",
+    )
   }
 
   @Test
@@ -680,11 +693,12 @@ class TokenizerTest {
     // TODO: https://youtrack.jetbrains.com/issue/KT-72887 - This should be an error.
     assertParseError(
         """
-      |package a.b
-      |class A {}
-      |/* /* */"""
+        |package a.b
+        |class A {}
+        |/* /* */"""
             .trimMargin(),
-        null)
+        null,
+    )
   }
 
   private fun assertParseError(code: String, message: String?) {

@@ -135,7 +135,8 @@ class UtilitiesTest {
 
     check(
         "SDK version - [`Partial(Mode.UseIfAvailable)`](Partial) on API 24+",
-        listOf("SDK", "version - [`Partial(Mode.UseIfAvailable)`](Partial)", "on", "API", "24+"))
+        listOf("SDK", "version - [`Partial(Mode.UseIfAvailable)`](Partial)", "on", "API", "24+"),
+    )
 
     check(
         "Z orders can range from Integer.MIN_VALUE to Integer.MAX_VALUE. Default z order " +
@@ -157,7 +158,9 @@ class UtilitiesTest {
             "instances",
             "are",
             "positioned",
-            "back-to-front."))
+            "back-to-front.",
+        ),
+    )
     check(
         "Equates to `cmd package compile -f -m speed <package>` on API 24+.",
         listOf(
@@ -172,6 +175,8 @@ class UtilitiesTest {
             "<package>`",
             "on",
             "API",
-            "24+."))
+            "24+.",
+        ),
+    )
   }
 }

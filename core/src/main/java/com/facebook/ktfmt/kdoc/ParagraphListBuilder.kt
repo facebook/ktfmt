@@ -35,7 +35,7 @@ package com.facebook.ktfmt.kdoc
 class ParagraphListBuilder(
     comment: String,
     private val options: KDocFormattingOptions,
-    private val task: FormattingTask
+    private val task: FormattingTask,
 ) {
   private val lineComment: Boolean = comment.isLineComment()
   private val commentPrefix: String =
@@ -106,7 +106,7 @@ class ParagraphListBuilder(
       until: (Int, String, String) -> Boolean = { _, _, _ -> true },
       customize: (Int, Paragraph) -> Unit = { _, _ -> },
       shouldBreak: (String, String) -> Boolean = { _, _ -> false },
-      separator: String = " "
+      separator: String = " ",
   ): Int {
     var j = i
     while (j < lines.size) {
@@ -339,7 +339,8 @@ class ParagraphListBuilder(
                     handleTag("</pre>")
                   }
                 },
-                until = { it.contains("</pre>", ignoreCase = true) })
+                until = { it.contains("</pre>", ignoreCase = true) },
+            )
       } else if (lineWithoutIndentation.isQuoted()) {
         i--
         val paragraph = newParagraph(i)
@@ -357,7 +358,8 @@ class ParagraphListBuilder(
                       w.isHeader()
                 },
                 customize = { _, p -> p.quoted = true },
-                includeEnd = false)
+                includeEnd = false,
+            )
         newParagraph(i)
       } else if (lineWithoutIndentation.equals("<ul>", true) ||
           lineWithoutIndentation.equals("<ol>", true)) {
@@ -374,7 +376,8 @@ class ParagraphListBuilder(
                   w.startsWith("<li>", true) ||
                       w.startsWith("</ul>", true) ||
                       w.startsWith("</ol>", true)
-                })
+                },
+            )
         newParagraph(i)
       } else if (lineWithoutIndentation.isListItem() ||
           (lineWithoutIndentation.isKDocTag() && task.type == CommentType.KDOC) ||
@@ -416,7 +419,8 @@ class ParagraphListBuilder(
                     p.hanging = true
                     p.continuation = true
                   }
-                })
+                },
+            )
         newParagraph(i)
       } else if (lineWithoutIndentation.isEmpty()) {
         newParagraph(i).separate = true

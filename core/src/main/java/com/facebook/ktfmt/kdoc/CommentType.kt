@@ -38,7 +38,7 @@ enum class CommentType(
     /** The closing string of the comment. */
     val suffix: String,
     /** For multi line comments, the prefix at each comment line after the first one. */
-    val linePrefix: String
+    val linePrefix: String,
 ) {
   KDOC("/**", "*/", " * "),
   BLOCK("/*", "*/", ""),

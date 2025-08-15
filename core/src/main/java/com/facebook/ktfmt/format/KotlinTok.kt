@@ -28,7 +28,7 @@ class KotlinTok(
     private val position: Int,
     private val column: Int,
     val isToken: Boolean,
-    private val kind: KtToken
+    private val kind: KtToken,
 ) : Input.Tok {
 
   override fun getIndex(): Int = index

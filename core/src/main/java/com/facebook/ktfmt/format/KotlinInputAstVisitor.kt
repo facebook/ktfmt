@@ -135,7 +135,7 @@ import org.jetbrains.kotlin.psi.stubs.impl.KotlinPlaceHolderStubImpl
 /** An AST visitor that builds a stream of {@link Op}s to format. */
 class KotlinInputAstVisitor(
     private val options: FormattingOptions,
-    private val builder: OpsBuilder
+    private val builder: OpsBuilder,
 ) : KtTreeVisitorVoid() {
 
   /** Standard indentation for a block */
@@ -451,7 +451,8 @@ class KotlinInputAstVisitor(
           typeConstraintList = property.typeConstraintList,
           delegate = property.delegate,
           initializer = property.initializer,
-          accessors = property.accessors)
+          accessors = property.accessors,
+      )
     }
     builder.guessToken(";")
     if (property.parent !is KtWhenExpression) {
@@ -644,7 +645,7 @@ class KotlinInputAstVisitor(
    */
   private fun computeGroupingInfo(
       parts: List<KtExpression>,
-      useBlockLikeLambdaStyle: Boolean
+      useBlockLikeLambdaStyle: Boolean,
   ): List<GroupingInfo> {
     val groupingInfos = List(parts.size) { GroupingInfo() }
     var lastIndexToOpen = 0
@@ -690,7 +691,7 @@ class KotlinInputAstVisitor(
       part: KtExpression,
       index: Int,
       previous: KtExpression,
-      current: KtExpression
+      current: KtExpression,
   ): Boolean {
     // this is the second, and the first is short, avoid `.` "hanging in air"
     if (index == 1 && previous.text.length < options.continuationIndent) {
@@ -1280,7 +1281,7 @@ class KotlinInputAstVisitor(
 
   internal enum class DeclarationKind {
     FIELD,
-    PARAMETER
+    PARAMETER,
   }
 
   /**
@@ -1302,7 +1303,7 @@ class KotlinInputAstVisitor(
       typeConstraintList: KtTypeConstraintList? = null,
       initializer: KtExpression?,
       delegate: KtPropertyDelegate? = null,
-      accessors: List<KtPropertyAccessor>? = null
+      accessors: List<KtPropertyAccessor>? = null,
   ): Int {
     val verticalAnnotationBreak = genSym()
 
@@ -1821,7 +1822,7 @@ class KotlinInputAstVisitor(
   /** For example, 'field' in @field:[Inject Named("WEB_VIEW")] */
   override fun visitAnnotationUseSiteTarget(
       annotationTarget: KtAnnotationUseSiteTarget,
-      data: Void?
+      data: Void?,
   ): Void? {
     builder.token(annotationTarget.getAnnotationUseSiteTarget().renderName)
     return null
@@ -1842,12 +1843,13 @@ class KotlinInputAstVisitor(
         annotationEntry.calleeExpression,
         null, // Type-arguments are included in the annotation's callee expression.
         annotationEntry.valueArgumentList,
-        listOf())
+        listOf(),
+    )
   }
 
   override fun visitFileAnnotationList(
       fileAnnotationList: KtFileAnnotationList,
-      data: Void?
+      data: Void?,
   ): Void? {
     for (child in fileAnnotationList.node.children()) {
       if (child is PsiElement) {
@@ -1912,7 +1914,10 @@ class KotlinInputAstVisitor(
               whenEntry.guard?.let { guard ->
                 builder.space()
                 emitKeywordWithCondition(
-                    "if", guard.getExpression(), surroundConditionWithParens = false)
+                    "if",
+                    guard.getExpression(),
+                    surroundConditionWithParens = false,
+                )
               }
             }
           }
@@ -2075,7 +2080,10 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
       builder.block(expressionBreakIndent) {
         visitEachCommaSeparated(
-            expression.indexExpressions, expression.trailingComma != null, wrapInBlock = true)
+            expression.indexExpressions,
+            expression.trailingComma != null,
+            wrapInBlock = true,
+        )
       }
     }
     builder.token("]")
@@ -2095,7 +2103,10 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
       builder.block(expressionBreakIndent) {
         visitEachCommaSeparated(
-            destructuringDeclaration.entries, hasTrailingComma, wrapInBlock = true)
+            destructuringDeclaration.entries,
+            hasTrailingComma,
+            wrapInBlock = true,
+        )
       }
     }
     builder.token(")")
@@ -2273,7 +2284,8 @@ class KotlinInputAstVisitor(
             valOrVarKeyword = parameter.valOrVarKeyword?.text,
             name = parameter.nameIdentifier?.text,
             type = typeReference,
-            initializer = parameter.defaultValue)
+            initializer = parameter.defaultValue,
+        )
       }
     }
   }
@@ -2306,7 +2318,8 @@ class KotlinInputAstVisitor(
           receiverExpression.calleeExpression,
           receiverExpression.typeArgumentList,
           receiverExpression.valueArgumentList,
-          receiverExpression.lambdaArguments)
+          receiverExpression.lambdaArguments,
+      )
     } else {
       visit(receiverExpression)
     }
@@ -2392,7 +2405,8 @@ class KotlinInputAstVisitor(
           expression.trailingComma != null,
           prefix = "[",
           postfix = "]",
-          wrapInBlock = !options.manageTrailingCommas)
+          wrapInBlock = !options.manageTrailingCommas,
+      )
     }
   }
 
@@ -2575,7 +2589,8 @@ class KotlinInputAstVisitor(
         token,
         Doc.Token.RealOrImaginary.REAL,
         plusIndentCommentsBefore,
-        /* breakAndIndentTrailingComment */ Optional.empty())
+        /* breakAndIndentTrailingComment */ Optional.empty(),
+    )
   }
 
   /**

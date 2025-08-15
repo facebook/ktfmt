@@ -150,7 +150,8 @@ object Formatter {
       throw ParseError(
           "ktfmt does not support code which contains one of {\\u0003, \\u0004, \\u0005} character" +
               "; escape it",
-          StringUtil.offsetToLineColumn(code, index))
+          StringUtil.offsetToLineColumn(code, index),
+      )
     }
   }
 
@@ -172,7 +173,8 @@ object Formatter {
       } else if (element !is KtImportDirective && element !is PsiWhiteSpace) {
         throw ParseError(
             "Imports not contiguous: " + element.text,
-            StringUtil.offsetToLineColumn(code, element.startOffset))
+            StringUtil.offsetToLineColumn(code, element.startOffset),
+        )
       }
       element = element.nextSibling
     }
@@ -189,6 +191,7 @@ object Formatter {
     return code.replaceRange(
         importList.startOffset,
         importList.endOffset,
-        importsWithComments.joinToString(separator = "\n") { imprt -> imprt.text } + "\n")
+        importsWithComments.joinToString(separator = "\n") { imprt -> imprt.text } + "\n",
+    )
   }
 }

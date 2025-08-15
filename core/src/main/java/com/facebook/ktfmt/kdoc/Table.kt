@@ -39,7 +39,7 @@ class Table(
     private val widths: List<Int>,
     private val rows: List<Row>,
     private val align: List<Align>,
-    private val original: List<String>
+    private val original: List<String>,
 ) {
   fun original(): List<String> {
     return original
@@ -70,7 +70,8 @@ class Table(
             if (align[column] == Align.CENTER && i > 0) {
               String.format(
                   "%-${width}s",
-                  String.format("%${cell.length + (width - cell.length) / 2}s", cell))
+                  String.format("%${cell.length + (width - cell.length) / 2}s", cell),
+              )
             } else if (align[column] == Align.RIGHT && i > 0) {
               String.format("%${width}s", cell)
             } else {
@@ -125,7 +126,7 @@ class Table(
     fun getTable(
         lines: List<String>,
         start: Int,
-        lineContent: (String) -> String
+        lineContent: (String) -> String,
     ): Pair<Table, Int>? {
       if (start > lines.size - 2) {
         return null
@@ -277,7 +278,7 @@ class Table(
   enum class Align {
     LEFT,
     RIGHT,
-    CENTER
+    CENTER,
   }
 
   class Row {

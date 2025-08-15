@@ -67,7 +67,9 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
       is PsiComment -> {
         if (element.text.startsWith("/*") && !element.text.endsWith("*/")) {
           throw ParseError(
-              "Unclosed comment", StringUtil.offsetToLineColumn(fileText, element.startOffset))
+              "Unclosed comment",
+              StringUtil.offsetToLineColumn(fileText, element.startOffset),
+          )
         }
         toks.add(
             KotlinTok(
@@ -111,7 +113,9 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
                     index = -1,
                     originalText =
                         fileText.substring(
-                            startIndex + matcher.start(), startIndex + matcher.end()),
+                            startIndex + matcher.start(),
+                            startIndex + matcher.end(),
+                        ),
                     text = text,
                     position = startIndex + matcher.start(),
                     column = 0,

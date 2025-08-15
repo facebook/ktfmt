@@ -63,7 +63,8 @@ class KDocFormatter(private val options: KDocFormattingOptions) {
       val width =
           min(
               options.maxLineWidth - firstIndentSize - commentType.singleLineOverhead(),
-              options.maxCommentWidth)
+              options.maxCommentWidth,
+          )
       val suffix = if (commentType.suffix.isEmpty()) "" else " ${commentType.suffix}"
       if (trimmed.length <= width) {
         return "$prefix $trimmed$suffix"
@@ -72,7 +73,8 @@ class KDocFormatter(private val options: KDocFormattingOptions) {
         val nextLineWidth =
             min(
                 options.maxLineWidth - indentSize - commentType.singleLineOverhead(),
-                options.maxCommentWidth)
+                options.maxCommentWidth,
+            )
         if (trimmed.length <= nextLineWidth) {
           return "$prefix $trimmed$suffix"
         }

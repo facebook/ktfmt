@@ -95,7 +95,7 @@ internal class KDocToken(val type: Type, val value: String) {
      * fit on the previous line. Of course, by doing this, we're potentially creating lines of more
      * than 100 characters. But it seems fair to call in the humans to resolve such problems.
      */
-    LITERAL
+    LITERAL,
   }
 
   fun length(): Int = value.length

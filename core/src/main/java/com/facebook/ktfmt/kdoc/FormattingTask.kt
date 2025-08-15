@@ -70,5 +70,5 @@ class FormattingTask(
     var orderedParameterNames: List<String> = emptyList(),
 
     /** The type of comment being formatted. */
-    val type: CommentType = comment.commentType()
+    val type: CommentType = comment.commentType(),
 )

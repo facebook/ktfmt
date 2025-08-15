@@ -52,10 +52,14 @@ object Parser {
     val configuration = CompilerConfiguration()
     configuration.put(
         CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY,
-        PrintingMessageCollector(System.err, PLAIN_RELATIVE_PATHS, false))
+        PrintingMessageCollector(System.err, PLAIN_RELATIVE_PATHS, false),
+    )
     env =
         KotlinCoreEnvironment.createForProduction(
-            disposable, configuration, EnvironmentConfigFiles.JVM_CONFIG_FILES)
+            disposable,
+            configuration,
+            EnvironmentConfigFiles.JVM_CONFIG_FILES,
+        )
   }
 
   fun parse(code: String): KtFile {
@@ -68,6 +72,8 @@ object Parser {
 
   private fun throwParseError(fileContents: String, error: PsiErrorElement): Nothing {
     throw ParseError(
-        error.errorDescription, StringUtil.offsetToLineColumn(fileContents, error.startOffset))
+        error.errorDescription,
+        StringUtil.offsetToLineColumn(fileContents, error.startOffset),
+    )
   }
 }
