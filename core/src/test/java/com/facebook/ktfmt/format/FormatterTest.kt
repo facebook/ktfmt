@@ -1602,7 +1602,7 @@ class FormatterTest {
                     Env.Prod,
                 )
             val aVar = setOf(Env.Dev, Env.Prod)
-    
+
             """
               .trimIndent(),
           deduceMaxWidth = false,
@@ -2972,6 +2972,156 @@ class FormatterTest {
       |$TQ
       |"""
               .trimMargin())
+
+  @Test
+  fun `multiline trimMargin special handling`() {
+    val before =
+        """
+            |val margin =
+            |    ${TQ}example
+            |    | of
+            |  |   a
+            |     |multiline
+            |   |  string
+            |    |$TQ
+            |        .trimMargin()
+            |"""
+            .trimMargin()
+    val after =
+        """
+            |val margin =
+            |    $TQ
+            |    |example
+            |    | of
+            |    |   a
+            |    |multiline
+            |    |  string
+            |    |$TQ
+            |        .trimMargin()
+            |"""
+            .trimMargin()
+
+    assertThatFormatting(before).isEqualTo(after)
+  }
+
+  @Test
+  fun `multiline trimIndent special handling`() {
+    val before =
+        """
+            |val indent =
+            |    ${TQ}example
+            |          of
+            |            a
+            |
+            |         multiline
+            |           string
+            |         $TQ
+            |         .trimIndent()
+            |"""
+            .trimMargin()
+    val after =
+        """
+            |val indent =
+            |    $TQ
+            |    example
+            |     of
+            |       a
+            |
+            |    multiline
+            |      string
+            |    $TQ
+            |        .trimIndent()
+            |"""
+            .trimMargin()
+
+    assertThatFormatting(before).isEqualTo(after)
+  }
+
+  @Test
+  fun `trimIndent and trimMargin formatting does not add new lines`() {
+    assertThatFormatting(
+            """
+                |val margin =
+                |    $TQ
+                |     |is this the end of the line?$TQ
+                |        .trimMargin()
+                |"""
+                .trimMargin())
+        .isEqualTo(
+            """
+                |val margin =
+                |    $TQ
+                |    |is this the end of the line?$TQ
+                |        .trimMargin()
+                |"""
+                .trimMargin())
+
+    assertThatFormatting(
+            """
+                |val margin =
+                |    $TQ
+                |     is this the end of the line?$TQ
+                |        .trimIndent()
+                |"""
+                .trimMargin())
+        .isEqualTo(
+            """
+                |val margin =
+                |    $TQ
+                |    is this the end of the line?$TQ
+                |        .trimIndent()
+                |"""
+                .trimMargin())
+  }
+
+  @Test
+  fun `properly handles trimMargin blank lines at the end of multiline string`() =
+      assertThatFormatting(
+              """
+                  |val margin =
+                  |    $TQ
+                  |     |test
+                  |     string
+                  |     |
+                  |     $TQ
+                  |        .trimMargin()
+                  |"""
+                  .trimMargin())
+          .isEqualTo(
+              """
+                  |val margin =
+                  |    $TQ
+                  |    |test
+                  |    |     string
+                  |    |$TQ
+                  |        .trimMargin()
+                  |"""
+                  .trimMargin())
+
+  @Test
+  fun `handles multi-dollar string`() =
+      assertThatFormatting(
+              """
+                  |val margin =
+                  |    ${"$$"}$TQ
+                  |     |{
+                  |  "${'$'}test": "string"
+                  |   |}
+                  |
+                  |     $TQ.trimMargin()
+                  |"""
+                  .trimMargin())
+          .isEqualTo(
+              """
+                  |val margin =
+                  |    ${"$$"}$TQ
+                  |    |{
+                  |    |  "${'$'}test": "string"
+                  |    |}
+                  |    |$TQ
+                  |        .trimMargin()
+                  |"""
+                  .trimMargin())
 
   @Test
   fun `Trailing spaces in a comment are not preserved`() {
@@ -7799,7 +7949,7 @@ class FormatterTest {
       |        is Animal.Dog -> animal.feedDog()
       |        is Animal.Cat if !animal.mouseHunter -> animal.feedCat()
       |        is Animal.Cat           if     !animal.birdHunter -> animal.feedCat()
-      |        is Animal.Cat if         
+      |        is Animal.Cat if
       |          !animal.birdHunter -> animal.feedCat()
       |        is Animal.Cat if     (!animal.birdHunter) -> animal.feedCat()
       |        else -> println("Unknown animal")
