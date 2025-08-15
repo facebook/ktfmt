@@ -41,7 +41,8 @@ class HandlerTest {
     assertEquals(
         """{"err":"com.google.gson.stream.MalformedJsonException: """ +
             """Unterminated object at line 1 column 30 path ${'$'}.source"}""",
-        response)
+        response,
+    )
   }
 
   @Test
@@ -107,7 +108,9 @@ class HandlerTest {
     event.body = """{"source": "fun foo ( ) { }", "maxWidth": "bla"}"""
     val response = Handler().handleRequest(event, null)
     assertEquals(
-        """{"err":"java.lang.NumberFormatException: For input string: \"bla\""}""", response)
+        """{"err":"java.lang.NumberFormatException: For input string: \"bla\""}""",
+        response,
+    )
   }
 
   @Test
