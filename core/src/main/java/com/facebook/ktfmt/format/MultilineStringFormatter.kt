@@ -81,7 +81,7 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
             multiline.appendLine(TQ)
             multiline.append(indentation)
             val lineContents =
-                if (candidate.isMargin) {
+                if (candidate.isMargin && after.trimStart().firstOrNull() == '|') {
                   after.substringAfter("|")
                 } else {
                   after
@@ -105,7 +105,11 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
                   return@forEachIndexed
                 }
 
-                line.substringAfter("|")
+                if (line.trimStart().firstOrNull() == '|') {
+                  line.substringAfter("|")
+                } else {
+                  line
+                }
               } else {
                 line.drop(minIndentForTrimIndent)
               }

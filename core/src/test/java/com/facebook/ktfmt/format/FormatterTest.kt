@@ -3200,6 +3200,31 @@ class FormatterTest {
   }
 
   @Test
+  fun `handles multiline trimMargin with pipe not being the margin character`() {
+    assertThatFormatting(
+            """
+            |val margin =
+            |    $TQ
+            |   echo hello | wc -c
+            |   cat hay_stack.txt | grep needle
+            |   ${'$'}{myList.joinToString("|")}
+            |    $TQ
+            |        .trimMargin()
+            |"""
+                .trimMargin())
+        .isEqualTo(
+            """
+            |val margin =
+            |    $TQ
+            |    |   echo hello | wc -c
+            |    |   cat hay_stack.txt | grep needle
+            |    |   ${'$'}{myList.joinToString("|")}$TQ
+            |        .trimMargin()
+            |"""
+                .trimMargin())
+  }
+
+  @Test
   fun `handles multiline trimMargin with single-line template expressions`() {
     assertThatFormatting(
             """
