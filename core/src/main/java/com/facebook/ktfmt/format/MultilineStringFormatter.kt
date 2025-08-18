@@ -47,6 +47,9 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
     val candidates = getCandidates(code)
     val result = StringBuilder(code)
 
+    val openTemplateExpressionRegex =
+        Regex("""\$\$?\{(((?<!\\)"([^"]|(\\"))*?[^\\]")|([^\\]'\\?.')|[^"'}])*$""")
+
     for (candidate in candidates.sortedByDescending(Candidate::stringOffset)) {
       val (indentCount, lines) =
           result.substring(candidate.stringOffset, candidate.trimMethodCallOffset).lines().let {
@@ -54,6 +57,14 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
           }
       if (lines.size < 2) {
         // Single line multiline strings are left alone
+        continue
+      }
+      if (candidate.isMargin && lines.any { openTemplateExpressionRegex.find(it) != null }) {
+        // Do not mess with multiline template expressions, as those can be a mess
+        // Why?
+        // 1. They span multiple lines
+        // 2. They can be nested recursively
+        // 3. We need to be careful as the closing character ('}') could be inside a string/char
         continue
       }
       val indentation = " ".repeat(indentCount)

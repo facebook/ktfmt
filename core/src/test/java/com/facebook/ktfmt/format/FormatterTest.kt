@@ -3169,6 +3169,62 @@ class FormatterTest {
                   .trimMargin())
 
   @Test
+  fun `handles multiline trimMargin with multiline template expressions inside of it`() {
+    assertFormatted(
+        """
+        |val margin =
+        |    $TQ
+        |    |my math = ${'$'}{
+        |      "}" + (1 + 2)
+        |        .toString()
+        |    }
+        |    |     string
+        |    |$TQ
+        |        .trimMargin()
+        |"""
+            .trimMargin())
+
+    assertFormatted(
+        """
+        |val margin =
+        |    ${"$$"}$TQ
+        |    |my math = ${"$$"}{
+        |      "}" + (1 + 2)
+        |        .toString()
+        |    }
+        |    |     string
+        |    |$TQ
+        |        .trimMargin()
+        |"""
+            .trimMargin())
+  }
+
+  @Test
+  fun `handles multiline trimMargin with single-line template expressions`() {
+    assertThatFormatting(
+            """
+            |val margin =
+            |    ${TQ}my math = ${'$'}{ "}" + (1 + 2).toString() }
+            |       | checks
+            |    |    out
+            |        |$TQ
+            |        .trimMargin()
+            |"""
+                .trimMargin())
+        .isEqualTo(
+            """
+            |val margin =
+            |    $TQ
+            |    |my math = ${'$'}{ "}" + (1 + 2).toString() }
+            |    | checks
+            |    |    out
+            |    |$TQ
+            |        .trimMargin()
+            |"""
+                .trimMargin())
+  }
+
+  @Test
   fun `handles multi-dollar string`() =
       assertThatFormatting(
               """
