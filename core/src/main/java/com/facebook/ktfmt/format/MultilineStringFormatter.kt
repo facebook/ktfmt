@@ -69,8 +69,14 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
             multiline.append(before)
             multiline.appendLine(TQ)
             multiline.append(indentation)
+            val lineContents =
+                if (candidate.isMargin) {
+                  after.substringAfter("|")
+                } else {
+                  after
+                }
             multiline.append(candidate.indentationSuffix)
-            multiline.appendLine(after)
+            multiline.appendLine(lineContents)
           } else {
             multiline.appendLine(line)
           }

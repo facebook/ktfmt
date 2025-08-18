@@ -3147,6 +3147,28 @@ class FormatterTest {
                   .trimMargin())
 
   @Test
+  fun `properly handles trimMargin that has margin in the first line`() =
+      assertThatFormatting(
+              """
+                  |val margin =
+                  |    $TQ |test
+                  |    |     string
+                  |    |$TQ
+                  |        .trimMargin()
+                  |"""
+                  .trimMargin())
+          .isEqualTo(
+              """
+                  |val margin =
+                  |    $TQ
+                  |    |test
+                  |    |     string
+                  |    |$TQ
+                  |        .trimMargin()
+                  |"""
+                  .trimMargin())
+
+  @Test
   fun `handles multi-dollar string`() =
       assertThatFormatting(
               """
