@@ -146,7 +146,8 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
               candidates.add(Candidate(isTrimMargin, trimOffset, stringOffset))
             }
           }
-        })
+        }
+    )
     return candidates
   }
 }

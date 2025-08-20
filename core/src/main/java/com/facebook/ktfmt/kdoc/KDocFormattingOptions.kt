@@ -71,7 +71,8 @@ class KDocFormattingOptions(
       if (value < 3) {
         error(
             "Nested list indent must be at least 3; if list items are only indented 2 spaces they " +
-                "will not be rendered as list items")
+                "will not be rendered as list items"
+        )
       }
       field = value
     }

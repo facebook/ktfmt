@@ -124,7 +124,8 @@ data class ParsedArgs(
               stdinName =
                   parseKeyValueArg("--stdin-name", arg)
                       ?: return ParseResult.Error(
-                          "Found option '${arg}', expected '${"--stdin-name"}=<value>'")
+                          "Found option '${arg}', expected '${"--stdin-name"}=<value>'"
+                      )
           arg.startsWith("--") -> return ParseResult.Error("Unexpected option: $arg")
           arg.startsWith("@") -> return ParseResult.Error("Unexpected option: $arg")
           else -> fileNames.add(arg)
@@ -137,7 +138,8 @@ data class ParsedArgs(
           val filesExceptStdin = fileNames - "-"
           return ParseResult.Error(
               "Cannot read from stdin and files in same run. Found stdin specifier '-'" +
-                  " and files ${filesExceptStdin.joinToString(", ")} ")
+                  " and files ${filesExceptStdin.joinToString(", ")} "
+          )
         }
       } else if (stdinName != null) {
         return ParseResult.Error("--stdin-name can only be specified when reading from stdin")
@@ -150,7 +152,8 @@ data class ParsedArgs(
               dryRun,
               setExitIfChanged,
               stdinName,
-          ))
+          )
+      )
     }
 
     private fun parseKeyValueArg(key: String, arg: String): String? {

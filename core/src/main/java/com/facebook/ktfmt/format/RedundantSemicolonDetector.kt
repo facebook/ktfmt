@@ -65,9 +65,11 @@ internal class RedundantSemicolonDetector {
 
     val prevLeaf = element.prevLeaf(false)
     val prevConcreteSibling = element.getPrevSiblingIgnoringWhitespaceAndComments()
-    if ((prevConcreteSibling is KtIfExpression || prevConcreteSibling is KtWhileExpression) &&
-        prevLeaf is KtContainerNodeForControlStructureBody &&
-        prevLeaf.text.isEmpty()) {
+    if (
+        (prevConcreteSibling is KtIfExpression || prevConcreteSibling is KtWhileExpression) &&
+            prevLeaf is KtContainerNodeForControlStructureBody &&
+            prevLeaf.text.isEmpty()
+    ) {
       return false
     }
 

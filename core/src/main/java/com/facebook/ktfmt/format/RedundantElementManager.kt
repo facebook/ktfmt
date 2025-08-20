@@ -68,7 +68,8 @@ object RedundantElementManager {
             redundantImportDetector.takeReferenceExpression(expression)
             super.visitReferenceExpression(expression)
           }
-        })
+        }
+    )
 
     val result = StringBuilder(code)
     val elementsToRemove =
@@ -104,7 +105,8 @@ object RedundantElementManager {
             trailingCommaSuggestor.takeElement(element)
             super.visitElement(element)
           }
-        })
+        }
+    )
 
     val result = StringBuilder(code)
     val suggestionElements = trailingCommaSuggestor.getTrailingCommaSuggestions()

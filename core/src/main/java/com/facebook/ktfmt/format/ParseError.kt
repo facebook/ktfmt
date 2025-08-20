@@ -21,7 +21,8 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 
 class ParseError(val errorDescription: String, val lineColumn: LineColumn) :
     IllegalArgumentException(
-        "${lineColumn.line + 1}:${lineColumn.column + 1}: error: $errorDescription") {
+        "${lineColumn.line + 1}:${lineColumn.column + 1}: error: $errorDescription"
+    ) {
 
   constructor(
       errorDescription: String,

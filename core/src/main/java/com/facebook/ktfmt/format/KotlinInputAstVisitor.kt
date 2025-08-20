@@ -657,8 +657,10 @@ class KotlinInputAstVisitor(
               (receiverExpression as? KtQualifiedExpression)?.selectorExpression
                   ?: receiverExpression
           val current = checkNotNull(part.selectorExpression)
-          if (lastIndexToOpen == 0 &&
-              shouldGroupPartWithPrevious(parts, part, index, previous, current)) {
+          if (
+              lastIndexToOpen == 0 &&
+                  shouldGroupPartWithPrevious(parts, part, index, previous, current)
+          ) {
             // this and the previous items should be grouped for better style
             // we add another group to open in index 0
             groupingInfos[0].groupOpenCount++
@@ -702,21 +704,27 @@ class KotlinInputAstVisitor(
       return true
     }
     // this and the previous part are a package name, type name, or property
-    if (previous is KtSimpleNameExpression &&
-        current is KtSimpleNameExpression &&
-        part is KtDotQualifiedExpression) {
+    if (
+        previous is KtSimpleNameExpression &&
+            current is KtSimpleNameExpression &&
+            part is KtDotQualifiedExpression
+    ) {
       return true
     }
     // this is `Foo` in `com.facebook.Foo`, so everything before it is a package name
-    if (current.text.first().isUpperCase() &&
-        current is KtSimpleNameExpression &&
-        part is KtDotQualifiedExpression) {
+    if (
+        current.text.first().isUpperCase() &&
+            current is KtSimpleNameExpression &&
+            part is KtDotQualifiedExpression
+    ) {
       return true
     }
     // this is the `foo()` in `com.facebook.Foo.foo()` or in `Foo.foo()`
-    if (current is KtCallExpression &&
-        (previous !is KtCallExpression) &&
-        previous.text?.firstOrNull()?.isUpperCase() == true) {
+    if (
+        current is KtCallExpression &&
+            (previous !is KtCallExpression) &&
+            previous.text?.firstOrNull()?.isUpperCase() == true
+    ) {
       return true
     }
     // this is an invocation and the last item, and the previous it not, i.e. `a.b.c()`
@@ -915,9 +923,11 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, "", bracePlusBlockIndent)
       builder.block(bracePlusBlockIndent) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
-        if (expressionStatements.size == 1 &&
-            expressionStatements.first() !is KtReturnExpression &&
-            !bodyExpression.startsWithComment()) {
+        if (
+            expressionStatements.size == 1 &&
+                expressionStatements.first() !is KtReturnExpression &&
+                !bodyExpression.startsWithComment()
+        ) {
           visitStatement(expressionStatements[0])
         } else {
           visitStatements(expressionStatements)
@@ -1247,8 +1257,10 @@ class KotlinInputAstVisitor(
       val operator = expression.operationReference.text
 
       visit(baseExpression)
-      if (baseExpression is KtPostfixExpression &&
-          baseExpression.operationReference.text.last() == operator.first()) {
+      if (
+          baseExpression is KtPostfixExpression &&
+              baseExpression.operationReference.text.last() == operator.first()
+      ) {
         builder.space()
       }
       builder.token(operator)
@@ -1262,8 +1274,10 @@ class KotlinInputAstVisitor(
       val operator = expression.operationReference.text
 
       builder.token(operator)
-      if (baseExpression is KtPrefixExpression &&
-          operator.last() == baseExpression.operationReference.text.first()) {
+      if (
+          baseExpression is KtPrefixExpression &&
+              operator.last() == baseExpression.operationReference.text.first()
+      ) {
         builder.space()
       }
       visit(baseExpression)
@@ -1467,9 +1481,11 @@ class KotlinInputAstVisitor(
 
     var carry = expression
     if (carry is KtCallExpression) {
-      if (carry.valueArgumentList?.leftParenthesis == null &&
-          carry.lambdaArguments.isNotEmpty() &&
-          carry.typeArgumentList?.arguments.isNullOrEmpty()) {
+      if (
+          carry.valueArgumentList?.leftParenthesis == null &&
+              carry.lambdaArguments.isNotEmpty() &&
+              carry.typeArgumentList?.arguments.isNullOrEmpty()
+      ) {
         carry = carry.lambdaArguments[0].getArgumentExpression()
       } else {
         return false
@@ -2362,9 +2378,11 @@ class KotlinInputAstVisitor(
     visit(expression.leftHandSide)
     if (!openGroupBeforeLeft) builder.open(ZERO)
     val parent = expression.parent
-    if (parent is KtValueArgument ||
-        parent is KtParenthesizedExpression ||
-        parent is KtContainerNode) {
+    if (
+        parent is KtValueArgument ||
+            parent is KtParenthesizedExpression ||
+            parent is KtContainerNode
+    ) {
       builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
     } else {
       builder.space()
@@ -2527,7 +2545,8 @@ class KotlinInputAstVisitor(
             child is PsiComment -> continue
             child is KtScript && importListEmpty -> OpsBuilder.BlankLineWanted.PRESERVE
             else -> OpsBuilder.BlankLineWanted.YES
-          })
+          }
+      )
 
       visit(child)
       isFirst = false
@@ -2550,8 +2569,9 @@ class KotlinInputAstVisitor(
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
       } else if (lastChildIsContextReceiver) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
-      } else if (child !is PsiComment &&
-          (childGetsBlankLineBefore || lastChildHadBlankLineBefore)) {
+      } else if (
+          child !is PsiComment && (childGetsBlankLineBefore || lastChildHadBlankLineBefore)
+      ) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
       }
       visit(child)

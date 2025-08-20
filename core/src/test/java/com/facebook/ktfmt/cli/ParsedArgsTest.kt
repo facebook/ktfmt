@@ -209,7 +209,8 @@ class ParsedArgsTest {
                 formattingOptions = Formatter.GOOGLE_FORMAT,
                 dryRun = true,
                 setExitIfChanged = true,
-            ))
+            )
+        )
   }
 
   @Test
@@ -221,7 +222,8 @@ class ParsedArgsTest {
             parseResultOk(
                 fileNames = listOf("File.kt"),
                 formattingOptions = Formatter.KOTLINLANG_FORMAT,
-            ))
+            )
+        )
   }
 
   @Test
@@ -246,6 +248,7 @@ class ParsedArgsTest {
     val returnedFormattingOptions =
         formattingOptions.copy(removeUnusedImports = removedUnusedImports)
     return ParseResult.Ok(
-        ParsedArgs(fileNames, returnedFormattingOptions, dryRun, setExitIfChanged, stdinName))
+        ParsedArgs(fileNames, returnedFormattingOptions, dryRun, setExitIfChanged, stdinName)
+    )
   }
 }

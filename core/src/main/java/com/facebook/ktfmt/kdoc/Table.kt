@@ -155,10 +155,12 @@ class Table(
       }
 
       val rowsAndDivider = rows + dividerRow
-      if (rowsAndDivider.all { row ->
-        val first = row.cells.firstOrNull()
-        first != null && first.isBlank()
-      }) {
+      if (
+          rowsAndDivider.all { row ->
+            val first = row.cells.firstOrNull()
+            first != null && first.isBlank()
+          }
+      ) {
         rowsAndDivider.forEach { if (it.cells.isNotEmpty()) it.cells.removeAt(0) }
       }
 
@@ -212,11 +214,13 @@ class Table(
           count++
         } else if (c.isWhitespace() || c == ':') {
           continue
-        } else if (c == '-' &&
-            (s.startsWith("--", i) ||
-                s.startsWith("-:", i) ||
-                (i > 1 && s.startsWith(":-:", i - 2)) ||
-                (i > 1 && s.startsWith(":--", i - 2)))) {
+        } else if (
+            c == '-' &&
+                (s.startsWith("--", i) ||
+                    s.startsWith("-:", i) ||
+                    (i > 1 && s.startsWith(":-:", i - 2)) ||
+                    (i > 1 && s.startsWith(":--", i - 2)))
+        ) {
           while (i < s.length && s[i] == '-') {
             i++
           }

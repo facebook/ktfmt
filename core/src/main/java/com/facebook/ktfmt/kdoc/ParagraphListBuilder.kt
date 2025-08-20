@@ -163,8 +163,9 @@ class ParagraphListBuilder(
     while (j < lines.size) {
       val l = lines[j]
       val lineWithIndentation = lineContent(l)
-      if (lineWithIndentation.contains("```") &&
-          lineWithIndentation.trimStart().startsWith("```")) {
+      if (
+          lineWithIndentation.contains("```") && lineWithIndentation.trimStart().startsWith("```")
+      ) {
         // Don't convert <pre> tags if we already have nested ``` content; that will lead to
         // trouble
         allowCustomize = false
@@ -247,42 +248,50 @@ class ParagraphListBuilder(
         return paragraph
       }
 
-      if (lineWithIndentation.startsWith("    ") && // markdown preformatted text
-          (i == 1 || lineContent(lines[i - 2]).isBlank()) && // we've already ++'ed i above
-          // Make sure it's not just deeply indented inside a different block
-          (paragraph.prev == null ||
-              lineWithIndentation.length - lineWithoutIndentation.length >=
-                  checkNotNull(paragraph.prev).originalIndent + 4)) {
+      if (
+          lineWithIndentation.startsWith("    ") && // markdown preformatted text
+              (i == 1 || lineContent(lines[i - 2]).isBlank()) && // we've already ++'ed i above
+              // Make sure it's not just deeply indented inside a different block
+              (paragraph.prev == null ||
+                  lineWithIndentation.length - lineWithoutIndentation.length >=
+                      checkNotNull(paragraph.prev).originalIndent + 4)
+      ) {
         i = addPreformatted(i - 1, includeEnd = false, expectClose = false) { !it.startsWith(" ") }
-      } else if (lineWithoutIndentation.startsWith("-") &&
-          lineWithoutIndentation.containsOnly('-', '|', ' ')) {
+      } else if (
+          lineWithoutIndentation.startsWith("-") &&
+              lineWithoutIndentation.containsOnly('-', '|', ' ')
+      ) {
         val paragraph = newParagraph(i - 1)
         appendText(lineWithoutIndentation)
         newParagraph(i).block = true
         // Dividers must be surrounded by blank lines
-        if (lineWithIndentation.isLine() &&
-            (i < 2 || lineContent(lines[i - 2]).isBlank()) &&
-            (i > lines.size - 1 || lineContent(lines[i]).isBlank())) {
+        if (
+            lineWithIndentation.isLine() &&
+                (i < 2 || lineContent(lines[i - 2]).isBlank()) &&
+                (i > lines.size - 1 || lineContent(lines[i]).isBlank())
+        ) {
           paragraph.separator = true
         }
-      } else if (lineWithoutIndentation.startsWith("=") &&
-          lineWithoutIndentation.containsOnly('=', ' ')) {
+      } else if (
+          lineWithoutIndentation.startsWith("=") && lineWithoutIndentation.containsOnly('=', ' ')
+      ) {
         // Header
         // ======
         newParagraph(i - 1).block = true
         appendText(lineWithoutIndentation)
         newParagraph(i).block = true
-      } else if (lineWithoutIndentation.startsWith("#")
-      // "## X" is a header, "##X" is not
-      &&
-          lineWithoutIndentation.firstOrNull { it != '#' }?.equals(' ') ==
-              true) { // not isHeader() because <h> is handled separately
+      } else if (
+          lineWithoutIndentation.startsWith("#")
+          // "## X" is a header, "##X" is not
+          && lineWithoutIndentation.firstOrNull { it != '#' }?.equals(' ') == true
+      ) { // not isHeader() because <h> is handled separately
         // ## Header
         newParagraph(i - 1).block = true
         appendText(lineWithoutIndentation)
         newParagraph(i).block = true
-      } else if (lineWithoutIndentation.startsWith("*") &&
-          lineWithoutIndentation.containsOnly('*', ' ')) {
+      } else if (
+          lineWithoutIndentation.startsWith("*") && lineWithoutIndentation.containsOnly('*', ' ')
+      ) {
         // Horizontal rule:
         // *******
         // * * *
@@ -361,8 +370,9 @@ class ParagraphListBuilder(
                 includeEnd = false,
             )
         newParagraph(i)
-      } else if (lineWithoutIndentation.equals("<ul>", true) ||
-          lineWithoutIndentation.equals("<ol>", true)) {
+      } else if (
+          lineWithoutIndentation.equals("<ul>", true) || lineWithoutIndentation.equals("<ol>", true)
+      ) {
         newParagraph(i - 1).block = true
         appendText(lineWithoutIndentation)
         newParagraph(i).hanging = true
@@ -379,9 +389,11 @@ class ParagraphListBuilder(
                 },
             )
         newParagraph(i)
-      } else if (lineWithoutIndentation.isListItem() ||
-          (lineWithoutIndentation.isKDocTag() && task.type == CommentType.KDOC) ||
-          lineWithoutIndentation.isTodo()) {
+      } else if (
+          lineWithoutIndentation.isListItem() ||
+              (lineWithoutIndentation.isKDocTag() && task.type == CommentType.KDOC) ||
+              lineWithoutIndentation.isTodo()
+      ) {
         i--
         newParagraph(i).hanging = true
         val start = i
@@ -391,9 +403,9 @@ class ParagraphListBuilder(
                 includeEnd = false,
                 until = { j: Int, w: String, s: String ->
                   // See if it's a line continuation
-                  if (s.isBlank() &&
-                      j < lines.size - 1 &&
-                      lineContent(lines[j + 1]).startsWith(" ")) {
+                  if (
+                      s.isBlank() && j < lines.size - 1 && lineContent(lines[j + 1]).startsWith(" ")
+                  ) {
                     false
                   } else {
                     s.isBlank() ||
@@ -429,9 +441,11 @@ class ParagraphListBuilder(
         appendText(lineWithoutIndentation)
         newParagraph(i).block = true
       } else {
-        if (lineWithoutIndentation.indexOf('|') != -1 &&
-            paragraph.isEmpty() &&
-            (i < 2 || !lines[i - 2].contains("---"))) {
+        if (
+            lineWithoutIndentation.indexOf('|') != -1 &&
+                paragraph.isEmpty() &&
+                (i < 2 || !lines[i - 2].contains("---"))
+        ) {
           val result = Table.getTable(lines, i - 1, ::lineContent)
           if (result != null) {
             val (table, nextRow) = result
@@ -460,22 +474,26 @@ class ParagraphListBuilder(
         }
 
         // Some common HTML block tags
-        if (lineWithoutIndentation.startsWith("<") &&
-            (lineWithoutIndentation.startsWith("<p>", true) ||
-                lineWithoutIndentation.startsWith("<p/>", true) ||
-                lineWithoutIndentation.startsWith("<h1", true) ||
-                lineWithoutIndentation.startsWith("<h2", true) ||
-                lineWithoutIndentation.startsWith("<h3", true) ||
-                lineWithoutIndentation.startsWith("<h4", true) ||
-                lineWithoutIndentation.startsWith("<table", true) ||
-                lineWithoutIndentation.startsWith("<tr", true) ||
-                lineWithoutIndentation.startsWith("<caption", true) ||
-                lineWithoutIndentation.startsWith("<td", true) ||
-                lineWithoutIndentation.startsWith("<div", true))) {
+        if (
+            lineWithoutIndentation.startsWith("<") &&
+                (lineWithoutIndentation.startsWith("<p>", true) ||
+                    lineWithoutIndentation.startsWith("<p/>", true) ||
+                    lineWithoutIndentation.startsWith("<h1", true) ||
+                    lineWithoutIndentation.startsWith("<h2", true) ||
+                    lineWithoutIndentation.startsWith("<h3", true) ||
+                    lineWithoutIndentation.startsWith("<h4", true) ||
+                    lineWithoutIndentation.startsWith("<table", true) ||
+                    lineWithoutIndentation.startsWith("<tr", true) ||
+                    lineWithoutIndentation.startsWith("<caption", true) ||
+                    lineWithoutIndentation.startsWith("<td", true) ||
+                    lineWithoutIndentation.startsWith("<div", true))
+        ) {
           newParagraph(i - 1).block = true
-          if (lineWithoutIndentation.equals("<p>", true) ||
-              lineWithoutIndentation.equals("<p/>", true) ||
-              (options.convertMarkup && lineWithoutIndentation.equals("</p>", true))) {
+          if (
+              lineWithoutIndentation.equals("<p>", true) ||
+                  lineWithoutIndentation.equals("<p/>", true) ||
+                  (options.convertMarkup && lineWithoutIndentation.equals("</p>", true))
+          ) {
             if (options.convertMarkup) {
               // Replace <p> with a blank line
               paragraph.separate = true
@@ -484,13 +502,17 @@ class ParagraphListBuilder(
               newParagraph(i).block = true
             }
             continue
-          } else if (lineWithoutIndentation.endsWith("</h1>", true) ||
-              lineWithoutIndentation.endsWith("</h2>", true) ||
-              lineWithoutIndentation.endsWith("</h3>", true) ||
-              lineWithoutIndentation.endsWith("</h4>", true)) {
-            if (lineWithoutIndentation.startsWith("<h", true) &&
-                options.convertMarkup &&
-                paragraph.isEmpty()) {
+          } else if (
+              lineWithoutIndentation.endsWith("</h1>", true) ||
+                  lineWithoutIndentation.endsWith("</h2>", true) ||
+                  lineWithoutIndentation.endsWith("</h3>", true) ||
+                  lineWithoutIndentation.endsWith("</h4>", true)
+          ) {
+            if (
+                lineWithoutIndentation.startsWith("<h", true) &&
+                    options.convertMarkup &&
+                    paragraph.isEmpty()
+            ) {
               paragraph.separate = true
               val count = lineWithoutIndentation[lineWithoutIndentation.length - 2] - '0'
               for (j in 0 until count.coerceAtLeast(0).coerceAtMost(8)) {
@@ -522,8 +544,9 @@ class ParagraphListBuilder(
   }
 
   private fun convertPrefix(text: String): String {
-    return if (options.convertMarkup &&
-        (text.startsWith("<p>", true) || text.startsWith("<p/>", true))) {
+    return if (
+        options.convertMarkup && (text.startsWith("<p>", true) || text.startsWith("<p/>", true))
+    ) {
       paragraph.separate = true
       text.substring(text.indexOf('>') + 1).trim()
     } else {
@@ -532,8 +555,10 @@ class ParagraphListBuilder(
   }
 
   private fun convertSuffix(trimmedPrefix: String): String {
-    return if (options.convertMarkup &&
-        (trimmedPrefix.endsWith("<p/>", true) || (trimmedPrefix.endsWith("</p>", true)))) {
+    return if (
+        options.convertMarkup &&
+            (trimmedPrefix.endsWith("<p/>", true) || (trimmedPrefix.endsWith("</p>", true)))
+    ) {
       trimmedPrefix.substring(0, trimmedPrefix.length - 4).trimEnd().removeSuffix("*").trimEnd()
     } else {
       trimmedPrefix

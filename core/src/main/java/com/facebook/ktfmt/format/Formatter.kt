@@ -131,7 +131,8 @@ object Formatter {
     val tokenRangeSet =
         kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
     return WhitespaceTombstones.replaceTombstoneWithTrailingWhitespace(
-        JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)))
+        JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet))
+    )
   }
 
   private fun createAstVisitor(options: FormattingOptions, builder: OpsBuilder): PsiElementVisitor {

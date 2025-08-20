@@ -56,7 +56,8 @@ class Handler : RequestHandler<APIGatewayProxyRequestEvent, String> {
           }
         } catch (e: Exception) {
           Response(null, e.message)
-        })
+        }
+    )
   }
 
   companion object {

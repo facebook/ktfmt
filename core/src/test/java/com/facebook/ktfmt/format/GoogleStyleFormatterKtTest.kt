@@ -1331,7 +1331,8 @@ class GoogleStyleFormatterKtTest {
           |  doItTwice()
           |}
           |"""
-              .trimMargin())
+              .trimMargin()
+      )
 
   @Test
   fun `comma separated lists, no automatic trailing break after lambda params`() =

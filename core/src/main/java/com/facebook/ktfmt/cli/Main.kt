@@ -72,7 +72,8 @@ class Main(
         result.addAll(
             File(arg).walkTopDown().filter {
               it.isFile && (it.extension == "kt" || it.extension == "kts")
-            })
+            }
+        )
       }
       return result
     }

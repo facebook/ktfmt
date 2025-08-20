@@ -252,10 +252,12 @@ class Paragraph(private val task: FormattingTask) {
           sb.append(']')
           i = end + 1
           continue
-        } else if (s.startsWith("@link", i, true)
-        // @linkplain is similar to @link, but kdoc does *not* render a [symbol]
-        // into a {@linkplain} in HTML, so converting these would change the output.
-        && !s.startsWith("@linkplain", i, true)) {
+        } else if (
+            s.startsWith("@link", i, true)
+            // @linkplain is similar to @link, but kdoc does *not* render a [symbol]
+            // into a {@linkplain} in HTML, so converting these would change the output.
+            && !s.startsWith("@linkplain", i, true)
+        ) {
           // {@link} or {@linkplain}
           sb.append('[')
           var curr = i + 5
@@ -346,11 +348,13 @@ class Paragraph(private val task: FormattingTask) {
   }
 
   private fun reflow(words: List<String>, lineWidth: Int, hangingIndentSize: Int): List<String> {
-    if (options.alternate ||
-        !options.optimal ||
-        (hanging && hangingIndentSize > 0) ||
-        // An unbreakable long word may make other lines shorter and won't look good
-        words.any { it.length > lineWidth }) {
+    if (
+        options.alternate ||
+            !options.optimal ||
+            (hanging && hangingIndentSize > 0) ||
+            // An unbreakable long word may make other lines shorter and won't look good
+            words.any { it.length > lineWidth }
+    ) {
       // Switch to greedy if explicitly turned on, and for hanging indent
       // paragraphs, since the current implementation doesn't have support
       // for a different maximum length on the first line from the rest
@@ -388,8 +392,10 @@ class Paragraph(private val task: FormattingTask) {
         val newLines = reflowOptimal(lineWidth - hangingIndentSize, words.subList(0, lastWord))
         if (newLines.size < lines.size) {
           val newLongestLine = newLines.maxOf(maxLine)
-          if (newLongestLine > longestLine &&
-              newLines.subList(0, newLines.size - 1).any { it.length > longestLine }) {
+          if (
+              newLongestLine > longestLine &&
+                  newLines.subList(0, newLines.size - 1).any { it.length > longestLine }
+          ) {
             return newLines +
                 reflowGreedy(
                     lineWidth - hangingIndentSize,
@@ -418,12 +424,14 @@ class Paragraph(private val task: FormattingTask) {
     // Can we start a new line with this without interpreting it in a special
     // way?
 
-    if (word.startsWith("#") ||
-        word.startsWith("```") ||
-        word.isDirectiveMarker() ||
-        word.startsWith("@") || // interpreted as a tag
-        word.isTodo() ||
-        word.startsWith(">")) {
+    if (
+        word.startsWith("#") ||
+            word.startsWith("```") ||
+            word.isDirectiveMarker() ||
+            word.startsWith("@") || // interpreted as a tag
+            word.isTodo() ||
+            word.startsWith(">")
+    ) {
       return false
     }
 
