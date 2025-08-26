@@ -15,7 +15,7 @@ gradlePlugin-dokka = "2.0.0"
 gradlePlugin-intelliJPlatform = "2.6.0"
 gradlePlugin-ktfmt = "0.22.0"
 gradlePlugin-nexusPublish = "2.0.0"
-gradlePlugin-shadowJar = "9.0.0-beta13"
+gradlePlugin-shadowJar = "9.0.2"
 
 [libraries]
 amazon-aws-lambda-core = { module = "com.amazonaws:aws-lambda-java-core", version.ref = "com-amazonaws-aws-lambda-java-core" }
