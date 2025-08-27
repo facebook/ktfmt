@@ -109,7 +109,11 @@ tasks {
   }
 
   // Fat jar
-  shadowJar { archiveClassifier.set("with-dependencies") }
+  shadowJar {
+    archiveClassifier = "with-dependencies"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    failOnDuplicateEntries = true
+  }
 }
 
 kotlin {
