@@ -1779,44 +1779,44 @@ class FormatterTest {
   fun `newlines between clauses of when() are preserved`() {
     assertThatFormatting(
             """
-        |fun f(x: Int) {
-        |  when (x) {
-        |
-        |
-        |    1 -> print(1)
-        |    2 -> print(2)
-        |
-        |
-        |    3 ->
-        |        // Comment
-        |        print(3)
-        |
-        |    else -> {
-        |      print("else")
-        |    }
-        |
-        |  }
-        |}
-        |"""
+            |fun f(x: Int) {
+            |  when (x) {
+            |
+            |
+            |    1 -> print(1)
+            |    2 -> print(2)
+            |
+            |
+            |    3 ->
+            |        // Comment
+            |        print(3)
+            |
+            |    else -> {
+            |      print("else")
+            |    }
+            |
+            |  }
+            |}
+            |"""
                 .trimMargin()
         )
         .isEqualTo(
             """
-        |fun f(x: Int) {
-        |  when (x) {
-        |    1 -> print(1)
-        |    2 -> print(2)
-        |
-        |    3 ->
-        |        // Comment
-        |        print(3)
-        |
-        |    else -> {
-        |      print("else")
-        |    }
-        |  }
-        |}
-        |"""
+            |fun f(x: Int) {
+            |  when (x) {
+            |    1 -> print(1)
+            |    2 -> print(2)
+            |
+            |    3 ->
+            |        // Comment
+            |        print(3)
+            |
+            |    else -> {
+            |      print("else")
+            |    }
+            |  }
+            |}
+            |"""
                 .trimMargin()
         )
   }
@@ -3168,42 +3168,99 @@ class FormatterTest {
   }
 
   @Test
-  fun `trimIndent and trimMargin formatting does not add new lines`() {
+  fun `multiline trimIndent and trimMargin inside of function call`() {
+    defaultTestFormattingOptions = META_FORMAT
     assertThatFormatting(
             """
-                |val margin =
-                |    $TQ
-                |     |is this the end of the line?$TQ
-                |        .trimMargin()
-                |"""
+            |foo(
+            |    ${TQ}example
+            |         | of
+            |       |   a
+            |
+            |          |multiline
+            |        |  string
+            |         |$TQ
+            |         .trimMargin()
+            |)
+            |   .bar(
+            |    ${TQ}example
+            |          of
+            |            a
+            |
+            |         multiline
+            |           string
+            |         $TQ
+            |         .trimIndent()
+            |   )
+            |"""
                 .trimMargin()
         )
         .isEqualTo(
             """
-                |val margin =
-                |    $TQ
-                |    |is this the end of the line?$TQ
-                |        .trimMargin()
-                |"""
+            |foo(
+            |        $TQ
+            |        |example
+            |        | of
+            |        |   a
+            |        |
+            |        |multiline
+            |        |  string
+            |        |$TQ
+            |            .trimMargin()
+            |    )
+            |    .bar(
+            |        $TQ
+            |        example
+            |         of
+            |           a
+            |
+            |        multiline
+            |          string
+            |        $TQ
+            |            .trimIndent()
+            |    )
+            |"""
+                .trimMargin()
+        )
+  }
+
+  @Test
+  fun `trimIndent and trimMargin formatting does not add new lines`() {
+    assertThatFormatting(
+            """
+            |val margin =
+            |    $TQ
+            |     |is this the end of the line?$TQ
+            |        .trimMargin()
+            |"""
+                .trimMargin()
+        )
+        .isEqualTo(
+            """
+            |val margin =
+            |    $TQ
+            |    |is this the end of the line?$TQ
+            |        .trimMargin()
+            |"""
                 .trimMargin()
         )
 
     assertThatFormatting(
             """
-                |val margin =
-                |    $TQ
-                |     is this the end of the line?$TQ
-                |        .trimIndent()
-                |"""
+            |val margin =
+            |    $TQ
+            |     is this the end of the line?$TQ
+            |        .trimIndent()
+            |"""
                 .trimMargin()
         )
         .isEqualTo(
             """
-                |val margin =
-                |    $TQ
-                |    is this the end of the line?$TQ
-                |        .trimIndent()
-                |"""
+            |val margin =
+            |    $TQ
+            |    is this the end of the line?$TQ
+            |        .trimIndent()
+            |"""
                 .trimMargin()
         )
   }
@@ -3212,25 +3269,25 @@ class FormatterTest {
   fun `properly handles trimMargin blank lines at the end of multiline string`() =
       assertThatFormatting(
               """
-                  |val margin =
-                  |    $TQ
-                  |     |test
-                  |     string
-                  |     |
-                  |     $TQ
-                  |        .trimMargin()
-                  |"""
+              |val margin =
+              |    $TQ
+              |     |test
+              |     string
+              |     |
+              |     $TQ
+              |        .trimMargin()
+              |"""
                   .trimMargin()
           )
           .isEqualTo(
               """
-                  |val margin =
-                  |    $TQ
-                  |    |test
-                  |    |     string
-                  |    |$TQ
-                  |        .trimMargin()
-                  |"""
+              |val margin =
+              |    $TQ
+              |    |test
+              |    |     string
+              |    |$TQ
+              |        .trimMargin()
+              |"""
                   .trimMargin()
           )
 
@@ -3238,23 +3295,23 @@ class FormatterTest {
   fun `properly handles trimMargin that has margin in the first line`() =
       assertThatFormatting(
               """
-                  |val margin =
-                  |    $TQ |test
-                  |    |     string
-                  |    |$TQ
-                  |        .trimMargin()
-                  |"""
+              |val margin =
+              |    $TQ |test
+              |    |     string
+              |    |$TQ
+              |        .trimMargin()
+              |"""
                   .trimMargin()
           )
           .isEqualTo(
               """
-                  |val margin =
-                  |    $TQ
-                  |    |test
-                  |    |     string
-                  |    |$TQ
-                  |        .trimMargin()
-                  |"""
+              |val margin =
+              |    $TQ
+              |    |test
+              |    |     string
+              |    |$TQ
+              |        .trimMargin()
+              |"""
                   .trimMargin()
           )
 
@@ -3341,46 +3398,46 @@ class FormatterTest {
 
     assertThatFormatting(
             """
-        |val margin1 =
-        |    $TQ
-        |not_a_var$
-        |$1
-        |$\{
-        |$}
-        |$TQ
-        |        .trimIndent()
-        |
-        |val margin2 =
-        |    ${"$$"}$TQ
-        |not_a_var$$
-        |$$1
-        |$$\{
-        |$$}
-        |        |$TQ
-        |        .trimMargin()
-        |"""
+            |val margin1 =
+            |    $TQ
+            |not_a_var$
+            |$1
+            |$\{
+            |$}
+            |$TQ
+            |        .trimIndent()
+            |
+            |val margin2 =
+            |    ${"$$"}$TQ
+            |not_a_var$$
+            |$$1
+            |$$\{
+            |$$}
+            |        |$TQ
+            |        .trimMargin()
+            |"""
                 .trimMargin()
         )
         .isEqualTo(
             """
-        |val margin1 =
-        |    $TQ
-        |    not_a_var$
-        |    $1
-        |    $\{
-        |    $}
-        |    $TQ
-        |        .trimIndent()
-        |
-        |val margin2 =
-        |    ${"$$"}$TQ
-        |    |not_a_var$$
-        |    |$$1
-        |    |$$\{
-        |    |$$}
-        |    |$TQ
-        |        .trimMargin()
-        |"""
+            |val margin1 =
+            |    $TQ
+            |    not_a_var$
+            |    $1
+            |    $\{
+            |    $}
+            |    $TQ
+            |        .trimIndent()
+            |
+            |val margin2 =
+            |    ${"$$"}$TQ
+            |    |not_a_var$$
+            |    |$$1
+            |    |$$\{
+            |    |$$}
+            |    |$TQ
+            |        .trimMargin()
+            |"""
                 .trimMargin()
         )
   }
@@ -3389,26 +3446,26 @@ class FormatterTest {
   fun `handles multi-dollar string`() =
       assertThatFormatting(
               """
-                  |val margin =
-                  |    ${"$$"}$TQ
-                  |     |{
-                  |  "${'$'}test": "string"
-                  |   |}
-                  |
-                  |     $TQ.trimMargin()
-                  |"""
+              |val margin =
+              |    ${"$$"}$TQ
+              |     |{
+              |  "${'$'}test": "string"
+              |   |}
+              |
+              |     $TQ.trimMargin()
+              |"""
                   .trimMargin()
           )
           .isEqualTo(
               """
-                  |val margin =
-                  |    ${"$$"}$TQ
-                  |    |{
-                  |    |  "${'$'}test": "string"
-                  |    |}
-                  |    |$TQ
-                  |        .trimMargin()
-                  |"""
+              |val margin =
+              |    ${"$$"}$TQ
+              |    |{
+              |    |  "${'$'}test": "string"
+              |    |}
+              |    |$TQ
+              |        .trimMargin()
+              |"""
                   .trimMargin()
           )
 
@@ -5362,18 +5419,18 @@ class FormatterTest {
   fun `enum comma and semicolon`() {
     assertThatFormatting(
             """
-        |enum class Highlander {
-        |  ONE,;
-        |}
-        |"""
+            |enum class Highlander {
+            |  ONE,;
+            |}
+            |"""
                 .trimMargin()
         )
         .isEqualTo(
             """
-        |enum class Highlander {
-        |  ONE,
-        |}
-        |"""
+            |enum class Highlander {
+            |  ONE,
+            |}
+            |"""
                 .trimMargin()
         )
   }
@@ -5382,33 +5439,33 @@ class FormatterTest {
   fun `empty enum with semicolons`() {
     assertThatFormatting(
             """
-        |enum class Empty {
-        |  ;
-        |}
-        |"""
+            |enum class Empty {
+            |  ;
+            |}
+            |"""
                 .trimMargin()
         )
         .isEqualTo(
             """
-        |enum class Empty {}
-        |"""
+            |enum class Empty {}
+            |"""
                 .trimMargin()
         )
 
     assertThatFormatting(
             """
-        |enum class Empty {
-        |  ;
-        |  ;
-        |  ;
-        |}
-        |"""
+            |enum class Empty {
+            |  ;
+            |  ;
+            |  ;
+            |}
+            |"""
                 .trimMargin()
         )
         .isEqualTo(
             """
-        |enum class Empty {}
-        |"""
+            |enum class Empty {}
+            |"""
                 .trimMargin()
         )
   }
@@ -6499,21 +6556,21 @@ class FormatterTest {
 
     assertThatFormatting(
             """
-      |import com.example.foo
-      |import com.example.bar
-      |const val SOME_CONST = foo.a
-      |val SOME_STR = bar.a
-      |"""
+            |import com.example.foo
+            |import com.example.bar
+            |const val SOME_CONST = foo.a
+            |val SOME_STR = bar.a
+            |"""
                 .trimMargin()
         )
         .isEqualTo(
             """
-      |import com.example.bar
-      |import com.example.foo
-      |
-      |const val SOME_CONST = foo.a
-      |val SOME_STR = bar.a
-      |"""
+            |import com.example.bar
+            |import com.example.foo
+            |
+            |const val SOME_CONST = foo.a
+            |val SOME_STR = bar.a
+            |"""
                 .trimMargin()
         )
   }
@@ -6522,15 +6579,15 @@ class FormatterTest {
   fun `first line is never empty`() =
       assertThatFormatting(
               """
-      |
-      |fun f() {}
-      |"""
+              |
+              |fun f() {}
+              |"""
                   .trimMargin()
           )
           .isEqualTo(
               """
-      |fun f() {}
-      |"""
+              |fun f() {}
+              |"""
                   .trimMargin()
           )
 
@@ -6538,48 +6595,48 @@ class FormatterTest {
   fun `at most one newline between any adjacent top-level elements`() =
       assertThatFormatting(
               """
-      |import com.Bar
-      |
-      |
-      |import com.Foo
-      |
-      |
-      |fun f() {}
-      |
-      |
-      |fun f() {}
-      |
-      |
-      |class C {}
-      |
-      |
-      |class C {}
-      |
-      |
-      |val x = Foo()
-      |
-      |
-      |val x = Bar()
-      |"""
+              |import com.Bar
+              |
+              |
+              |import com.Foo
+              |
+              |
+              |fun f() {}
+              |
+              |
+              |fun f() {}
+              |
+              |
+              |class C {}
+              |
+              |
+              |class C {}
+              |
+              |
+              |val x = Foo()
+              |
+              |
+              |val x = Bar()
+              |"""
                   .trimMargin()
           )
           .isEqualTo(
               """
-      |import com.Bar
-      |import com.Foo
-      |
-      |fun f() {}
-      |
-      |fun f() {}
-      |
-      |class C {}
-      |
-      |class C {}
-      |
-      |val x = Foo()
-      |
-      |val x = Bar()
-      |"""
+              |import com.Bar
+              |import com.Foo
+              |
+              |fun f() {}
+              |
+              |fun f() {}
+              |
+              |class C {}
+              |
+              |class C {}
+              |
+              |val x = Foo()
+              |
+              |val x = Bar()
+              |"""
                   .trimMargin()
           )
 
@@ -6587,33 +6644,33 @@ class FormatterTest {
   fun `at least one newline between any adjacent top-level elements, unless it's a property`() =
       assertThatFormatting(
               """
-      |import com.Bar
-      |import com.Foo
-      |fun f() {}
-      |fun f() {}
-      |class C {}
-      |class C {}
-      |val x = Foo()
-      |val x = Bar()
-      |"""
+              |import com.Bar
+              |import com.Foo
+              |fun f() {}
+              |fun f() {}
+              |class C {}
+              |class C {}
+              |val x = Foo()
+              |val x = Bar()
+              |"""
                   .trimMargin()
           )
           .isEqualTo(
               """
-      |import com.Bar
-      |import com.Foo
-      |
-      |fun f() {}
-      |
-      |fun f() {}
-      |
-      |class C {}
-      |
-      |class C {}
-      |
-      |val x = Foo()
-      |val x = Bar()
-      |"""
+              |import com.Bar
+              |import com.Foo
+              |
+              |fun f() {}
+              |
+              |fun f() {}
+              |
+              |class C {}
+              |
+              |class C {}
+              |
+              |val x = Foo()
+              |val x = Bar()
+              |"""
                   .trimMargin()
           )
 
@@ -8307,24 +8364,24 @@ class FormatterTest {
 
     assertThatFormatting(
             """
-      |enum class Foo {
-      |  ;
-      |  ;
-      |  ;
-      |
-      |  fun foo(): Unit
-      |}
-      |"""
+            |enum class Foo {
+            |  ;
+            |  ;
+            |  ;
+            |
+            |  fun foo(): Unit
+            |}
+            |"""
                 .trimMargin()
         )
         .isEqualTo(
             """
-      |enum class Foo {
-      |  ;
-      |
-      |  fun foo(): Unit
-      |}
-      |"""
+            |enum class Foo {
+            |  ;
+            |
+            |  fun foo(): Unit
+            |}
+            |"""
                 .trimMargin()
         )
   }

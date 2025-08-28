@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 - Do not apply special format handling of multiline strings with template expressions in them (https://github.com/facebook/ktfmt/issues/556)
+- Make sure that we handle nested expressions for special format handling of multiline strings
 
 
 ## [0.57]

@@ -1900,14 +1900,14 @@ class KDocFormatterTest {
     val source =
         "/**\n" +
             """
-            List items with multiple paragraphs:
+                List items with multiple paragraphs:
 
-            * This is my list item. It has
-              text on many lines.
+                * This is my list item. It has
+                  text on many lines.
 
-              This is a continuation of the first bullet.
-            * And this is the second.
-        """
+                  This is a continuation of the first bullet.
+                * And this is the second.
+            """
                 .trimIndent()
                 .split("\n")
                 .joinToString(separator = "\n") { " * $it".trimEnd() } +

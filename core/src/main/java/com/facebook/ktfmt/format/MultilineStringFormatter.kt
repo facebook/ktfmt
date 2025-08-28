@@ -135,6 +135,7 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
     file.accept(
         object : KtTreeVisitorVoid() {
           override fun visitQualifiedExpression(expression: KtQualifiedExpression) {
+            super.visitQualifiedExpression(expression)
             val receiver = expression.receiverExpression
             if (receiver !is KtStringTemplateExpression) return
             val isDollarString = receiver.text.startsWith("$$")
