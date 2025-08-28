@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [Unreleased]
 
 ### Changed
+- Updated ShadowJar to 9.0.2 (https://github.com/facebook/ktfmt/pull/555)
+
+### Fixed
+- Do not apply special format handling of multiline strings with template expressions in them (https://github.com/facebook/ktfmt/issues/556)
 
 
 ## [0.57]
@@ -20,7 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 - `TrailingCommaManagementStrategy.ONLY_ADD` strategy that does not remove existing trailing commas (https://github.com/facebook/ktfmt/issues/461, https://github.com/facebook/ktfmt/issues/512, https://github.com/facebook/ktfmt/issues/514)
 - Formatting of where clauses (https://github.com/facebook/ktfmt/issues/541)
-- Special format handling of multiline strings with `trimMargin()` and `trimIndent` (https://github.com/facebook/ktfmt/issues/389)
+- Special format handling of multiline strings with `trimMargin()` and `trimIndent()` (https://github.com/facebook/ktfmt/issues/389)
 
 ### Changed
 - `FormattingOptions.manageTrailingCommas` was replaced with `FormattingOptions.trailingCommaManagementStrategy`, which also added new `TrailingCommaManagementStrategy.ONLY_ADD` strategy (https://github.com/facebook/ktfmt/issues/461, https://github.com/facebook/ktfmt/issues/512, https://github.com/facebook/ktfmt/issues/514)

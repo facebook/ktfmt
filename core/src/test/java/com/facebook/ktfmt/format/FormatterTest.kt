@@ -3259,7 +3259,7 @@ class FormatterTest {
           )
 
   @Test
-  fun `handles multiline trimMargin with multiline template expressions inside of it`() {
+  fun `handles multiline trim with template expressions inside of it`() {
     assertFormatted(
         """
         |val margin =
@@ -3299,7 +3299,7 @@ class FormatterTest {
             |    $TQ
             |   echo hello | wc -c
             |   cat hay_stack.txt | grep needle
-            |   ${'$'}{myList.joinToString("|")}
+            |   {myList.joinToString("|")}
             |    $TQ
             |        .trimMargin()
             |"""
@@ -3311,7 +3311,7 @@ class FormatterTest {
             |    $TQ
             |    |   echo hello | wc -c
             |    |   cat hay_stack.txt | grep needle
-            |    |   ${'$'}{myList.joinToString("|")}$TQ
+            |    |   {myList.joinToString("|")}$TQ
             |        .trimMargin()
             |"""
                 .trimMargin()
@@ -3319,28 +3319,68 @@ class FormatterTest {
   }
 
   @Test
-  fun `handles multiline trimMargin with single-line template expressions`() {
+  fun `handles multiline trim formatting with template expressions`() {
+    assertFormatted(
+        """
+        |val margin1 =
+        |    ${TQ}my math = ${'$'}{ "}" + (1 + 2).toString() }
+        |       | checks
+        |    |    out
+        |        |$TQ
+        |        .trimMargin()
+        |
+        |val margin2 =
+        |    ${"$$"}${TQ}my math = ${"$$"}{ "}" + (1 + 2).toString() }
+        |       | checks
+        |    |    out
+        |        |$TQ
+        |        .trimMargin()
+        |"""
+            .trimMargin()
+    )
+
     assertThatFormatting(
             """
-            |val margin =
-            |    ${TQ}my math = ${'$'}{ "}" + (1 + 2).toString() }
-            |       | checks
-            |    |    out
-            |        |$TQ
-            |        .trimMargin()
-            |"""
+        |val margin1 =
+        |    $TQ
+        |not_a_var$
+        |$1
+        |$\{
+        |$}
+        |$TQ
+        |        .trimIndent()
+        |
+        |val margin2 =
+        |    ${"$$"}$TQ
+        |not_a_var$$
+        |$$1
+        |$$\{
+        |$$}
+        |        |$TQ
+        |        .trimMargin()
+        |"""
                 .trimMargin()
         )
         .isEqualTo(
             """
-            |val margin =
-            |    $TQ
-            |    |my math = ${'$'}{ "}" + (1 + 2).toString() }
-            |    | checks
-            |    |    out
-            |    |$TQ
-            |        .trimMargin()
-            |"""
+        |val margin1 =
+        |    $TQ
+        |    not_a_var$
+        |    $1
+        |    $\{
+        |    $}
+        |    $TQ
+        |        .trimIndent()
+        |
+        |val margin2 =
+        |    ${"$$"}$TQ
+        |    |not_a_var$$
+        |    |$$1
+        |    |$$\{
+        |    |$$}
+        |    |$TQ
+        |        .trimMargin()
+        |"""
                 .trimMargin()
         )
   }

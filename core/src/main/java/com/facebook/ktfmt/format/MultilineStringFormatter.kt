@@ -27,6 +27,7 @@ import org.jetbrains.kotlin.psi.psiUtil.startOffset
  */
 class MultilineStringFormatter(val continuationIndentSize: Int) {
   class Candidate(
+      val isDollarString: Boolean,
       val isMargin: Boolean,
       /* The start offset of the trim method call, right before `.trimX` */
       val trimMethodCallOffset: Int,
@@ -47,8 +48,8 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
     val candidates = getCandidates(code)
     val result = StringBuilder(code)
 
-    val openTemplateExpressionRegex =
-        Regex("""\$\$?\{(((?<!\\)"([^"]|(\\"))*?[^\\]")|([^\\]'\\?.')|[^"'}])*$""")
+    val simpleTemplateExpressionRegex = Regex("""\${'$'}{1}((\{?[A-Za-z_\s])|\{$)""")
+    val dollarTemplateExpressionRegex = Regex("""\${'$'}{2}((\{?[A-Za-z_\s])|\{$)""")
 
     for (candidate in candidates.sortedByDescending(Candidate::stringOffset)) {
       val (indentCount, lines) =
@@ -59,12 +60,12 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
         // Single line multiline strings are left alone
         continue
       }
-      if (candidate.isMargin && lines.any { openTemplateExpressionRegex.find(it) != null }) {
-        // Do not mess with multiline template expressions, as those can be a mess
-        // Why?
-        // 1. They span multiple lines
-        // 2. They can be nested recursively
-        // 3. We need to be careful as the closing character ('}') could be inside a string/char
+      val regex =
+          if (candidate.isDollarString) dollarTemplateExpressionRegex
+          else simpleTemplateExpressionRegex
+      if (lines.any { regex.find(it) != null }) {
+        // If there are any template expressions, we cannot format the string as it's possible that
+        // the output of the template affects the result of the trimIndent/trimMargin call
         continue
       }
       val indentation = " ".repeat(indentCount)
@@ -136,6 +137,7 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
           override fun visitQualifiedExpression(expression: KtQualifiedExpression) {
             val receiver = expression.receiverExpression
             if (receiver !is KtStringTemplateExpression) return
+            val isDollarString = receiver.text.startsWith("$$")
             val selectorExpression = expression.selectorExpression?.text.orEmpty().trim()
             val isTrimMargin = selectorExpression.startsWith("trimMargin(")
             val isTrimIndent = selectorExpression.startsWith("trimIndent(")
@@ -143,7 +145,7 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
               // -1 here to account for the space after the dot
               val trimOffset = checkNotNull(expression.selectorExpression).startOffset - 1
               val stringOffset = receiver.startOffset
-              candidates.add(Candidate(isTrimMargin, trimOffset, stringOffset))
+              candidates.add(Candidate(isDollarString, isTrimMargin, trimOffset, stringOffset))
             }
           }
         }
