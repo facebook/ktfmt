@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - All styles managing trailing commas now (https://github.com/facebook/ktfmt/issues/216, https://github.com/facebook/ktfmt/issues/442)
 
 
-## [Unreleased]
+## [0.58]
 
 ### Changed
 - Updated ShadowJar to 9.0.2 (https://github.com/facebook/ktfmt/pull/555)
