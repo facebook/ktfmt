@@ -6723,6 +6723,47 @@ class FormatterTest {
     Formatter.format(code)
   }
 
+  // Regression test against https://github.com/facebook/ktfmt/issues/557
+  @Test
+  fun `empty companion object`() {
+    assertFormatted(
+        """
+        |class Foo {
+        |  val a: String
+        |
+        |  companion object;
+        |
+        |  init {
+        |    a = "Hello"
+        |  }
+        |}
+        |"""
+            .trimMargin()
+    )
+  }
+
+  // Regression test against https://github.com/facebook/ktfmt/issues/557
+  @Test
+  fun `empty companion object with nothing after`() {
+    val code =
+        """
+        |class Foo {
+        |  companion object;
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |class Foo {
+        |  companion object
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
   @Test
   fun `lambda with required arrow`() =
       assertFormatted(

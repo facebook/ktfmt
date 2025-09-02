@@ -1563,7 +1563,7 @@ class KotlinInputAstVisitor(
         }
         visit(typeConstraintList)
         builder.space()
-      } else {
+      } else if (classOrObject.body != null) {
         builder.space()
       }
       visit(classOrObject.body)

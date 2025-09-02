@@ -17,12 +17,15 @@
 package com.facebook.ktfmt.format
 
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
+import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtClassBody
 import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
 import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
 import org.jetbrains.kotlin.psi.KtEnumEntry
 import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtLambdaExpression
+import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.KtStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtWhileExpression
@@ -41,6 +44,12 @@ internal class RedundantSemicolonDetector {
     }
   }
 
+  private fun isLastConcreteChild(element: PsiElement): Boolean {
+    val nextSibling = element.getNextSiblingIgnoringWhitespaceAndComments()
+    return nextSibling == null ||
+        (nextSibling is LeafPsiElement && nextSibling.elementType == KtTokens.RBRACE)
+  }
+
   /** returns **true** if this element was an extra comma, **false** otherwise. */
   private fun isExtraSemicolon(element: PsiElement): Boolean {
     if (element.text != ";") {
@@ -57,14 +66,25 @@ internal class RedundantSemicolonDetector {
       // Terminating semicolon with no other class members.
       return classBody.children.last() == parent
     }
+
+    val prevConcreteSibling = element.getPrevSiblingIgnoringWhitespaceAndComments()
     if (parent is KtClassBody) {
+      if (
+          prevConcreteSibling is KtObjectDeclaration &&
+              prevConcreteSibling.isCompanion() &&
+              prevConcreteSibling.nameIdentifier == null &&
+              !isLastConcreteChild(element)
+      ) {
+        // Example: `class Foo { companion object ; init { } }`
+        return false
+      }
+
       val enumEntryList = EnumEntryList.extractChildList(parent) ?: return true
       // Is not terminating semicolon or is terminating with no members.
       return element != enumEntryList.terminatingSemicolon || parent.children.isEmpty()
     }
 
     val prevLeaf = element.prevLeaf(false)
-    val prevConcreteSibling = element.getPrevSiblingIgnoringWhitespaceAndComments()
     if (
         (prevConcreteSibling is KtIfExpression || prevConcreteSibling is KtWhileExpression) &&
             prevLeaf is KtContainerNodeForControlStructureBody &&
