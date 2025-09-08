@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 
+### Fixed
+- Special format handling of multiline strings handling of first line and do not format string template expressions
+- Do not remove semicolon after an unnamed empty companion object, if it isn't the last element (https://github.com/facebook/ktfmt/issues/557)
+
 ## [0.58]
 
 ### Changed

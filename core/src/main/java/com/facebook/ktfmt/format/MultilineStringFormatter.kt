@@ -16,122 +16,89 @@
 
 package com.facebook.ktfmt.format
 
+import com.google.common.annotations.VisibleForTesting
 import org.jetbrains.kotlin.psi.KtQualifiedExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
+import org.jetbrains.kotlin.psi.psiUtil.getParentOfType
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
+
+private const val TQ = "\"\"\""
 
 /**
  * Adds and removes elements that are not strictly needed in the code, such as semicolons and unused
  * imports.
  */
 class MultilineStringFormatter(val continuationIndentSize: Int) {
-  class Candidate(
-      val isDollarString: Boolean,
-      val isMargin: Boolean,
-      /* The start offset of the trim method call, right before `.trimX` */
-      val trimMethodCallOffset: Int,
-      /* The start offset of the string template, starting with `"""` or `$$"""` */
-      val stringOffset: Int,
-  ) {
-    val indentationSuffix: String = if (isMargin) "|" else ""
-  }
-
-  companion object {
-    private const val TQ = "\"\"\""
-  }
-
-  private val String.indentLevel: Int
-    get() = length - trimStart().length
-
   fun format(code: String): String {
-    val candidates = getCandidates(code)
     val result = StringBuilder(code)
-
-    val simpleTemplateExpressionRegex = Regex("""\${'$'}{1}((\{?[A-Za-z_\s])|\{$)""")
-    val dollarTemplateExpressionRegex = Regex("""\${'$'}{2}((\{?[A-Za-z_\s])|\{$)""")
-
-    for (candidate in candidates.sortedByDescending(Candidate::stringOffset)) {
-      val (indentCount, lines) =
-          result.substring(candidate.stringOffset, candidate.trimMethodCallOffset).lines().let {
-            result.substring(0, candidate.stringOffset).lines().last().length to it.dropLast(1)
-          }
-      if (lines.size < 2) {
+    val multilineStringList =
+        getMultilineTrimmedStringList(code)
+            .sortedByDescending(MultilineTrimmedString::openStringOffset)
+    for (multilineString in multilineStringList) {
+      if (multilineString.stringLineCount < 2) {
         // Single line multiline strings are left alone
         continue
       }
-      val regex =
-          if (candidate.isDollarString) dollarTemplateExpressionRegex
-          else simpleTemplateExpressionRegex
-      if (lines.any { regex.find(it) != null }) {
+      if (multilineString.hasTemplateExpression()) {
         // If there are any template expressions, we cannot format the string as it's possible that
         // the output of the template affects the result of the trimIndent/trimMargin call
         continue
       }
-      val indentation = " ".repeat(indentCount)
+      if (multilineString.isNestedMultiline) {
+        // We currently do not format code inside of template expressions
+        continue
+      }
+      val indentation = " ".repeat(multilineString.indentCount)
       val continuationIndentation = " ".repeat(continuationIndentSize)
-      val minIndentForTrimIndent: Int =
-          lines.subList(1, lines.size).minOf { if (it.isEmpty()) Int.MAX_VALUE else it.indentLevel }
 
       val multiline = StringBuilder()
-      lines.forEachIndexed { i, line ->
-        if (i == 0) {
-          val (before, after) = line.split(TQ, limit = 2)
-          if (after.isNotEmpty()) {
-            multiline.append(before)
-            multiline.appendLine(TQ)
-            multiline.append(indentation)
-            val lineContents =
-                if (candidate.isMargin && after.trimStart().firstOrNull() == '|') {
-                  after.substringAfter("|")
-                } else {
-                  after
-                }
-            multiline.append(candidate.indentationSuffix)
-            multiline.appendLine(lineContents)
-          } else {
-            multiline.appendLine(line)
-          }
-        } else {
-          val lineContents =
-              if (candidate.isMargin) {
-                if (i == lines.lastIndex && "|" !in line && line.substringBefore(TQ).isBlank()) {
-                  // trimMargin has a special handling of the final line, where it ignores it if
-                  // it's blank
+      // Open string
+      if (multilineString.isDollarString) multiline.append("$$")
+      multiline.append(TQ)
+      multiline.appendLine()
 
-                  // Drop last new line character
-                  multiline.deleteAt(multiline.lastIndex)
+      var isLastLineEmpty = true
 
-                  multiline.appendLine(line.substring(line.indexOf(TQ)))
-                  return@forEachIndexed
-                }
-
-                if (line.trimStart().firstOrNull() == '|') {
-                  line.substringAfter("|")
-                } else {
-                  line
-                }
-              } else {
-                line.drop(minIndentForTrimIndent)
-              }
-          if (candidate.isMargin || line.isNotEmpty()) {
-            multiline.append(indentation)
-          }
-          multiline.append(candidate.indentationSuffix)
-          multiline.appendLine(lineContents)
+      // String content
+      multilineString.getStringContent().forEach { lineContent ->
+        if (multilineString.usesTrimMargin || lineContent.isNotBlank()) {
+          multiline.append(indentation)
+          multiline.append(multilineString.indentationSuffix)
         }
+        multiline.appendLine(lineContent)
+
+        isLastLineEmpty = lineContent.isEmpty()
       }
+
+      // Close string
+      if (multilineString.usesTrimMargin && isLastLineEmpty) {
+        // Remove the last new line character
+        multiline.deleteAt(multiline.lastIndex)
+      } else {
+        multiline.append(indentation)
+      }
+      multiline.appendLine(TQ)
+
+      // Trim method call
       multiline.append(indentation)
       multiline.append(continuationIndentation)
-      result.replace(candidate.stringOffset, candidate.trimMethodCallOffset, multiline.toString())
+
+      // Now replace the original multiline string with the newly formatted one
+      result.replace(
+          multilineString.openStringOffset,
+          multilineString.trimMethodCallOffset,
+          multiline.toString(),
+      )
     }
 
     return result.toString()
   }
 
-  private fun getCandidates(code: String): List<Candidate> {
+  @VisibleForTesting
+  internal fun getMultilineTrimmedStringList(code: String): List<MultilineTrimmedString> {
     val file = Parser.parse(code)
-    val candidates = mutableListOf<Candidate>()
+    val strings = mutableListOf<MultilineTrimmedString>()
     file.accept(
         object : KtTreeVisitorVoid() {
           override fun visitQualifiedExpression(expression: KtQualifiedExpression) {
@@ -140,17 +107,128 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
             if (receiver !is KtStringTemplateExpression) return
             val isDollarString = receiver.text.startsWith("$$")
             val selectorExpression = expression.selectorExpression?.text.orEmpty().trim()
-            val isTrimMargin = selectorExpression.startsWith("trimMargin(")
-            val isTrimIndent = selectorExpression.startsWith("trimIndent(")
+            val isTrimMargin = selectorExpression.startsWith("trimMargin()")
+            val isTrimIndent = selectorExpression.startsWith("trimIndent()")
             if (isTrimIndent || isTrimMargin) {
               // -1 here to account for the space after the dot
               val trimOffset = checkNotNull(expression.selectorExpression).startOffset - 1
               val stringOffset = receiver.startOffset
-              candidates.add(Candidate(isDollarString, isTrimMargin, trimOffset, stringOffset))
+              val lineStart = code.substring(0, stringOffset).lines().lastIndex
+              val lineEnd = code.substring(0, trimOffset).lines().lastIndex
+              val indentCount =
+                  code.substring(0, stringOffset).lines().last().substringBefore(TQ).let {
+                    it.length - it.trimStart().length
+                  }
+              strings.add(
+                  MultilineTrimmedString(
+                      usesTrimMargin = isTrimMargin,
+                      isDollarString = isDollarString,
+                      indentCount = indentCount,
+                      lines = code.lines().subList(lineStart, lineEnd + 1),
+                      lineStart = lineStart,
+                      lineEnd = lineEnd,
+                      openStringOffset = stringOffset,
+                      trimMethodCallOffset = trimOffset,
+                      isNestedMultiline =
+                          expression.getParentOfType<KtStringTemplateExpression>(strict = false) !=
+                              null,
+                  )
+              )
             }
           }
         }
     )
-    return candidates
+    return strings.toList()
+  }
+}
+
+@VisibleForTesting
+internal data class MultilineTrimmedString(
+    /* Whether this is a trimMargin or a trimIndent call. */
+    val usesTrimMargin: Boolean,
+    /* Whether this is a dollar string or a simple string. */
+    val isDollarString: Boolean,
+    /* The number of spaces to indent the string template. */
+    val indentCount: Int,
+    /* The lines of the string template, inclunding the trimX call. */
+    val lines: List<String>,
+    /* The line number of the first line of the string template, 0-indexed. */
+    val lineStart: Int,
+    /* The line number of the last line of the string template, including the trimX call, 0-indexed. */
+    val lineEnd: Int,
+    /* The start offset relative to the full code of the string template, which is the starting index of `"""` or `$$"""`. */
+    val openStringOffset: Int,
+    /* The start offset relative to the full code of the trim method call in this multiline string, right before `.trimX`. */
+    val trimMethodCallOffset: Int,
+    /* Whether this multiline string is nested in another multiline string. */
+    val isNestedMultiline: Boolean,
+) {
+  companion object {
+    private val simpleTemplateExpressionRegex = Regex("""\${'$'}{1}((\{?[A-Za-z_\s])|\{$)""")
+    private val dollarTemplateExpressionRegex = Regex("""\${'$'}{2}((\{?[A-Za-z_\s])|\{$)""")
+  }
+
+  val usesTrimIndent: Boolean
+    get() = !usesTrimMargin
+
+  val lastStringLineIndex: Int = lines.indexOfLast { TQ in it }
+
+  /* The minimal indent level of the string template, useful to adjust trimIndent. */
+  val minimalIndent: Int
+    get() =
+        (lines.subList(1, lastStringLineIndex) +
+                // Cannot include anything before the string opening `"""`
+                lines.first().substringAfterLast(TQ) +
+                // Cannot include anything after the string closing `"""`
+                lines[lastStringLineIndex].substringBefore(TQ))
+            .minOf { if (it.isBlank()) Int.MAX_VALUE else it.indentLevel() }
+
+  val indentationSuffix: String = if (usesTrimMargin) "|" else ""
+
+  /* The number of lines in the string template, excluding the trimX call. */
+  val stringLineCount: Int = lastStringLineIndex + 1
+
+  fun hasTemplateExpression(): Boolean {
+    val regex = if (isDollarString) dollarTemplateExpressionRegex else simpleTemplateExpressionRegex
+    return lines.any { regex.find(it) != null }
+  }
+
+  fun getStringContent(): List<String> {
+    return buildList<String> {
+      lines.forEachIndexed { i, line ->
+        if (i == 0) {
+          // The first line (one with opening `"""`) contents are ignored if they are only
+          // whitespaces
+          val after = line.substringAfter(TQ)
+          if (after.isNotBlank()) {
+            add(after.trimmed())
+          }
+        } else if (i == lastStringLineIndex) {
+          // trimX have a special handling of the final line
+          val stringContent = line.substringBeforeLast(TQ)
+          if (stringContent.isBlank()) {
+            // ignores last line if it's blank
+          } else {
+            add(stringContent.trimmed())
+          }
+        } else if (i > lastStringLineIndex) {
+          // No longer part of the string template, so we can ignore it
+        } else {
+          add(line.trimmed())
+        }
+      }
+    }
+  }
+
+  private fun String.indentLevel(): Int = length - trimStart().length
+
+  private fun String.trimmed(): String {
+    if (isBlank()) return ""
+    if (usesTrimIndent) return drop(minimalIndent)
+
+    if (trimStart().firstOrNull() == '|') {
+      return substringAfter("|").ifBlank { "" }
+    }
+    return this
   }
 }
