@@ -62,7 +62,7 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
 
       // String content
       multilineString.getStringContent().forEach { lineContent ->
-        if (multilineString.usesTrimMargin || lineContent.isNotBlank()) {
+        if (multilineString.usesTrimMargin || lineContent.isNotEmpty()) {
           multiline.append(indentation)
           multiline.append(multilineString.indentationSuffix)
         }
@@ -196,19 +196,10 @@ internal data class MultilineTrimmedString(
   fun getStringContent(): List<String> {
     return buildList<String> {
       lines.forEachIndexed { i, line ->
-        if (i == 0) {
-          // The first line (one with opening `"""`) contents are ignored if they are only
-          // whitespaces
-          val after = line.substringAfter(TQ)
-          if (after.isNotBlank()) {
-            add(after.trimmed())
-          }
-        } else if (i == lastStringLineIndex) {
-          // trimX have a special handling of the final line
-          val stringContent = line.substringBeforeLast(TQ)
-          if (stringContent.isBlank()) {
-            // ignores last line if it's blank
-          } else {
+        if (i == 0 || i == lastStringLineIndex) {
+          val stringContent = if (i == 0) line.substringAfter(TQ) else line.substringBeforeLast(TQ)
+          // Ignores first and last line content if they are blank
+          if (stringContent.isNotBlank()) {
             add(stringContent.trimmed())
           }
         } else if (i > lastStringLineIndex) {
@@ -223,11 +214,10 @@ internal data class MultilineTrimmedString(
   private fun String.indentLevel(): Int = length - trimStart().length
 
   private fun String.trimmed(): String {
-    if (isBlank()) return ""
     if (usesTrimIndent) return drop(minimalIndent)
 
     if (trimStart().firstOrNull() == '|') {
-      return substringAfter("|").ifBlank { "" }
+      return substringAfter("|")
     }
     return this
   }
