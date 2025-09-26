@@ -10,14 +10,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - All styles managing trailing commas now (https://github.com/facebook/ktfmt/issues/216, https://github.com/facebook/ktfmt/issues/442)
 
 
-## [Unreleased]
-
-### Changed
-
+## [0.59]
 
 ### Fixed
 - Special format handling of multiline strings handling of first line and do not format string template expressions
 - Do not remove semicolon after an unnamed empty companion object, if it isn't the last element (https://github.com/facebook/ktfmt/issues/557)
+
 
 ## [0.58]
 
@@ -47,6 +45,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Corrected reference to jar in formatter website's command line instructions https://facebook.github.io/ktfmt/
 - Trailing comma on when cases (https://github.com/facebook/ktfmt/issues/376)
 - Update idea plugin name to avoid collision with google-java-format (https://github.com/facebook/ktfmt/issues/553)
+
 
 ## [0.56]
 
