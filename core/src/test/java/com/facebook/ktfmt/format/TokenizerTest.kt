@@ -695,7 +695,8 @@ class TokenizerTest {
         """
         |package a.b
         |class A {}
-        |/* /* */"""
+        |/* /* */
+        """
             .trimMargin(),
         null,
     )
