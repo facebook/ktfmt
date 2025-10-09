@@ -234,6 +234,7 @@ class TokenizerTest {
         |fun feedAnimal(animal: Animal) {
         |    when (animal) {
         |        is Animal.Cat if !animal.mouseHunter -> animal.feedCat()
+        |        else if animal.eatsPlants -> animal.giveLettuce()
         |    }
         |}
         |"""
@@ -285,6 +286,23 @@ class TokenizerTest {
             "animal",
             ".",
             "feedCat",
+            "(",
+            ")",
+            "\n",
+            "        ",
+            "else",
+            " ",
+            "if",
+            " ",
+            "animal",
+            ".",
+            "eatsPlants",
+            " ",
+            "->",
+            " ",
+            "animal",
+            ".",
+            "giveLettuce",
             "(",
             ")",
             "\n",
@@ -344,6 +362,23 @@ class TokenizerTest {
             28,
             -1,
             29,
+            -1,
+            30,
+            31,
+            32,
+            -1,
+            33,
+            -1,
+            34,
+            35,
+            36,
+            37,
+            38,
+            -1,
+            -1,
+            39,
+            -1,
+            40,
             -1,
         )
         .inOrder()
