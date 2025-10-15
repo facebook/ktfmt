@@ -130,6 +130,12 @@ kotlin {
   }
 }
 
+ktfmt {
+  trailingCommaManagementStrategy.set(
+      com.ncorti.ktfmt.gradle.TrailingCommaManagementStrategy.ONLY_ADD
+  )
+}
+
 group = "com.facebook"
 
 version = rootProject.version

@@ -3170,7 +3170,6 @@ class FormatterTest {
 
   @Test
   fun `multiline trimIndent and trimMargin inside of function call`() {
-    defaultTestFormattingOptions = META_FORMAT
     assertThatFormatting(
             """
             |foo(
@@ -3197,6 +3196,7 @@ class FormatterTest {
             |"""
                 .trimMargin()
         )
+        .withOptions(META_FORMAT)
         .isEqualTo(
             """
             |foo(

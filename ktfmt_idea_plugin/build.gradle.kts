@@ -51,6 +51,12 @@ dependencies {
   implementation(project(":ktfmt"))
 }
 
+ktfmt {
+  trailingCommaManagementStrategy.set(
+      com.ncorti.ktfmt.gradle.TrailingCommaManagementStrategy.ONLY_ADD
+  )
+}
+
 intellijPlatform {
   projectName.set("ktfmt_idea_plugin")
 

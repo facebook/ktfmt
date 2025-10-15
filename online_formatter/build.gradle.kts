@@ -39,6 +39,12 @@ kotlin {
   jvmToolchain(javaVersion.toInt())
 }
 
+ktfmt {
+  trailingCommaManagementStrategy.set(
+      com.ncorti.ktfmt.gradle.TrailingCommaManagementStrategy.ONLY_ADD
+  )
+}
+
 tasks {
   test { useJUnit() }
 
