@@ -12,7 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
-### Changed
+### Fixed
+- Added support for `else if` guard conditions
 
 
 ## [0.59]
