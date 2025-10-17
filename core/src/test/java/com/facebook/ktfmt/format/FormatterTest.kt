@@ -8583,6 +8583,8 @@ class FormatterTest {
         |        is Animal.Cat if
         |          !animal.birdHunter -> animal.feedCat()
         |        is Animal.Cat if     (!animal.birdHunter) -> animal.feedCat()
+        |          else  if animal
+        |              .eatsPlants -> animal.giveLettuce()   
         |        else -> println("Unknown animal")
         |    }
         |}
@@ -8598,6 +8600,7 @@ class FormatterTest {
         |    is Animal.Cat if !animal.birdHunter -> animal.feedCat()
         |    is Animal.Cat if !animal.birdHunter -> animal.feedCat()
         |    is Animal.Cat if (!animal.birdHunter) -> animal.feedCat()
+        |    else if animal.eatsPlants -> animal.giveLettuce()
         |    else -> println("Unknown animal")
         |  }
         |}

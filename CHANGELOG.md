@@ -12,7 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
-### Changed
+### Added
+- Support for `else if` guard conditions (https://github.com/facebook/ktfmt/pull/563)
 
 
 ## [0.59]

@@ -1915,10 +1915,10 @@ class KotlinInputAstVisitor(
             builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
           }
           builder.forcedBreak()
-          if (whenEntry.isElse) {
-            builder.token("else")
-          } else {
-            builder.block(ZERO) {
+          builder.block(ZERO) {
+            if (whenEntry.elseKeyword != null) {
+              builder.token("else")
+            } else {
               val conditions = whenEntry.conditions
               for ((index, condition) in conditions.withIndex()) {
                 visit(condition)
@@ -1927,14 +1927,14 @@ class KotlinInputAstVisitor(
                   builder.forcedBreak()
                 }
               }
-              whenEntry.guard?.let { guard ->
-                builder.space()
-                emitKeywordWithCondition(
-                    "if",
-                    guard.getExpression(),
-                    surroundConditionWithParens = false,
-                )
-              }
+            }
+            whenEntry.guard?.let { guard ->
+              builder.space()
+              emitKeywordWithCondition(
+                  "if",
+                  guard.getExpression(),
+                  surroundConditionWithParens = false,
+              )
             }
           }
           val whenExpression = whenEntry.expression
