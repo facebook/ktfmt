@@ -255,7 +255,14 @@ class ParsedArgsTest {
     val returnedFormattingOptions =
         formattingOptions.copy(removeUnusedImports = removedUnusedImports)
     return ParseResult.Ok(
-        ParsedArgs(fileNames, returnedFormattingOptions, dryRun, setExitIfChanged, stdinName, editorConfig)
+        ParsedArgs(
+            fileNames,
+            returnedFormattingOptions,
+            dryRun,
+            setExitIfChanged,
+            stdinName,
+            editorConfig,
+        )
     )
   }
 }
