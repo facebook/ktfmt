@@ -104,6 +104,12 @@ class ParsedArgsTest {
   }
 
   @Test
+  fun `parseOptions recognizes --enable-editorconfig`() {
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--enable-editorconfig", "foo.kt")))
+    assertThat(parsed.editorConfig).isEqualTo(true)
+  }
+
+  @Test
   fun `parseOptions recognizes --stdin-name`() {
     val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--stdin-name=my/foo.kt", "-")))
     assertThat(parsed.stdinName).isEqualTo("my/foo.kt")
@@ -244,11 +250,12 @@ class ParsedArgsTest {
       setExitIfChanged: Boolean = false,
       removedUnusedImports: Boolean = true,
       stdinName: String? = null,
+      editorConfig: Boolean = false,
   ): ParseResult.Ok {
     val returnedFormattingOptions =
         formattingOptions.copy(removeUnusedImports = removedUnusedImports)
     return ParseResult.Ok(
-        ParsedArgs(fileNames, returnedFormattingOptions, dryRun, setExitIfChanged, stdinName)
+        ParsedArgs(fileNames, returnedFormattingOptions, dryRun, setExitIfChanged, stdinName, editorConfig)
     )
   }
 }
