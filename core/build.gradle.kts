@@ -38,6 +38,7 @@ dependencies {
   api(libs.kotlin.stdlib)
   api(libs.kotlin.test)
   api(libs.kotlin.compilerEmbeddable)
+  implementation(libs.ec4j)
   testImplementation(libs.googleTruth)
   testImplementation(libs.junit)
 }

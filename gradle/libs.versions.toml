@@ -22,6 +22,7 @@ amazon-aws-lambda-core = { module = "com.amazonaws:aws-lambda-java-core", versio
 amazon-aws-lambda-events = { module = "com.amazonaws:aws-lambda-java-events", version.ref = "com-amazonaws-aws-lambda-java-events" }
 amazon-aws-sdk-bom = { module = "software.amazon.awssdk:bom", version = "2.10.73" }
 amazon-aws-sdk-lambda = { module = "software.amazon.awssdk:lambda" }
+ec4j = { module = "org.ec4j.core:ec4j-core", version = "1.1.1" }
 googleJavaformat = { module = "com.google.googlejavaformat:google-java-format", version.ref = "com-google-googlejavaformat-google-java-format" }
 googleTruth = { module = "com.google.truth:truth", version.ref = "com-google-truth-truth" }
 gson = { module = "com.google.code.gson:gson", version.ref = "com-google-code-gson-gson" }
