@@ -21,6 +21,7 @@ plugins {
   alias(libs.plugins.ktfmt) apply false
   alias(libs.plugins.nexusPublish)
   alias(libs.plugins.shadowJar) apply false
+  alias(libs.plugins.graalvm) apply false
 }
 
 version = providers.gradleProperty("ktfmt.version").get()
