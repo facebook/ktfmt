@@ -6,7 +6,10 @@ com-amazonaws-aws-lambda-java-events = "2.2.9"
 com-google-googlejavaformat-google-java-format = "1.23.0"
 com-google-guava-guava = "32.0.0-jre"
 com-google-truth-truth = "1.0"
+org-graalvm = "25.0.1"
+graalvmPlugin = "0.11.1"
 junit-junit = "4.13.1"
+org-jline = "3.30.6"
 net-java-dev-jna-jna = "4.2.2"
 com-google-code-gson-gson = "2.10.1"
 
@@ -25,7 +28,12 @@ amazon-aws-sdk-lambda = { module = "software.amazon.awssdk:lambda" }
 googleJavaformat = { module = "com.google.googlejavaformat:google-java-format", version.ref = "com-google-googlejavaformat-google-java-format" }
 googleTruth = { module = "com.google.truth:truth", version.ref = "com-google-truth-truth" }
 gson = { module = "com.google.code.gson:gson", version.ref = "com-google-code-gson-gson" }
+graalvm-nativeimage = { module = "org.graalvm.nativeimage:svm", version.ref ="org-graalvm" }
 guava = { module = "com.google.guava:guava", version.ref = "com-google-guava-guava" }
+jline-terminal = { module = "org.jline:jline-terminal", version.ref = "org-jline" }
+jline-terminal-jansi = { module = "org.jline:jline-terminal-jansi", version.ref = "org-jline" }
+jline-terminal-jna = { module = "org.jline:jline-terminal-jna", version.ref = "org-jline" }
+jline-terminal-jni = { module = "org.jline:jline-terminal-jni", version.ref = "org-jline" }
 junit = { module = "junit:junit", version.ref = "junit-junit" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "net-java-dev-jna-jna" }
 ktfmt = { module = "com.facebook:ktfmt", version.ref = "ktfmt" }
@@ -35,6 +43,7 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version.ref = "gradlePlugin-dokka" }
+graalvm = { id = "org.graalvm.buildtools.native", version.ref = "graalvmPlugin" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "gradlePlugin-intelliJPlatform" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "gradlePlugin-ktfmt" }

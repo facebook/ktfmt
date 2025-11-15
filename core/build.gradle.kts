@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import java.nio.file.Paths
 import kotlin.io.path.writeText
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 
@@ -22,9 +23,48 @@ plugins {
   id("com.gradleup.shadow")
   id("com.ncorti.ktfmt.gradle")
   id("maven-publish")
+  id("org.graalvm.buildtools.native")
   id("org.jetbrains.dokka")
   id("signing")
+  application
 }
+
+val entrypoint = "com.facebook.ktfmt.cli.Main"
+
+// Pass `-Pktfmt.native.release=true` to enable release mode for Native Image.
+val nativeRelease = findProperty("ktfmt.native.release") == "true"
+
+// Pass `-Pktfmt.native.target=xx` to pass `-march=xx` to Native Image.
+val nativeTarget = findProperty("ktfmt.native.target") ?: "compatibility"
+
+// Pass `-Pktfmt.native.opt=s` to pass e.g. `-Os` to Native Image.
+val nativeOpt =
+    when (val opt = findProperty("ktfmt.native.opt")) {
+      null -> if (nativeRelease) "3" else "b"
+      else -> opt
+    }
+
+// List of PGO profiles, which are held in `src/main/native-image/profiles`.
+val pgoProfiles =
+    listOf("default.iprof")
+        .map { profileName ->
+          layout.projectDirectory.file(
+              Paths.get("src", "main", "native-image", "profiles", profileName).toString()
+          )
+        }
+        .let { allProfiles -> listOf("--pgo=${allProfiles.joinToString(",")}") }
+
+// Pass `-Pktfmt.native.pgo=true` to build with PGO; pass `train` to enable instrumentation.
+val pgoArgs =
+    when (val pgo = findProperty("ktfmt.native.pgo")) {
+      null -> if (nativeRelease) pgoProfiles else emptyList()
+      "true" -> pgoProfiles
+      "false" -> emptyList()
+      "train" -> listOf("--pgo-instrument")
+      else -> error("Unrecognized `ktfmt.native.pgo` argument: '$pgo'")
+    }
+
+application { mainClass = entrypoint }
 
 repositories {
   mavenLocal()
@@ -40,6 +80,12 @@ dependencies {
   api(libs.kotlin.compilerEmbeddable)
   testImplementation(libs.googleTruth)
   testImplementation(libs.junit)
+
+  compileOnly(libs.graalvm.nativeimage)
+  nativeImageClasspath(libs.jline.terminal)
+  nativeImageClasspath(libs.jline.terminal.jansi)
+  nativeImageClasspath(libs.jline.terminal.jna)
+  nativeImageClasspath(libs.jline.terminal.jni)
 }
 
 val generateSources by
@@ -136,6 +182,78 @@ ktfmt {
   )
 }
 
+graalvmNative {
+  binaries {
+    named("main") {
+      imageName = "ktfmt"
+      mainClass = entrypoint
+
+      buildArgs(
+          buildList {
+            // If PGO flags are present, add them first; if not, add `-Ox`.
+            when (pgoArgs.isEmpty()) {
+              true -> add("-O$nativeOpt")
+              false -> addAll(pgoArgs)
+            }
+
+            // Common flags for Native Image.
+            addAll(
+                listOf(
+                    "-march=$nativeTarget",
+                    "--gc=serial",
+                    "--future-defaults=all",
+                    "--link-at-build-time=com.facebook",
+                    "--initialize-at-build-time=com.facebook",
+                    "--add-opens=java.base/java.util=ALL-UNNAMED",
+                    "--emit=build-report",
+                    "--color=always",
+                    "--enable-sbom=cyclonedx,embed",
+                    // -- ▼ SVM Hosted Options
+                    "-H:+UseCompressedReferences",
+                    "-H:+ReportExceptionStackTraces",
+                    // -- ▼ SVM Runtime Options
+                    "-R:MaxHeapSize=268435456", // 256mb max heap
+                    // -- ▼ Experimental Options
+                    "-H:+UnlockExperimentalVMOptions",
+                    "-H:-ReduceImplicitExceptionStackTraceInformation",
+                    "-H:+ReportDynamicAccess",
+                    "-H:-UnlockExperimentalVMOptions",
+                    // -- ▼ VM flags
+                    "-J--enable-native-access=ALL-UNNAMED",
+                    "-J--illegal-native-access=allow",
+                    "-J--sun-misc-unsafe-memory-access=allow",
+                )
+            )
+
+            // Mark what should be initialized at build-time, i.e. persisted to the heap image.
+            // See `src/main/native-image/initialize-at-build-time.txt` for a list of such classes.
+            addLinesFromFile("src", "main", "native-image", "initialize-at-build-time.txt") {
+              "--initialize-at-build-time=$it"
+            }
+
+            // Still other classes must be initialized at runtime only.
+            // See `src/main/native-image/initialize-at-run-time.txt` for a list of such classes.
+            addLinesFromFile("src", "main", "native-image", "initialize-at-run-time.txt") {
+              "--initialize-at-run-time=$it"
+            }
+
+            // Here, we prefer static linking, for startup performance and release simplicity.
+            // On Linux amd64, we target musl to avoid linking conflicts with older glibc.
+            // On macOS, pass `--static-nolibc` for the closest option available.
+            when (System.getProperty("os.name")) {
+              "Linux" ->
+                  when (System.getProperty("os.arch")) {
+                    "amd64" -> addAll(listOf("--static", "--libc=musl"))
+                    else -> add("--static-nolibc")
+                  }
+              "Mac OS X" -> add("--static-nolibc")
+            }
+          }
+      )
+    }
+  }
+}
+
 group = "com.facebook"
 
 version = rootProject.version
@@ -179,4 +297,19 @@ if (System.getenv("SIGN_BUILD") != null) {
     useGpgCmd()
     sign(publishing.publications["maven"])
   }
+}
+
+fun MutableList<String>.addLinesFromFile(vararg path: String, mapper: (String) -> String) {
+  // Mark what should be initialized at build-time, i.e. persisted to the heap image.
+  file(Paths.get(path.first(), *path.drop(1).toTypedArray()).toString())
+      .useLines { lines ->
+        lines
+            .filter { line ->
+              // filter empty lines
+              line.isNotEmpty()
+            }
+            .map(mapper)
+            .toList()
+      }
+      .also { addAll(it) }
 }
