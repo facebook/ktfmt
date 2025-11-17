@@ -25,3 +25,7 @@ release-ktfmt-website/
 **/build/
 !src/**/build/
 .claude/
+
+# Native Image profiles are large
+core/src/main/native-image/profiles/*.iprof
+
