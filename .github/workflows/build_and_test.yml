@@ -25,9 +25,19 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
         distribution: zulu
+    - name: Set up GraalVM
+      uses: graalvm/setup-graalvm@v1
+      with:
+        java-version: '25.0.1'
+        distribution: 'graalvm'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        set-java-home: 'false'
+        native-image-job-reports: 'true'
     - name: Build ktfmt_idea_plugin
       run: ./gradlew :idea_plugin:build --stacktrace --no-daemon
     - name: Build the Online Formatter
       run: ./gradlew :lambda:build --stacktrace --no-daemon
     - name: Build ktfmt
       run: ./gradlew :ktfmt:build --stacktrace --no-daemon
+    - name: Build Native Image
+      run: ./gradlew :ktfmt:nativeCompile --stacktrace --no-daemon && ./ktfmt/build/native/nativeCompile/ktfmt --version
