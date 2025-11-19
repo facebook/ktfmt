@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 - Support for `else if` guard conditions (https://github.com/facebook/ktfmt/pull/563)
+- Explicit Kotlin import layout for the default and Google specific editorconfig files to match ktfmt's style. The same layout was already applied to the Kotlin Lang editorconfig (https://github.com/facebook/ktfmt/pull/571) 
 
 
 ## [0.59]
