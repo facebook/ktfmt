@@ -88,6 +88,32 @@ following subset of editorconfig properties:
 | `ij_continuation_indent_size`                             | will override the continuation indent                                                            |
 | `ktfmt_trailing_comma_management_strategy`                | one of `none`, `only_add` or `complete`<br/>will override the trailing comma management strategy |
 
+#### Cascading Lambda Breaks
+
+For DSLs like Jetpack Compose where nested lambdas represent semantic hierarchies, you can use the `--cascade-nested-lambda-breaks` option to preserve visual structure:
+
+```
+$ java -jar /path/to/ktfmt-<VERSION>-with-dependencies.jar --cascade-nested-lambda-breaks [files...]
+```
+
+When enabled, nested trailing lambdas are forced to multi-line format when their parent breaks, ensuring complete visual hierarchy:
+
+```kotlin
+// With --cascade-nested-lambda-breaks
+App {
+  SelectableCard {
+    Button {
+      Text("Click me")
+    }
+  }
+}
+
+// Without (default)
+App { SelectableCard { Button { Text("Click me") } } }
+```
+
+This option only affects trailing lambdas and does not change the formatting of lambdas in other contexts (like `map` or `filter` chains).
+
 ***Note:***
 *There is no configurability as to the formatter's algorithm for formatting (apart from the different styles
 or limited `.editorconfig` support). This is a deliberate design decision to unify our code formatting on a
