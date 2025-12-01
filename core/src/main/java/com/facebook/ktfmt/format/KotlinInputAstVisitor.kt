@@ -943,12 +943,16 @@ class KotlinInputAstVisitor(
 
         // Determine if this lambda will break to multi-line
         // A lambda breaks when it either:
-        // 1. Is forced to break by the cascadeNestedLambdaBreaks option
-        // 2. Has multiple statements
-        // 3. Has a return expression
-        // 4. Has a comment before the first statement
+        // 1. Is forced to break by the cascadeNestedLambdaBreaks option (parent broke)
+        // 2. Contains nested trailing lambdas and cascadeNestedLambdaBreaks is enabled
+        // 3. Has multiple statements
+        // 4. Has a return expression
+        // 5. Has a comment before the first statement
         val currentLambdaWillBreak =
             shouldForceMultiline ||
+                (options.cascadeNestedLambdaBreaks &&
+                    isTrailingLambda(lambdaExpression) &&
+                    containsTrailingLambdas(lambdaExpression)) ||
                 expressionStatements.size > 1 ||
                 expressionStatements.firstOrNull() is KtReturnExpression ||
                 bodyExpression.startsWithComment()
@@ -1566,6 +1570,31 @@ class KotlinInputAstVisitor(
     }
 
     return false
+  }
+
+  /**
+   * Determines if a lambda expression contains trailing lambda calls in its body.
+   *
+   * This is used to detect when a lambda should be forced to break because it contains nested
+   * trailing lambdas that form a hierarchy needing preservation.
+   */
+  private fun containsTrailingLambdas(lambdaExpression: KtLambdaExpression): Boolean {
+    val body = lambdaExpression.bodyExpression ?: return false
+
+    // Check if any element in the body is a call expression with trailing lambdas
+    fun checkElement(element: PsiElement): Boolean {
+      if (element is KtCallExpression && element.lambdaArguments.isNotEmpty()) {
+        return true
+      }
+      for (child in element.children) {
+        if (checkElement(child)) {
+          return true
+        }
+      }
+      return false
+    }
+
+    return checkElement(body)
   }
 
   /** See [isLambdaOrScopingFunction] for examples. */
