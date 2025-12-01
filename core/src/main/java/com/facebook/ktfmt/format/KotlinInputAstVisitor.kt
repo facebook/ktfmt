@@ -863,10 +863,15 @@ class KotlinInputAstVisitor(
    *       car()
    *     }
    * ```
+   *
+   * @param parentLambdaBroke used when cascadeNestedLambdaBreaks is enabled to track whether the
+   *   parent lambda has broken to multi-line, so that nested trailing lambdas can be forced to
+   *   break as well
    */
   private fun visitLambdaExpressionInternal(
       lambdaExpression: KtLambdaExpression,
       brokeBeforeBrace: BreakTag?,
+      parentLambdaBroke: Boolean = false,
   ) {
     builder.sync(lambdaExpression)
 
@@ -1496,6 +1501,30 @@ class KotlinInputAstVisitor(
     }
     if (carry is KtLambdaExpression) {
       return true
+    }
+
+    return false
+  }
+
+  /**
+   * Determines if the given expression is a trailing lambda in a call expression.
+   *
+   * This is used to identify lambdas that should inherit hierarchy preservation when
+   * cascadeNestedLambdaBreaks is enabled.
+   */
+  private fun isTrailingLambda(expression: KtExpression?): Boolean {
+    if (expression == null) return false
+    val parent = expression.parent
+
+    // Check if this lambda is in the lambdaArguments list of a call expression
+    if (parent is KtLambdaArgument) {
+      val callExpression = parent.parent as? KtCallExpression
+      return callExpression?.lambdaArguments?.contains(parent) == true
+    }
+
+    // Check if this is a labeled lambda that's a trailing lambda
+    if (expression is KtLabeledExpression) {
+      return isTrailingLambda(expression.parent as? KtExpression)
     }
 
     return false
