@@ -138,6 +138,12 @@ class KotlinInputAstVisitor(
     private val builder: OpsBuilder,
 ) : KtTreeVisitorVoid() {
 
+  /**
+   * Track whether we're currently inside a lambda that has broken to multi-line. Used when
+   * cascadeNestedLambdaBreaks is enabled to force nested trailing lambdas to break.
+   */
+  private var insideBreakingLambda: Boolean = false
+
   /** Standard indentation for a block */
   private val blockIndent: Indent.Const = Indent.Const.make(options.blockIndent, 1)
 
@@ -928,15 +934,46 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, "", bracePlusBlockIndent)
       builder.block(bracePlusBlockIndent) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
+
+        // FORCE multi-line when parent lambda broke and option is enabled
+        val shouldForceMultiline =
+            options.cascadeNestedLambdaBreaks &&
+                parentLambdaBroke &&
+                isTrailingLambda(lambdaExpression)
+
+        // Determine if this lambda will break to multi-line
+        // A lambda breaks when it either:
+        // 1. Is forced to break by the cascadeNestedLambdaBreaks option
+        // 2. Has multiple statements
+        // 3. Has a return expression
+        // 4. Has a comment before the first statement
+        val currentLambdaWillBreak =
+            shouldForceMultiline ||
+                expressionStatements.size > 1 ||
+                expressionStatements.firstOrNull() is KtReturnExpression ||
+                bodyExpression.startsWithComment()
+
+        // Track lambda break state for nested lambdas
+        val previousInsideBreakingLambda = insideBreakingLambda
+        if (options.cascadeNestedLambdaBreaks && isTrailingLambda(lambdaExpression)) {
+          insideBreakingLambda = currentLambdaWillBreak
+        }
+
         if (
-            expressionStatements.size == 1 &&
+            !shouldForceMultiline &&
+                expressionStatements.size == 1 &&
                 expressionStatements.first() !is KtReturnExpression &&
                 !bodyExpression.startsWithComment()
         ) {
           visitStatement(expressionStatements[0])
         } else {
+          // FORCED multi-line: either naturally multi-line OR forced by parent
           visitStatements(expressionStatements)
         }
+
+        // Restore previous state
+        insideBreakingLambda = previousInsideBreakingLambda
+
         builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusZeroIndent)
       }
     }
@@ -1167,6 +1204,7 @@ class KotlinInputAstVisitor(
         visitLambdaExpressionInternal(
             argument.getArgumentExpression() as KtLambdaExpression,
             brokeBeforeBrace = brokeBeforeBrace,
+            parentLambdaBroke = insideBreakingLambda,
         )
       } else {
         visit(argument.getArgumentExpression())
@@ -1546,7 +1584,11 @@ class KotlinInputAstVisitor(
       carry = carry.baseExpression ?: fail()
     }
     if (carry is KtLambdaExpression) {
-      visitLambdaExpressionInternal(carry, brokeBeforeBrace = breakToExpr)
+      visitLambdaExpressionInternal(
+          carry,
+          brokeBeforeBrace = breakToExpr,
+          parentLambdaBroke = insideBreakingLambda,
+      )
       return
     }
 
