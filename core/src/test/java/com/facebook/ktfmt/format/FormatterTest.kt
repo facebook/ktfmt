@@ -8610,6 +8610,251 @@ class FormatterTest {
     assertThatFormatting(code).isEqualTo(expected)
   }
 
+  @Test
+  fun `cascade nested lambda breaks - force nested lambda hierarchy when option enabled`() {
+    val code =
+        """
+        |fun compose() {
+        |  App { SelectableCard { Button { Text("Hello") } } }
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun compose() {
+        |  App {
+        |    SelectableCard {
+        |      Button {
+        |        Text("Hello")
+        |      }
+        |    }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                cascadeNestedLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `cascade nested lambda breaks - maintain single line when option disabled`() {
+    val code =
+        """
+        |fun compose() {
+        |  App { SelectableCard { Button { Text("Hello") } } }
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun compose() {
+        |  App { SelectableCard { Button { Text("Hello") } } }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                cascadeNestedLambdaBreaks = false,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `cascade nested lambda breaks - force hierarchy only for trailing lambdas`() {
+    val code =
+        """
+        |fun test() {
+        |  val result = listOf(1, 2, 3).map { it * 2 }.filter { it > 2 }
+        |  Container {
+        |    Box {
+        |      Text("Hi")
+        |    }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun test() {
+        |  val result = listOf(1, 2, 3).map { it * 2 }.filter { it > 2 }
+        |  Container {
+        |    Box {
+        |      Text("Hi")
+        |    }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                cascadeNestedLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `cascade nested lambda breaks - demonstrate forcing behavior with parent break`() {
+    val code =
+        """
+        |fun test() {
+        |  Container {
+        |    val x = 1
+        |    Card { Text("x") }
+        |  }
+        |  Container { Card { Text("x") } }
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun test() {
+        |  Container {
+        |    val x = 1
+        |    Card {
+        |      Text("x")
+        |    }
+        |  }
+        |  Container {
+        |    Card {
+        |      Text("x")
+        |    }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                cascadeNestedLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `cascade nested lambda breaks - preserve hierarchy with multiple statements`() {
+    val code =
+        """
+        |fun compose() {
+        |  App {
+        |    val state = remember { mutableStateOf(0) }
+        |    SelectableCard {
+        |      Button {
+        |        state.value++
+        |        Text("Count: ${'$'}{state.value}")
+        |      }
+        |    }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun compose() {
+        |  App {
+        |    val state = remember {
+        |      mutableStateOf(0)
+        |    }
+        |    SelectableCard {
+        |      Button {
+        |        state.value++
+        |        Text("Count: ${'$'}{state.value}")
+        |      }
+        |    }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                cascadeNestedLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `cascade nested lambda breaks - handle deep nesting levels`() {
+    val code =
+        """
+        |fun deepCompose() {
+        |  Level1 {
+        |    Level2 {
+        |      Level3 {
+        |        Level4 {
+        |          Level5 {
+        |            Text("Deep")
+        |          }
+        |        }
+        |      }
+        |    }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                cascadeNestedLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(code)
+  }
+
+  @Test
+  fun `cascade nested lambda breaks - no effect on non-nested lambdas`() {
+    val code =
+        """
+        |fun test() {
+        |  singleCall { doSomething() }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                cascadeNestedLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(code)
+  }
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""
