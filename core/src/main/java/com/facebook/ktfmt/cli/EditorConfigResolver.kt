@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap
 import org.ec4j.core.EditorConfigLoader
 import org.ec4j.core.PropertyTypeRegistry
 import org.ec4j.core.Resource
+import org.ec4j.core.ResourceProperties
 import org.ec4j.core.ResourcePropertiesService
 import org.ec4j.core.model.EditorConfig
 import org.ec4j.core.model.PropertyType
@@ -36,6 +37,7 @@ object EditorConfigResolver {
           },
           TrailingCommaManagementStrategy.entries.map { it.name.lowercase() }.toSet(),
       )
+
   private val propertyTypeRegistry by lazy {
     PropertyTypeRegistry.builder()
         .defaults()
@@ -61,27 +63,28 @@ object EditorConfigResolver {
         .build()
   }
 
-  fun resolveFormattingOptions(file: File, baseOptions: FormattingOptions): FormattingOptions {
-    val props =
-        resourcePropertiesService.queryProperties(
-            Resource.Resources.ofPath(file.toPath(), Charsets.UTF_8)
-        )
+  fun resolveFormattingOptions(file: File, baseOptions: FormattingOptions): FormattingOptions =
+      resourcePropertiesService
+          .queryProperties(Resource.Resources.ofPath(file.toPath(), Charsets.UTF_8))
+          .resolveFormattingOptions(baseOptions)
 
+  private fun ResourceProperties.resolveFormattingOptions(
+      baseOptions: FormattingOptions,
+  ): FormattingOptions {
     // `max_line_length` may return null to indicate 'off', in which case we keep the base maxWidth
     val maxWidth =
-        props.getValue(PropertyType.max_line_length, baseOptions.maxWidth, false)
-            ?: baseOptions.maxWidth
+        getValue(PropertyType.max_line_length, baseOptions.maxWidth, false) ?: baseOptions.maxWidth
 
     // `indent_size` may return null to indicate 'tab', in which case we defer to `tab_width`
     val blockIndent =
-        props.getValue(PropertyType.indent_size, baseOptions.blockIndent, false)
-            ?: props.getValue(PropertyType.tab_width, baseOptions.blockIndent, false)
+        getValue(PropertyType.indent_size, baseOptions.blockIndent, false)
+            ?: getValue(PropertyType.tab_width, baseOptions.blockIndent, false)
 
     val continuationIndent =
-        props.getValue(ijContinuationIndentSize, baseOptions.continuationIndent, false)
+        getValue(ijContinuationIndentSize, baseOptions.continuationIndent, false)
 
     val trailingCommaStrategy =
-        props.getValue(commaManagementStrategy, baseOptions.trailingCommaManagementStrategy, false)
+        getValue(commaManagementStrategy, baseOptions.trailingCommaManagementStrategy, false)
 
     val resolved =
         baseOptions.copy(
