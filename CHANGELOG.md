@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 - Support for `else if` guard conditions (https://github.com/facebook/ktfmt/pull/563)
+- ktfmt cli can pull formatting configs from editor config files (https://github.com/facebook/ktfmt/pull/570)
 
 
 ## [0.59]
