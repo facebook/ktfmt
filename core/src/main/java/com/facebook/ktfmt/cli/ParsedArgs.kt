@@ -82,7 +82,8 @@ data class ParsedArgs(
         |  --set-exit-if-changed             Sets exit code to 1 if any input file was not 
         |                                        formatted/touched
         |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used
-        |  --enable-editorconfig             Enable .editorconfig overrides for supported formatting options (limited).
+        |  --enable-editorconfig             Enable .editorconfig overrides for supported formatting options (limited)
+        |                                        see https://github.com/facebook/ktfmt/blob/main/README.md
         |  
         |ARGFILE:
         |  If the only argument begins with '@', the remainder of the argument is treated
