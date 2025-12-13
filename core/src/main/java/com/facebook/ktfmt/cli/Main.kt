@@ -34,6 +34,7 @@ import kotlin.system.exitProcess
 
 private const val EXIT_CODE_FAILURE = 1
 private const val EXIT_CODE_SUCCESS = 0
+private const val UTF8_BOM = "\uFEFF"
 
 private val USAGE =
     """
@@ -141,7 +142,7 @@ class Main(
     val fileName = file?.toString() ?: args.stdinName ?: "<stdin>"
     try {
       val bytes = if (file == null) input else FileInputStream(file)
-      val code = BufferedReader(InputStreamReader(bytes, UTF_8)).readText()
+      val code = BufferedReader(InputStreamReader(bytes, UTF_8)).readText().removePrefix(UTF8_BOM)
       val formattedCode = Formatter.format(args.formattingOptions, code)
       val alreadyFormatted = code == formattedCode
 

@@ -507,6 +507,25 @@ class MainTest {
   }
 
   @Test
+  fun `UTF-8 BOM is ignored when formatting file`() {
+    val code = "\uFEFFfun f () =    println( \"hello, world\" )"
+    val file = root.resolve("bom.kt")
+    file.writeText(code, UTF_8)
+
+    val exitCode =
+        Main(
+                emptyInput,
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf(file.toString()),
+            )
+            .run()
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(file.readText(UTF_8)).isEqualTo("""fun f() = println("hello, world")""" + "\n")
+  }
+
+  @Test
   fun `--help gives return code of 0`() {
     val exitCode =
         Main(
