@@ -3,12 +3,13 @@ java = "17"
 kotlin = "2.2.0"
 com-amazonaws-aws-lambda-java-core = "1.2.1"
 com-amazonaws-aws-lambda-java-events = "2.2.9"
+com-google-code-gson-gson = "2.10.1"
 com-google-googlejavaformat-google-java-format = "1.23.0"
 com-google-guava-guava = "32.0.0-jre"
 com-google-truth-truth = "1.0"
 junit-junit = "4.13.1"
 net-java-dev-jna-jna = "4.2.2"
-com-google-code-gson-gson = "2.10.1"
+org-ec4j-core = "1.2.0"
 
 # plugins
 gradlePlugin-dokka = "2.0.0"
@@ -22,6 +23,7 @@ amazon-aws-lambda-core = { module = "com.amazonaws:aws-lambda-java-core", versio
 amazon-aws-lambda-events = { module = "com.amazonaws:aws-lambda-java-events", version.ref = "com-amazonaws-aws-lambda-java-events" }
 amazon-aws-sdk-bom = { module = "software.amazon.awssdk:bom", version = "2.10.73" }
 amazon-aws-sdk-lambda = { module = "software.amazon.awssdk:lambda" }
+ec4j = { module = "org.ec4j.core:ec4j-core", version.ref = "org-ec4j-core" }
 googleJavaformat = { module = "com.google.googlejavaformat:google-java-format", version.ref = "com-google-googlejavaformat-google-java-format" }
 googleTruth = { module = "com.google.truth:truth", version.ref = "com-google-truth-truth" }
 gson = { module = "com.google.code.gson:gson", version.ref = "com-google-code-gson-gson" }

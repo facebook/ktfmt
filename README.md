@@ -78,10 +78,20 @@ $ java -jar /path/to/ktfmt-<VERSION>-with-dependencies.jar [--kotlinlang-style |
 `--kotlinlang-style` makes `ktfmt` use a block indent of 4 spaces instead of 2.
 See below for details.
 
+`--enable-editorconfig` makes `ktfmt` enables limited support to override the style's configuration based on the
+following subset of editorconfig properties:
+
+| EditorConfig Property                                     | Description                                                                                      |
+|:----------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| `max_line_length`                                         | will override the max line width                                                                 |
+| `indent_size`<br/>*or `tab_width` if `indent_size = tab`* | will override the block indent                                                                   |
+| `ij_continuation_indent_size`                             | will override the continuation indent                                                            |
+| `ktfmt_trailing_comma_management_strategy`                | one of `none`, `only_add` or `complete`<br/>will override the trailing comma management strategy |
+
 ***Note:***
-*There is no configurability as to the formatter's algorithm for formatting (apart from the
-different styles). This is a deliberate design decision to unify our code formatting on a single
-format.*
+*There is no configurability as to the formatter's algorithm for formatting (apart from the different styles
+or limited `.editorconfig` support). This is a deliberate design decision to unify our code formatting on a
+single format.*
 
 ### using Gradle
 
@@ -137,6 +147,8 @@ Two reasons -
 
 However, we do offer an alternative style for projects that absolutely cannot make the move to
 `ktfmt` because of 2-space: the style `--kotlinlang-style` changes block indents to 4-space.
+
+Alternatively, the `ktfmt` command-line supports a limited subset of `.editorconfig` properties; see above.
 
 ## Developer's Guide
 
