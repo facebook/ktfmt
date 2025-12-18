@@ -36,9 +36,9 @@ dependencies {
   api(libs.guava)
   api(libs.jna)
   api(libs.kotlin.stdlib)
-  api(libs.kotlin.test)
   api(libs.kotlin.compilerEmbeddable)
   implementation(libs.ec4j)
+  testImplementation(libs.kotlin.test.junit4)
   testImplementation(libs.googleTruth)
   testImplementation(libs.junit)
 }
