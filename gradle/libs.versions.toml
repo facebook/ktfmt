@@ -33,7 +33,7 @@ jna = { module = "net.java.dev.jna:jna", version.ref = "net-java-dev-jna-jna" }
 ktfmt = { module = "com.facebook:ktfmt", version.ref = "ktfmt" }
 kotlin-compilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit4 = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version.ref = "gradlePlugin-dokka" }
