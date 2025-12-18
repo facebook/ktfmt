@@ -39,6 +39,7 @@ import org.jetbrains.kotlin.psi.KtAnnotation
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import org.jetbrains.kotlin.psi.KtAnnotationUseSiteTarget
 import org.jetbrains.kotlin.psi.KtArrayAccessExpression
+import org.jetbrains.kotlin.psi.KtBackingField
 import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtBinaryExpressionWithTypeRHS
 import org.jetbrains.kotlin.psi.KtBlockExpression
@@ -452,12 +453,17 @@ class KotlinInputAstVisitor(
           delegate = property.delegate,
           initializer = property.initializer,
           accessors = property.accessors,
+          backingField = property.fieldDeclaration,
       )
     }
     builder.guessToken(";")
     if (property.parent !is KtWhenExpression) {
       builder.forcedBreak()
     }
+  }
+
+  fun visitBackingField(backingField: KtBackingField) {
+    emitBackingField(backingField)
   }
 
   /**
@@ -1318,6 +1324,7 @@ class KotlinInputAstVisitor(
       initializer: KtExpression?,
       delegate: KtPropertyDelegate? = null,
       accessors: List<KtPropertyAccessor>? = null,
+      backingField: KtBackingField? = null,
   ): Int {
     val verticalAnnotationBreak = genSym()
 
@@ -1396,27 +1403,42 @@ class KotlinInputAstVisitor(
         }
       }
     }
-    // for example `private set` or `get = 2 * field`
-    if (accessors?.isNotEmpty() == true) {
+    // for example `field = value`, `private set`, or `get = 2 * field`
+    val propertyComponents =
+        buildList {
+          if (backingField != null) {
+            add(backingField)
+          }
+          if (accessors != null) {
+            addAll(accessors)
+          }
+        }.sortedBy { it.startOffset }
+    if (propertyComponents.isNotEmpty()) {
       builder.block(blockIndent) {
-        for (accessor in accessors) {
+        for (component in propertyComponents) {
           builder.forcedBreak()
           // The semicolon must come after the newline, or the output code will not parse.
           builder.guessToken(";")
 
-          builder.block(ZERO) {
-            visitFunctionLikeExpression(
-                contextReceiverList = null,
-                modifierList = accessor.modifierList,
-                keyword = accessor.namePlaceholder.text,
-                typeParameters = null,
-                receiverTypeReference = null,
-                name = null,
-                parameterList = getParameterListWithBugFixes(accessor),
-                typeConstraintList = null,
-                bodyExpression = accessor.bodyBlockExpression ?: accessor.bodyExpression,
-                typeOrDelegationCall = accessor.returnTypeReference,
-            )
+          when (component) {
+            is KtPropertyAccessor -> {
+              builder.block(ZERO) {
+                visitFunctionLikeExpression(
+                    contextReceiverList = null,
+                    modifierList = component.modifierList,
+                    keyword = component.namePlaceholder.text,
+                    typeParameters = null,
+                    receiverTypeReference = null,
+                    name = null,
+                    parameterList = getParameterListWithBugFixes(component),
+                    typeConstraintList = null,
+                    bodyExpression = component.bodyBlockExpression ?: component.bodyExpression,
+                    typeOrDelegationCall = component.returnTypeReference,
+                )
+              }
+            }
+            is KtBackingField -> emitBackingField(component)
+            else -> error("Unexpected property component: ${component::class}")
           }
         }
       }
@@ -1429,6 +1451,38 @@ class KotlinInputAstVisitor(
     }
 
     return 0
+  }
+
+  private fun emitBackingField(backingField: KtBackingField) {
+    builder.sync(backingField)
+    builder.block(ZERO) {
+      backingField.modifierList?.let { visit(it) }
+      builder.block(ZERO) { builder.token(backingField.namePlaceholder.text) }
+
+      val type = backingField.returnTypeReference
+      if (type != null) {
+        builder.block(expressionBreakIndent) {
+          builder.token(":")
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+          visit(type)
+        }
+      }
+
+      val initializer = backingField.initializer
+      if (initializer != null) {
+        builder.space()
+        builder.token("=")
+        if (isLambdaOrScopingFunction(initializer)) {
+          visitLambdaOrScopingFunction(initializer)
+        } else {
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+          builder.block(expressionBreakIndent) {
+            builder.fenceComments()
+            visit(initializer)
+          }
+        }
+      }
+    }
   }
 
   // Bug in Kotlin 1.9.10: KtPropertyAccessor is the direct parent of the left and right paren
