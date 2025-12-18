@@ -55,6 +55,34 @@ jobs:
               --no-daemon \
               -Psigning.gnupg.passphrase="$GPG_PASSPHRASE"
 
+  upload_github_artifacts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to upload release assets
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.events.release.tag_name || inputs.release_tag || github.ref }}
+
+      - name: Debug release tag
+        run: |
+          echo "Release tag: ${{ github.events.release.tag_name || inputs.release_tag }}"
+
+      - name: Build JAR artifacts
+        run: ./gradlew :ktfmt:jar :ktfmt:shadowJar --stacktrace --no-daemon
+
+      - name: Verify JAR artifacts exist
+        run: ls -la core/build/libs/ktfmt-*.jar
+
+      - name: Upload JAR artifacts to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.events.release.tag_name || inputs.release_tag }}
+          files: |
+            core/build/libs/ktfmt-*.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   deploy_website:
     runs-on: ubuntu-latest
     steps:
