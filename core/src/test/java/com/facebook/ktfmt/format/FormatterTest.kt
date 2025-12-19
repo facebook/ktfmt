@@ -4278,12 +4278,12 @@ class FormatterTest {
       )
 
   @Test
-  fun `explicit backing field with type`() =
+  fun `explicit backing field without type`() =
       assertFormatted(
           """
           |class Foo {
           |  val count: Int
-          |    field: Int = 0
+          |    field = 0
           |}
           |"""
               .trimMargin()
