@@ -4278,14 +4278,12 @@ class FormatterTest {
       )
 
   @Test
-  fun `explicit backing field with accessor and modifier`() =
+  fun `explicit backing field with type`() =
       assertFormatted(
           """
           |class Foo {
-          |  var count: Int = 0
-          |    private set
-          |    @Volatile
-          |    field = value
+          |  val count: Int
+          |    field: Int = 0
           |}
           |"""
               .trimMargin()
