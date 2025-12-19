@@ -4278,6 +4278,20 @@ class FormatterTest {
       )
 
   @Test
+  fun `explicit backing field with accessor and modifier`() =
+      assertFormatted(
+          """
+          |class Foo {
+          |  var count: Int = 0
+          |    private set
+          |    @Volatile
+          |    field = value
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
   fun `handle method calls with lambda arg only`() =
       assertFormatted(
           """
