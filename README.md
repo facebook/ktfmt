@@ -78,7 +78,7 @@ $ java -jar /path/to/ktfmt-<VERSION>-with-dependencies.jar [--kotlinlang-style |
 `--kotlinlang-style` makes `ktfmt` use a block indent of 4 spaces instead of 2.
 See below for details.
 
-`--enable-editorconfig` makes `ktfmt` enables limited support to override the style's configuration based on the
+`--enable-editorconfig` makes `ktfmt` enable limited support to override the style's configuration based on the
 following subset of editorconfig properties:
 
 | EditorConfig Property                                     | Description                                                                                      |
