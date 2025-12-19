@@ -1457,7 +1457,6 @@ class KotlinInputAstVisitor(
   private fun emitBackingField(backingField: KtBackingField) {
     builder.sync(backingField)
     builder.block(ZERO) {
-      backingField.modifierList?.let { visit(it) }
       builder.block(ZERO) { builder.token(backingField.namePlaceholder.text) }
 
       val type = backingField.returnTypeReference
