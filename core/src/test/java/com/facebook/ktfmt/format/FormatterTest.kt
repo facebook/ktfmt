@@ -4263,6 +4263,46 @@ class FormatterTest {
       )
 
   @Test
+  fun `explicit backing field`() =
+      assertFormatted(
+          """
+          |class Foo {
+          |  val city: StateFlow<String>
+          |    field = MutableStateFlow("")
+          |
+          |  var numbers: List<Int>
+          |    field: MutableList<Int> = mutableListOf()
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `explicit backing field without type`() =
+      assertFormatted(
+          """
+          |class Foo {
+          |  val count: Int
+          |    field = 0
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `explicit backing field with private set accessor`() =
+      assertFormatted(
+          """
+          |class Foo {
+          |  var count: Int
+          |    field = 0
+          |    private set
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
   fun `handle method calls with lambda arg only`() =
       assertFormatted(
           """
