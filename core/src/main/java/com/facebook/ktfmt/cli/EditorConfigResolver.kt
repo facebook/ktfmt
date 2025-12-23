@@ -28,6 +28,7 @@ import org.ec4j.core.ResourcePropertiesService
 import org.ec4j.core.model.EditorConfig
 import org.ec4j.core.model.PropertyType
 import org.ec4j.core.model.Version.CURRENT
+import kotlin.io.path.absolute
 
 object EditorConfigResolver {
 
@@ -83,7 +84,7 @@ object EditorConfigResolver {
 
   fun resolveFormattingOptions(file: File, baseOptions: FormattingOptions): FormattingOptions =
       resourcePropertiesService
-          .queryProperties(Resource.Resources.ofPath(file.toPath(), Charsets.UTF_8))
+          .queryProperties(Resource.Resources.ofPath(file.toPath().absolute(), Charsets.UTF_8))
           .resolveFormattingOptions(baseOptions)
 
   private fun ResourceProperties.resolveFormattingOptions(
