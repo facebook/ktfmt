@@ -61,14 +61,14 @@ tasks {
     outputs.file(versionFile)
     outputs.cacheIf { true }
 
-    doLast {
-      // run the shell script genVersionFileScript with versionPropertiesFile as argument
-      val scriptProcess =
-          providers.exec {
-            workingDir = rootProject.rootDir
-            commandLine = listOf(genVersionFileScript.toString(), versionPropertiesFile.toString())
-          }
+    // provider to run the shell script genVersionFileScript with versionPropertiesFile as argument
+    val scriptProcess =
+        providers.exec {
+          workingDir = rootProject.rootDir
+          commandLine = listOf(genVersionFileScript.toString(), versionPropertiesFile.toString())
+        }
 
+    doLast {
       val scriptOutput = scriptProcess.standardOutput.asText.get()
       if (scriptProcess.result.get().exitValue != 0) {
         val scriptError = scriptProcess.standardError.asText.get()
