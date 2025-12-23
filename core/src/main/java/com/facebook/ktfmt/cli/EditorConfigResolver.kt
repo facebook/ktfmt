@@ -20,6 +20,7 @@ import com.facebook.ktfmt.format.FormattingOptions
 import com.facebook.ktfmt.format.TrailingCommaManagementStrategy
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.io.path.absolute
 import org.ec4j.core.EditorConfigLoader
 import org.ec4j.core.PropertyTypeRegistry
 import org.ec4j.core.Resource
@@ -28,7 +29,6 @@ import org.ec4j.core.ResourcePropertiesService
 import org.ec4j.core.model.EditorConfig
 import org.ec4j.core.model.PropertyType
 import org.ec4j.core.model.Version.CURRENT
-import kotlin.io.path.absolute
 
 object EditorConfigResolver {
 
