@@ -20,6 +20,7 @@ import com.facebook.ktfmt.format.FormattingOptions
 import com.facebook.ktfmt.format.TrailingCommaManagementStrategy
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.io.path.absolute
 import org.ec4j.core.EditorConfigLoader
 import org.ec4j.core.PropertyTypeRegistry
 import org.ec4j.core.Resource
@@ -83,7 +84,7 @@ object EditorConfigResolver {
 
   fun resolveFormattingOptions(file: File, baseOptions: FormattingOptions): FormattingOptions =
       resourcePropertiesService
-          .queryProperties(Resource.Resources.ofPath(file.toPath(), Charsets.UTF_8))
+          .queryProperties(Resource.Resources.ofPath(file.toPath().absolute(), Charsets.UTF_8))
           .resolveFormattingOptions(baseOptions)
 
   private fun ResourceProperties.resolveFormattingOptions(
