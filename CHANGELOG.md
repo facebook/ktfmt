@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- Support for Kotlin 2.3.0 explicit backing field (https://github.com/facebook/ktfmt/pull/580)
+
 ### Fixed
 - Editorconfig not found for relative paths (https://github.com/facebook/ktfmt/pull/582)
 
