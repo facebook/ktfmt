@@ -12,7 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
-### Changed
+### Fixed
+- Editorconfig not found for relative paths (https://github.com/facebook/ktfmt/pull/582)
 
 
 ## [0.60]
