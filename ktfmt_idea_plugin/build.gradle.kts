@@ -18,9 +18,9 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaC
 
 plugins {
   java
-  kotlin("jvm")
-  id("com.ncorti.ktfmt.gradle")
-  id("org.jetbrains.intellij.platform")
+  alias(libs.plugins.kotlin)
+  alias(libs.plugins.ktfmt)
+  alias(libs.plugins.intelliJPlatform)
 }
 
 val ktfmtVersion = rootProject.version
