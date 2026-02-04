@@ -2105,7 +2105,10 @@ class KotlinInputAstVisitor(
         builder.block(ZERO) { visit(expression.then) }
       } else {
         builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent)
-        builder.block(expressionBreakIndent) { visit(expression.then) }
+        builder.block(expressionBreakIndent) {
+          builder.fenceComments()
+          visit(expression.then)
+        }
       }
 
       if (expression.elseKeyword != null) {

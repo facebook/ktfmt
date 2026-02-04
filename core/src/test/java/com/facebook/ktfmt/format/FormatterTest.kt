@@ -2448,6 +2448,21 @@ class FormatterTest {
       )
 
   @Test
+  fun `if expression with comment`() =
+      assertFormatted(
+          """
+          |////////////////////////////
+          |fun foo() {
+          |  if (expressions1)
+          |      // comment
+          |      bar()
+          |}
+          |"""
+              .trimMargin(),
+          deduceMaxWidth = true,
+      )
+
+  @Test
   fun `assignment expression on multiple lines`() =
       assertFormatted(
           """

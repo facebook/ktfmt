@@ -12,9 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
-### Changed
-
 ### Fixed
+- Single-line comments in if expressions are now correctly indented (https://github.com/facebook/ktfmt/pull/591)
 - Idea Plugin not applying custom trailing commas management strategy (https://github.com/facebook/ktfmt/pull/593)
 
 
