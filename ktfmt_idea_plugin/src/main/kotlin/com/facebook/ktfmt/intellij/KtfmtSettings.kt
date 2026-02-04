@@ -78,10 +78,10 @@ internal class KtfmtSettings(private val project: Project) :
       state.customContinuationIndent = continuationIndent.coerceAtLeast(1)
     }
 
-  var customTrailingCommaManagementStrategy: String
-    get() = state.customTrailingCommaManagementStrategy
+  var customTrailingCommaManagementStrategy: TrailingCommaManagementStrategy
+    get() = state.customTrailingCommaManagementStrategy.toTrailingCommaManagementStrategy()
     set(value) {
-      state.customTrailingCommaManagementStrategy = value
+      state.customTrailingCommaManagementStrategy = value.name
     }
 
   var customRemoveUnusedImports: Boolean
@@ -168,8 +168,8 @@ internal class KtfmtSettings(private val project: Project) :
   private fun String.toTrailingCommaManagementStrategy(
       defaultValue: TrailingCommaManagementStrategy = TrailingCommaManagementStrategy.NONE,
   ): TrailingCommaManagementStrategy =
-      runCatching { TrailingCommaManagementStrategy.valueOf(this.uppercase()) }
-          .getOrDefault(defaultValue)
+      TrailingCommaManagementStrategy.entries.find { it.name == this || it.toString() == this }
+          ?: defaultValue
 
   companion object {
     @JvmStatic

@@ -14,6 +14,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+### Fixed
+- Idea Plugin not applying custom trailing commas management strategy (https://github.com/facebook/ktfmt/pull/593)
+
 
 ## [0.61]
 

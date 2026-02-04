@@ -102,13 +102,16 @@ class KtfmtConfigurable(project: Project) :
                     .component
           }
 
-          lateinit var trailingCommaManagementStrategy: JComboBox<String>
+          lateinit var trailingCommaManagementStrategy: JComboBox<TrailingCommaManagementStrategy>
           row("Trailing commas management") {
             trailingCommaManagementStrategy =
-                comboBox(TrailingCommaManagementStrategy.values().map { it.toString() })
+                comboBox(TrailingCommaManagementStrategy.entries)
                     .bindItem(
                         getter = { settings.customTrailingCommaManagementStrategy },
-                        setter = { settings.customTrailingCommaManagementStrategy = it.orEmpty() },
+                        setter = {
+                          settings.customTrailingCommaManagementStrategy =
+                              it ?: TrailingCommaManagementStrategy.NONE
+                        },
                     )
                     .component
           }
@@ -174,13 +177,13 @@ private fun FormattingOptions.updateFields(
     maxLineLength: JTextField,
     blockIndent: JTextField,
     continuationIndent: JTextField,
-    trailingCommaManagementStrategy: JComboBox<String>,
+    trailingCommaManagementStrategy: JComboBox<TrailingCommaManagementStrategy>,
     removeUnusedImports: JCheckBox,
 ) {
   maxLineLength.text = maxWidth.toString()
   blockIndent.text = this.blockIndent.toString()
   continuationIndent.text = this.continuationIndent.toString()
-  trailingCommaManagementStrategy.selectedItem = this.trailingCommaManagementStrategy.toString()
+  trailingCommaManagementStrategy.selectedItem = this.trailingCommaManagementStrategy
   removeUnusedImports.isSelected = this.removeUnusedImports
 }
 
