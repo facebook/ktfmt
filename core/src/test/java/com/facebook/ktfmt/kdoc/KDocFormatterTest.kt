@@ -1795,6 +1795,7 @@ class KDocFormatterTest {
          * - Third
          *
          * List items with multiple paragraphs:
+         *
          * * This is my list item. It has text on many lines.
          *
          *   This is a continuation of the first bullet.
@@ -1919,6 +1920,7 @@ class KDocFormatterTest {
         """
         /**
          * List items with multiple paragraphs:
+         *
          * * This is my list item. It has text on many lines.
          *
          *   This is a continuation of the first bullet.
@@ -2866,6 +2868,7 @@ class KDocFormatterTest {
          *
          * First read the javadoc on how to convert from the older
          * [JavaScanner] interface over to [JavaPsiScanner].
+         *
          * 1. A file header, which is the exact contents of [FILE_HEADER]
          *    encoded as ASCII characters.
          *
@@ -3626,9 +3629,11 @@ class KDocFormatterTest {
          * 1. Create a new Theme (e.g `Theme.App.Starting`) and set its
          *    parent to `Theme.SplashScreen` or
          *    `Theme.SplashScreen.IconBackground`
+         *
          * 2. In your manifest, set the `theme` attribute of the whole
          *    `<application>` or just the starting `<activity>` to
          *    `Theme.App.Starting`
+         *
          * 3. In the `onCreate` method the starting activity, call
          *    [installSplashScreen] just before `super.onCreate()`. You also
          *    need to make sure that `postSplashScreenTheme` is set to the
@@ -3673,6 +3678,7 @@ class KDocFormatterTest {
          *   and a still icon for API <31, you can do so by overriding the
          *   still icon with an animated vector drawable in
          *   `res/drawable-v31`.
+         *
          * - On API < 31, if the value of `windowSplashScreenAnimatedIcon`
          *   is an
          *   [adaptive icon](http://developer.android.com/guide/practices/ui_guidelines/icon_design_adaptive)
@@ -3680,6 +3686,7 @@ class KDocFormatterTest {
          *   respectively assign `windowSplashScreenAnimatedIcon` and
          *   `windowSplashScreenIconBackgroundColor` to the values of the
          *   adaptive icon `foreground` and `background`.
+         *
          * - On API 21-22, The icon isn't displayed until the application
          *   starts, only the background is visible.
          *
@@ -4554,6 +4561,7 @@ class KDocFormatterTest {
         """
         /**
          * Some summary.
+         *
          * - Some bullet.
          *
          * ------------------------------------------------------------------------------
@@ -4584,11 +4592,12 @@ class KDocFormatterTest {
         """
         /**
          * 1. Test
+         *
          * 2. Test
          */
         """
             .trimIndent(),
-        // We deliberately allow list items to jump up across blank lines
+        // Blank line is preserved (source had blank line before <p>2.)
         verifyDokka = false,
     )
   }
@@ -4613,12 +4622,13 @@ class KDocFormatterTest {
         """
         /**
          * Some title
+         *
          * 1. Test
          * 2. Test
          */
         """
             .trimIndent(),
-        // We deliberately allow list items to jump up across blank lines
+        // Blank line is preserved (source had blank line before <p>1.)
         verifyDokka = false,
     )
   }
@@ -5212,6 +5222,106 @@ class KDocFormatterTest {
       }
     }
     return sb.toString()
+  }
+
+  @Test
+  fun testBlankLineBeforeBlockQuote() {
+    // From GH#561: blank line before blockquote should be preserved
+    checkFormatter(
+        """
+        /**
+         * Text before blockquote:
+         *
+         * > This is a blockquote.
+         */
+        """
+            .trimIndent(),
+        KDocFormattingOptions(72),
+        """
+        /**
+         * Text before blockquote:
+         *
+         * > This is a blockquote.
+         */
+        """
+            .trimIndent(),
+    )
+  }
+
+  @Test
+  fun testBlankLineBetweenLists() {
+    // From GH#561: blank line between two lists should be preserved
+    checkFormatter(
+        """
+        /**
+         * - list item 1
+         * - list item 2
+         *
+         * - second list item A
+         * - second list item B
+         */
+        """
+            .trimIndent(),
+        KDocFormattingOptions(72),
+        """
+        /**
+         * - list item 1
+         * - list item 2
+         *
+         * - second list item A
+         * - second list item B
+         */
+        """
+            .trimIndent(),
+    )
+  }
+
+  @Test
+  fun testBlankLinesInMarkdownElements() {
+    // Full example from GH#561
+    checkFormatter(
+        """
+        /**
+         * Test paragraph
+         *
+         * Test paragraph 2
+         *
+         * - list item 1
+         * - list item 2
+         *
+         * - second list item A
+         * - second list item B
+         *
+         * ```json
+         * {"code": "block"}
+         * ```
+         *
+         * > test block quote
+         */
+        """
+            .trimIndent(),
+        KDocFormattingOptions(72),
+        """
+        /**
+         * Test paragraph
+         *
+         * Test paragraph 2
+         *
+         * - list item 1
+         * - list item 2
+         *
+         * - second list item A
+         * - second list item B
+         *
+         * ```json
+         * {"code": "block"}
+         * ```
+         *
+         * > test block quote
+         */
+        """
+            .trimIndent(),
+    )
   }
 
   // --------------------------------------------------------------------

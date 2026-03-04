@@ -351,8 +351,12 @@ class ParagraphListBuilder(
                 until = { it.contains("</pre>", ignoreCase = true) },
             )
       } else if (lineWithoutIndentation.isQuoted()) {
+        val hadBlankLine = this.paragraph.isEmpty() && this.paragraph.separate
         i--
         val paragraph = newParagraph(i)
+        if (hadBlankLine) {
+          paragraph.separate = true
+        }
         paragraph.quoted = true
         paragraph.block = false
         i =
@@ -394,8 +398,13 @@ class ParagraphListBuilder(
               (lineWithoutIndentation.isKDocTag() && task.type == CommentType.KDOC) ||
               lineWithoutIndentation.isTodo()
       ) {
+        val hadBlankLine =
+            paragraph.isEmpty() && paragraph.separate && lineWithoutIndentation.isListItem()
         i--
         newParagraph(i).hanging = true
+        if (hadBlankLine) {
+          paragraph.separate = true
+        }
         val start = i
         i =
             addLines(
@@ -770,7 +779,6 @@ class ParagraphListBuilder(
                 paragraph.separate && (!prev.block || prev.text.isKDocTag() || prev.table)
             paragraph.separator || prev.separator -> true
             text.isLine(1) || prev.text.isLine(1) -> false
-            paragraph.separate && paragraph.text.isListItem() -> false
             paragraph.separate -> true
             // Don't separate kdoc tags, except for the first one
             paragraph.doc -> !prev.doc
@@ -862,6 +870,10 @@ class ParagraphListBuilder(
     // separators
     for (i in paragraphs.size - 2 downTo 0) {
       if (paragraphs[i].isEmpty() && (!paragraphs[i].preformatted || i == paragraphs.size - 1)) {
+        // Propagate blank-line intent to the next paragraph
+        if (paragraphs[i].separate && i + 1 < paragraphs.size) {
+          paragraphs[i + 1].separate = true
+        }
         paragraphs.removeAt(i)
         if (i > 0) {
           paragraphs[i - 1].next = null
