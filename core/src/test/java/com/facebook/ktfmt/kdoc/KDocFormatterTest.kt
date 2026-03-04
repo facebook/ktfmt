@@ -4084,7 +4084,7 @@ class KDocFormatterTest {
         For the possibly-simpler case where we have a discontinuity in behaviour, v_o = v_n = vvv, and the three possible cases are:
 
         | 1 | 2 | 3 | Necessity
-        +---+---+---+----------
+        |---|---|---|----------
         |vvv|cur|new| [IRRELEVANT_PAST]
         |cur|vvv|new| [MANDATORY_CODEPENDENT]
         |cur|new|vvv| [IRRELEVANT_FUTURE]
@@ -4110,9 +4110,11 @@ class KDocFormatterTest {
          * For the possibly-simpler case where we have a discontinuity in
          * behaviour, v_o = v_n = vvv, and the three possible cases are:
          *
-         * | 1 | 2 | 3 | Necessity +---+---+---+---------- |vvv|cur|new|
-         * [IRRELEVANT_PAST] |cur|vvv|new| [MANDATORY_CODEPENDENT] |cur|new|vvv|
-         * [IRRELEVANT_FUTURE]
+         * | 1   | 2   | 3   | Necessity               |
+         * |-----|-----|-----|-------------------------|
+         * | vvv | cur | new | [IRRELEVANT_PAST]       |
+         * | cur | vvv | new | [MANDATORY_CODEPENDENT] |
+         * | cur | new | vvv | [IRRELEVANT_FUTURE]     |
          *
          * (again in case of equality, vvv sorts before cur and new)
          */
