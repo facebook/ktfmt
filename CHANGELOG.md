@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [Unreleased]
 
 ### Fixed
+- Backtick-escaped full-path imports are no longer incorrectly removed as unused (https://github.com/facebook/ktfmt/issues/532)
 - Single-line comments in if expressions are now correctly indented (https://github.com/facebook/ktfmt/pull/591)
 - Idea Plugin not applying custom trailing commas management strategy (https://github.com/facebook/ktfmt/pull/593)
 - Comments between a multiline string and `.trimMargin()`/`.trimIndent()` are no longer deleted during formatting (https://github.com/facebook/ktfmt/issues/597)

@@ -1233,6 +1233,28 @@ class FormatterTest {
   }
 
   @Test
+  fun `unused import removal handles backtick-escaped full-path imports`() {
+    val code =
+        """
+        |import `com.example.Foo.bar`
+        |import `com.example.Foo.baz` as qux
+        |import `com.example.unused.Quux`
+        |
+        |fun test() = bar + qux
+        |"""
+            .trimMargin()
+    val expected =
+        """
+        |import `com.example.Foo.bar`
+        |import `com.example.Foo.baz` as qux
+        |
+        |fun test() = bar + qux
+        |"""
+            .trimMargin()
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
   fun `used imports from this package are removed`() {
     val code =
         """
