@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 - Single-line comments in if expressions are now correctly indented (https://github.com/facebook/ktfmt/pull/591)
 - Idea Plugin not applying custom trailing commas management strategy (https://github.com/facebook/ktfmt/pull/593)
+- Comments between a multiline string and `.trimMargin()`/`.trimIndent()` are no longer deleted during formatting (https://github.com/facebook/ktfmt/issues/597)
 
 
 ## [0.61]

@@ -17,6 +17,7 @@
 package com.facebook.ktfmt.format
 
 import com.google.common.annotations.VisibleForTesting
+import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.psi.KtQualifiedExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
@@ -80,6 +81,13 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
       }
       multiline.appendLine(TQ)
 
+      // Preserve any comments between the string and the trim method call
+      for (comment in multilineString.commentsBetweenStringAndTrimCall) {
+        multiline.append(indentation)
+        multiline.append(continuationIndentation)
+        multiline.appendLine(comment)
+      }
+
       // Trim method call
       multiline.append(indentation)
       multiline.append(continuationIndentation)
@@ -119,6 +127,15 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
                   code.substring(0, stringOffset).lines().last().substringBefore(TQ).let {
                     it.length - it.trimStart().length
                   }
+              // Collect comments between the closing """ and the .trimX() call
+              val comments = mutableListOf<String>()
+              var child = receiver.nextSibling
+              while (child != null && child !== expression.selectorExpression) {
+                if (child is PsiComment) {
+                  comments.add(child.text)
+                }
+                child = child.nextSibling
+              }
               strings.add(
                   MultilineTrimmedString(
                       usesTrimMargin = isTrimMargin,
@@ -132,6 +149,7 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
                       isNestedMultiline =
                           expression.getParentOfType<KtStringTemplateExpression>(strict = false) !=
                               null,
+                      commentsBetweenStringAndTrimCall = comments,
                   )
               )
             }
@@ -162,6 +180,8 @@ internal data class MultilineTrimmedString(
     val trimMethodCallOffset: Int,
     /* Whether this multiline string is nested in another multiline string. */
     val isNestedMultiline: Boolean,
+    /* Comments between the closing """ and the .trimX() call. */
+    val commentsBetweenStringAndTrimCall: List<String> = emptyList(),
 ) {
   companion object {
     private val simpleTemplateExpressionRegex = Regex("""\${'$'}{1}((\{?[A-Za-z_\s])|\{$)""")

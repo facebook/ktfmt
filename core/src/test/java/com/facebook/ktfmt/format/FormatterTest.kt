@@ -3411,6 +3411,81 @@ class FormatterTest {
   }
 
   @Test
+  fun `comments between multiline string and trimMargin are preserved`() =
+      assertFormatted(
+          """
+          |val bar =
+          |    $TQ
+          |    |content
+          |    $TQ
+          |        // This comment should be preserved
+          |        .trimMargin()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `comments between multiline string and trimIndent are preserved`() =
+      assertFormatted(
+          """
+          |val bar =
+          |    $TQ
+          |    content
+          |    $TQ
+          |        // This comment should be preserved
+          |        .trimIndent()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `multiple comments between multiline string and trimMargin are preserved`() =
+      assertFormatted(
+          """
+          |val bar =
+          |    $TQ
+          |    |content
+          |    $TQ
+          |        // First comment
+          |        // Second comment
+          |        .trimMargin()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `comment between multiline string and trimMargin is not deleted in string concatenation`() {
+    val before =
+        """
+        |val bar =
+        |    $TQ
+        |    |    a
+        |    $TQ +
+        |        $TQ
+        |        |    b
+        |        $TQ
+        |      // This comment will not be deleted
+        |.trimMargin()
+        |"""
+            .trimMargin()
+    val after =
+        """
+        |val bar =
+        |    $TQ
+        |    |    a
+        |    $TQ +
+        |        $TQ
+        |        |    b
+        |        $TQ
+        |            // This comment will not be deleted
+        |            .trimMargin()
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(before).isEqualTo(after)
+  }
+
+  @Test
   fun `handles multiline trim formatting with template expressions`() {
     assertFormatted(
         """
