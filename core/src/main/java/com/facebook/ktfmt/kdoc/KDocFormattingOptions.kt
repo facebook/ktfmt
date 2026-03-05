@@ -32,8 +32,6 @@
 
 package com.facebook.ktfmt.kdoc
 
-import kotlin.math.min
-
 /** Options controlling how the [KDocFormatter] will behave. */
 class KDocFormattingOptions(
     /** Right hand side margin to write lines at. */
@@ -41,7 +39,7 @@ class KDocFormattingOptions(
     /**
      * Limit comment to be at most [maxCommentWidth] characters even if more would fit on the line.
      */
-    var maxCommentWidth: Int = min(maxLineWidth, 72),
+    var maxCommentWidth: Int = maxLineWidth,
 ) {
   /** Whether to collapse multi-line comments that would fit on a single line into a single line. */
   var collapseSingleLine: Boolean = true

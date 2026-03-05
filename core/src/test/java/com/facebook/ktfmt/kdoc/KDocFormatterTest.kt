@@ -1431,6 +1431,28 @@ class KDocFormatterTest {
   }
 
   @Test
+  fun testMaxCommentWidthDefaultsToMaxLineWidth() {
+    // GH#594: maxCommentWidth should default to maxLineWidth, not min(maxLineWidth, 72).
+    // When only maxLineWidth is set to 100, comments should wrap at 100, not 72.
+    checkFormatter(
+        """
+        /**
+         * This is a long comment that should not be wrapped at 72 characters. It should wrap at 100 characters instead.
+         */
+        """
+            .trimIndent(),
+        KDocFormattingOptions(100),
+        """
+        /**
+         * This is a long comment that should not be wrapped at 72 characters. It should wrap at 100
+         * characters instead.
+         */
+        """
+            .trimIndent(),
+    )
+  }
+
+  @Test
   fun testAsciiArt() {
     // Comment from
     // https://cs.android.com/android-studio/platform/tools/base/+/mirror-goog-studio-master-dev:build-system/integration-test/application/src/test/java/com/android/build/gradle/integration/bundle/DynamicFeatureAndroidTestBuildTest.kt
