@@ -39,6 +39,13 @@ object EditorConfigResolver {
           PropertyType.PropertyValueParser.POSITIVE_INT_VALUE_PARSER,
       )
 
+  private val ijKotlinContinuationIndentSize: PropertyType<Int> =
+      PropertyType.LowerCasingPropertyType(
+          "ij_kotlin_continuation_indent_size",
+          "Denotes the Kotlin-specific continuation indent size. Takes precedence over ij_continuation_indent_size",
+          PropertyType.PropertyValueParser.POSITIVE_INT_VALUE_PARSER,
+      )
+
   private val commaManagementStrategy: PropertyType<TrailingCommaManagementStrategy> =
       PropertyType.LowerCasingPropertyType(
           "ktfmt_trailing_comma_management_strategy",
@@ -61,6 +68,7 @@ object EditorConfigResolver {
             .defaults()
             .type(PropertyType.max_line_length) // missing from defaults?
             .type(ijContinuationIndentSize)
+            .type(ijKotlinContinuationIndentSize)
             .type(commaManagementStrategy)
             .build()
       }
@@ -100,7 +108,8 @@ object EditorConfigResolver {
             ?: getValue(PropertyType.tab_width, baseOptions.blockIndent, false)
 
     val continuationIndent =
-        getValue(ijContinuationIndentSize, baseOptions.continuationIndent, false)
+        properties[ijKotlinContinuationIndentSize.name]?.takeIf { it.isValid }?.getValueAs<Int>()
+            ?: getValue(ijContinuationIndentSize, baseOptions.continuationIndent, false)
 
     val trailingCommaStrategy =
         getValue(commaManagementStrategy, baseOptions.trailingCommaManagementStrategy, false)
