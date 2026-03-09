@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import kotlin.io.path.writeText
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
   kotlin("jvm")
@@ -118,6 +118,8 @@ tasks {
 }
 
 kotlin {
+  @OptIn(ExperimentalAbiValidation::class) abiValidation { enabled = true }
+
   val javaVersion: String = rootProject.libs.versions.java.get()
   jvmToolchain(javaVersion.toInt())
 
@@ -180,4 +182,11 @@ if (System.getenv("SIGN_BUILD") != null) {
     useGpgCmd()
     sign(publishing.publications["maven"])
   }
+}
+
+tasks.check {
+  dependsOn(
+      // TODO: https://youtrack.jetbrains.com/issue/KT-78525
+      tasks.checkLegacyAbi,
+  )
 }
