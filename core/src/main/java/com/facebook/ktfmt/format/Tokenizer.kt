@@ -24,7 +24,9 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtBinaryExpression
+import org.jetbrains.kotlin.psi.KtBlockExpression
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.KtFunctionLiteral
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
@@ -71,6 +73,15 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
               StringUtil.offsetToLineColumn(fileText, element.startOffset),
           )
         }
+        // Treat block comments inside statement-less lambda bodies as tokens so the
+        // visitor can position them with proper break structure. Without this, the
+        // comment attaches as toksAfter of `{` and stays on the same line when the
+        // lambda breaks.
+        val isBlockComment = elementText.startsWith("/*")
+        val parentBlock = element.parent as? KtBlockExpression
+        val isInLambdaBody = parentBlock?.parent is KtFunctionLiteral
+        val bodyHasNoStatements = parentBlock != null && parentBlock.children.isEmpty()
+        val treatAsToken = isBlockComment && isInLambdaBody && bodyHasNoStatements
         toks.add(
             KotlinTok(
                 index = index,
@@ -78,7 +89,7 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
                 text = elementText,
                 position = startIndex,
                 column = 0,
-                isToken = false,
+                isToken = treatAsToken,
                 kind = KtTokens.EOF,
             ),
         )

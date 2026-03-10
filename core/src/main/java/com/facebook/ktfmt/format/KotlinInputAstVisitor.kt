@@ -940,9 +940,28 @@ class KotlinInputAstVisitor(
         }
         builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusZeroIndent)
       }
+    } else if (hasComments) {
+      val blockComments =
+          bodyExpression.children().filter { it is PsiComment && it.text.startsWith("/*") }.toList()
+      builder.breakOp(Doc.FillMode.UNIFIED, "", bracePlusBlockIndent)
+      builder.block(bracePlusBlockIndent) {
+        builder.fenceComments()
+        builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
+        if (blockComments.size == 1) {
+          builder.token(blockComments[0].text)
+        } else {
+          for ((i, comment) in blockComments.withIndex()) {
+            if (i > 0) {
+              builder.forcedBreak()
+            }
+            builder.token(comment.text)
+          }
+        }
+        builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusZeroIndent)
+      }
     }
 
-    if (hasParams || hasArrow || hasStatements) {
+    if (hasParams || hasArrow || hasStatements || hasComments) {
       // If we had to break in the body, ensure there is a break before the closing brace
       builder.breakOp(Doc.FillMode.UNIFIED, "", bracePlusZeroIndent)
     }

@@ -6983,7 +6983,10 @@ class FormatterTest {
     assertFormatted(
         """
         |val a = { /* do nothing */ }
-        |val b = { /* do nothing */ /* also do nothing */ }
+        |val b = {
+        |  /* do nothing */
+        |  /* also do nothing */
+        |}
         |val c = { -> /* do nothing */ }
         |val d = { _ -> /* do nothing */ }
         |private val e = Runnable {
@@ -7001,23 +7004,25 @@ class FormatterTest {
         """
         |//////////////////////////////
         |val a = { /* do nothing */ }
-        |val b =
-        |    { /* do nothing */ /* also do nothing */
-        |    }
-        |val c = { -> /* do nothing */
+        |val b = {
+        |  /* do nothing */
+        |  /* also do nothing */
         |}
-        |val d =
-        |    { _ -> /* do nothing */
-        |    }
+        |val c = { ->
+        |  /* do nothing */
+        |}
+        |val d = { _ ->
+        |  /* do nothing */
+        |}
         |private val e = Runnable {
         |  // do nothing
         |}
         |private val f: () -> Unit = {
         |  // no-op
         |}
-        |private val g: () -> Unit =
-        |    { /* no-op */
-        |    }
+        |private val g: () -> Unit = {
+        |  /* no-op */
+        |}
         |"""
             .trimMargin(),
         deduceMaxWidth = true,
@@ -7088,9 +7093,7 @@ class FormatterTest {
           |  TODO("no-op")
           |}
           |
-          |private val c: () -> Unit = {
-          |  /* no-op */
-          |}
+          |private val c: () -> Unit = { /* no-op */ }
           |private val C: () -> Unit = { TODO("...") }
           |
           |private val d: () -> Unit = {
@@ -7150,28 +7153,30 @@ class FormatterTest {
         |  myProp.funCall(param) { /* 123456 */ }
         |  myProp.funCall(param) { TODO("1234") }
         |
-        |  myProp.funCall(param) { /* 1234567 */
+        |  myProp.funCall(param) {
+        |    /* 1234567 */
         |  }
         |  myProp.funCall(param) {
         |    TODO("12345")
         |  }
         |
-        |  myProp.funCall(param) { /* 12345678 */
+        |  myProp.funCall(param) {
+        |    /* 12345678 */
         |  }
         |  myProp.funCall(param) {
         |    TODO("123456")
         |  }
         |
-        |  myProp.funCall(
-        |      param) { /* 123456789 */
-        |      }
+        |  myProp.funCall(param) {
+        |    /* 123456789 */
+        |  }
         |  myProp.funCall(param) {
         |    TODO("1234567")
         |  }
         |
-        |  myProp.funCall(
-        |      param) { /* very_very_long_comment_that_should_go_on_its_own_line */
-        |      }
+        |  myProp.funCall(param) {
+        |    /* very_very_long_comment_that_should_go_on_its_own_line */
+        |  }
         |  myProp.funCall(param) {
         |    TODO(
         |        "_a_very_long_comment_that_should_go_on_its_own_line")

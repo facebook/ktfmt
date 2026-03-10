@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Comments between a multiline string and `.trimMargin()`/`.trimIndent()` are no longer deleted during formatting (https://github.com/facebook/ktfmt/issues/597)
 - Blank lines before lists and blockquotes in KDoc comments are now preserved (https://github.com/facebook/ktfmt/issues/561)
 - `maxCommentWidth` now defaults to `maxLineWidth` instead of being capped at 72, so KDoc comments respect the configured line width (https://github.com/facebook/ktfmt/issues/594)
+- Block comment formatting inside of lambda expressions (https://github.com/facebook/ktfmt/issues/602)
 
 
 ## [0.61]
