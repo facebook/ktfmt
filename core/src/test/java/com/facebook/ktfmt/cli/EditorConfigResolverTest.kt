@@ -159,6 +159,41 @@ class EditorConfigResolverTest {
   }
 
   @Test
+  fun `overrides blockIndent based on editorconfig ij_kotlin_indent_size`() {
+    val conf = root.resolve(".editorconfig")
+    conf.writeText(
+        """
+        root = true
+        [*.kt]
+        ij_kotlin_indent_size = 3
+        """
+            .trimIndent()
+    )
+
+    val file = root.resolve("src/main/kotlin/Example.kt")
+    val resolved = EditorConfigResolver.resolveFormattingOptions(file, Formatter.GOOGLE_FORMAT)
+    assertThat(resolved).isEqualTo(Formatter.GOOGLE_FORMAT.copy(blockIndent = 3))
+  }
+
+  @Test
+  fun `ij_kotlin_indent_size takes priority over indent_size`() {
+    val conf = root.resolve(".editorconfig")
+    conf.writeText(
+        """
+        root = true
+        [*.kt]
+        indent_size = 2
+        ij_kotlin_indent_size = 3
+        """
+            .trimIndent()
+    )
+
+    val file = root.resolve("src/main/kotlin/Example.kt")
+    val resolved = EditorConfigResolver.resolveFormattingOptions(file, Formatter.GOOGLE_FORMAT)
+    assertThat(resolved).isEqualTo(Formatter.GOOGLE_FORMAT.copy(blockIndent = 3))
+  }
+
+  @Test
   fun `overrides continuationIndent based on editorconfig ij_continuation_indent_size`() {
     val conf = root.resolve(".editorconfig")
     conf.writeText(
