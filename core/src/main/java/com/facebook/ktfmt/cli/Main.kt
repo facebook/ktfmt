@@ -170,7 +170,9 @@ class Main(
         if (!alreadyFormatted) {
           file.writeText(formattedCode, UTF_8)
         }
-        err.println("Done formatting $fileName")
+        if (!args.quiet) {
+          err.println("Done formatting $fileName")
+        }
       }
 
       return alreadyFormatted

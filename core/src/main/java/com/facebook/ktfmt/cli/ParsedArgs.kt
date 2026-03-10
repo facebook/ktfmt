@@ -37,6 +37,8 @@ data class ParsedArgs(
     /** File name to report when formating code from stdin */
     val stdinName: String?,
     val editorConfig: Boolean,
+    /** Suppress all non-error output. */
+    val quiet: Boolean,
 ) {
   companion object {
 
@@ -84,6 +86,7 @@ data class ParsedArgs(
         |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used
         |  --enable-editorconfig             Enable .editorconfig overrides for supported formatting options (limited)
         |                                        see https://github.com/facebook/ktfmt/blob/main/README.md
+        |  --quiet                           Suppress all non-error output
         |  
         |ARGFILE:
         |  If the only argument begins with '@', the remainder of the argument is treated
@@ -110,6 +113,7 @@ data class ParsedArgs(
       var removeUnusedImports = true
       var stdinName: String? = null
       var editorConfig = false
+      var quiet = false
 
       if ("--help" in args || "-h" in args) return ParseResult.ShowMessage(HELP_TEXT)
       if ("--version" in args || "-v" in args) {
@@ -125,6 +129,7 @@ data class ParsedArgs(
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
           arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
           arg == "--enable-editorconfig" -> editorConfig = true
+          arg == "--quiet" -> quiet = true
           arg.startsWith("--stdin-name=") ->
               stdinName =
                   parseKeyValueArg("--stdin-name", arg)
@@ -158,6 +163,7 @@ data class ParsedArgs(
               setExitIfChanged,
               stdinName,
               editorConfig,
+              quiet,
           )
       )
     }
