@@ -176,6 +176,41 @@ class EditorConfigResolverTest {
   }
 
   @Test
+  fun `overrides continuationIndent based on editorconfig ij_kotlin_continuation_indent_size`() {
+    val conf = root.resolve(".editorconfig")
+    conf.writeText(
+        """
+        root = true
+        [*.kt]
+        ij_kotlin_continuation_indent_size = 3
+        """
+            .trimIndent()
+    )
+
+    val file = root.resolve("src/main/kotlin/Example.kt")
+    val resolved = EditorConfigResolver.resolveFormattingOptions(file, Formatter.GOOGLE_FORMAT)
+    assertThat(resolved).isEqualTo(Formatter.GOOGLE_FORMAT.copy(continuationIndent = 3))
+  }
+
+  @Test
+  fun `ij_kotlin_continuation_indent_size takes precedence over ij_continuation_indent_size`() {
+    val conf = root.resolve(".editorconfig")
+    conf.writeText(
+        """
+        root = true
+        [*.kt]
+        ij_continuation_indent_size = 6
+        ij_kotlin_continuation_indent_size = 3
+        """
+            .trimIndent()
+    )
+
+    val file = root.resolve("src/main/kotlin/Example.kt")
+    val resolved = EditorConfigResolver.resolveFormattingOptions(file, Formatter.GOOGLE_FORMAT)
+    assertThat(resolved).isEqualTo(Formatter.GOOGLE_FORMAT.copy(continuationIndent = 3))
+  }
+
+  @Test
   fun `overrides trailingCommaManagementStrategy based on editorconfig ktfmt_trailing_comma_management_strategy`() {
     val conf = root.resolve(".editorconfig")
     conf.writeText(
