@@ -11,8 +11,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 
 ## [Unreleased]
+
 ### Added
 - Support `ij_kotlin_continuation_indent_size` in editorconfig.
+- Support `ij_kotlin_indent_size` in editorconfig.
 
 ### Fixed
 - Backtick-escaped full-path imports are no longer incorrectly removed as unused (https://github.com/facebook/ktfmt/issues/532)
