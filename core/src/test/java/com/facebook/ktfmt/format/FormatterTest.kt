@@ -404,6 +404,75 @@ class FormatterTest {
       )
 
   @Test
+  fun `line comment before binary operator keeps operator with operand`() =
+      assertFormatted(
+          """
+          |//////////////////////////////////////////////////
+          |fun foo() {
+          |  val result =
+          |      firstCond &&
+          |          secondCond
+          |          // comment about thirdCond.
+          |          && thirdCond
+          |}
+          |"""
+              .trimMargin(),
+          deduceMaxWidth = true,
+      )
+
+  @Test
+  fun `line comment before operator in multi-operand chain`() =
+      assertFormatted(
+          """
+          |//////////////////////////////////////////////////
+          |fun foo() {
+          |  val result =
+          |      firstCond &&
+          |          secondCond
+          |          // comment about thirdCond.
+          |          && thirdCond &&
+          |          fourthCond
+          |}
+          |"""
+              .trimMargin(),
+          deduceMaxWidth = true,
+      )
+
+  @Test
+  fun `block comment before binary operator keeps operator with operand`() =
+      assertFormatted(
+          """
+          |//////////////////////////////////////////////////
+          |fun foo() {
+          |  val result =
+          |      firstCond &&
+          |          secondCond
+          |          /* comment. */
+          |          && thirdCond
+          |}
+          |"""
+              .trimMargin(),
+          deduceMaxWidth = true,
+      )
+
+  @Test
+  fun `line comment before or operator keeps operator with operand`() =
+      assertFormatted(
+          """
+          |//////////////////////////////////////////////////
+          |fun foo() {
+          |  val result =
+          |      firstCond ||
+          |          secondCond
+          |          // comment about thirdCond.
+          |          || thirdCond
+          |}
+          |"""
+              .trimMargin(),
+          deduceMaxWidth = true,
+      )
+
+  @Test
   fun `assignment expressions with scoping functions are block-like`() =
       assertFormatted(
           """

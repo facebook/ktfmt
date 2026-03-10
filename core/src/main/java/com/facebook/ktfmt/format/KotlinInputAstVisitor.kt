@@ -1267,12 +1267,24 @@ class KotlinInputAstVisitor(
             builder.open(expressionBreakIndent)
           }
           builder.token(leftExpression.operationReference.text)
-          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+          val fillMode =
+              if (hasCommentBefore(leftExpression.operationReference)) Doc.FillMode.INDEPENDENT
+              else Doc.FillMode.UNIFIED
+          builder.breakOp(fillMode, " ", ZERO)
         }
       }
       visit(leftExpression.right)
     }
     builder.close()
+  }
+
+  /** Checks if a comment immediately precedes [element] in the PSI tree. */
+  private fun hasCommentBefore(element: PsiElement): Boolean {
+    var prev = element.prevSibling
+    while (prev is PsiWhiteSpace) {
+      prev = prev.prevSibling
+    }
+    return prev is PsiComment
   }
 
   override fun visitPostfixExpression(expression: KtPostfixExpression) {
