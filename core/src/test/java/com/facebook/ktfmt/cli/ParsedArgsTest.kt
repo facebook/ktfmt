@@ -110,6 +110,12 @@ class ParsedArgsTest {
   }
 
   @Test
+  fun `parseOptions recognizes --quiet`() {
+    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--quiet", "foo.kt")))
+    assertThat(parsed.quiet).isTrue()
+  }
+
+  @Test
   fun `parseOptions recognizes --stdin-name`() {
     val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--stdin-name=my/foo.kt", "-")))
     assertThat(parsed.stdinName).isEqualTo("my/foo.kt")
@@ -251,6 +257,7 @@ class ParsedArgsTest {
       removedUnusedImports: Boolean = true,
       stdinName: String? = null,
       editorConfig: Boolean = false,
+      quiet: Boolean = false,
   ): ParseResult.Ok {
     val returnedFormattingOptions =
         formattingOptions.copy(removeUnusedImports = removedUnusedImports)
@@ -262,6 +269,7 @@ class ParsedArgsTest {
             setExitIfChanged,
             stdinName,
             editorConfig,
+            quiet,
         )
     )
   }

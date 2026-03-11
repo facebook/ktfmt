@@ -12,7 +12,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 ### Added
+
 - Support `ij_kotlin_continuation_indent_size` in editorconfig.
+- Add `--quiet` flag to suppress per-file formatting status output.
 
 ### Fixed
 - Backtick-escaped full-path imports are no longer incorrectly removed as unused (https://github.com/facebook/ktfmt/issues/532)

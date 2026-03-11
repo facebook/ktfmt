@@ -538,4 +538,27 @@ class MainTest {
 
     assertThat(exitCode).isEqualTo(0)
   }
+
+  @Test
+  fun `--quiet suppresses 'Done formatting' output`() {
+    val code = """fun f () =    println( "hello, world" )"""
+    val file = root.resolve("foo.kt")
+    file.writeText(code, UTF_8)
+
+    Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf("--quiet", file.toString())).run()
+
+    assertThat(err.toString(testCharset)).doesNotContain("Done formatting")
+  }
+
+  @Test
+  fun `--quiet still reports errors`() {
+    val fooBar = root.resolve("foo.kt")
+    fooBar.writeText("fun    f1 (  ", UTF_8)
+    val returnValue =
+        Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf("--quiet", fooBar.toString()))
+            .run()
+
+    assertThat(returnValue).isEqualTo(1)
+    assertThat(err.toString(testCharset)).contains("foo.kt:1:14: error: ")
+  }
 }
