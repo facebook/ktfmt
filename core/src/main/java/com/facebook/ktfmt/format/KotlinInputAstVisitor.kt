@@ -2029,7 +2029,7 @@ class KotlinInputAstVisitor(
             builder.space()
           }
           builder.token("->")
-          if (whenExpression is KtBlockExpression) {
+          if (whenExpression is KtBlockExpression || whenExpression is KtLambdaExpression) {
             builder.space()
             visit(whenExpression)
           } else {

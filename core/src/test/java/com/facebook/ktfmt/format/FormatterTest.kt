@@ -2097,6 +2097,57 @@ class FormatterTest {
       )
 
   @Test
+  fun `when() expression with lambda body`() =
+      assertFormatted(
+          """
+          |fun f(x: ModifierType) {
+          |  when (x) {
+          |    is FirstModifierType -> { myObject ->
+          |      doCustomModification(x, myObject)
+          |    }
+          |    is SecondModifierType -> { myObject ->
+          |      doOtherModification(x, myObject)
+          |    }
+          |  }
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `when() expression with no-param lambda body`() =
+      assertFormatted(
+          """
+          |fun f(x: Int) {
+          |  when (x) {
+          |    0 -> {
+          |      doSomething()
+          |    }
+          |    1 -> print("hello")
+          |  }
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `when() expression with lambda body containing multiple statements`() =
+      assertFormatted(
+          """
+          |fun f(x: ModifierType) {
+          |  when (x) {
+          |    is FirstModifierType -> { myObject ->
+          |      doFirstThing(myObject)
+          |      doSecondThing(myObject)
+          |      doThirdThing(myObject)
+          |    }
+          |  }
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
   fun `function return types`() =
       assertFormatted(
           """
