@@ -5346,6 +5346,153 @@ class KDocFormatterTest {
     )
   }
 
+  @Test
+  fun testFencedCodeBlockInListItem() {
+    checkFormatter(
+        """
+        /**
+         * - Item with code:
+         *   ```
+         *   val x = 1
+         *   ```
+         * - Next item
+         */
+        """
+            .trimIndent(),
+        KDocFormattingOptions(72),
+        """
+        /**
+         * - Item with code:
+         *   ```
+         *   val x = 1
+         *   ```
+         * - Next item
+         */
+        """
+            .trimIndent(),
+    )
+  }
+
+  @Test
+  fun testFencedCodeBlockWithContinuationInListItem() {
+    checkFormatter(
+        """
+        /**
+         * - Item with code:
+         *   ```
+         *   val x = 1
+         *   ```
+         *
+         *   More text after the code block.
+         * - Next item
+         */
+        """
+            .trimIndent(),
+        KDocFormattingOptions(72),
+        """
+        /**
+         * - Item with code:
+         *   ```
+         *   val x = 1
+         *   ```
+         *
+         *   More text after the code block.
+         * - Next item
+         */
+        """
+            .trimIndent(),
+    )
+  }
+
+  @Test
+  fun testMultipleFencedCodeBlocksInListItem() {
+    checkFormatter(
+        """
+        /**
+         * - First do this:
+         *   ```
+         *   val x = 1
+         *   ```
+         *
+         *   Then do this:
+         *   ```
+         *   val y = 2
+         *   ```
+         * - Next item
+         */
+        """
+            .trimIndent(),
+        KDocFormattingOptions(72),
+        """
+        /**
+         * - First do this:
+         *   ```
+         *   val x = 1
+         *   ```
+         *
+         *   Then do this:
+         *   ```
+         *   val y = 2
+         *   ```
+         * - Next item
+         */
+        """
+            .trimIndent(),
+    )
+  }
+
+  @Test
+  fun testFencedCodeBlockAtEndOfListItem() {
+    checkFormatter(
+        """
+        /**
+         * - Item with code at end:
+         *   ```
+         *   val x = 1
+         *   ```
+         */
+        """
+            .trimIndent(),
+        KDocFormattingOptions(72),
+        """
+        /**
+         * - Item with code at end:
+         *   ```
+         *   val x = 1
+         *   ```
+         */
+        """
+            .trimIndent(),
+    )
+  }
+
+  @Test
+  fun testFencedCodeBlockInNumberedListItem() {
+    checkFormatter(
+        """
+        /**
+         * 1. First step:
+         *    ```kotlin
+         *    val config = Config()
+         *    ```
+         * 2. Second step
+         */
+        """
+            .trimIndent(),
+        KDocFormattingOptions(72),
+        """
+        /**
+         * 1. First step:
+         *    ```kotlin
+         *    val config = Config()
+         *    ```
+         * 2. Second step
+         */
+        """
+            .trimIndent(),
+    )
+  }
+
   // --------------------------------------------------------------------
   // A few failing test cases here for corner cases that aren't handled
   // right yet.

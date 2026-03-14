@@ -406,42 +406,80 @@ class ParagraphListBuilder(
           paragraph.separate = true
         }
         val start = i
+        val listItemUntil = { j: Int, w: String, s: String ->
+          // See if it's a line continuation
+          if (s.isBlank() && j < lines.size - 1 && lineContent(lines[j + 1]).startsWith(" ")) {
+            false
+          } else {
+            s.isBlank() ||
+                w.isListItem() ||
+                w.isQuoted() ||
+                w.isKDocTag() ||
+                w.isTodo() ||
+                w.startsWith("```") ||
+                w.startsWith("<pre>") ||
+                w.isDirectiveMarker() ||
+                w.isLine() ||
+                w.isHeader() ||
+                // Not indented by at least two spaces following a blank line?
+                (s.length > 2 &&
+                    (!s[0].isWhitespace() || !s[1].isWhitespace()) &&
+                    j < lines.size - 1 &&
+                    lineContent(lines[j - 1]).isBlank())
+          }
+        }
+        val listItemShouldBreak = { w: String, _: String -> w.isBlank() }
+        val listItemCustomize = { j: Int, p: Paragraph ->
+          if (lineContent(lines[j]).isBlank() && j >= start) {
+            p.hanging = true
+            p.continuation = true
+          }
+        }
         i =
             addLines(
                 i,
                 includeEnd = false,
-                until = { j: Int, w: String, s: String ->
-                  // See if it's a line continuation
-                  if (
-                      s.isBlank() && j < lines.size - 1 && lineContent(lines[j + 1]).startsWith(" ")
-                  ) {
-                    false
-                  } else {
-                    s.isBlank() ||
-                        w.isListItem() ||
-                        w.isQuoted() ||
-                        w.isKDocTag() ||
-                        w.isTodo() ||
-                        s.startsWith("```") ||
-                        w.startsWith("<pre>") ||
-                        w.isDirectiveMarker() ||
-                        w.isLine() ||
-                        w.isHeader() ||
-                        // Not indented by at least two spaces following a blank line?
-                        (s.length > 2 &&
-                            (!s[0].isWhitespace() || !s[1].isWhitespace()) &&
-                            j < lines.size - 1 &&
-                            lineContent(lines[j - 1]).isBlank())
-                  }
-                },
-                shouldBreak = { w, _ -> w.isBlank() },
-                customize = { j, p ->
-                  if (lineContent(lines[j]).isBlank() && j >= start) {
-                    p.hanging = true
-                    p.continuation = true
-                  }
-                },
+                until = listItemUntil,
+                shouldBreak = listItemShouldBreak,
+                customize = listItemCustomize,
             )
+        // Handle fenced code blocks within list items
+        while (i < lines.size && lineContent(lines[i]).trim().startsWith("```")) {
+          i = addPreformatted(i, expectClose = true) { it.trimStart().startsWith("```") }
+          // Check if list item continues after the code block
+          if (i >= lines.size) break
+          val nextLine = lineContent(lines[i])
+          val nextTrimmed = nextLine.trim()
+          // Continue if next content is indented continuation text or a blank line
+          // followed by indented text (standard list item continuation pattern)
+          val isContinuation =
+              if (nextTrimmed.isBlank()) {
+                i + 1 < lines.size && lineContent(lines[i + 1]).startsWith(" ")
+              } else {
+                nextLine.startsWith(" ") &&
+                    !nextTrimmed.isListItem() &&
+                    !nextTrimmed.isQuoted() &&
+                    !nextTrimmed.isKDocTag() &&
+                    !nextTrimmed.isTodo() &&
+                    !nextTrimmed.isDirectiveMarker() &&
+                    !nextTrimmed.isLine() &&
+                    !nextTrimmed.isHeader()
+              }
+          if (!isContinuation) break
+          // Set up continuation paragraph and continue processing
+          newParagraph(i).apply {
+            hanging = true
+            continuation = true
+          }
+          i =
+              addLines(
+                  i,
+                  includeEnd = false,
+                  until = listItemUntil,
+                  shouldBreak = listItemShouldBreak,
+                  customize = listItemCustomize,
+              )
+        }
         newParagraph(i)
       } else if (lineWithoutIndentation.isEmpty()) {
         newParagraph(i).separate = true
@@ -789,7 +827,7 @@ class ParagraphListBuilder(
             paragraph.preformatted ->
                 !prev.preformatted &&
                     !text.startsWith("<pre", true) &&
-                    (!text.startsWith("```") || !prev.text.isExpectingMore())
+                    (!text.trimStart().startsWith("```") || !prev.text.isExpectingMore())
             prev.preformatted && prev.text.startsWith("</pre>", true) -> false
             paragraph.continuation -> true
             paragraph.hanging -> false
@@ -803,7 +841,14 @@ class ParagraphListBuilder(
         if (paragraph.doc || text.startsWith("<li>", true) || text.isTodo()) {
           paragraph.hangingIndent = getIndent(options.hangingIndent)
         } else if (paragraph.continuation && paragraph.prev != null) {
-          paragraph.hangingIndent = checkNotNull(paragraph.prev).hangingIndent
+          // Walk back through preformatted and empty predecessors to find the
+          // original list item's hanging indent (e.g. when a code block
+          // separates the continuation text from its list item).
+          var source = checkNotNull(paragraph.prev)
+          while ((source.preformatted || source.isEmpty()) && source.prev != null) {
+            source = checkNotNull(source.prev)
+          }
+          paragraph.hangingIndent = source.hangingIndent
           // Dedent to match hanging indent
           val s = paragraph.text.trimStart()
           paragraph.content.clear()

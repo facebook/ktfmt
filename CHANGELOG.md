@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Blank lines before lists and blockquotes in KDoc comments are now preserved (https://github.com/facebook/ktfmt/issues/561)
 - `maxCommentWidth` now defaults to `maxLineWidth` instead of being capped at 72, so KDoc comments respect the configured line width (https://github.com/facebook/ktfmt/issues/594)
 - Block comment formatting inside of lambda expressions (https://github.com/facebook/ktfmt/issues/602)
+- Fenced code blocks inside KDoc list items are no longer erroneously reflowed into a single line (https://github.com/facebook/ktfmt/issues/572)
 - Comments before `&&`/`||` operators in chained binary expressions no longer strand the operator on its own line (https://github.com/facebook/ktfmt/issues/527)
 - Lambda bodies in `when` branches no longer get extra indentation with Meta style (https://github.com/facebook/ktfmt/issues/222)
 
