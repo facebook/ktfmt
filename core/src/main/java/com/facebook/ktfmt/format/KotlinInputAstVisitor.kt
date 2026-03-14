@@ -1553,6 +1553,7 @@ class KotlinInputAstVisitor(
    * 1. '... = { ... }' is a lambda expression
    * 2. '... = Runnable { ... }' is considered a scoping function
    * 3. '... = scope { ... }' '... = apply { ... }' is a scoping function
+   * 4. '... = scope.launch { ... }' is a dot-qualified scoping function
    *
    * but not:
    * 1. '... = foo() { ... }' due to the empty parenthesis
@@ -1565,6 +1566,9 @@ class KotlinInputAstVisitor(
     }
 
     var carry = expression
+    if (carry is KtQualifiedExpression && carry.receiverExpression is KtSimpleNameExpression) {
+      carry = carry.selectorExpression
+    }
     if (carry is KtCallExpression) {
       if (
           carry.valueArgumentList?.leftParenthesis == null &&
@@ -1592,6 +1596,11 @@ class KotlinInputAstVisitor(
     builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent, Optional.of(breakToExpr))
 
     var carry = expr
+    if (carry is KtQualifiedExpression && carry.receiverExpression is KtSimpleNameExpression) {
+      visit(carry.receiverExpression)
+      builder.token(carry.operationSign.value)
+      carry = carry.selectorExpression
+    }
     if (carry is KtCallExpression) {
       visit(carry.calleeExpression)
       builder.space()

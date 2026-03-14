@@ -6808,6 +6808,84 @@ class FormatterTest {
       )
 
   @Test
+  fun `dot-qualified scoping functions are block-like`() =
+      assertFormatted(
+          """
+          |/////////////////////////////////
+          |fun f() {
+          |  val fn = scope.launch {
+          |    doThing()
+          |    doAnother()
+          |  }
+          |}
+          |
+          |fun g() {
+          |  val longVariableName =
+          |      scope.launch {
+          |        doThing()
+          |        doAnother()
+          |      }
+          |}
+          |
+          |fun h() = scope.launch {
+          |  doThing()
+          |  doAnother()
+          |}
+          |
+          |fun longFunctionName() =
+          |    scope.launch {
+          |      doThing()
+          |      doAnother()
+          |    }
+          |
+          |fun j() {
+          |  x = scope.launch {
+          |    doThing()
+          |    doAnother()
+          |  }
+          |}
+          |
+          |fun k() {
+          |  longVariableName =
+          |      scope.launch {
+          |        doThing()
+          |        doAnother()
+          |      }
+          |}
+          |
+          |fun l() {
+          |  val fn = scope?.launch {
+          |    doThing()
+          |    doAnother()
+          |  }
+          |}
+          |
+          |fun m() {
+          |  val longVariableName =
+          |      scope?.launch {
+          |        doThing()
+          |        doAnother()
+          |      }
+          |}
+          |"""
+              .trimMargin(),
+          deduceMaxWidth = true,
+      )
+
+  @Test
+  fun `dot-qualified scoping functions single-line`() =
+      assertFormatted(
+          """
+          |///////////////////////////////////////////
+          |fun f() {
+          |  val fn = scope.launch { doThing() }
+          |}
+          |"""
+              .trimMargin(),
+          deduceMaxWidth = true,
+      )
+
+  @Test
   fun `top level properties with other types preserve newline spacing`() {
     assertFormatted(
         """
