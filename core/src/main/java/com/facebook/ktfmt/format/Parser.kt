@@ -43,9 +43,7 @@ object Parser {
    * from [KotlinCoreEnvironment.createForProduction]:
    * https://github.com/JetBrains/kotlin/blob/master/compiler/cli/src/org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreEnvironment.kt#L544
    */
-  val env: KotlinCoreEnvironment
-
-  init {
+  val env: KotlinCoreEnvironment by lazy {
     // To hide annoying warning on Windows
     System.setProperty("idea.use.native.fs.for.win", "false")
     val disposable = Disposer.newDisposable()
@@ -54,12 +52,11 @@ object Parser {
         CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY,
         PrintingMessageCollector(System.err, PLAIN_RELATIVE_PATHS, false),
     )
-    env =
-        KotlinCoreEnvironment.createForProduction(
-            disposable,
-            configuration,
-            EnvironmentConfigFiles.JVM_CONFIG_FILES,
-        )
+    KotlinCoreEnvironment.createForProduction(
+        disposable,
+        configuration,
+        EnvironmentConfigFiles.JVM_CONFIG_FILES,
+    )
   }
 
   fun parse(code: String): KtFile {

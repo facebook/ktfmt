@@ -1,0 +1,8 @@
+com.google.common.collect.SingletonImmutableList
+kotlin.Function
+kotlin.KotlinVersion
+kotlin.SynchronizedLazyImpl
+kotlin.UNINITIALIZED_VALUE
+kotlin.collections.EmptyMap
+kotlin.jvm.functions.Function1
+kotlin.text.Regex
