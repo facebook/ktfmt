@@ -5907,7 +5907,7 @@ class FormatterTest {
     } catch (e: ParseError) {
       assertThat(e.lineColumn.line).isEqualTo(6)
       assertThat(e.lineColumn.column).isEqualTo(0)
-      assertThat(e.errorDescription).contains("Expecting an expression")
+      assertThat(e.errorDescription).containsMatch("Expecting an (expression|argument)")
     }
   }
 
@@ -8617,6 +8617,29 @@ class FormatterTest {
         |          suspend context(someContext: SomeContext)
         |          T.() -> Unit,
         |  ) = startCoroutine { T.block() }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `context receivers on secondary constructor`() {
+    val code =
+        """
+        |class A(val x: Int) {
+        |  context(Something)
+        |  constructor() : this(0)
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |class A(val x: Int) {
+        |  context(Something)
+        |  constructor() : this(0)
         |}
         |"""
             .trimMargin()

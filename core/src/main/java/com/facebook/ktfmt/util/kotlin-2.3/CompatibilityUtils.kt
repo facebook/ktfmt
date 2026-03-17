@@ -26,4 +26,4 @@ fun KtContextReceiverList.listToVisit(): List<KtElement> {
   return contextParameters().ifEmpty { contextReceivers() }
 }
 
-val CONTEXT_PARAMETER_LIST = KtStubElementTypes.CONTEXT_RECEIVER_LIST
+val CONTEXT_PARAMETER_LIST = KtStubElementTypes.CONTEXT_PARAMETER_LIST

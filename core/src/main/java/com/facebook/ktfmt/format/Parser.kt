@@ -55,6 +55,7 @@ object Parser {
         PrintingMessageCollector(System.err, PLAIN_RELATIVE_PATHS, false),
     )
     env =
+        @Suppress("OPT_IN_USAGE_ERROR") // KotlinCoreEnvironment.createForProduction
         KotlinCoreEnvironment.createForProduction(
             disposable,
             configuration,

@@ -20,7 +20,10 @@ package com.facebook.ktfmt.util
 
 import org.jetbrains.kotlin.psi.KtContextReceiverList
 import org.jetbrains.kotlin.psi.KtElement
+import org.jetbrains.kotlin.psi.stubs.elements.KtStubElementTypes
 
 fun KtContextReceiverList.listToVisit(): List<KtElement> {
   return contextReceivers()
 }
+
+val CONTEXT_PARAMETER_LIST = KtStubElementTypes.CONTEXT_RECEIVER_LIST

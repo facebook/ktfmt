@@ -16,6 +16,7 @@
 
 package com.facebook.ktfmt.format
 
+import com.facebook.ktfmt.util.CONTEXT_PARAMETER_LIST
 import com.facebook.ktfmt.util.listToVisit
 import com.google.common.base.Throwables
 import com.google.common.collect.ImmutableList
@@ -169,7 +170,7 @@ class KotlinInputAstVisitor(
     builder.block(ZERO) {
       visitFunctionLikeExpression(
           contextReceiverList =
-              function.getStubOrPsiChild(KtStubElementTypes.CONTEXT_RECEIVER_LIST),
+              function.getStubOrPsiChild(CONTEXT_PARAMETER_LIST) as? KtContextReceiverList,
           modifierList = function.modifierList,
           keyword = "fun",
           typeParameters = function.typeParameterList,
@@ -1621,7 +1622,7 @@ class KotlinInputAstVisitor(
   override fun visitClassOrObject(classOrObject: KtClassOrObject) {
     builder.sync(classOrObject)
     val contextReceiverList =
-        classOrObject.getStubOrPsiChild(KtStubElementTypes.CONTEXT_RECEIVER_LIST)
+        classOrObject.getStubOrPsiChild(CONTEXT_PARAMETER_LIST) as? KtContextReceiverList
     val modifierList = classOrObject.modifierList
     builder.block(ZERO) {
       if (contextReceiverList != null) {
@@ -1695,7 +1696,7 @@ class KotlinInputAstVisitor(
       val delegationCall = constructor.getDelegationCall()
       visitFunctionLikeExpression(
           contextReceiverList =
-              constructor.getStubOrPsiChild(KtStubElementTypes.CONTEXT_RECEIVER_LIST),
+              constructor.getStubOrPsiChild(CONTEXT_PARAMETER_LIST) as? KtContextReceiverList,
           modifierList = constructor.modifierList,
           keyword = "constructor",
           typeParameters = null,
@@ -1828,6 +1829,13 @@ class KotlinInputAstVisitor(
     for (child in list.node.children()) {
       val psi = child.psi
       if (psi is PsiWhiteSpace) {
+        continue
+      }
+
+      // In Kotlin 2.3+, context receiver lists are children of the modifier list.
+      // Handle them directly to avoid issues with the visitor dispatch.
+      if (psi is KtContextReceiverList) {
+        visitContextReceiverList(psi)
         continue
       }
 

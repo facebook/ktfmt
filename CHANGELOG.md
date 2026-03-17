@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Add `--quiet` flag to suppress per-file formatting status output.
 
 ### Fixed
+- Compatibility with Kotlin compiler v2.3.20 (`CONTEXT_RECEIVER_LIST` renamed to `CONTEXT_PARAMETER_LIST`, K1 API opt-in for `KotlinCoreEnvironment.createForProduction`) (https://github.com/facebook/ktfmt/issues/605)
 - Dot-qualified scoping functions (e.g., `scope.launch { }`) now format as block-like expressions, consistent with non-qualified calls ([GH#205](https://github.com/facebook/ktfmt/issues/205))
 - Backtick-escaped full-path imports are no longer incorrectly removed as unused (https://github.com/facebook/ktfmt/issues/532)
 - Single-line comments in if expressions are now correctly indented (https://github.com/facebook/ktfmt/pull/591)
