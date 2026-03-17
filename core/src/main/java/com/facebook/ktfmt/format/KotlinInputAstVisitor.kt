@@ -1269,7 +1269,8 @@ class KotlinInputAstVisitor(
           }
           builder.token(leftExpression.operationReference.text)
           val fillMode =
-              if (hasCommentBefore(leftExpression.operationReference)) Doc.FillMode.INDEPENDENT
+              if (hasLineBreakingCommentBefore(leftExpression.operationReference))
+                  Doc.FillMode.INDEPENDENT
               else Doc.FillMode.UNIFIED
           builder.breakOp(fillMode, " ", ZERO)
         }
@@ -1279,13 +1280,26 @@ class KotlinInputAstVisitor(
     builder.close()
   }
 
-  /** Checks if a comment immediately precedes [element] in the PSI tree. */
-  private fun hasCommentBefore(element: PsiElement): Boolean {
+  /**
+   * Checks if a line-breaking comment precedes [element] in the PSI tree.
+   *
+   * Line comments (`//`) always force a break. Block comments (`/* */`) only count if they are on
+   * their own line (preceded by whitespace with a newline). Inline block comments like `x /*tag*/
+   * ||` do not force a break and should not trigger INDEPENDENT fill mode.
+   */
+  private fun hasLineBreakingCommentBefore(element: PsiElement): Boolean {
     var prev = element.prevSibling
     while (prev is PsiWhiteSpace) {
       prev = prev.prevSibling
     }
-    return prev is PsiComment
+    if (prev !is PsiComment) return false
+
+    // Line comments always force a line break
+    if (prev.text.startsWith("//")) return true
+
+    // Block comments force a break only if on their own line
+    val beforeComment = prev.prevSibling
+    return beforeComment is PsiWhiteSpace && beforeComment.text.contains('\n')
   }
 
   override fun visitPostfixExpression(expression: KtPostfixExpression) {

@@ -473,6 +473,22 @@ class FormatterTest {
       )
 
   @Test
+  fun `inline block comment before binary operator does not break chain`() =
+      assertFormatted(
+          """
+          |//////////////////////////////////////////////////////
+          |fun foo() {
+          |  val result =
+          |      firstCondition ||
+          |          secondCondition /*tag*/ ||
+          |          thirdCondition
+          |}
+          |"""
+              .trimMargin(),
+          deduceMaxWidth = true,
+      )
+
+  @Test
   fun `assignment expressions with scoping functions are block-like`() =
       assertFormatted(
           """
