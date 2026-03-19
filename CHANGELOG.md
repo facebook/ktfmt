@@ -18,8 +18,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [0.62]
 ### Added
 
-- Support `ij_kotlin_continuation_indent_size` in editorconfig.
-- Add `--quiet` flag to suppress per-file formatting status output.
+- Support `ij_kotlin_continuation_indent_size` in editorconfig. (https://github.com/facebook/ktfmt/pull/600)
+- Add `--quiet` flag to suppress per-file formatting status output. (https://github.com/facebook/ktfmt/issues/558)
 
 ### Fixed
 - Compatibility with Kotlin compiler v2.3.20 (`CONTEXT_RECEIVER_LIST` renamed to `CONTEXT_PARAMETER_LIST`, K1 API opt-in for `KotlinCoreEnvironment.createForProduction`) (https://github.com/facebook/ktfmt/issues/605)
