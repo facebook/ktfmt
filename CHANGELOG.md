@@ -12,8 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
-### Changed
-
+### Added
+- Support `ij_kotlin_indent_size` in editorconfig. (https://github.com/facebook/ktfmt/pull/604)
 
 ## [0.62]
 ### Added
