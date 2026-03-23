@@ -16,6 +16,7 @@
 
 import kotlin.io.path.writeText
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
   kotlin("jvm")
@@ -116,6 +117,8 @@ tasks {
 }
 
 kotlin {
+  @OptIn(ExperimentalAbiValidation::class) abiValidation { enabled = true }
+
   val javaVersion: String = rootProject.libs.versions.java.get()
   jvmToolchain(javaVersion.toInt())
 
