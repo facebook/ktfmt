@@ -43,11 +43,10 @@ dependencies {
   testImplementation(libs.junit)
 }
 
-val generateSources by
-    tasks.registering {
-      outputs.dir(layout.buildDirectory.dir("generated/main/java"))
-      dependsOn(tasks.named("generateKtfmtFile"))
-    }
+val generateSources by tasks.registering {
+  outputs.dir(layout.buildDirectory.dir("generated/main/java"))
+  dependsOn(tasks.named("generateKtfmtFile"))
+}
 
 tasks {
   // Create Ktfmt.kt file with version information
@@ -62,11 +61,10 @@ tasks {
     outputs.cacheIf { true }
 
     // provider to run the shell script genVersionFileScript with versionPropertiesFile as argument
-    val scriptProcess =
-        providers.exec {
-          workingDir = rootProject.rootDir
-          commandLine = listOf(genVersionFileScript.toString(), versionPropertiesFile.toString())
-        }
+    val scriptProcess = providers.exec {
+      workingDir = rootProject.rootDir
+      commandLine = listOf(genVersionFileScript.toString(), versionPropertiesFile.toString())
+    }
 
     doLast {
       val scriptOutput = scriptProcess.standardOutput.asText.get()

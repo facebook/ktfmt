@@ -141,12 +141,11 @@ internal class RedundantImportDetector(val enabled: Boolean) {
 
       val links = kdocSection.getChildrenOfType<KDocLink>() + tagLinks
 
-      val references =
-          links.flatMap { link ->
-            link.getChildrenOfType<KDocName>().mapNotNull {
-              it.getQualifiedName().firstOrNull()?.trim('[', ']')
-            }
-          }
+      val references = links.flatMap { link ->
+        link.getChildrenOfType<KDocName>().mapNotNull {
+          it.getQualifiedName().firstOrNull()?.trim('[', ']')
+        }
+      }
 
       usedReferences += references
     }
