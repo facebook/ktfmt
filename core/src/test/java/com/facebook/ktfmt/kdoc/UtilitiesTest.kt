@@ -120,7 +120,7 @@ class UtilitiesTest {
     }
     check("Foo", listOf("Foo"))
     check("Foo Bar Baz", listOf("Foo", "Bar", "Baz"))
-    check("Foo Bar Baz", listOf("Foo Bar", "Baz")) { it.quoted = true }
+    check("Foo Bar Baz", listOf("Foo Bar", "Baz")) { it.quoted = 1 }
     check("Foo Bar Baz", listOf("Foo Bar", "Baz")) { it.hanging = true }
     check("1. Foo", listOf("1.", "Foo"))
     // "1." can't start a word; if it ends up at the beginning of a line it becomes

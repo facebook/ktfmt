@@ -353,26 +353,71 @@ class ParagraphListBuilder(
       } else if (lineWithoutIndentation.isQuoted()) {
         val hadBlankLine = this.paragraph.isEmpty() && this.paragraph.separate
         i--
-        val paragraph = newParagraph(i)
-        if (hadBlankLine) {
-          paragraph.separate = true
+
+        // Process quoted block line by line to handle inner structure
+        // (list items, nested quotes)
+        var prevDepth = 0
+        var isFirst = true
+
+        while (i < lines.size) {
+          val ql = lines[i]
+          val qLineContent = lineContent(ql)
+          val qTrimmed = qLineContent.trim()
+
+          // Check termination conditions
+          if (
+              qTrimmed.isBlank() ||
+                  qTrimmed.isKDocTag() ||
+                  qTrimmed.isTodo() ||
+                  qTrimmed.isDirectiveMarker() ||
+                  qTrimmed.isHeader()
+          ) {
+            break
+          }
+
+          // Non-quoted lines that are list items should end the quoted block
+          if (!qTrimmed.isQuoted() && qTrimmed.isListItem()) {
+            break
+          }
+
+          // Compute quote depth and inner content
+          val depth: Int
+          val inner: String
+          if (qTrimmed.isQuoted()) {
+            var d = 0
+            var s = qTrimmed
+            while (s.startsWith("> ")) {
+              d++
+              s = s.substring(2).trimStart()
+            }
+            depth = d
+            inner = s
+          } else {
+            // Continuation line without `> ` prefix - inherits previous depth
+            depth = prevDepth
+            inner = qTrimmed
+          }
+
+          // Decide if we need a new paragraph
+          val needsBreak = !isFirst && (depth != prevDepth || inner.isListItem())
+
+          if (isFirst || needsBreak) {
+            val p = newParagraph(i)
+            if (isFirst && hadBlankLine) {
+              p.separate = true
+            }
+            p.quoted = depth
+            p.block = false
+          }
+
+          appendText(inner.collapseSpaces())
+          appendText(" ")
+
+          prevDepth = depth
+          isFirst = false
+          i++
         }
-        paragraph.quoted = true
-        paragraph.block = false
-        i =
-            addLines(
-                i,
-                until = { _, w, _ ->
-                  w.isBlank() ||
-                      w.isListItem() ||
-                      w.isKDocTag() ||
-                      w.isTodo() ||
-                      w.isDirectiveMarker() ||
-                      w.isHeader()
-                },
-                customize = { _, p -> p.quoted = true },
-                includeEnd = false,
-            )
+
         newParagraph(i)
       } else if (
           lineWithoutIndentation.equals("<ul>", true) || lineWithoutIndentation.equals("<ol>", true)
@@ -831,7 +876,7 @@ class ParagraphListBuilder(
             prev.preformatted && prev.text.startsWith("</pre>", true) -> false
             paragraph.continuation -> true
             paragraph.hanging -> false
-            paragraph.quoted -> prev.quoted
+            paragraph.quoted > 0 -> prev.quoted > 0 && paragraph.quoted == prev.quoted
             text.isHeader() -> true
             text.startsWith("<p>", true) || text.startsWith("<p/>", true) -> true
             else -> !paragraph.block && !paragraph.isEmpty()

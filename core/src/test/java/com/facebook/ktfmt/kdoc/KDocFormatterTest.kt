@@ -35,7 +35,6 @@ package com.facebook.ktfmt.kdoc
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlin.io.path.createTempDirectory
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -5498,12 +5497,11 @@ class KDocFormatterTest {
   // right yet.
   // --------------------------------------------------------------------
 
-  @Ignore("Lists within quoted blocks not yet supported")
   @Test
   fun testNestedWithinQuoted() {
     val source =
         """
-        /*
+        /**
          * Lists within a block quote:
          * > Here's my quoted text.
          * > 1. First item
@@ -5516,7 +5514,7 @@ class KDocFormatterTest {
         source,
         KDocFormattingOptions(40),
         """
-        /*
+        /**
          * Lists within a block quote:
          * > Here's my quoted text.
          * > 1. First item
@@ -5543,10 +5541,8 @@ class KDocFormatterTest {
         """
         /**
          * Here's some text.
-         * > Here's some more text that
-         * > is indented. More text.
-         * > > And here's some even
-         * > > more indented text
+         * > Here's some more text that is indented. More text.
+         * > > And here's some even more indented text
          * > Back to the top level
          */
         """

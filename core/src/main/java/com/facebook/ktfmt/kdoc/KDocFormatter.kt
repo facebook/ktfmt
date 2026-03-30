@@ -108,7 +108,7 @@ class KDocFormatter(private val options: KDocFormattingOptions) {
       }
 
       val lineWithoutIndent = options.maxLineWidth - commentType.lineOverhead()
-      val quoteAdjustment = if (paragraph.quoted) 2 else 0
+      val quoteAdjustment = if (paragraph.quoted > 0) 2 * paragraph.quoted else 0
       val maxLineWidth =
           min(options.maxCommentWidth, lineWithoutIndent - indentSize) - quoteAdjustment
       val firstMaxLineWidth =
@@ -128,8 +128,10 @@ class KDocFormatter(private val options: KDocFormattingOptions) {
         } else {
           sb.append(hangingIndent)
         }
-        if (paragraph.quoted) {
-          sb.append("> ")
+        if (paragraph.quoted > 0) {
+          for (q in 0 until paragraph.quoted) {
+            sb.append("> ")
+          }
         }
         if (line.isEmpty()) {
           // Remove trailing spaces which can happen when we have a paragraph

@@ -71,11 +71,8 @@ class Paragraph(private val task: FormattingTask) {
   /** Is this paragraph specifying a kdoc tag like @param? */
   var doc = false
 
-  /**
-   * Is this line quoted? (In the future make this an int such that we can support additional
-   * levels.)
-   */
-  var quoted = false
+  /** The quote depth of this paragraph. 0 = not quoted, 1 = `>`, 2 = `> >`, etc. */
+  var quoted = 0
 
   /** Is this line part of a table? */
   var table = false
@@ -303,7 +300,8 @@ class Paragraph(private val task: FormattingTask) {
 
   fun reflow(firstLineMaxWidth: Int, maxLineWidth: Int): List<String> {
     val lineWidth = maxLineWidth - getIndentSize(indent, options)
-    val hangingIndentSize = getIndentSize(hangingIndent, options) - if (quoted) 2 else 0 // "> "
+    val hangingIndentSize =
+        getIndentSize(hangingIndent, options) - if (quoted > 0) 2 * quoted else 0
     if (text.length < (firstLineMaxWidth - hangingIndentSize)) {
       return listOf(text.collapseSpaces())
     }
@@ -479,7 +477,7 @@ class Paragraph(private val task: FormattingTask) {
     val end = words.size
     while (from < end) {
       val start =
-          if (from == 0 && (quoted || (hanging && !text.isKDocTag()))) {
+          if (from == 0 && (quoted > 0 || (hanging && !text.isKDocTag()))) {
             from + 2
           } else {
             from + 1
