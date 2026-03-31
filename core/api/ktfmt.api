@@ -465,7 +465,7 @@ public final class com/facebook/ktfmt/kdoc/Paragraph {
 	public final fun getOriginalIndent ()I
 	public final fun getPreformatted ()Z
 	public final fun getPrev ()Lcom/facebook/ktfmt/kdoc/Paragraph;
-	public final fun getQuoted ()Z
+	public final fun getQuoted ()I
 	public final fun getSeparate ()Z
 	public final fun getSeparator ()Z
 	public final fun getTable ()Z
@@ -484,7 +484,7 @@ public final class com/facebook/ktfmt/kdoc/Paragraph {
 	public final fun setOriginalIndent (I)V
 	public final fun setPreformatted (Z)V
 	public final fun setPrev (Lcom/facebook/ktfmt/kdoc/Paragraph;)V
-	public final fun setQuoted (Z)V
+	public final fun setQuoted (I)V
 	public final fun setSeparate (Z)V
 	public final fun setSeparator (Z)V
 	public final fun setTable (Z)V
