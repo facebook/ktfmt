@@ -61,7 +61,11 @@ class GoogleStyleFormatterKtTest {
 
     val expected =
         """
-        |fun f(a: Int, b: Double, c: String) {
+        |fun f(
+        |  a: Int,
+        |  b: Double,
+        |  c: String,
+        |) {
         |  var result = 0
         |  val aVeryLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongVar =
         |    43
