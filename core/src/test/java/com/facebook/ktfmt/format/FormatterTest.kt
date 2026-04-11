@@ -9004,6 +9004,43 @@ class FormatterTest {
     assertThatFormatting(code).isEqualTo(expected)
   }
 
+  @Test
+  fun `line with max length that needs a trailing comma`() {
+    val code =
+        """
+        |fun foo(a: String, b: String) {
+        |  foo(
+        |    a = "this is a very very very very very very veryy long line that has precisely 100 characters",
+        |    b = "also is a very very very very very very veryyy long line that has precisely 100 characters"
+        |  )
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun foo(a: String, b: String) {
+        |  foo(
+        |    a = "this is a very very very very very very veryy long line that has precisely 100 characters",
+        |    b =
+        |      "also is a very very very very very very veryyy long line that has precisely 100 characters",
+        |  )
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+         .withOptions(
+            defaultTestFormattingOptions.copy(
+                maxWidth = 100,
+                blockIndent = 2,
+                continuationIndent = 2,
+                trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
+            ),
+        )
+        .isEqualTo(expected)
+  }
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""
