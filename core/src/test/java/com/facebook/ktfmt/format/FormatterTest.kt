@@ -9030,7 +9030,7 @@ class FormatterTest {
             .trimMargin()
 
     assertThatFormatting(code)
-         .withOptions(
+        .withOptions(
             defaultTestFormattingOptions.copy(
                 maxWidth = 100,
                 blockIndent = 2,
