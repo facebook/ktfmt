@@ -9041,6 +9041,77 @@ class FormatterTest {
         .isEqualTo(expected)
   }
 
+  @Test
+  fun `single-line parameter list breaking to multi-line should add trailing comma in one pass`() {
+    val code =
+        """
+        |fun foo(param1: String, param2: String, param3: String) {
+        |  functionCall(param1 = "value1", param2 = "value2", param3 = "value3", param4 = "value4", param5 = "value5")
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun foo(param1: String, param2: String, param3: String) {
+        |  functionCall(
+        |    param1 = "value1",
+        |    param2 = "value2",
+        |    param3 = "value3",
+        |    param4 = "value4",
+        |    param5 = "value5",
+        |  )
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            defaultTestFormattingOptions.copy(
+                maxWidth = 100,
+                blockIndent = 2,
+                continuationIndent = 2,
+                trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
+            ),
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `single-line parameter list breaking to multi-line when a parameter spans multiple lines`() {
+    val code =
+        """
+        |fun foo(param1: String, param2: String, param3: String) {
+        |  functionCall(param1 = "value1", param2 = "value2", param3 = "this one is very long and will have to sit on its own line otherwise the line would overflow")
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun foo(param1: String, param2: String, param3: String) {
+        |  functionCall(
+        |    param1 = "value1",
+        |    param2 = "value2",
+        |    param3 =
+        |      "this one is very long and will have to sit on its own line otherwise the line would overflow",
+        |  )
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            defaultTestFormattingOptions.copy(
+                maxWidth = 100,
+                blockIndent = 2,
+                continuationIndent = 2,
+                trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
+            ),
+        )
+        .isEqualTo(expected)
+  }
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""

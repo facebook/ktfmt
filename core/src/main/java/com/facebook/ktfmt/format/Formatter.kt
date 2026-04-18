@@ -104,6 +104,7 @@ object Formatter {
         .let { dropRedundantElements(it, options) }
         .let { addRedundantElements(it, options) }
         .let { prettyPrint(it, options, lineSeparator = "\n") }
+        .let { addRedundantElements(it, options) }
         .let { MultilineStringFormatter(options.continuationIndent).format(it) }
         .let { convertLineSeparators(it, checkNotNull(Newlines.guessLineSeparator(kotlinCode))) }
         .let { if (shebang.isEmpty()) it else shebang + "\n" + it }
