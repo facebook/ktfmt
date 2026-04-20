@@ -102,6 +102,7 @@ object Formatter {
         .let { convertLineSeparators(it) }
         .let { sortedAndDistinctImports(it) }
         .let { dropRedundantElements(it, options) }
+        .let { addRedundantElements(it, options) }
         .let { prettyPrint(it, options, lineSeparator = "\n") }
         .let { addRedundantElements(it, options) }
         .let { MultilineStringFormatter(options.continuationIndent).format(it) }

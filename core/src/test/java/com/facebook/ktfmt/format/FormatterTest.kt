@@ -9004,6 +9004,114 @@ class FormatterTest {
     assertThatFormatting(code).isEqualTo(expected)
   }
 
+  @Test
+  fun `line with max length that needs a trailing comma`() {
+    val code =
+        """
+        |fun foo(a: String, b: String) {
+        |  foo(
+        |    a = "this is a very very very very very very veryy long line that has precisely 100 characters",
+        |    b = "also is a very very very very very very veryyy long line that has precisely 100 characters"
+        |  )
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun foo(a: String, b: String) {
+        |  foo(
+        |    a = "this is a very very very very very very veryy long line that has precisely 100 characters",
+        |    b =
+        |      "also is a very very very very very very veryyy long line that has precisely 100 characters",
+        |  )
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            defaultTestFormattingOptions.copy(
+                maxWidth = 100,
+                blockIndent = 2,
+                continuationIndent = 2,
+                trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
+            ),
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `single-line parameter list breaking to multi-line should add trailing comma in one pass`() {
+    val code =
+        """
+        |fun foo(param1: String, param2: String, param3: String) {
+        |  functionCall(param1 = "value1", param2 = "value2", param3 = "value3", param4 = "value4", param5 = "value5")
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun foo(param1: String, param2: String, param3: String) {
+        |  functionCall(
+        |    param1 = "value1",
+        |    param2 = "value2",
+        |    param3 = "value3",
+        |    param4 = "value4",
+        |    param5 = "value5",
+        |  )
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            defaultTestFormattingOptions.copy(
+                maxWidth = 100,
+                blockIndent = 2,
+                continuationIndent = 2,
+                trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
+            ),
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `single-line parameter list breaking to multi-line when a parameter spans multiple lines`() {
+    val code =
+        """
+        |fun foo(param1: String, param2: String, param3: String) {
+        |  functionCall(param1 = "value1", param2 = "value2", param3 = "this one is very long and will have to sit on its own line otherwise the line would overflow")
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun foo(param1: String, param2: String, param3: String) {
+        |  functionCall(
+        |    param1 = "value1",
+        |    param2 = "value2",
+        |    param3 =
+        |      "this one is very long and will have to sit on its own line otherwise the line would overflow",
+        |  )
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            defaultTestFormattingOptions.copy(
+                maxWidth = 100,
+                blockIndent = 2,
+                continuationIndent = 2,
+                trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
+            ),
+        )
+        .isEqualTo(expected)
+  }
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""
