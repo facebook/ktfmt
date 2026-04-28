@@ -9113,181 +9113,13 @@ class FormatterTest {
   }
 
   @Test
-  fun `cascade nested lambda breaks - force nested lambda hierarchy when option enabled`() {
-    val code =
-        """
-        |fun compose() {
-        |  App { SelectableCard { Button { Text("Hello") } } }
-        |}
-        |"""
-            .trimMargin()
-
-    val expected =
-        """
-        |fun compose() {
-        |  App {
-        |    SelectableCard {
-        |      Button {
-        |        Text("Hello")
-        |      }
-        |    }
-        |  }
-        |}
-        |"""
-            .trimMargin()
-
-    assertThatFormatting(code)
-        .withOptions(
-            FormattingOptions(
-                cascadeNestedLambdaBreaks = true,
-                blockIndent = 2,
-                continuationIndent = 4,
-            )
-        )
-        .isEqualTo(expected)
-  }
-
-  @Test
-  fun `cascade nested lambda breaks - maintain single line when option disabled`() {
-    val code =
-        """
-        |fun compose() {
-        |  App { SelectableCard { Button { Text("Hello") } } }
-        |}
-        |"""
-            .trimMargin()
-
-    val expected =
-        """
-        |fun compose() {
-        |  App { SelectableCard { Button { Text("Hello") } } }
-        |}
-        |"""
-            .trimMargin()
-
-    assertThatFormatting(code)
-        .withOptions(
-            FormattingOptions(
-                cascadeNestedLambdaBreaks = false,
-                blockIndent = 2,
-                continuationIndent = 4,
-            )
-        )
-        .isEqualTo(expected)
-  }
-
-  @Test
-  fun `cascade nested lambda breaks - force hierarchy only for trailing lambdas`() {
-    val code =
-        """
-        |fun test() {
-        |  val result = listOf(1, 2, 3).map { it * 2 }.filter { it > 2 }
-        |  Container {
-        |    Box {
-        |      Text("Hi")
-        |    }
-        |  }
-        |}
-        |"""
-            .trimMargin()
-
-    val expected =
-        """
-        |fun test() {
-        |  val result = listOf(1, 2, 3).map { it * 2 }.filter { it > 2 }
-        |  Container {
-        |    Box {
-        |      Text("Hi")
-        |    }
-        |  }
-        |}
-        |"""
-            .trimMargin()
-
-    assertThatFormatting(code)
-        .withOptions(
-            FormattingOptions(
-                cascadeNestedLambdaBreaks = true,
-                blockIndent = 2,
-                continuationIndent = 4,
-            )
-        )
-        .isEqualTo(expected)
-  }
-
-  @Test
-  fun `cascade nested lambda breaks - demonstrate forcing behavior with parent break`() {
-    val code =
-        """
-        |fun test() {
-        |  Container {
-        |    val x = 1
-        |    Card { Text("x") }
-        |  }
-        |  Container { Card { Text("x") } }
-        |}
-        |"""
-            .trimMargin()
-
-    val expected =
-        """
-        |fun test() {
-        |  Container {
-        |    val x = 1
-        |    Card {
-        |      Text("x")
-        |    }
-        |  }
-        |  Container {
-        |    Card {
-        |      Text("x")
-        |    }
-        |  }
-        |}
-        |"""
-            .trimMargin()
-
-    assertThatFormatting(code)
-        .withOptions(
-            FormattingOptions(
-                cascadeNestedLambdaBreaks = true,
-                blockIndent = 2,
-                continuationIndent = 4,
-            )
-        )
-        .isEqualTo(expected)
-  }
-
-  @Test
-  fun `cascade nested lambda breaks - preserve hierarchy with multiple statements`() {
+  fun `preserve lambda breaks - keeps multi-line lambda multi-line`() {
     val code =
         """
         |fun compose() {
         |  App {
-        |    val state = remember { mutableStateOf(0) }
         |    SelectableCard {
-        |      Button {
-        |        state.value++
-        |        Text("Count: ${'$'}{state.value}")
-        |      }
-        |    }
-        |  }
-        |}
-        |"""
-            .trimMargin()
-
-    val expected =
-        """
-        |fun compose() {
-        |  App {
-        |    val state = remember {
-        |      mutableStateOf(0)
-        |    }
-        |    SelectableCard {
-        |      Button {
-        |        state.value++
-        |        Text("Count: ${'$'}{state.value}")
-        |      }
+        |      Button { Text("Hello") }
         |    }
         |  }
         |}
@@ -9297,38 +9129,7 @@ class FormatterTest {
     assertThatFormatting(code)
         .withOptions(
             FormattingOptions(
-                cascadeNestedLambdaBreaks = true,
-                blockIndent = 2,
-                continuationIndent = 4,
-            )
-        )
-        .isEqualTo(expected)
-  }
-
-  @Test
-  fun `cascade nested lambda breaks - handle deep nesting levels`() {
-    val code =
-        """
-        |fun deepCompose() {
-        |  Level1 {
-        |    Level2 {
-        |      Level3 {
-        |        Level4 {
-        |          Level5 {
-        |            Text("Deep")
-        |          }
-        |        }
-        |      }
-        |    }
-        |  }
-        |}
-        |"""
-            .trimMargin()
-
-    assertThatFormatting(code)
-        .withOptions(
-            FormattingOptions(
-                cascadeNestedLambdaBreaks = true,
+                preserveLambdaBreaks = true,
                 blockIndent = 2,
                 continuationIndent = 4,
             )
@@ -9337,11 +9138,15 @@ class FormatterTest {
   }
 
   @Test
-  fun `cascade nested lambda breaks - no effect on non-nested lambdas`() {
+  fun `preserve lambda breaks - keeps single-line lambda single-line`() {
+    // The classic Gradle/Compose single-line case the option must NOT disturb:
+    // dependencies { implementation(libs.androidx.activity) }
+    // remember { mutableStateOf(false) }
     val code =
         """
-        |fun test() {
-        |  singleCall { doSomething() }
+        |fun build() {
+        |  dependencies { implementation(libs.androidx.activity) }
+        |  val state = remember { mutableStateOf(false) }
         |}
         |"""
             .trimMargin()
@@ -9349,7 +9154,145 @@ class FormatterTest {
     assertThatFormatting(code)
         .withOptions(
             FormattingOptions(
-                cascadeNestedLambdaBreaks = true,
+                preserveLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(code)
+  }
+
+  @Test
+  fun `preserve lambda breaks - disabled collapses multi-line lambda to single line`() {
+    val code =
+        """
+        |fun compose() {
+        |  App {
+        |    Button { Text("Hello") }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun compose() {
+        |  App { Button { Text("Hello") } }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = false,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `preserve lambda breaks - mixed single-line and multi-line preserved independently`() {
+    // Inner single-line lambdas stay single-line; outer multi-line lambdas stay multi-line.
+    val code =
+        """
+        |fun compose() {
+        |  App {
+        |    val state = remember { mutableStateOf(0) }
+        |    SelectableCard {
+        |      Button { Text("Count: ${'$'}{state.value}") }
+        |    }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(code)
+  }
+
+  @Test
+  fun `preserve lambda breaks - applies to non-trailing lambdas too`() {
+    // Lambda passed as a non-trailing argument that is multi-line in source stays multi-line.
+    val code =
+        """
+        |fun test() {
+        |  withCallback(
+        |      onClick = {
+        |        log("clicked")
+        |      },
+        |      label = "Press",
+        |  )
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(code)
+  }
+
+  @Test
+  fun `preserve lambda breaks - empty lambda always collapses even when multi-line in source`() {
+    val code =
+        """
+        |fun test() {
+        |  noop {
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun test() {
+        |  noop {}
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `preserve lambda breaks - single statement broken across lines is kept multi-line`() {
+    val code =
+        """
+        |fun test() {
+        |  scope {
+        |    doSomething()
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = true,
                 blockIndent = 2,
                 continuationIndent = 4,
             )
