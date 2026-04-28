@@ -118,9 +118,17 @@ class KtfmtConfigurable(project: Project) :
 
           lateinit var removeUnusedImports: JCheckBox
           row {
-                removeUnusedImports =
-                    checkBox("Remove unused imports")
-                        .bindSelected(settings::customRemoveUnusedImports)
+            removeUnusedImports =
+                checkBox("Remove unused imports")
+                    .bindSelected(settings::customRemoveUnusedImports)
+                    .component
+          }
+
+          lateinit var preserveLambdaBreaks: JCheckBox
+          row {
+                preserveLambdaBreaks =
+                    checkBox("Preserve user-authored line breaks inside lambdas")
+                        .bindSelected(settings::customPreserveLambdaBreaks)
                         .component
               }
               .bottomGap(BottomGap.SMALL)
@@ -136,6 +144,7 @@ class KtfmtConfigurable(project: Project) :
                           continuationIndent,
                           trailingCommaManagementStrategy,
                           removeUnusedImports,
+                          preserveLambdaBreaks,
                       )
                 }
                 .component
@@ -149,6 +158,7 @@ class KtfmtConfigurable(project: Project) :
                           continuationIndent,
                           trailingCommaManagementStrategy,
                           removeUnusedImports,
+                          preserveLambdaBreaks,
                       )
                 }
                 .component
@@ -162,6 +172,7 @@ class KtfmtConfigurable(project: Project) :
                           continuationIndent,
                           trailingCommaManagementStrategy,
                           removeUnusedImports,
+                          preserveLambdaBreaks,
                       )
                 }
                 .component
@@ -179,12 +190,14 @@ private fun FormattingOptions.updateFields(
     continuationIndent: JTextField,
     trailingCommaManagementStrategy: JComboBox<TrailingCommaManagementStrategy>,
     removeUnusedImports: JCheckBox,
+    preserveLambdaBreaks: JCheckBox,
 ) {
   maxLineLength.text = maxWidth.toString()
   blockIndent.text = this.blockIndent.toString()
   continuationIndent.text = this.continuationIndent.toString()
   trailingCommaManagementStrategy.selectedItem = this.trailingCommaManagementStrategy
   removeUnusedImports.isSelected = this.removeUnusedImports
+  preserveLambdaBreaks.isSelected = this.preserveLambdaBreaks
 }
 
 private fun Cell<JTextField>.validatePositiveIntegerOrEmpty() = validationOnInput { jTextField ->

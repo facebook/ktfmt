@@ -9112,6 +9112,194 @@ class FormatterTest {
         .isEqualTo(expected)
   }
 
+  @Test
+  fun `preserve lambda breaks - keeps multi-line lambda multi-line`() {
+    val code =
+        """
+        |fun compose() {
+        |  App {
+        |    SelectableCard {
+        |      Button { Text("Hello") }
+        |    }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(code)
+  }
+
+  @Test
+  fun `preserve lambda breaks - keeps single-line lambda single-line`() {
+    // The classic Gradle/Compose single-line case the option must NOT disturb:
+    // dependencies { implementation(libs.androidx.activity) }
+    // remember { mutableStateOf(false) }
+    val code =
+        """
+        |fun build() {
+        |  dependencies { implementation(libs.androidx.activity) }
+        |  val state = remember { mutableStateOf(false) }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(code)
+  }
+
+  @Test
+  fun `preserve lambda breaks - disabled collapses multi-line lambda to single line`() {
+    val code =
+        """
+        |fun compose() {
+        |  App {
+        |    Button { Text("Hello") }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun compose() {
+        |  App { Button { Text("Hello") } }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = false,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `preserve lambda breaks - mixed single-line and multi-line preserved independently`() {
+    // Inner single-line lambdas stay single-line; outer multi-line lambdas stay multi-line.
+    val code =
+        """
+        |fun compose() {
+        |  App {
+        |    val state = remember { mutableStateOf(0) }
+        |    SelectableCard {
+        |      Button { Text("Count: ${'$'}{state.value}") }
+        |    }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(code)
+  }
+
+  @Test
+  fun `preserve lambda breaks - applies to non-trailing lambdas too`() {
+    // Lambda passed as a non-trailing argument that is multi-line in source stays multi-line.
+    val code =
+        """
+        |fun test() {
+        |  withCallback(
+        |      onClick = {
+        |        log("clicked")
+        |      },
+        |      label = "Press",
+        |  )
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(code)
+  }
+
+  @Test
+  fun `preserve lambda breaks - empty lambda always collapses even when multi-line in source`() {
+    val code =
+        """
+        |fun test() {
+        |  noop {
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun test() {
+        |  noop {}
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(expected)
+  }
+
+  @Test
+  fun `preserve lambda breaks - single statement broken across lines is kept multi-line`() {
+    val code =
+        """
+        |fun test() {
+        |  scope {
+        |    doSomething()
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(code)
+  }
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""

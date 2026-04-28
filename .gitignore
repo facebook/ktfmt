@@ -1,4 +1,5 @@
 .idea/
+.kotlin/
 *.ims
 *.iml
 
@@ -23,3 +24,4 @@ release-ktfmt-website/
 .gradle
 **/build/
 !src/**/build/
+.claude/

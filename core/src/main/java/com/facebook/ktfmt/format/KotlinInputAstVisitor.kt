@@ -930,8 +930,13 @@ class KotlinInputAstVisitor(
       builder.breakOp(Doc.FillMode.UNIFIED, "", bracePlusBlockIndent)
       builder.block(bracePlusBlockIndent) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
+
+        val shouldForceMultiline =
+            options.preserveLambdaBreaks && hasSourceNewlineInLambdaBody(lambdaExpression)
+
         if (
-            expressionStatements.size == 1 &&
+            !shouldForceMultiline &&
+                expressionStatements.size == 1 &&
                 expressionStatements.first() !is KtReturnExpression &&
                 !bodyExpression.startsWithComment()
         ) {
@@ -1602,6 +1607,19 @@ class KotlinInputAstVisitor(
       return true
     }
 
+    return false
+  }
+
+  /**
+   * Returns true if the source code contains a newline anywhere inside the body of [lambdaExpression]
+   * — that is, between the opening `{` and the closing `}` of the function literal. Used by
+   * [FormattingOptions.preserveLambdaBreaks] to keep user-authored multi-line lambdas multi-line.
+   */
+  private fun hasSourceNewlineInLambdaBody(lambdaExpression: KtLambdaExpression): Boolean {
+    val functionLiteral = lambdaExpression.functionLiteral
+    for (child in functionLiteral.node.children()) {
+      if (child.psi is PsiWhiteSpace && child.text.contains('\n')) return true
+    }
     return false
   }
 
