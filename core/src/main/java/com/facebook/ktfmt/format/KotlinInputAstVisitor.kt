@@ -140,12 +140,6 @@ class KotlinInputAstVisitor(
     private val builder: OpsBuilder,
 ) : KtTreeVisitorVoid() {
 
-  /**
-   * Track whether we're currently inside a lambda that has broken to multi-line. Used when
-   * cascadeNestedLambdaBreaks is enabled to force nested trailing lambdas to break.
-   */
-  private var insideBreakingLambda: Boolean = false
-
   /** Standard indentation for a block */
   private val blockIndent: Indent.Const = Indent.Const.make(options.blockIndent, 1)
 
@@ -876,15 +870,10 @@ class KotlinInputAstVisitor(
    *       car()
    *     }
    * ```
-   *
-   * @param parentLambdaBroke used when cascadeNestedLambdaBreaks is enabled to track whether the
-   *   parent lambda has broken to multi-line, so that nested trailing lambdas can be forced to
-   *   break as well
    */
   private fun visitLambdaExpressionInternal(
       lambdaExpression: KtLambdaExpression,
       brokeBeforeBrace: BreakTag?,
-      parentLambdaBroke: Boolean = false,
   ) {
     builder.sync(lambdaExpression)
 
@@ -942,33 +931,8 @@ class KotlinInputAstVisitor(
       builder.block(bracePlusBlockIndent) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.NO)
 
-        // FORCE multi-line when parent lambda broke and option is enabled
         val shouldForceMultiline =
-            options.cascadeNestedLambdaBreaks &&
-                parentLambdaBroke &&
-                isTrailingLambda(lambdaExpression)
-
-        // Determine if this lambda will break to multi-line
-        // A lambda breaks when it either:
-        // 1. Is forced to break by the cascadeNestedLambdaBreaks option (parent broke)
-        // 2. Contains nested trailing lambdas and cascadeNestedLambdaBreaks is enabled
-        // 3. Has multiple statements
-        // 4. Has a return expression
-        // 5. Has a comment before the first statement
-        val currentLambdaWillBreak =
-            shouldForceMultiline ||
-                (options.cascadeNestedLambdaBreaks &&
-                    isTrailingLambda(lambdaExpression) &&
-                    containsTrailingLambdas(lambdaExpression)) ||
-                expressionStatements.size > 1 ||
-                expressionStatements.firstOrNull() is KtReturnExpression ||
-                bodyExpression.startsWithComment()
-
-        // Track lambda break state for nested lambdas
-        val previousInsideBreakingLambda = insideBreakingLambda
-        if (options.cascadeNestedLambdaBreaks && isTrailingLambda(lambdaExpression)) {
-          insideBreakingLambda = currentLambdaWillBreak
-        }
+            options.preserveLambdaBreaks && hasSourceNewlineInLambdaBody(lambdaExpression)
 
         if (
             !shouldForceMultiline &&
@@ -978,13 +942,8 @@ class KotlinInputAstVisitor(
         ) {
           visitStatement(expressionStatements[0])
         } else {
-          // FORCED multi-line: either naturally multi-line OR forced by parent
           visitStatements(expressionStatements)
         }
-
-        // Restore previous state
-        insideBreakingLambda = previousInsideBreakingLambda
-
         builder.breakOp(Doc.FillMode.UNIFIED, " ", bracePlusZeroIndent)
       }
     } else if (hasComments) {
@@ -1234,7 +1193,6 @@ class KotlinInputAstVisitor(
         visitLambdaExpressionInternal(
             argument.getArgumentExpression() as KtLambdaExpression,
             brokeBeforeBrace = brokeBeforeBrace,
-            parentLambdaBroke = insideBreakingLambda,
         )
       } else {
         visit(argument.getArgumentExpression())
@@ -1653,52 +1611,16 @@ class KotlinInputAstVisitor(
   }
 
   /**
-   * Determines if the given expression is a trailing lambda in a call expression.
-   *
-   * This is used to identify lambdas that should inherit hierarchy preservation when
-   * cascadeNestedLambdaBreaks is enabled.
+   * Returns true if the source code contains a newline anywhere inside the body of [lambdaExpression]
+   * — that is, between the opening `{` and the closing `}` of the function literal. Used by
+   * [FormattingOptions.preserveLambdaBreaks] to keep user-authored multi-line lambdas multi-line.
    */
-  private fun isTrailingLambda(expression: KtExpression?): Boolean {
-    if (expression == null) return false
-    val parent = expression.parent
-
-    // Check if this lambda is in the lambdaArguments list of a call expression
-    if (parent is KtLambdaArgument) {
-      val callExpression = parent.parent as? KtCallExpression
-      return callExpression?.lambdaArguments?.contains(parent) == true
+  private fun hasSourceNewlineInLambdaBody(lambdaExpression: KtLambdaExpression): Boolean {
+    val functionLiteral = lambdaExpression.functionLiteral
+    for (child in functionLiteral.node.children()) {
+      if (child.psi is PsiWhiteSpace && child.text.contains('\n')) return true
     }
-
-    // Check if this is a labeled lambda that's a trailing lambda
-    if (expression is KtLabeledExpression) {
-      return isTrailingLambda(expression.parent as? KtExpression)
-    }
-
     return false
-  }
-
-  /**
-   * Determines if a lambda expression contains trailing lambda calls in its body.
-   *
-   * This is used to detect when a lambda should be forced to break because it contains nested
-   * trailing lambdas that form a hierarchy needing preservation.
-   */
-  private fun containsTrailingLambdas(lambdaExpression: KtLambdaExpression): Boolean {
-    val body = lambdaExpression.bodyExpression ?: return false
-
-    // Check if any element in the body is a call expression with trailing lambdas
-    fun checkElement(element: PsiElement): Boolean {
-      if (element is KtCallExpression && element.lambdaArguments.isNotEmpty()) {
-        return true
-      }
-      for (child in element.children) {
-        if (checkElement(child)) {
-          return true
-        }
-      }
-      return false
-    }
-
-    return checkElement(body)
   }
 
   /** See [isLambdaOrScopingFunction] for examples. */
@@ -1722,11 +1644,7 @@ class KotlinInputAstVisitor(
       carry = carry.baseExpression ?: fail()
     }
     if (carry is KtLambdaExpression) {
-      visitLambdaExpressionInternal(
-          carry,
-          brokeBeforeBrace = breakToExpr,
-          parentLambdaBroke = insideBreakingLambda,
-      )
+      visitLambdaExpressionInternal(carry, brokeBeforeBrace = breakToExpr)
       return
     }
 
