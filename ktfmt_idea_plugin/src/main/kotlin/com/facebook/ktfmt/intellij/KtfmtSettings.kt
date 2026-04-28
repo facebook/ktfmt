@@ -55,6 +55,7 @@ internal class KtfmtSettings(private val project: Project) :
             trailingCommaManagementStrategy =
                 state.customTrailingCommaManagementStrategy.toTrailingCommaManagementStrategy(),
             removeUnusedImports = state.customRemoveUnusedImports,
+            preserveLambdaBreaks = state.customPreserveLambdaBreaks,
         )
     set(customFormattingOptions) {
       state.applyCustomFormattingOptions(customFormattingOptions)
@@ -88,6 +89,12 @@ internal class KtfmtSettings(private val project: Project) :
     get() = state.customRemoveUnusedImports
     set(removeUnusedImports) {
       state.customRemoveUnusedImports = removeUnusedImports
+    }
+
+  var customPreserveLambdaBreaks: Boolean
+    get() = state.customPreserveLambdaBreaks
+    set(preserveLambdaBreaks) {
+      state.customPreserveLambdaBreaks = preserveLambdaBreaks
     }
 
   var isEnabled: Boolean
@@ -153,6 +160,7 @@ internal class KtfmtSettings(private val project: Project) :
             isDefault = { it == Formatter.META_FORMAT.trailingCommaManagementStrategy.name },
         )
     var customRemoveUnusedImports: Boolean by property(Formatter.META_FORMAT.removeUnusedImports)
+    var customPreserveLambdaBreaks: Boolean by property(Formatter.META_FORMAT.preserveLambdaBreaks)
 
     fun applyCustomFormattingOptions(formattingOptions: FormattingOptions) {
       customMaxLineLength = formattingOptions.maxWidth
@@ -160,6 +168,7 @@ internal class KtfmtSettings(private val project: Project) :
       customContinuationIndent = formattingOptions.continuationIndent
       customTrailingCommaManagementStrategy = formattingOptions.trailingCommaManagementStrategy.name
       customRemoveUnusedImports = formattingOptions.removeUnusedImports
+      customPreserveLambdaBreaks = formattingOptions.preserveLambdaBreaks
 
       incrementModificationCount()
     }
