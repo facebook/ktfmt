@@ -88,31 +88,31 @@ following subset of editorconfig properties:
 | `ij_continuation_indent_size`                             | will override the continuation indent                                                            |
 | `ktfmt_trailing_comma_management_strategy`                | one of `none`, `only_add` or `complete`<br/>will override the trailing comma management strategy |
 
-#### Cascading Lambda Breaks
+#### Preserving Lambda Line Breaks
 
-For DSLs like Jetpack Compose where nested lambdas represent semantic hierarchies, you can use the `--cascade-nested-lambda-breaks` option to preserve visual structure:
+`--preserve-lambda-breaks` tells `ktfmt` to respect user-authored line breaks inside lambda bodies.
+This is useful for DSLs where nesting carries semantic meaning (Jetpack Compose UI hierarchies,
+Kotlin Gradle scripts, etc.) without ktfmt prescribing a specific outcome:
 
 ```
-$ java -jar /path/to/ktfmt-<VERSION>-with-dependencies.jar --cascade-nested-lambda-breaks [files...]
+$ java -jar /path/to/ktfmt-<VERSION>-with-dependencies.jar --preserve-lambda-breaks [files...]
 ```
 
-When enabled, nested trailing lambdas are forced to multi-line format when their parent breaks, ensuring complete visual hierarchy:
+A lambda body whose source spans multiple lines stays multi-line; one that fits on a single line
+stays single-line. For example, the following is left as-is:
 
 ```kotlin
-// With --cascade-nested-lambda-breaks
+// Multi-line in source is preserved
 App {
   SelectableCard {
-    Button {
-      Text("Click me")
-    }
+    Button { Text("Click me") }
   }
 }
 
-// Without (default)
-App { SelectableCard { Button { Text("Click me") } } }
+// Single-line in source is also preserved
+dependencies { implementation(libs.androidx.activity) }
+val state = remember { mutableStateOf(false) }
 ```
-
-This option only affects trailing lambdas and does not change the formatting of lambdas in other contexts (like `map` or `filter` chains).
 
 ***Note:***
 *There is no configurability as to the formatter's algorithm for formatting (apart from the different styles
