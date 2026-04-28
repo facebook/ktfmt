@@ -87,8 +87,8 @@ data class ParsedArgs(
         |  --enable-editorconfig             Enable .editorconfig overrides for supported formatting options (limited)
         |                                        see https://github.com/facebook/ktfmt/blob/main/README.md
         |  --quiet                           Suppress all non-error output
-        |  --cascade-nested-lambda-breaks    Force nested trailing lambdas to break when parent
-        |                                        breaks (useful for Compose DSLs)
+        |  --preserve-lambda-breaks          Preserve user-authored line breaks inside lambda
+        |                                        bodies (useful for DSLs such as Compose or Kotlin Gradle script)
         |
         |ARGFILE:
         |  If the only argument begins with '@', the remainder of the argument is treated
@@ -132,8 +132,8 @@ data class ParsedArgs(
           arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
           arg == "--enable-editorconfig" -> editorConfig = true
           arg == "--quiet" -> quiet = true
-          arg == "--cascade-nested-lambda-breaks" -> {
-            formattingOptions = formattingOptions.copy(cascadeNestedLambdaBreaks = true)
+          arg == "--preserve-lambda-breaks" -> {
+            formattingOptions = formattingOptions.copy(preserveLambdaBreaks = true)
           }
           arg.startsWith("--stdin-name=") ->
               stdinName =
