@@ -8571,9 +8571,7 @@ class FormatterTest {
         |
         |  fun <T> testSuspend(
         |      mock: T,
-        |      block:
-        |          suspend context(SomeContext)
-        |          T.() -> Unit,
+        |      block: suspend context(SomeContext) T.() -> Unit,
         |  ) = startCoroutine { T.block() }
         |}
         |"""
@@ -8629,9 +8627,7 @@ class FormatterTest {
         |
         |  fun <T> testSuspend(
         |      mock: T,
-        |      block:
-        |          suspend context(someContext: SomeContext)
-        |          T.() -> Unit,
+        |      block: suspend context(someContext: SomeContext) T.() -> Unit,
         |  ) = startCoroutine { T.block() }
         |}
         |"""
