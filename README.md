@@ -88,6 +88,32 @@ following subset of editorconfig properties:
 | `ij_continuation_indent_size`                             | will override the continuation indent                                                            |
 | `ktfmt_trailing_comma_management_strategy`                | one of `none`, `only_add` or `complete`<br/>will override the trailing comma management strategy |
 
+#### Preserving Lambda Line Breaks
+
+`--preserve-lambda-breaks` tells `ktfmt` to respect user-authored line breaks inside lambda bodies.
+This is useful for DSLs where nesting carries semantic meaning (Jetpack Compose UI hierarchies,
+Kotlin Gradle scripts, etc.) without ktfmt prescribing a specific outcome:
+
+```
+$ java -jar /path/to/ktfmt-<VERSION>-with-dependencies.jar --preserve-lambda-breaks [files...]
+```
+
+A lambda body whose source spans multiple lines stays multi-line; one that fits on a single line
+stays single-line. For example, the following is left as-is:
+
+```kotlin
+// Multi-line in source is preserved
+App {
+  SelectableCard {
+    Button { Text("Click me") }
+  }
+}
+
+// Single-line in source is also preserved
+dependencies { implementation(libs.androidx.activity) }
+val state = remember { mutableStateOf(false) }
+```
+
 ***Note:***
 *There is no configurability as to the formatter's algorithm for formatting (apart from the different styles
 or limited `.editorconfig` support). This is a deliberate design decision to unify our code formatting on a
