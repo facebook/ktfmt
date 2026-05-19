@@ -110,20 +110,20 @@ data class FormattingOptions(
 
   @Deprecated("Here just for retrocompatibility reasons. Will be removed on 1.0.0")
   constructor(
-    maxWidth: Int,
-    blockIndent: Int,
-    continuationIndent: Int,
-    trailingCommaManagementStrategy: TrailingCommaManagementStrategy,
-    removeUnusedImports: Boolean,
-    debuggingPrintOpsAfterFormatting: Boolean,
+      maxWidth: Int,
+      blockIndent: Int,
+      continuationIndent: Int,
+      trailingCommaManagementStrategy: TrailingCommaManagementStrategy,
+      removeUnusedImports: Boolean,
+      debuggingPrintOpsAfterFormatting: Boolean,
   ) : this(
-    maxWidth = maxWidth,
-    blockIndent = blockIndent,
-    continuationIndent = continuationIndent,
-    trailingCommaManagementStrategy = trailingCommaManagementStrategy,
-    removeUnusedImports = removeUnusedImports,
-    preserveLambdaBreaks = false,
-    debuggingPrintOpsAfterFormatting = debuggingPrintOpsAfterFormatting,
+      maxWidth = maxWidth,
+      blockIndent = blockIndent,
+      continuationIndent = continuationIndent,
+      trailingCommaManagementStrategy = trailingCommaManagementStrategy,
+      removeUnusedImports = removeUnusedImports,
+      preserveLambdaBreaks = false,
+      debuggingPrintOpsAfterFormatting = debuggingPrintOpsAfterFormatting,
   )
 
   internal val manageTrailingCommas: Boolean
