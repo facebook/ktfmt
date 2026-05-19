@@ -15,7 +15,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 - Support `ij_kotlin_indent_size` in editorconfig. (https://github.com/facebook/ktfmt/pull/604)
 - Support for lists within quoted blocks in KDoc comments (https://github.com/facebook/ktfmt/commit/68fa1585b759ad4b12ca4802bccd297f6a33b0f3)
-- Fix `ONLY_ADD` trailing commas strategy causing lines over MAX_WIDTH length (https://github.com/facebook/ktfmt/issues/610) 
+- Fix `ONLY_ADD` trailing commas strategy causing lines over MAX_WIDTH length (https://github.com/facebook/ktfmt/issues/610)
+- Remove forced breaking of `context` function types (https://github.com/facebook/ktfmt/pull/613)
 
 ## [0.62]
 ### Added
