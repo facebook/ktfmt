@@ -122,6 +122,8 @@ public final class com/facebook/ktfmt/format/Formatter {
 
 public final class com/facebook/ktfmt/format/FormattingOptions {
 	public static final field Companion Lcom/facebook/ktfmt/format/FormattingOptions$Companion;
+	public static final field DEFAULT_BLOCK_INDENT I
+	public static final field DEFAULT_CONTINUATION_INDENT I
 	public static final field DEFAULT_MAX_WIDTH I
 	public fun <init> (IIILcom/facebook/ktfmt/format/TrailingCommaManagementStrategy;ZZ)V
 	public fun <init> (IIILcom/facebook/ktfmt/format/TrailingCommaManagementStrategy;ZZZ)V
@@ -146,7 +148,20 @@ public final class com/facebook/ktfmt/format/FormattingOptions {
 	public final fun getRemoveUnusedImports ()Z
 	public final fun getTrailingCommaManagementStrategy ()Lcom/facebook/ktfmt/format/TrailingCommaManagementStrategy;
 	public fun hashCode ()I
+	public final fun toBuilder ()Lcom/facebook/ktfmt/format/FormattingOptions$Builder;
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/facebook/ktfmt/format/FormattingOptions$Builder {
+	public fun <init> ()V
+	public final fun blockIndent (I)Lcom/facebook/ktfmt/format/FormattingOptions$Builder;
+	public final fun build ()Lcom/facebook/ktfmt/format/FormattingOptions;
+	public final fun continuationIndent (I)Lcom/facebook/ktfmt/format/FormattingOptions$Builder;
+	public final fun debuggingPrintOpsAfterFormatting (Z)Lcom/facebook/ktfmt/format/FormattingOptions$Builder;
+	public final fun maxWidth (I)Lcom/facebook/ktfmt/format/FormattingOptions$Builder;
+	public final fun preserveLambdaBreaks (Z)Lcom/facebook/ktfmt/format/FormattingOptions$Builder;
+	public final fun removeUnusedImports (Z)Lcom/facebook/ktfmt/format/FormattingOptions$Builder;
+	public final fun trailingCommaManagementStrategy (Lcom/facebook/ktfmt/format/TrailingCommaManagementStrategy;)Lcom/facebook/ktfmt/format/FormattingOptions$Builder;
 }
 
 public final class com/facebook/ktfmt/format/FormattingOptions$Companion {

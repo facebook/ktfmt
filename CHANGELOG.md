@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Fix `ONLY_ADD` trailing commas strategy causing lines over MAX_WIDTH length (https://github.com/facebook/ktfmt/issues/610)
 - Remove forced breaking of `context` function types (https://github.com/facebook/ktfmt/pull/613)
 - Add `--preserve-lambda-breaks` flag. With this, user-authored line breaks inside lambda bodies are preserved rather than have ktfmt impose anything. This can be particularly useful for DSL syntax like Compose UI or Kotlin Gradle script. (https://github.com/facebook/ktfmt/pull/614)
+- Add a `FormattingOptions.Builder` API for tools to avoid breaking ABI changes with new options. (https://github.com/facebook/ktfmt/pull/614)
 
 ## [0.62]
 ### Added

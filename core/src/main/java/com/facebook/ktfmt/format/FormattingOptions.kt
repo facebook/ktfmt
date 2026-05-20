@@ -89,6 +89,8 @@ data class FormattingOptions(
 ) {
   companion object {
     const val DEFAULT_MAX_WIDTH: Int = 100
+    const val DEFAULT_BLOCK_INDENT: Int = 2
+    const val DEFAULT_CONTINUATION_INDENT: Int = 4
   }
 
   @Deprecated("Here just for retrocompatibility reasons. Will be removed on 1.0.0")
@@ -128,6 +130,94 @@ data class FormattingOptions(
 
   internal val manageTrailingCommas: Boolean
     get() = trailingCommaManagementStrategy != NONE
+
+  /**
+   * Returns a [Builder] pre-populated with this instance's values.
+   *
+   * Handy for deriving a new [FormattingOptions] from an existing one (such as one of the
+   * [Formatter] presets) while overriding only a few fields.
+   */
+  fun toBuilder(): Builder =
+      Builder()
+          .maxWidth(maxWidth)
+          .blockIndent(blockIndent)
+          .continuationIndent(continuationIndent)
+          .trailingCommaManagementStrategy(trailingCommaManagementStrategy)
+          .removeUnusedImports(removeUnusedImports)
+          .preserveLambdaBreaks(preserveLambdaBreaks)
+          .debuggingPrintOpsAfterFormatting(debuggingPrintOpsAfterFormatting)
+
+  /**
+   * A fluent builder for [FormattingOptions].
+   *
+   * Prefer this (or [toBuilder]) over the constructor and generated [copy] when constructing
+   * options from outside this module. New options can be introduced as additional builder methods
+   * without breaking source or binary compatibility for existing callers, which is not true of the
+   * constructor or [copy] overloads.
+   *
+   * For example:
+   * ```
+   * val options =
+   *     FormattingOptions.Builder()
+   *         .blockIndent(2)
+   *         .continuationIndent(4)
+   *         .preserveLambdaBreaks(true)
+   *         .build()
+   * ```
+   */
+  class Builder {
+    private var maxWidth: Int = DEFAULT_MAX_WIDTH
+    private var blockIndent: Int = DEFAULT_BLOCK_INDENT
+    private var continuationIndent: Int = DEFAULT_CONTINUATION_INDENT
+    private var trailingCommaManagementStrategy: TrailingCommaManagementStrategy = COMPLETE
+    private var removeUnusedImports: Boolean = true
+    private var preserveLambdaBreaks: Boolean = false
+    private var debuggingPrintOpsAfterFormatting: Boolean = false
+
+    /** @see FormattingOptions.maxWidth */
+    fun maxWidth(maxWidth: Int): Builder = apply { this.maxWidth = maxWidth }
+
+    /** @see FormattingOptions.blockIndent */
+    fun blockIndent(blockIndent: Int): Builder = apply { this.blockIndent = blockIndent }
+
+    /** @see FormattingOptions.continuationIndent */
+    fun continuationIndent(continuationIndent: Int): Builder = apply {
+      this.continuationIndent = continuationIndent
+    }
+
+    /** @see FormattingOptions.trailingCommaManagementStrategy */
+    fun trailingCommaManagementStrategy(
+        trailingCommaManagementStrategy: TrailingCommaManagementStrategy
+    ): Builder = apply { this.trailingCommaManagementStrategy = trailingCommaManagementStrategy }
+
+    /** @see FormattingOptions.removeUnusedImports */
+    fun removeUnusedImports(removeUnusedImports: Boolean): Builder = apply {
+      this.removeUnusedImports = removeUnusedImports
+    }
+
+    /** @see FormattingOptions.preserveLambdaBreaks */
+    fun preserveLambdaBreaks(preserveLambdaBreaks: Boolean): Builder = apply {
+      this.preserveLambdaBreaks = preserveLambdaBreaks
+    }
+
+    /** @see FormattingOptions.debuggingPrintOpsAfterFormatting */
+    fun debuggingPrintOpsAfterFormatting(debuggingPrintOpsAfterFormatting: Boolean): Builder =
+        apply {
+          this.debuggingPrintOpsAfterFormatting = debuggingPrintOpsAfterFormatting
+        }
+
+    /** Builds a new [FormattingOptions] from the current builder state. */
+    fun build(): FormattingOptions =
+        FormattingOptions(
+            maxWidth = maxWidth,
+            blockIndent = blockIndent,
+            continuationIndent = continuationIndent,
+            trailingCommaManagementStrategy = trailingCommaManagementStrategy,
+            removeUnusedImports = removeUnusedImports,
+            preserveLambdaBreaks = preserveLambdaBreaks,
+            debuggingPrintOpsAfterFormatting = debuggingPrintOpsAfterFormatting,
+        )
+  }
 }
 
 enum class TrailingCommaManagementStrategy(
