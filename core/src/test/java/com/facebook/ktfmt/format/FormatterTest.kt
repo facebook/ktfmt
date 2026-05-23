@@ -9296,6 +9296,41 @@ class FormatterTest {
         .isEqualTo(code)
   }
 
+  @Test
+  fun `preserve lambda breaks - still fixes a dangling closing brace`() {
+    // Preserving breaks must not mean "leave the source untouched". The outer lambda is multi-line
+    // in source, so it stays multi-line, but the trailing '}' that was left on the inner lambda's
+    // line is still pulled onto its own line
+    val code =
+        """
+        |fun compose() {
+        |  App {
+        |    Button { Text("Hello") } }
+        |}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |fun compose() {
+        |  App {
+        |    Button { Text("Hello") }
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code)
+        .withOptions(
+            FormattingOptions(
+                preserveLambdaBreaks = true,
+                blockIndent = 2,
+                continuationIndent = 4,
+            )
+        )
+        .isEqualTo(expected)
+  }
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""
