@@ -87,8 +87,9 @@ data class ParsedArgs(
         |  --enable-editorconfig             Enable .editorconfig overrides for supported formatting options (limited)
         |                                        see https://github.com/facebook/ktfmt/blob/main/README.md
         |  --quiet                           Suppress all non-error output
-        |  --preserve-lambda-breaks          Preserve user-authored line breaks inside lambda
-        |                                        bodies (useful for DSLs such as Compose or Kotlin Gradle script)
+        |  --do-not-preserve-lambda-breaks   Collapse user-authored line breaks inside lambda
+        |                                        bodies. By default these breaks are preserved
+        |                                        (useful for DSLs such as Compose or Kotlin Gradle script)
         |
         |ARGFILE:
         |  If the only argument begins with '@', the remainder of the argument is treated
@@ -113,6 +114,7 @@ data class ParsedArgs(
       var dryRun = false
       var setExitIfChanged = false
       var removeUnusedImports = true
+      var preserveLambdaBreaks = true
       var stdinName: String? = null
       var editorConfig = false
       var quiet = false
@@ -132,9 +134,7 @@ data class ParsedArgs(
           arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false
           arg == "--enable-editorconfig" -> editorConfig = true
           arg == "--quiet" -> quiet = true
-          arg == "--preserve-lambda-breaks" -> {
-            formattingOptions = formattingOptions.copy(preserveLambdaBreaks = true)
-          }
+          arg == "--do-not-preserve-lambda-breaks" -> preserveLambdaBreaks = false
           arg.startsWith("--stdin-name=") ->
               stdinName =
                   parseKeyValueArg("--stdin-name", arg)
@@ -163,7 +163,10 @@ data class ParsedArgs(
       return ParseResult.Ok(
           ParsedArgs(
               fileNames,
-              formattingOptions.copy(removeUnusedImports = removeUnusedImports),
+              formattingOptions.copy(
+                  removeUnusedImports = removeUnusedImports,
+                  preserveLambdaBreaks = preserveLambdaBreaks,
+              ),
               dryRun,
               setExitIfChanged,
               stdinName,

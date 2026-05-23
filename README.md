@@ -90,16 +90,12 @@ following subset of editorconfig properties:
 
 #### Preserving Lambda Line Breaks
 
-`--preserve-lambda-breaks` tells `ktfmt` to respect user-authored line breaks inside lambda bodies.
-This is useful for DSLs where nesting carries semantic meaning (Jetpack Compose UI hierarchies,
-Kotlin Gradle scripts, etc.) without ktfmt prescribing a specific outcome:
-
-```
-$ java -jar /path/to/ktfmt-<VERSION>-with-dependencies.jar --preserve-lambda-breaks [files...]
-```
+By default, `ktfmt` respects user-authored line breaks inside lambda bodies. This is useful for DSLs
+where nesting carries semantic meaning (Jetpack Compose UI hierarchies, Kotlin Gradle scripts, etc.)
+without ktfmt prescribing a specific outcome.
 
 A lambda body whose source spans multiple lines stays multi-line; one that fits on a single line
-stays single-line. For example, the following is left as-is:
+stays single-line if written that way. For example, the following is left as-is:
 
 ```kotlin
 // Multi-line in source is preserved
@@ -112,6 +108,13 @@ App {
 // Single-line in source is also preserved
 dependencies { implementation(libs.androidx.activity) }
 val state = remember { mutableStateOf(false) }
+```
+
+To opt out and let `ktfmt` collapse lambda bodies that fit on a single line, pass
+`--do-not-preserve-lambda-breaks`:
+
+```
+$ java -jar /path/to/ktfmt-<VERSION>-with-dependencies.jar --do-not-preserve-lambda-breaks [files...]
 ```
 
 ***Note:***
