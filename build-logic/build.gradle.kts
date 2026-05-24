@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-pluginManagement { includeBuild("build-logic") }
+plugins { `kotlin-dsl` }
 
-rootProject.name = "ktfmt-parent"
+repositories {
+  gradlePluginPortal()
+  mavenCentral()
+}
 
-include(
-    ":ktfmt",
-    ":lambda",
-    ":idea_plugin",
-)
-
-project(":ktfmt").projectDir = file("core")
-
-project(":lambda").projectDir = file("online_formatter")
-
-project(":idea_plugin").projectDir = file("ktfmt_idea_plugin")
-
-dependencyResolutionManagement {
-  versionCatalogs {
-    create("libs") {
-      val ktfmtVersion = providers.gradleProperty("ktfmt.version").get()
-      version("ktfmt", ktfmtVersion)
-    }
-  }
+dependencies {
+  // Makes the GraalVM Native Build Tools plugin (and its `graalvmNative` DSL) available to the
+  // convention plugins defined in this build. Version is read from the shared catalog.
+  implementation(
+    libs.plugins.graalvm.get().run { "$pluginId:$pluginId.gradle.plugin:$version" }
+  )
 }

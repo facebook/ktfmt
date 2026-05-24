@@ -14,27 +14,20 @@
  * limitations under the License.
  */
 
-pluginManagement { includeBuild("build-logic") }
-
-rootProject.name = "ktfmt-parent"
-
-include(
-    ":ktfmt",
-    ":lambda",
-    ":idea_plugin",
-)
-
-project(":ktfmt").projectDir = file("core")
-
-project(":lambda").projectDir = file("online_formatter")
-
-project(":idea_plugin").projectDir = file("ktfmt_idea_plugin")
-
 dependencyResolutionManagement {
+  repositories {
+    gradlePluginPortal()
+    mavenCentral()
+  }
   versionCatalogs {
     create("libs") {
-      val ktfmtVersion = providers.gradleProperty("ktfmt.version").get()
-      version("ktfmt", ktfmtVersion)
+      from(files("../gradle/libs.versions.toml"))
+      // The shared catalog declares a `ktfmt` library whose version is injected at runtime by the
+      // root build's settings. Supply a placeholder so the catalog validates when consumed here;
+      // the `ktfmt` library itself is never used by build-logic.
+      version("ktfmt", "0.0.0")
     }
   }
 }
+
+rootProject.name = "build-logic"
