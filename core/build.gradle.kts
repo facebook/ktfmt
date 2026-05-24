@@ -188,19 +188,24 @@ ktfmt {
 }
 
 object DefaultArchitectureTarget {
-  val amd64 = "x86-64-v4"
-  val arm64 = "armv8.4-a+crypto+sve"
+  // x86-64 family (a.k.a. amd64). `v3` = ~2013+ CPUs (AVX2). Avoid `v4`: it needs AVX-512, which
+  // many cloud/CI hosts lack and would SIGILL on.
+  val x86_64 = "x86-64-v3"
+  // AArch64 family (a.k.a. arm64). `armv8-a` is the ARMv8.0 baseline that runs on all AArch64
+  // hardware. native-image only accepts `armv8-a`, `armv8.1-a`, `compatibility`, or `native` here.
+  val arm64 = "armv8-a"
 }
 
 // Pass `-Pktfmt.native.release=true` to enable release mode for Native Image.
 val nativeRelease = findProperty("ktfmt.native.release") == "true"
 
-// Pass `-Pktfmt.native.target=xx` to pass `-march=xx` to Native Image.
+// Pass `-Pktfmt.native.target=xx` to pass `-march=xx` to Native Image. Defaults favor broad CPU
+// compatibility over peak performance; pass `native` to target this exact machine.
 val nativeTarget =
     findProperty("ktfmt.native.target")
         ?: when (val hostArch = System.getProperty("os.arch")) {
           "amd64",
-          "x86_64" -> DefaultArchitectureTarget.amd64
+          "x86_64" -> DefaultArchitectureTarget.x86_64
           "aarch64",
           "arm64" -> DefaultArchitectureTarget.arm64
           else -> error("Unrecognized host architecture: '$hostArch'")
