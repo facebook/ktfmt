@@ -59,5 +59,20 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         set-java-home: 'false'
         native-image-job-reports: 'true'
-    - name: Build Native Image
-      run: ./gradlew :ktfmt:nativeCompile --stacktrace --no-daemon && ./core/build/native/nativeCompile/ktfmt --version
+    - name: Build
+      run: ./gradlew :ktfmt:nativeCompile --stacktrace --no-daemon
+    - name: Smoke test
+      shell: bash
+      run: |
+        set -euo pipefail
+        bin=./core/build/native/nativeCompile/ktfmt
+        "$bin" --version
+        # Exercise the parser/formatter on representative constructs (enum/class/lambda), which is
+        # the reflection-heavy path that a bare `--version` check would miss.
+        sample=$'enum class E { A, B }\nclass Foo(val a: Int) { fun bar() = listOf(1, 2).map { it * 2 } }'
+        formatted="$(printf '%s\n' "$sample" | "$bin" -)"
+        printf '%s\n' "$formatted"
+        [[ -n "$formatted" ]] || { echo 'native ktfmt produced no output'; exit 1; }
+        # Idempotency: re-formatting the output must be a no-op.
+        reformatted="$(printf '%s\n' "$formatted" | "$bin" -)"
+        [[ "$formatted" = "$reformatted" ]] || { echo 'native ktfmt output is not idempotent'; exit 1; }
