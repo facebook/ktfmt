@@ -83,6 +83,66 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # Build the GraalVM native binary per platform and attach it to the GitHub Release. Modeled on
+  # google-java-format's release workflow. Uses GraalVM Community (Serial GC only, which matches the
+  # build's default) so there are no Oracle GraalVM licensing considerations.
+  upload_native_binaries:
+    name: Native binary (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write  # Required to upload release assets
+    strategy:
+      fail-fast: false
+      matrix:
+        # Build linux on the oldest available ubuntu for broader glibc compatibility. Keep the keys
+        # of the SUFFIX map below in sync with this list.
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-latest, windows-latest]
+    env:
+      SUFFIX: ${{ fromJson('{"ubuntu-22.04":"linux-x86-64","ubuntu-22.04-arm":"linux-arm64","macos-latest":"darwin-arm64","windows-latest":"windows-x86-64"}')[matrix.os] }}
+      EXTENSION: ${{ matrix.os == 'windows-latest' && '.exe' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.events.release.tag_name || inputs.release_tag || github.ref }}
+
+      # Gradle runs on JDK 17; native-image is provided via GRAALVM_HOME (set-java-home: false).
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: zulu
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '25'
+          distribution: 'graalvm-community'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          set-java-home: 'false'
+          native-image-job-reports: 'true'
+
+      - name: Build native binary
+        shell: bash
+        run: ./gradlew :ktfmt:nativeCompile -Pktfmt.native.release=true --stacktrace --no-daemon
+
+      - name: Smoke test
+        shell: bash
+        run: ./native_smoke_test.sh
+
+      - name: Stage binary
+        shell: bash
+        run: |
+          mkdir -p release
+          cp "core/build/native/nativeCompile/ktfmt${EXTENSION}" "release/ktfmt_${SUFFIX}${EXTENSION}"
+
+      - name: Upload native binary to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.events.release.tag_name || inputs.release_tag }}
+          files: release/ktfmt_${{ env.SUFFIX }}${{ env.EXTENSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   deploy_website:
     runs-on: ubuntu-latest
     steps:
