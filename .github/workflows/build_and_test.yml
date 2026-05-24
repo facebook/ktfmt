@@ -30,7 +30,7 @@ jobs:
     - name: Set up GraalVM
       uses: graalvm/setup-graalvm@v1
       with:
-        java-version: '25.0.1'
+        java-version: '25'
         distribution: 'graalvm'
         github-token: ${{ secrets.GITHUB_TOKEN }}
         set-java-home: 'false'
@@ -42,4 +42,4 @@ jobs:
     - name: Build ktfmt
       run: ./gradlew :ktfmt:build --stacktrace --no-daemon
     - name: Build Native Image
-      run: ./gradlew :ktfmt:nativeCompile --stacktrace --no-daemon && ./ktfmt/build/native/nativeCompile/ktfmt --version
+      run: ./gradlew :ktfmt:nativeCompile --stacktrace --no-daemon && ./core/build/native/nativeCompile/ktfmt --version
