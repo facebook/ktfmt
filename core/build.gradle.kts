@@ -40,11 +40,10 @@ repositories {
 }
 
 // Configuration for building `src/native-image/java`.
-val nativeImageJavacClasspath by
-    configurations.creating {
-      extendsFrom(configurations.implementation.get())
-      isCanBeResolved = true
-    }
+val nativeImageJavacClasspath by configurations.creating {
+  extendsFrom(configurations.implementation.get())
+  isCanBeResolved = true
+}
 
 dependencies {
   api(libs.googleJavaformat)
