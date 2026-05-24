@@ -35,8 +35,10 @@ repositories {
   mavenCentral()
 }
 
-// Configuration for building `src/native-image/java`.
-val nativeImageJavacClasspath by configurations.creating {
+// Resolvable classpath for compiling the Native Image substitution: the main compile deps (for the
+// kotlinc types it targets) plus GraalVM's `svm`. Kept standalone so `svm` does NOT leak into the
+// `nativeImage` source set's configurations (and from there into the GraalVM image classpath).
+val nativeImageHelperClasspath by configurations.creating {
   extendsFrom(configurations.implementation.get())
   isCanBeResolved = true
 }
@@ -52,7 +54,7 @@ dependencies {
   testImplementation(libs.googleTruth)
   testImplementation(libs.junit)
 
-  nativeImageJavacClasspath(libs.graalvm.nativeimage)
+  nativeImageHelperClasspath(libs.graalvm.nativeimage)
   // `nativeImageClasspath` is created by the GraalVM plugin (applied via `ktfmt.native-image`), so
   // reference it by name rather than via a generated accessor.
   "nativeImageClasspath"(libs.jline.terminal)
@@ -133,33 +135,24 @@ tasks {
   }
 }
 
-sourceSets {
-  create("nativeImage") {
-    java { srcDir("src/main/native-image/java") }
-    resources { srcDir("src/main/native-image/resources") }
-  }
-}
-
-val compileNativeImageClasses by
-    tasks.registering(JavaCompile::class) {
-      group = "build"
-      description = "Compiles Native Image helper classes"
-      source = sourceSets["nativeImage"].java
-      classpath = nativeImageJavacClasspath
-      destinationDirectory = layout.buildDirectory.dir("classes/native-image")
-      dependsOn(tasks.named("compileJava"))
-    }
+// The Native Image substitution helper + reachability metadata live in their own source set so the
+// GraalVM-only `svm` dependency stays out of the main/published artifact. The Kotlin source is
+// compiled by the auto-created `compileNativeImageKotlin` task (kotlin srcDir configured below).
+sourceSets { create("nativeImage") { resources { srcDir("src/main/native-image/resources") } } }
 
 // Native Image artifacts jar (local only, not published)
 val nativeImageJar by
     tasks.registering(Jar::class) {
       group = "build"
       description = "Assembles Native Image jar and resources"
-      dependsOn(compileNativeImageClasses)
-      from(layout.buildDirectory.dir("classes/native-image"))
-      from(sourceSets["nativeImage"].resources)
+      from(sourceSets["nativeImage"].output)
       archiveClassifier = "nativeimage"
     }
+
+// Compile the substitution against `svm` without putting it on the source set's configurations.
+tasks.named<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>("compileNativeImageKotlin") {
+  libraries.from(nativeImageHelperClasspath)
+}
 
 kotlin {
   @OptIn(ExperimentalAbiValidation::class) abiValidation { enabled = true }
@@ -174,6 +167,7 @@ kotlin {
         srcDir(generateSources)
       }
     }
+    named("nativeImage") { kotlin { srcDir("src/main/native-image/kotlin") } }
   }
 }
 
