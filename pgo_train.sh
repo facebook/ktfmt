@@ -15,6 +15,8 @@
 
 set -e
 
+# Run from the repo root.
+
 # clean any current native build
 ./gradlew :ktfmt:clean;
 
@@ -30,6 +32,7 @@ echo "PGO training starting"
 
 echo "PGO training completed."
 
+mkdir -p ./core/src/main/native-image/profiles
 cp -fv ./default.iprof ./core/src/main/native-image/profiles/default.iprof;
 
 echo "Rebuilding..."
