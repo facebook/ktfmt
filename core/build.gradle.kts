@@ -207,11 +207,16 @@ val nativeTarget =
         }
 
 // Pass `-Pktfmt.native.gc=xx` to select a garbage collector; options include `serial`, `G1`, and
-// `epsilon`.
-val nativeGc = findProperty("ktfmt.native.gc") ?: "G1"
+// `epsilon`. Defaults to `serial` because:
+// - it's the best fit for ktfmt's short-lived CLI runs
+// - it's the only GC available in GraalVM Community Edition
+// - it's the only GC supported by `native-image` on macOS
+// - avoids the Oracle GraalVM licensing considerations of `G1`. Anyone that needs this can do it
+// from source and opt into `G1` for large, long-running batch formatting on Linux with Oracle
+// GraalVM.
+val nativeGc = findProperty("ktfmt.native.gc") ?: "serial"
 
-// Pass `-Pktfmt.native.gc=xx` to select a garbage collector; options include `serial`, `G1`, and
-// `epsilon`.
+// Pass `-Pktfmt.native.debug=true` to build the Native Image binary with debug info.
 val nativeDebug = findProperty("ktfmt.native.debug") == "true"
 
 // Pass `-Pktfmt.native.lto=true` to enable LTO for the Native Image binary.
@@ -245,25 +250,42 @@ val nativeOpt =
       else -> opt
     }
 
-// List of PGO profiles, which are held in `src/main/native-image/profiles`.
-val pgoProfiles =
+// PGO profiles live in `src/main/native-image/profiles`. They are git-ignored (see `.gitignore`)
+// and are generated via `pgo_train.sh` or materialized in CI, so they may be absent. Only profiles
+// that actually exist on disk are used; a missing profile degrades to a non-PGO build instead of
+// failing `native-image` with a file-not-found.
+val existingPgoProfiles =
     listOf("default.iprof")
         .map { profileName ->
-          layout.projectDirectory.file(
-              Paths.get("src", "main", "native-image", "profiles", profileName).toString()
-          )
+          layout.projectDirectory
+              .file(Paths.get("src", "main", "native-image", "profiles", profileName).toString())
+              .asFile
         }
-        .let { allProfiles -> listOf("--pgo=${allProfiles.joinToString(",")}") }
+        .filter { it.exists() }
+
+val pgoProfileArgs =
+    if (existingPgoProfiles.isEmpty()) emptyList()
+    else listOf("--pgo=${existingPgoProfiles.joinToString(",") { it.absolutePath }}")
 
 // Pass `-Pktfmt.native.pgo=true` to build with PGO; pass `train` to enable instrumentation.
 val pgoArgs =
     when (val pgo = findProperty("ktfmt.native.pgo")) {
-      null -> if (nativeRelease) pgoProfiles else emptyList()
-      "true" -> pgoProfiles
+      null -> if (nativeRelease) pgoProfileArgs else emptyList()
+      "true" -> pgoProfileArgs
       "false" -> emptyList()
       "train" -> listOf("--pgo-instrument")
       else -> error("Unrecognized `ktfmt.native.pgo` argument: '$pgo'")
     }
+
+// Warn (rather than fail) when PGO was requested but no profiles are available.
+if (
+    (nativeRelease || findProperty("ktfmt.native.pgo") == "true") && existingPgoProfiles.isEmpty()
+) {
+  logger.warn(
+      "[ktfmt native] PGO was requested but no profiles were found in " +
+          "src/main/native-image/profiles; building without PGO. Generate one with `bash pgo_train.sh`."
+  )
+}
 
 graalvmNative {
   binaries {
@@ -296,7 +318,7 @@ graalvmNative {
                     add("-H:+SourceLevelDebug")
                   }
                   // --
-                  add("--gc=G1")
+                  add("--gc=$nativeGc")
                   add("--future-defaults=all")
                   add("--link-at-build-time=com.facebook")
                   add("--initialize-at-build-time=com.facebook")
@@ -411,10 +433,9 @@ fun MutableList<String>.addLinesFromFile(vararg path: String, mapper: (String) -
   file(Paths.get(path.first(), *path.drop(1).toTypedArray()).toString())
       .useLines { lines ->
         lines
-            .filter { line ->
-              // filter empty lines
-              line.isNotEmpty()
-            }
+            .map { it.trim() }
+            // Skip blank lines and `#` comments so these metadata files can be documented.
+            .filter { it.isNotEmpty() && !it.startsWith("#") }
             .map(mapper)
             .toList()
       }
