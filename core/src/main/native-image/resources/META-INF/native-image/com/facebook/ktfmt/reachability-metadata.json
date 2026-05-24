@@ -1,14 +1,7 @@
 {
   "reflection": [
     {
-      "type": "org.jetbrains.kotlin.cli.common.CompilerSystemProperties"
-    },
-    {
-      "type": {
-        "proxy": [
-          "org.jetbrains.kotlin.com.intellij.openapi.vfs.VirtualFileListener"
-        ]
-      }
+      "type": "android.os.Build$VERSION"
     },
     {
       "type": "java.util.concurrent.ForkJoinTask",
@@ -58,6 +51,9 @@
       ]
     },
     {
+      "type": "kotlinx.coroutines.CancellableContinuationImpl"
+    },
+    {
       "type": "kotlinx.coroutines.EventLoopImplBase",
       "fields": [
         {
@@ -83,6 +79,18 @@
       ]
     },
     {
+      "type": "kotlinx.coroutines.JobSupport$Finishing"
+    },
+    {
+      "type": "kotlinx.coroutines.channels.BufferedChannel"
+    },
+    {
+      "type": "kotlinx.coroutines.internal.AtomicOp"
+    },
+    {
+      "type": "kotlinx.coroutines.internal.ConcurrentLinkedListNode"
+    },
+    {
       "type": "kotlinx.coroutines.internal.DispatchedContinuation",
       "fields": [
         {
@@ -97,6 +105,9 @@
           "name": "runningWorkers$volatile"
         }
       ]
+    },
+    {
+      "type": "kotlinx.coroutines.internal.LockFreeLinkedListNode"
     },
     {
       "type": "kotlinx.coroutines.internal.LockFreeTaskQueue",
@@ -118,6 +129,9 @@
       ]
     },
     {
+      "type": "kotlinx.coroutines.internal.Segment"
+    },
+    {
       "type": "kotlinx.coroutines.scheduling.CoroutineScheduler",
       "fields": [
         {
@@ -132,7 +146,22 @@
       ]
     },
     {
+      "type": "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker"
+    },
+    {
+      "type": "kotlinx.coroutines.scheduling.WorkQueue"
+    },
+    {
+      "type": "org.jetbrains.kotlin.cli.common.CompilerSystemProperties"
+    },
+    {
       "type": "org.jetbrains.kotlin.com.intellij.codeInsight.ContainerProvider"
+    },
+    {
+      "type": "org.jetbrains.kotlin.com.intellij.codeInsight.multiverse.CodeInsightContextProvider"
+    },
+    {
+      "type": "org.jetbrains.kotlin.com.intellij.codeInsight.multiverse.MultiverseEnabler"
     },
     {
       "type": "org.jetbrains.kotlin.com.intellij.openapi.application.impl.ModalityStateEx",
@@ -507,6 +536,9 @@
           ]
         }
       ]
+    },
+    {
+      "type": "org.jetbrains.kotlin.psi.KtCallExpression[]"
     },
     {
       "type": "org.jetbrains.kotlin.psi.KtCallableReferenceExpression",
@@ -919,6 +951,17 @@
       "type": "org.jetbrains.kotlin.psi.KtDynamicType[]"
     },
     {
+      "type": "org.jetbrains.kotlin.psi.KtEnumEntry",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "org.jetbrains.kotlin.com.intellij.lang.ASTNode"
+          ]
+        }
+      ]
+    },
+    {
       "type": "org.jetbrains.kotlin.psi.KtEnumEntrySuperclassReferenceExpression",
       "methods": [
         {
@@ -937,6 +980,9 @@
     },
     {
       "type": "org.jetbrains.kotlin.psi.KtEnumEntrySuperclassReferenceExpression[]"
+    },
+    {
+      "type": "org.jetbrains.kotlin.psi.KtEnumEntry[]"
     },
     {
       "type": "org.jetbrains.kotlin.psi.KtEscapeStringTemplateEntry",
@@ -1552,6 +1598,9 @@
       ]
     },
     {
+      "type": "org.jetbrains.kotlin.psi.KtScriptInitializer[]"
+    },
+    {
       "type": "org.jetbrains.kotlin.psi.KtScript[]"
     },
     {
@@ -2059,6 +2108,14 @@
       ]
     },
     {
+      "type": "org.jetbrains.kotlin.psi.impl.KotlinElementTypeProviderImpl",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
+    },
+    {
       "type": "org.jetbrains.kotlin.psi.stubs.elements.KtFileElementType",
       "methods": [
         {
@@ -2156,11 +2213,35 @@
           ]
         }
       ]
+    },
+    {
+      "type": {
+        "proxy": [
+          "org.jetbrains.kotlin.com.intellij.openapi.command.CommandListener"
+        ]
+      }
+    },
+    {
+      "type": {
+        "proxy": [
+          "org.jetbrains.kotlin.com.intellij.openapi.vfs.VirtualFileListener"
+        ]
+      }
+    },
+    {
+      "type": {
+        "proxy": [
+          "org.jetbrains.kotlin.com.intellij.psi.util.PsiModificationTracker$Listener"
+        ]
+      }
     }
   ],
   "resources": [
     {
       "glob": "org/jetbrains/kotlin/cli/common/CompilerSystemProperties.class"
+    },
+    {
+      "glob": "pluginsCompatibleWithK2Mode.txt"
     }
   ]
 }
