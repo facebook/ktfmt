@@ -35,13 +35,13 @@ jobs:
       run: ./gradlew :ktfmt:build --stacktrace --no-daemon
 
   native:
-    # Native builds run across platforms and are non-blocking: a GraalVM/toolchain hiccup on one OS
-    # shouldn't fail the whole CI run. The shippable release binaries are built separately, see
-    # publish_artifacts_on_release.yaml. Build on the oldest available ubuntu for broader glibc
-    # compatibility of the linux binary.
+    # The linux build is blocking so stale GraalVM reachability metadata (which is OS-independent)
+    # fails CI. macOS and Windows stay non-blocking, since cross-platform toolchain hiccups
+    # shouldn't fail the run. Release binaries are built separately (publish_artifacts_on_release.yaml).
+    # Linux uses the oldest available ubuntu for broader glibc compatibility.
     name: Native Image on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
+    continue-on-error: ${{ matrix.os != 'ubuntu-22.04' }}
     strategy:
       fail-fast: false
       matrix:
