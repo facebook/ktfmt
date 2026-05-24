@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Smoke-tests a ktfmt native binary: confirms it runs and actually formats representative Kotlin
-# without crashing. This exercises the reflection-heavy parser/formatter path that a bare
-# `--version` check would miss (e.g. stale GraalVM reachability metadata).
+# Smoke-tests a ktfmt native binary: confirms it runs and actually formats Kotlin without crashing.
+# This exercises the reflection-heavy parser/formatter path that a bare `--version` check would miss
+# (e.g. stale GraalVM reachability metadata).
 #
+# Run from the repo root.
 # Usage: ./native_smoke_test.sh [path-to-ktfmt-binary]
 set -euo pipefail
 
@@ -25,22 +26,32 @@ if [[ ! -e "$bin" && -e "${bin}.exe" ]]; then
   bin="${bin}.exe"
 fi
 
+# A format crash is almost always stale GraalVM reachability metadata. Point at the fix.
+stale_hint() {
+  echo "native ktfmt crashed while formatting; the GraalVM reachability metadata is likely stale." >&2
+  echo "Regenerate with ./regenerate_native_metadata.sh (see core/README.md)." >&2
+  exit 1
+}
+
 "$bin" --version
 
 # Representative constructs (enum/class/lambda) that drive Kotlin-compiler PSI reflection.
 sample=$'enum class E { A, B }\nclass Foo(val a: Int) { fun bar() = listOf(1, 2).map { it * 2 } }'
-formatted="$(printf '%s\n' "$sample" | "$bin" -)"
+formatted="$(printf '%s\n' "$sample" | "$bin" -)" || stale_hint
 printf '%s\n' "$formatted"
-[[ -n "$formatted" ]] || {
-  echo 'native ktfmt produced no output' >&2
-  exit 1
-}
+[[ -n "$formatted" ]] || stale_hint
 
 # Idempotency: re-formatting the output must be a no-op.
-reformatted="$(printf '%s\n' "$formatted" | "$bin" -)"
+reformatted="$(printf '%s\n' "$formatted" | "$bin" -)" || stale_hint
 [[ "$formatted" == "$reformatted" ]] || {
   echo 'native ktfmt output is not idempotent' >&2
   exit 1
 }
+
+# Broader coverage: formatting ktfmt's own sources drives many more Kotlin constructs, and thus
+# reflective paths, than the snippet above. Skipped when the sources aren't present.
+if [[ -d core/src/main ]]; then
+  "$bin" -n core/src/main core/src/test >/dev/null || stale_hint
+fi
 
 echo "Native smoke test passed."
