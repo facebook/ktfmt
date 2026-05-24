@@ -22,14 +22,11 @@ import java.nio.file.Paths
 import org.graalvm.buildtools.gradle.dsl.GraalVMExtension
 import org.gradle.api.tasks.bundling.Jar
 
-plugins {
-  application
-  id("org.graalvm.buildtools.native")
-}
+plugins { id("org.graalvm.buildtools.native") }
 
+// Entry point for the native binary. Set directly on the GraalVM binary below; we intentionally do
+// not apply the `application` plugin, which would only add unused `run`/`distZip`/`distTar` tasks.
 val entrypoint = "com.facebook.ktfmt.cli.Main"
-
-application { mainClass.set(entrypoint) }
 
 object DefaultArchitectureTarget {
   // x86-64 family (a.k.a. amd64). `v3` = ~2013+ CPUs (AVX2). Avoid `v4`: it needs AVX-512, which
