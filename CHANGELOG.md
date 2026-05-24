@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Support for lists within quoted blocks in KDoc comments (https://github.com/facebook/ktfmt/commit/68fa1585b759ad4b12ca4802bccd297f6a33b0f3)
 - Fix `ONLY_ADD` trailing commas strategy causing lines over MAX_WIDTH length (https://github.com/facebook/ktfmt/issues/610)
 - Remove forced breaking of `context` function types (https://github.com/facebook/ktfmt/pull/613)
-- Preserve user-authored line breaks inside lambda bodies by default, rather than have ktfmt impose anything. This can be particularly useful for DSL syntax like Compose UI or Kotlin Gradle script. Pass `--do-not-preserve-lambda-breaks` to opt out. (https://github.com/facebook/ktfmt/pull/614)
+- Preserve user-authored line breaks inside lambda bodies by default, rather than have ktfmt impose anything. This can be particularly useful for DSL syntax like Compose UI or Kotlin Gradle script. The behavior follows the `FormattingOptions.preserveLambdaBreaks` setting of the chosen style. (https://github.com/facebook/ktfmt/pull/614)
 - Add a `FormattingOptions.Builder` API for tools to avoid breaking ABI changes with new options. (https://github.com/facebook/ktfmt/pull/614)
 
 ## [0.62]

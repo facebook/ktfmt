@@ -110,13 +110,6 @@ dependencies { implementation(libs.androidx.activity) }
 val state = remember { mutableStateOf(false) }
 ```
 
-To opt out and let `ktfmt` collapse lambda bodies that fit on a single line, pass
-`--do-not-preserve-lambda-breaks`:
-
-```
-$ java -jar /path/to/ktfmt-<VERSION>-with-dependencies.jar --do-not-preserve-lambda-breaks [files...]
-```
-
 ***Note:***
 *There is no configurability as to the formatter's algorithm for formatting (apart from the different styles
 or limited `.editorconfig` support). This is a deliberate design decision to unify our code formatting on a

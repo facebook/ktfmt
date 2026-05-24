@@ -104,21 +104,6 @@ class ParsedArgsTest {
   }
 
   @Test
-  fun `parseOptions defaults to preserving lambda breaks`() {
-    val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("foo.kt")))
-    assertThat(parsed.formattingOptions.preserveLambdaBreaks).isTrue()
-  }
-
-  @Test
-  fun `parseOptions recognizes --do-not-preserve-lambda-breaks`() {
-    val parsed =
-        assertSucceeds(
-            ParsedArgs.parseOptions(arrayOf("--do-not-preserve-lambda-breaks", "foo.kt"))
-        )
-    assertThat(parsed.formattingOptions.preserveLambdaBreaks).isFalse()
-  }
-
-  @Test
   fun `parseOptions recognizes --enable-editorconfig`() {
     val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--enable-editorconfig", "foo.kt")))
     assertThat(parsed.editorConfig).isEqualTo(true)
