@@ -27,6 +27,30 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
         distribution: zulu
+    - name: Build ktfmt_idea_plugin
+      run: ./gradlew :idea_plugin:build --stacktrace --no-daemon
+    - name: Build the Online Formatter
+      run: ./gradlew :lambda:build --stacktrace --no-daemon
+    - name: Build ktfmt
+      run: ./gradlew :ktfmt:build --stacktrace --no-daemon
+
+  native:
+    # The native image is independent of the JVM test matrix above, so it builds once in its own job
+    # rather than once per Java version. TODO(#15): expand to a macOS/Windows + architecture matrix
+    # once multi-platform release infrastructure moves to Meta-owned CI.
+    runs-on: ubuntu-latest
+    name: Build Native Image
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    # Gradle itself runs on the project's JDK (17); native-image is provided separately below via
+    # GRAALVM_HOME (set-java-home: false keeps JAVA_HOME pointed at the JDK above).
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: zulu
     - name: Set up GraalVM
       uses: graalvm/setup-graalvm@v1
       with:
@@ -35,11 +59,5 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         set-java-home: 'false'
         native-image-job-reports: 'true'
-    - name: Build ktfmt_idea_plugin
-      run: ./gradlew :idea_plugin:build --stacktrace --no-daemon
-    - name: Build the Online Formatter
-      run: ./gradlew :lambda:build --stacktrace --no-daemon
-    - name: Build ktfmt
-      run: ./gradlew :ktfmt:build --stacktrace --no-daemon
     - name: Build Native Image
       run: ./gradlew :ktfmt:nativeCompile --stacktrace --no-daemon && ./core/build/native/nativeCompile/ktfmt --version
