@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Remove forced breaking of `context` function types (https://github.com/facebook/ktfmt/pull/613)
 - Preserve user-authored line breaks inside lambda bodies by default, rather than have ktfmt impose anything. This can be particularly useful for DSL syntax like Compose UI or Kotlin Gradle script. The behavior follows the `FormattingOptions.preserveLambdaBreaks` setting of the chosen style. (https://github.com/facebook/ktfmt/pull/614)
 - Add a `FormattingOptions.Builder` API for tools to avoid breaking ABI changes with new options. (https://github.com/facebook/ktfmt/pull/614)
+- Add standalone native binaries built with GraalVM `native-image`. These have identical CLI behavior to the JVM version but with near-instant startup and no JVM required (https://github.com/facebook/ktfmt/issues/441)
 
 ## [0.62]
 ### Added

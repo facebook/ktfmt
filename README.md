@@ -115,6 +115,32 @@ val state = remember { mutableStateOf(false) }
 or limited `.editorconfig` support). This is a deliberate design decision to unify our code formatting on a
 single format.*
 
+### Native binary
+
+`ktfmt` is also available as a standalone native binary, compiled ahead-of-time with
+[GraalVM `native-image`](https://www.graalvm.org/latest/reference-manual/native-image/). It behaves
+exactly like the JVM CLI (same options) but starts near-instantly and needs no JVM installed, which
+is especially handy for pre-commit hooks and formatting only changed files. Pre-built binaries for
+each supported platform are attached to the [releases page](https://github.com/facebook/ktfmt/releases):
+
+```
+$ ktfmt [--kotlinlang-style | --google-style] [files...]
+```
+
+#### Building the native binary from source
+
+Building requires a [GraalVM](https://www.graalvm.org/downloads/) JDK (one that includes
+`native-image`) discoverable via `GRAALVM_HOME` or `PATH`:
+
+```
+$ ./gradlew :ktfmt:nativeCompile
+$ ./core/build/native/nativeCompile/ktfmt --version
+```
+
+The build defaults to the Serial GC and a broadly-compatible `-march` target. Several knobs are
+exposed via `-Pktfmt.native.*` properties (GC, target architecture, PGO, static linking, …); see
+[`build-logic/src/main/kotlin/ktfmt.native-image.gradle.kts`](build-logic/src/main/kotlin/ktfmt.native-image.gradle.kts).
+
 ### using Gradle
 
 A [Gradle plugin (ktfmt-gradle)](https://github.com/cortinico/ktfmt-gradle) is available on the
