@@ -100,13 +100,20 @@ jobs:
     env:
       SUFFIX: ${{ fromJson('{"ubuntu-22.04":"linux-x86-64","ubuntu-22.04-arm":"linux-arm64","macos-latest":"darwin-arm64","windows-latest":"windows-x86-64"}')[matrix.os] }}
       EXTENSION: ${{ matrix.os == 'windows-latest' && '.exe' || '' }}
-      # Keep Gradle's home on the workspace drive so native-build-tools' classpath relativize doesn't
-      # fail across drives on Windows ("'other' has different root").
-      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle
+      # On Windows the workspace is on D: but java.io.tmpdir defaults to C:. native-build-tools writes
+      # the native-image @argfile under java.io.tmpdir, then relativizes it against the build's working
+      # directory (on D:), which fails with "'other' has different root". Point temp at the workspace
+      # drive so both share a root. Empty (no-op) on other OSes.
+      TMP: ${{ matrix.os == 'windows-latest' && format('{0}\tmp', github.workspace) || '' }}
+      TEMP: ${{ matrix.os == 'windows-latest' && format('{0}\tmp', github.workspace) || '' }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.events.release.tag_name || inputs.release_tag || github.ref }}
+
+      - name: Create temp dir on workspace drive (Windows)
+        if: matrix.os == 'windows-latest'
+        run: New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\tmp"
 
       # Gradle runs on JDK 17; native-image is provided via GRAALVM_HOME (set-java-home: false).
       - name: Set up JDK 17
