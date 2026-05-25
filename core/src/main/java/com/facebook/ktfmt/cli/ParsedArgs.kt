@@ -75,19 +75,19 @@ data class ParsedArgs(
         |Commands options:
         |  -h, --help                        Show this help message
         |  -v, --version                     Show version
-        |  -n, --dry-run                     Don't write to files, only report files which 
+        |  -n, --dry-run                     Don't write to files, only report files which
         |                                        would have changed
         |  --meta-style                      Use 2-space block indenting (default)
         |  --google-style                    Google internal style (2 spaces)
         |  --kotlinlang-style                Kotlin language guidelines style (4 spaces)
         |  --stdin-name=<name>               Name to report when formatting code from stdin
-        |  --set-exit-if-changed             Sets exit code to 1 if any input file was not 
+        |  --set-exit-if-changed             Sets exit code to 1 if any input file was not
         |                                        formatted/touched
         |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used
         |  --enable-editorconfig             Enable .editorconfig overrides for supported formatting options (limited)
         |                                        see https://github.com/facebook/ktfmt/blob/main/README.md
         |  --quiet                           Suppress all non-error output
-        |  
+        |
         |ARGFILE:
         |  If the only argument begins with '@', the remainder of the argument is treated
         |  as the name of a file to read options and arguments from, one per line.
