@@ -17,6 +17,7 @@
 import kotlin.io.path.writeText
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   kotlin("jvm")
@@ -117,11 +118,13 @@ tasks {
   test { jvmArgs("-Dfile.encoding=UTF-16") }
 
   // Handle multiple versions of Kotlin here
-  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+  withType<KotlinCompile> {
     // Only get major and minor version, e.g. 1.8.0-beta1 -> 1.8
     val kotlinVersion = rootProject.libs.versions.kotlin.get().substringBeforeLast(".")
     exclude {
-      val path = it.file.path
+      // it.path is tree-relative and always '/'-separated, unlike it.file.path which uses '\' on
+      // Windows (where the old check matched nothing and compiled every kotlin-x.y shim at once).
+      val path = it.path
       "com/facebook/ktfmt/util/kotlin-" in path && "kotlin-$kotlinVersion" !in path
     }
   }
@@ -166,7 +169,7 @@ val nativeImageJar by
     }
 
 // Compile the substitution against `svm` without putting it on the source set's configurations.
-tasks.named<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>("compileNativeImageKotlin") {
+tasks.named<KotlinCompile>("compileNativeImageKotlin") {
   libraries.from(nativeImageHelperClasspath)
 }
 
