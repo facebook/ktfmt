@@ -28,29 +28,13 @@ plugins { id("org.graalvm.buildtools.native") }
 // not apply the `application` plugin, which would only add unused `run`/`distZip`/`distTar` tasks.
 val entrypoint = "com.facebook.ktfmt.cli.Main"
 
-object DefaultArchitectureTarget {
-  // x86-64 family (a.k.a. amd64). `v3` = ~2013+ CPUs (AVX2). Avoid `v4`: it needs AVX-512, which
-  // many cloud/CI hosts lack and would SIGILL on.
-  val x86_64 = "x86-64-v3"
-  // AArch64 family (a.k.a. arm64). `armv8-a` is the ARMv8.0 baseline that runs on all AArch64
-  // hardware. native-image only accepts `armv8-a`, `armv8.1-a`, `compatibility`, or `native` here.
-  val arm64 = "armv8-a"
-}
-
 // Pass `-Pktfmt.native.release=true` to enable release mode for Native Image.
 val nativeRelease = findProperty("ktfmt.native.release") == "true"
 
-// Pass `-Pktfmt.native.target=xx` to pass `-march=xx` to Native Image. Defaults favor broad CPU
-// compatibility over peak performance; pass `native` to target this exact machine.
-val nativeTarget =
-    findProperty("ktfmt.native.target")
-        ?: when (val hostArch = System.getProperty("os.arch")) {
-          "amd64",
-          "x86_64" -> DefaultArchitectureTarget.x86_64
-          "aarch64",
-          "arm64" -> DefaultArchitectureTarget.arm64
-          else -> error("Unrecognized host architecture: '$hostArch'")
-        }
+// Pass `-Pktfmt.native.target=xx` to pass `-march=xx` to Native Image. Defaults to `compatibility`
+// (runs on any CPU of the build architecture), matching google-java-format. Pass `native` to target
+// this exact machine, or e.g. `x86-64-v3` to trade portability for performance.
+val nativeTarget = findProperty("ktfmt.native.target") ?: "compatibility"
 
 // Pass `-Pktfmt.native.gc=xx` to select a garbage collector; options include `serial`, `G1`, and
 // `epsilon`. Defaults to `serial` because:
@@ -158,23 +142,22 @@ configure<GraalVMExtension> {
                     add("-H:+SourceLevelDebug")
                   }
                   // --
+                  add("--no-fallback") // fail rather than fall back to a JVM-requiring image
                   add("--gc=$nativeGc")
                   add("--future-defaults=all")
                   add("--link-at-build-time=com.facebook")
                   add("--initialize-at-build-time=com.facebook")
                   add("--add-opens=java.base/java.util=ALL-UNNAMED")
-                  add("--emit=build-report")
                   add("--color=always")
-                  add("--enable-sbom=cyclonedx,embed")
                   // -- ▼ SVM Hosted Options
-                  add("-H:+UseCompressedReferences")
                   add("-H:+ReportExceptionStackTraces")
+                  // a short-lived CLI doesn't need cgroup-based heap sizing
+                  add("-H:-UseContainerSupport")
                   // -- ▼ SVM Runtime Options
                   add("-R:+InstallSegfaultHandler")
                   // -- ▼ Experimental Options
                   add("-H:+UnlockExperimentalVMOptions")
                   add("-H:-ReduceImplicitExceptionStackTraceInformation")
-                  add("-H:+ReportDynamicAccess")
                   add("-H:-UnlockExperimentalVMOptions")
                   // -- ▼ VM flags
                   add("-J--enable-native-access=ALL-UNNAMED")
