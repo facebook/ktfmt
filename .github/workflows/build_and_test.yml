@@ -42,6 +42,11 @@ jobs:
     name: Native Image on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.os != 'ubuntu-22.04' }}
+    # Keep Gradle's home on the same drive as the workspace. On Windows runners the workspace is on
+    # D: but the default GRADLE_USER_HOME is on C:, and native-build-tools relativizes the classpath
+    # across drives, which fails with "'other' has different root".
+    env:
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle
     strategy:
       fail-fast: false
       matrix:
