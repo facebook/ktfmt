@@ -53,8 +53,8 @@ jar="${jars[0]}"
 }
 
 # 3. Trace reflection by formatting ktfmt's own sources, merging into the existing metadata. The
-#    merge happens in a temp dir holding only reachability-metadata.json, so the deprecated,
-#    hand-maintained proxy-config.json is left untouched. `-n` (dry-run) avoids editing any sources.
+#    merge happens in a temp dir holding only reachability-metadata.json, so the agent updates just
+#    that file and can't reintroduce legacy split-config files. `-n` (dry-run) avoids editing sources.
 tmp="$(mktemp -d)"
 cp "${meta_dir}/reachability-metadata.json" "${tmp}/"
 echo "Tracing reflection over core/src..."
