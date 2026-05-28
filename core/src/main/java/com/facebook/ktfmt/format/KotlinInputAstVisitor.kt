@@ -2488,8 +2488,8 @@ class KotlinInputAstVisitor(
   override fun visitFunctionType(type: KtFunctionType) {
     builder.sync(type)
 
-    type.contextReceiverList?.let {
-      handleContextReceiverList(it)
+    type.contextReceiverList?.let { functionTypeContextReceiverList ->
+      handleContextReceiverList(functionTypeContextReceiverList)
       builder.space()
     }
 
