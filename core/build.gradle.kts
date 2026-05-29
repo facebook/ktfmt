@@ -108,7 +108,7 @@ tasks {
             const val version = "${version.get()}"
           }
           """
-          .trimIndent() + "\n"
+                  .trimIndent() + "\n"
           )
       logger.info("Generated version file at ${versionFile.get()}")
     }
