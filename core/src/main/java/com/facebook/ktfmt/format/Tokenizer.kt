@@ -61,9 +61,13 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
   }
 
   override fun visitElement(element: PsiElement) {
-   // Do not materialize text/text ranges when it's non needed -- e.g. for KtFile, composite PsiElement(...) etc.
+    // Do not materialize text/text ranges when it's non needed -- e.g. for KtFile, composite
+    // PsiElement(...) etc.
     val elementText by lazy(LazyThreadSafetyMode.NONE) { element.text }
-    val originalText by lazy(LazyThreadSafetyMode.NONE) { fileText.substring(element.startOffset, element.endOffset) }
+    val originalText by
+        lazy(LazyThreadSafetyMode.NONE) {
+          fileText.substring(element.startOffset, element.endOffset)
+        }
     when (element) {
       is PsiComment -> {
         if (elementText.startsWith("/*") && !elementText.endsWith("*/")) {
