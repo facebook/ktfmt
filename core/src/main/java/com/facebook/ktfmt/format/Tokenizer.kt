@@ -61,13 +61,12 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
   }
 
   override fun visitElement(element: PsiElement) {
-    val startIndex = element.startOffset
-    val endIndex = element.endOffset
-    val elementText = element.text
-    val originalText = fileText.substring(startIndex, endIndex)
+   // Do not materialize text/text ranges when it's non needed -- e.g. for KtFile, composite PsiElement(...) etc.
+    val elementText by lazy(LazyThreadSafetyMode.NONE) { element.text }
+    val originalText by lazy(LazyThreadSafetyMode.NONE) { fileText.substring(element.startOffset, element.endOffset) }
     when (element) {
       is PsiComment -> {
-        if (element.text.startsWith("/*") && !element.text.endsWith("*/")) {
+        if (elementText.startsWith("/*") && !elementText.endsWith("*/")) {
           throw ParseError(
               "Unclosed comment",
               StringUtil.offsetToLineColumn(fileText, element.startOffset),
@@ -87,7 +86,7 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
                 index = index,
                 originalText = originalText,
                 text = elementText,
-                position = startIndex,
+                position = element.startOffset,
                 column = 0,
                 isToken = treatAsToken,
                 kind = KtTokens.EOF,
@@ -105,7 +104,7 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
                         originalText,
                     ),
                 text = elementText,
-                position = startIndex,
+                position = element.startOffset,
                 column = 0,
                 isToken = true,
                 kind = KtTokens.EOF,
@@ -124,11 +123,11 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
                     index = -1,
                     originalText =
                         fileText.substring(
-                            startIndex + matcher.start(),
-                            startIndex + matcher.end(),
+                            element.startOffset + matcher.start(),
+                            element.startOffset + matcher.end(),
                         ),
                     text = text,
-                    position = startIndex + matcher.start(),
+                    position = element.startOffset + matcher.start(),
                     column = 0,
                     isToken = false,
                     kind = KtTokens.EOF,
@@ -141,7 +140,7 @@ class Tokenizer(private val fileText: String, val file: KtFile) : KtTreeVisitorV
                   index = index,
                   originalText = originalText,
                   text = elementText,
-                  position = startIndex,
+                  position = element.startOffset,
                   column = 0,
                   isToken = true,
                   kind = KtTokens.EOF,

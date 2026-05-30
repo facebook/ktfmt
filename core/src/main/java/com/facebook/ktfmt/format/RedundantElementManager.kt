@@ -120,6 +120,6 @@ object RedundantElementManager {
 
   private fun PsiElement?.containsNewline(): Boolean {
     if (this !is PsiWhiteSpace) return false
-    return this.text.contains('\n')
+    return this.textContains('\n')
   }
 }

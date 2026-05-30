@@ -52,7 +52,7 @@ internal class RedundantSemicolonDetector {
 
   /** returns **true** if this element was an extra comma, **false** otherwise. */
   private fun isExtraSemicolon(element: PsiElement): Boolean {
-    if (element.text != ";") {
+    if (element !is LeafPsiElement || element.elementType != KtTokens.SEMICOLON) {
       return false
     }
 

@@ -19,6 +19,8 @@ package com.facebook.ktfmt.format
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
+import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtClassBody
 import org.jetbrains.kotlin.psi.KtCollectionLiteralExpression
 import org.jetbrains.kotlin.psi.KtElement
@@ -47,10 +49,9 @@ object TrailingCommas {
     }
 
     private fun isTrailingComma(element: PsiElement): Boolean {
-      if (element.text != ",") {
+      if (element !is LeafPsiElement || element.elementType != KtTokens.COMMA) {
         return false
       }
-
       return extractManagedList(element.parent)?.trailingComma == element
     }
   }
@@ -77,10 +78,6 @@ object TrailingCommas {
      * ```
      */
     fun takeElement(element: KtElement) {
-      if (!element.text.contains("\n")) {
-        return // Only suggest trailing commas where there is already a line break
-      }
-
       when (element) {
         is KtEnumEntry, // Only suggest on the KtClassBody container
         is KtWhenEntry -> return
@@ -99,6 +96,9 @@ object TrailingCommas {
       }
 
       val list = extractManagedList(element) ?: return
+      if (!element.textContains('\n')) {
+        return // Only suggest trailing commas where there is already a line break
+      }
       if (list.items.size <= 1) {
         return // Never insert commas to single-element lists
       }
