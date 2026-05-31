@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+* Reduced overall number of allocations to improve formatting performance (~6-7%) (https://github.com/facebook/ktfmt/pull/620)
 
 ## [0.63]
 
