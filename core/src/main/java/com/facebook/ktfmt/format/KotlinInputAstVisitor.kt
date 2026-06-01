@@ -1619,7 +1619,7 @@ class KotlinInputAstVisitor(
   private fun hasSourceNewlineInLambdaBody(lambdaExpression: KtLambdaExpression): Boolean {
     val functionLiteral = lambdaExpression.functionLiteral
     for (child in functionLiteral.node.children()) {
-      if (child.psi is PsiWhiteSpace && child.text.contains('\n')) return true
+      if (child.psi is PsiWhiteSpace && child.textContains('\n')) return true
     }
     return false
   }

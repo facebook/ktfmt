@@ -22,6 +22,7 @@ import java.util.regex.Pattern.MULTILINE
 object WhitespaceTombstones {
   /** See [replaceTrailingWhitespaceWithTombstone]. */
   const val SPACE_TOMBSTONE = '\u0003'
+  private val TRAILING_WHITESPACE_PATTERN = Pattern.compile(" ($)", MULTILINE)
 
   fun String.indexOfWhitespaceTombstone(): Int = this.indexOf(SPACE_TOMBSTONE)
 
@@ -32,7 +33,7 @@ object WhitespaceTombstones {
    * replace it back to a space.
    */
   fun replaceTrailingWhitespaceWithTombstone(s: String): String {
-    return Pattern.compile(" ($)", MULTILINE).matcher(s).replaceAll("$SPACE_TOMBSTONE$1")
+    return TRAILING_WHITESPACE_PATTERN.matcher(s).replaceAll("$SPACE_TOMBSTONE$1")
   }
 
   /** See [replaceTrailingWhitespaceWithTombstone]. */

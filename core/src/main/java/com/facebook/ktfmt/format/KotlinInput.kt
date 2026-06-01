@@ -130,8 +130,11 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
         )
   }
 
-  private fun makePositionToColumnMap(toks: List<KotlinTok>) =
-      ImmutableMap.copyOf(toks.map { it.position to it.column }.toMap())
+  private fun makePositionToColumnMap(toks: List<KotlinTok>): ImmutableMap<Int, Int> {
+    val builder = ImmutableMap.builderWithExpectedSize<Int, Int>(toks.size)
+    toks.forEach { builder.put(it.position, it.column) }
+    return builder.build()
+  }
 
   private fun buildToks(file: KtFile, fileText: String): ImmutableList<KotlinTok> {
     val tokenizer = Tokenizer(fileText, file)
