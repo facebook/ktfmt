@@ -12,7 +12,7 @@ net-java-dev-jna-jna = "4.2.2"
 org-ec4j-core = "1.2.0"
 
 # plugins
-gradlePlugin-dokka = "2.0.0"
+gradlePlugin-dokka = "2.2.0"
 gradlePlugin-intelliJPlatform = "2.6.0"
 gradlePlugin-ktfmt = "0.24.0"
 gradlePlugin-nexusPublish = "2.0.0"
@@ -36,6 +36,7 @@ kotlin-test-junit4 = { module = "org.jetbrains.kotlin:kotlin-test-junit", versio
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version.ref = "gradlePlugin-dokka" }
+dokka-javadoc = { id = "org.jetbrains.dokka-javadoc", version.ref = "gradlePlugin-dokka" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "gradlePlugin-intelliJPlatform" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "gradlePlugin-ktfmt" }

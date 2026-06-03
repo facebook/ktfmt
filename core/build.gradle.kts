@@ -25,6 +25,7 @@ plugins {
   id("com.ncorti.ktfmt.gradle")
   id("maven-publish")
   id("org.jetbrains.dokka")
+  id("org.jetbrains.dokka-javadoc")
   id("signing")
   id("ktfmt.ktfmt-file-generator")
 }
@@ -76,7 +77,11 @@ tasks {
 
   // Javadoc
   register("javadocJar", Jar::class) {
-    val dokkaJavadocTask = named("dokkaJavadoc", org.jetbrains.dokka.gradle.DokkaTask::class)
+    val dokkaJavadocTask =
+        named(
+            "dokkaGeneratePublicationJavadoc",
+            org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask::class,
+        )
     dependsOn(dokkaJavadocTask)
     from(dokkaJavadocTask.flatMap { it.outputDirectory })
     archiveClassifier.set("javadoc")
