@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import com.ncorti.ktfmt.gradle.tasks.KtfmtCheckTask
 import kotlin.io.path.writeText
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
@@ -137,6 +139,10 @@ ktfmt {
       com.ncorti.ktfmt.gradle.TrailingCommaManagementStrategy.ONLY_ADD
   )
 }
+
+tasks.named("compileKotlin") { setMustRunAfter(emptyList<Any>()) }
+
+tasks.withType<KtfmtCheckTask>().configureEach { setMustRunAfter(listOf(tasks.named("jar"))) }
 
 group = "com.facebook"
 
