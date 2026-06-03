@@ -190,10 +190,20 @@ object Formatter {
     val sortedImports = importList.imports.sortedBy(::canonicalText).distinctBy(::canonicalText)
     val importsWithComments = commentList + sortedImports
 
+    val body = importsWithComments.joinToString(separator = "\n") { imprt -> imprt.text }
+    /*
+     * Kludge: idempotent formatting.
+     * This step optimizes the following goal -- producing **identical** code for already formatted
+     * code, as it's important for PSI-reuse.
+     * There is exactly one case where this step should add trailing newline -- when an inline
+     * comment follows the last import statement. We check for that (note it gives false positives for `/* // */`
+     * which is acceptable -- later prettyPrint step will fix that) and avoid extra-append when it is redundant.
+     */
+    val needsTerminator = body.lastIndexOf('\n').let { it >= 0 && body.indexOf("//", it + 1) >= 0 }
     return code.replaceRange(
         importList.startOffset,
         importList.endOffset,
-        importsWithComments.joinToString(separator = "\n") { imprt -> imprt.text } + "\n",
+        if (needsTerminator) body + "\n" else body,
     )
   }
 }
