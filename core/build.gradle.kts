@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
+import com.facebook.ktfmt.GenerateKtfmtFileTask
 import com.ncorti.ktfmt.gradle.tasks.KtfmtCheckTask
-import kotlin.io.path.writeText
 import org.gradle.kotlin.dsl.withType
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
@@ -27,6 +26,7 @@ plugins {
   id("maven-publish")
   id("org.jetbrains.dokka")
   id("signing")
+  id("ktfmt.ktfmt-file-generator")
 }
 
 repositories {
@@ -48,38 +48,10 @@ dependencies {
 
 val generateSources by tasks.registering {
   outputs.dir(layout.buildDirectory.dir("generated/main/java"))
-  dependsOn(tasks.named("generateKtfmtFile"))
+  dependsOn(tasks.withType<GenerateKtfmtFileTask>())
 }
 
 tasks {
-  // Create Ktfmt.kt file with version information
-  register("generateKtfmtFile") {
-    val genVersionFileScript = rootProject.rootDir.resolve("gen_version_file.sh")
-    val versionPropertiesFile = rootProject.rootDir.resolve("gradle.properties")
-    val versionFile =
-        layout.buildDirectory.file("generated/main/java/com/facebook/ktfmt/util/Ktfmt.kt")
-
-    inputs.files(genVersionFileScript, versionPropertiesFile)
-    outputs.file(versionFile)
-    outputs.cacheIf { true }
-
-    // provider to run the shell script genVersionFileScript with versionPropertiesFile as argument
-    val scriptProcess = providers.exec {
-      workingDir = rootProject.rootDir
-      commandLine = listOf(genVersionFileScript.toString(), versionPropertiesFile.toString())
-    }
-
-    doLast {
-      val scriptOutput = scriptProcess.standardOutput.asText.get()
-      if (scriptProcess.result.get().exitValue != 0) {
-        val scriptError = scriptProcess.standardError.asText.get()
-        error("Failed to generate version file!\nstdout:\n$scriptOutput\n\nstderr:\n$scriptError")
-      }
-      versionFile.get().asPath.writeText(scriptOutput)
-      logger.info("Generated version file at ${versionFile.get()}")
-    }
-  }
-
   // Run tests with UTF-16 encoding
   test { jvmArgs("-Dfile.encoding=UTF-16") }
 

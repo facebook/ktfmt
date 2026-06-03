@@ -30,7 +30,6 @@ gson = { module = "com.google.code.gson:gson", version.ref = "com-google-code-gs
 guava = { module = "com.google.guava:guava", version.ref = "com-google-guava-guava" }
 junit = { module = "junit:junit", version.ref = "junit-junit" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "net-java-dev-jna-jna" }
-ktfmt = { module = "com.facebook:ktfmt", version.ref = "ktfmt" }
 kotlin-compilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-test-junit4 = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
