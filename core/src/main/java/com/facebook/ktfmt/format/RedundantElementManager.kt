@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.kdoc.psi.impl.KDocImpl
 import org.jetbrains.kotlin.psi.KtElement
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtImportList
 import org.jetbrains.kotlin.psi.KtPackageDirective
 import org.jetbrains.kotlin.psi.KtReferenceExpression
@@ -33,8 +34,11 @@ import org.jetbrains.kotlin.psi.psiUtil.startOffset
  */
 object RedundantElementManager {
   /** Remove extra semicolons and unused imports, if enabled in the [options] */
-  fun dropRedundantElements(code: String, options: FormattingOptions): String {
-    val file = Parser.parse(code)
+  fun dropRedundantElements(code: String, options: FormattingOptions): String =
+      dropRedundantElements(Parser.parse(code), options)
+
+  internal fun dropRedundantElements(file: KtFile, options: FormattingOptions): String {
+    val code = file.text
     val redundantImportDetector = RedundantImportDetector(enabled = options.removeUnusedImports)
     val redundantSemicolonDetector = RedundantSemicolonDetector()
     val trailingCommaDetector = TrailingCommas.Detector()
@@ -96,8 +100,15 @@ object RedundantElementManager {
     if (!options.manageTrailingCommas) {
       return code
     }
+    return addRedundantElements(Parser.parse(code), options)
+  }
 
-    val file = Parser.parse(code)
+  internal fun addRedundantElements(file: KtFile, options: FormattingOptions): String {
+    if (!options.manageTrailingCommas) {
+      return file.text
+    }
+
+    val code = file.text
     val trailingCommaSuggestor = TrailingCommas.Suggestor()
 
     file.accept(

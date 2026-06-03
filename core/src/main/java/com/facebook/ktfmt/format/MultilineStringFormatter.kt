@@ -18,6 +18,7 @@ package com.facebook.ktfmt.format
 
 import com.google.common.annotations.VisibleForTesting
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtQualifiedExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
@@ -31,10 +32,13 @@ private const val TQ = "\"\"\""
  * imports.
  */
 class MultilineStringFormatter(val continuationIndentSize: Int) {
-  fun format(code: String): String {
+  fun format(code: String): String = format(Parser.parse(code))
+
+  internal fun format(file: KtFile): String {
+    val code = file.text
     val result = StringBuilder(code)
     val multilineStringList =
-        getMultilineTrimmedStringList(code)
+        getMultilineTrimmedStringList(file)
             .sortedByDescending(MultilineTrimmedString::openStringOffset)
     for (multilineString in multilineStringList) {
       if (multilineString.stringLineCount < 2) {
@@ -104,8 +108,11 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
   }
 
   @VisibleForTesting
-  internal fun getMultilineTrimmedStringList(code: String): List<MultilineTrimmedString> {
-    val file = Parser.parse(code)
+  internal fun getMultilineTrimmedStringList(code: String): List<MultilineTrimmedString> =
+      getMultilineTrimmedStringList(Parser.parse(code))
+
+  internal fun getMultilineTrimmedStringList(file: KtFile): List<MultilineTrimmedString> {
+    val code = file.text
     val strings = mutableListOf<MultilineTrimmedString>()
     file.accept(
         object : KtTreeVisitorVoid() {
