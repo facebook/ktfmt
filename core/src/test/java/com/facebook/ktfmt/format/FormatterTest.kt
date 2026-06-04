@@ -1840,10 +1840,10 @@ class FormatterTest {
           |                rate =
           |                    rate(
           |                        value =
-          |                            firstArg<Input>().info.get(0).rate.value
-          |                    )
+          |                            firstArg<Input>().info.get(0).rate.value,
+          |                    ),
           |            )
-          |        }
+          |        },
           |)
           |"""
               .trimMargin(),
@@ -3457,7 +3457,7 @@ class FormatterTest {
             |        |multiline
             |        |  string
             |        |$TQ
-            |            .trimMargin()
+            |            .trimMargin(),
             |    )
             |    .bar(
             |        $TQ
@@ -3468,7 +3468,7 @@ class FormatterTest {
             |        multiline
             |          string
             |        $TQ
-            |            .trimIndent()
+            |            .trimIndent(),
             |    )
             |"""
                 .trimMargin()
@@ -9444,6 +9444,48 @@ class FormatterTest {
             )
         )
         .isEqualTo(expected)
+  }
+
+  @Test
+  fun `single parameter gets trailing comma when wrapped`() =
+      assertFormatted(
+          """
+          |///////////////////////////////////////////
+          |fun foo(
+          |    aLongParameterNameThatForcesWrapping:
+          |        String,
+          |) {}
+          |"""
+              .trimMargin(),
+          formattingOptions = META_FORMAT,
+          deduceMaxWidth = true,
+      )
+
+  @Test
+  fun `single parameter gets wrapped if line limit reached after trailing comma added`() {
+      val code = """
+            |////////////////////////////////////////////////
+            |fun foo(
+            |    aLongParameterNameThatForcesWrapping: String
+            |) {}
+            |"""
+          .trimMargin()
+      val expected = """
+            |////////////////////////////////////////////////
+            |fun foo(
+            |    aLongParameterNameThatForcesWrapping:
+            |        String,
+            |) {}
+            |"""
+          .trimMargin()
+
+      assertThatFormatting(code)
+          .withOptions(
+              META_FORMAT.copy(
+                  maxWidth = code.lineSequence().first().length
+              )
+          )
+      .isEqualTo(expected)
   }
 
   @Test
