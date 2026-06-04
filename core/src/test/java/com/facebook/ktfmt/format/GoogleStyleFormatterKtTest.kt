@@ -1339,7 +1339,7 @@ class GoogleStyleFormatterKtTest {
           |  doItTwice()
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test

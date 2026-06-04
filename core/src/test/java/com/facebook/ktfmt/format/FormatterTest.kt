@@ -51,7 +51,7 @@ class FormatterTest {
           |
           |args.forEach { println(File + "-") }
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -63,7 +63,7 @@ class FormatterTest {
           |
           |println("Called")
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -241,7 +241,7 @@ class FormatterTest {
           |  val y = 0
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test fun `class without a body nor properties`() = assertFormatted("class Foo\n")
@@ -258,7 +258,7 @@ class FormatterTest {
           |  fun runIt()
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -281,7 +281,7 @@ class FormatterTest {
           |  class Bar
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -298,7 +298,7 @@ class FormatterTest {
           |  final var f4 = 0
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -309,7 +309,7 @@ class FormatterTest {
           |  public open inner var f2 = 0
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -321,7 +321,7 @@ class FormatterTest {
           |  x + 1
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -554,7 +554,7 @@ class FormatterTest {
         |
         |/* Another comment */
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertFormatted(
@@ -565,7 +565,7 @@ class FormatterTest {
         |
         |/* Another comment */
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertFormatted(
@@ -577,7 +577,7 @@ class FormatterTest {
         |
         |/* Another comment */
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertFormatted(
@@ -587,7 +587,7 @@ class FormatterTest {
         |// Adjacent line comments
         |// Don't separate
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
   }
 
@@ -615,7 +615,7 @@ class FormatterTest {
           |      }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -642,7 +642,7 @@ class FormatterTest {
           |      }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -668,7 +668,7 @@ class FormatterTest {
           |    private set
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -731,7 +731,7 @@ class FormatterTest {
           |  a === b
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -764,7 +764,7 @@ class FormatterTest {
           |
           |fun f() = `from doing this`()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -775,7 +775,7 @@ class FormatterTest {
           |  node?.name
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -786,7 +786,7 @@ class FormatterTest {
           |  node?.name.hello
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -984,7 +984,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1272,7 +1272,7 @@ class FormatterTest {
           |
           |val x = `if` { we.`when`(wow) }
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1286,7 +1286,7 @@ class FormatterTest {
           |
           |val x = `if` { we.`when`(wow) }
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1582,7 +1582,7 @@ class FormatterTest {
         | */
         |fun fetchBananas(count: Int)
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
   }
 
@@ -1600,7 +1600,7 @@ class FormatterTest {
         | */
         |fun fetchBananas(count: Int)
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
   }
 
@@ -1616,7 +1616,7 @@ class FormatterTest {
           |import com.example.component4
           |import com.example.component5
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1657,7 +1657,7 @@ class FormatterTest {
           |import com.example.unaryPlus
           |import org.gradle.kotlin.dsl.assign
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1727,7 +1727,7 @@ class FormatterTest {
           |bar
           |*/
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1742,7 +1742,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1758,7 +1758,7 @@ class FormatterTest {
           |      123456789012345678901234567890)
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1774,7 +1774,7 @@ class FormatterTest {
           |      c = 3456789012345678901234567890)
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1790,7 +1790,7 @@ class FormatterTest {
           |            },
           |        duration = duration)
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1907,7 +1907,7 @@ class FormatterTest {
           |      })
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1921,7 +1921,7 @@ class FormatterTest {
           |      })
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -1947,7 +1947,7 @@ class FormatterTest {
             |  }
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .isEqualTo(
             """
@@ -1966,7 +1966,7 @@ class FormatterTest {
             |  }
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -1987,7 +1987,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2004,7 +2004,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2019,7 +2019,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2040,7 +2040,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2055,7 +2055,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2069,7 +2069,7 @@ class FormatterTest {
           |  }.exhaustive
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2114,7 +2114,7 @@ class FormatterTest {
           |  doItTwice()
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2128,7 +2128,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2151,7 +2151,7 @@ class FormatterTest {
           |      .build()
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2169,7 +2169,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2185,7 +2185,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2202,7 +2202,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2213,7 +2213,7 @@ class FormatterTest {
           |
           |fun f2(): Int {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2271,7 +2271,7 @@ class FormatterTest {
           |
           |class Derived5 : Super3<Int>()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2306,7 +2306,7 @@ class FormatterTest {
           """
           |@AnnWithArrayValue(1, 2, 3) class C
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2315,7 +2315,7 @@ class FormatterTest {
           """
           |override internal fun f() {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2330,7 +2330,7 @@ class FormatterTest {
           |
           |open class Foo
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2384,7 +2384,7 @@ class FormatterTest {
           | */
           |fun foo() {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2400,7 +2400,7 @@ class FormatterTest {
           | * <p>On the other hand, we respect existing tags, and don't remove them.
           | */
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2415,7 +2415,7 @@ class FormatterTest {
           | * This is another paragraph
           | */
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2459,7 +2459,7 @@ class FormatterTest {
           | * This is another paragraph
           | */
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2474,7 +2474,7 @@ class FormatterTest {
           | * This is another paragraph
           | */
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2484,7 +2484,7 @@ class FormatterTest {
           |/** \[ */
           |fun markdownError() = Unit
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2495,7 +2495,7 @@ class FormatterTest {
           |  return 4
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2507,7 +2507,7 @@ class FormatterTest {
           |  return
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2518,7 +2518,7 @@ class FormatterTest {
           |  print(b ?: return)
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2531,7 +2531,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2546,7 +2546,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2563,7 +2563,7 @@ class FormatterTest {
           |  return if (b) 1 else 2
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2620,7 +2620,7 @@ class FormatterTest {
           |      }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2683,7 +2683,7 @@ class FormatterTest {
           """
           |val x = 2
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2779,7 +2779,7 @@ class FormatterTest {
           |    val offspring2: List<Foo>
           |) {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2795,7 +2795,7 @@ class FormatterTest {
           |    val foo: String
           |) {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2828,7 +2828,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2907,7 +2907,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2918,7 +2918,7 @@ class FormatterTest {
           |  internal constructor(number: Int) : super(number) {}
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2931,7 +2931,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2949,7 +2949,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2960,7 +2960,7 @@ class FormatterTest {
           |/** A comment */
           |constructor() {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2969,7 +2969,7 @@ class FormatterTest {
           """
           |object Foo(n: Int) {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2980,7 +2980,7 @@ class FormatterTest {
           |  return object : Adapter() {}
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -2991,7 +2991,7 @@ class FormatterTest {
           |  return (object : Adapter() {})
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3003,7 +3003,7 @@ class FormatterTest {
           |  b[3, 4]
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3089,7 +3089,7 @@ class FormatterTest {
             |  (val x: Int = a, var y: String = b    ) = d
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .isEqualTo(
             """
@@ -3103,7 +3103,7 @@ class FormatterTest {
             |  (val x: Int = a, var y: String = b) = d
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -3218,7 +3218,7 @@ class FormatterTest {
           |                .also { _somePropertyWithBackingOne = it }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3259,7 +3259,7 @@ class FormatterTest {
           |var x: (@Anno (Int?)) = null
           |var x: (@Anno() (Int)?) = null
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3268,7 +3268,7 @@ class FormatterTest {
           """
           |var listener: ((Boolean) -> Unit)? = null
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3279,7 +3279,7 @@ class FormatterTest {
           |
           |var listener: ((Boolean) -> Unit) = foo
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3292,7 +3292,7 @@ class FormatterTest {
           |  println("Hello! ${'$'}{"wor" + "ld"}")
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3310,7 +3310,7 @@ class FormatterTest {
           |      world!${TQ})
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3349,7 +3349,7 @@ class FormatterTest {
           |Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
           |$TQ
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3443,7 +3443,7 @@ class FormatterTest {
             |         .trimIndent()
             |   )
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .withOptions(META_FORMAT)
         .isEqualTo(
@@ -3471,7 +3471,7 @@ class FormatterTest {
             |            .trimIndent(),
             |    )
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -3484,7 +3484,7 @@ class FormatterTest {
             |     |is this the end of the line?$TQ
             |        .trimMargin()
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .isEqualTo(
             """
@@ -3494,7 +3494,7 @@ class FormatterTest {
             |    $TQ
             |        .trimMargin()
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
 
     assertThatFormatting(
@@ -3504,7 +3504,7 @@ class FormatterTest {
             |     is this the end of the line?$TQ
             |        .trimIndent()
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .isEqualTo(
             """
@@ -3514,7 +3514,7 @@ class FormatterTest {
             |    $TQ
             |        .trimIndent()
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -3530,7 +3530,7 @@ class FormatterTest {
               |     $TQ
               |        .trimMargin()
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
           .isEqualTo(
               """
@@ -3541,7 +3541,7 @@ class FormatterTest {
               |    |$TQ
               |        .trimMargin()
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
 
   @Test
@@ -3554,7 +3554,7 @@ class FormatterTest {
               |    |$TQ
               |        .trimMargin()
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
           .isEqualTo(
               """
@@ -3565,7 +3565,7 @@ class FormatterTest {
               |    |$TQ
               |        .trimMargin()
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
 
   @Test
@@ -3590,7 +3590,7 @@ class FormatterTest {
         |    |$TQ
         |        .trimMargin()
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertFormatted(
@@ -3612,7 +3612,7 @@ class FormatterTest {
         |    |$TQ
         |        .trimMargin()
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
   }
 
@@ -3628,7 +3628,7 @@ class FormatterTest {
             |    $TQ
             |        .trimMargin()
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .isEqualTo(
             """
@@ -3640,7 +3640,7 @@ class FormatterTest {
             |    $TQ
             |        .trimMargin()
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -3655,7 +3655,7 @@ class FormatterTest {
           |        // This comment should be preserved
           |        .trimMargin()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3669,7 +3669,7 @@ class FormatterTest {
           |        // This comment should be preserved
           |        .trimIndent()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3684,7 +3684,7 @@ class FormatterTest {
           |        // Second comment
           |        .trimMargin()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3737,7 +3737,7 @@ class FormatterTest {
         |        |$TQ
         |        .trimMargin()
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertThatFormatting(
@@ -3760,7 +3760,7 @@ class FormatterTest {
             |        |$TQ
             |        .trimMargin()
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .isEqualTo(
             """
@@ -3782,7 +3782,7 @@ class FormatterTest {
             |    |$TQ
             |        .trimMargin()
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -3798,7 +3798,7 @@ class FormatterTest {
               |
               |     $TQ.trimMargin()
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
           .isEqualTo(
               """
@@ -3810,7 +3810,7 @@ class FormatterTest {
               |    |$TQ
               |        .trimMargin()
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
 
   @Test
@@ -3851,7 +3851,7 @@ class FormatterTest {
           |
           |class Foo<T>
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3864,7 +3864,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3944,7 +3944,7 @@ class FormatterTest {
           |      .methodCall()
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -3955,7 +3955,7 @@ class FormatterTest {
           |
           |fun <T> foo(n: Int) where T : Bar, T : FooBar {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4179,7 +4179,7 @@ class FormatterTest {
           |      })
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4192,7 +4192,7 @@ class FormatterTest {
           |  var x: List<String>.Iterator
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4203,7 +4203,7 @@ class FormatterTest {
           |  for ((x, y: Int) in a) {}
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4248,7 +4248,7 @@ class FormatterTest {
           |
           |class `more spaces`
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4265,7 +4265,7 @@ class FormatterTest {
           |  //
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4362,7 +4362,7 @@ class FormatterTest {
           """
           |val callback: (@Anno List<@JvmSuppressWildcards String>) -> Unit = foo
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4373,7 +4373,7 @@ class FormatterTest {
           |  inline fun <@Anno reified @Anno X, @Anno reified @Anno Y> bar() {}
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4384,7 +4384,7 @@ class FormatterTest {
           |  fun <T : @Anno Kip, U> bar() where U : @Anno Kip, U : @Anno Qux {}
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4393,7 +4393,7 @@ class FormatterTest {
           """
           |fun foo(x: Foo<in @Anno Int>) {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4402,7 +4402,7 @@ class FormatterTest {
           """
           |val x = { (@Anno x, @Anno y) -> x }
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4417,7 +4417,7 @@ class FormatterTest {
           |  } catch (@Suppress("GeneralException") e: Exception) {}
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4429,7 +4429,7 @@ class FormatterTest {
           |  return map.asMap()
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4462,7 +4462,7 @@ class FormatterTest {
           |  !--a
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4480,7 +4480,7 @@ class FormatterTest {
           |  a!! !!
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4492,7 +4492,7 @@ class FormatterTest {
           |  val p: Pair<*, *>
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4504,7 +4504,7 @@ class FormatterTest {
           |  val p = Ctor<A & B & C, T & Y & Z>
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4513,7 +4513,7 @@ class FormatterTest {
           """
           |val p: Pair<in T, out S>
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4522,7 +4522,7 @@ class FormatterTest {
           """
           |class Foo<in T, out S>
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4531,7 +4531,7 @@ class FormatterTest {
           """
           |class Foo<in T : List<*>, out S : Any?>
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4540,7 +4540,7 @@ class FormatterTest {
           """
           |class Foo<T>(n: Int) where T : Bar, T : FooBar {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4549,7 +4549,7 @@ class FormatterTest {
           """
           |fun <T> foo(n: Int) where T : Bar, T : FooBar {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4561,7 +4561,7 @@ class FormatterTest {
           |    return 2 * sum()
           |  }
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4571,7 +4571,7 @@ class FormatterTest {
           |class Foo<T>() : Bar by bar
           |    where T : Qux
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4583,7 +4583,7 @@ class FormatterTest {
           |    get(): Int = 1
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4598,7 +4598,7 @@ class FormatterTest {
           |    field: MutableList<Int> = mutableListOf()
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4610,7 +4610,7 @@ class FormatterTest {
           |    field = 0
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4623,7 +4623,7 @@ class FormatterTest {
           |    private set
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4634,7 +4634,7 @@ class FormatterTest {
           |  val a = g { 1 + 1 }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4645,7 +4645,7 @@ class FormatterTest {
           |  val a = g(1, 2) { 1 + 1 }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4671,7 +4671,7 @@ class FormatterTest {
           |  val b = { x: Int, y: Int -> x + y }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4689,7 +4689,7 @@ class FormatterTest {
           |      }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4702,7 +4702,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4711,7 +4711,7 @@ class FormatterTest {
           """
           |operator fun Point.component1() = x
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4738,7 +4738,7 @@ class FormatterTest {
           |val Int.isPrime: Boolean
           |  get() = runMillerRabinPrimality(this)
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4747,7 +4747,7 @@ class FormatterTest {
           """
           |val <T> List<T>.twiceSize = 2 * size()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4764,7 +4764,7 @@ class FormatterTest {
         |  val a = example2("and 1")
         |}
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertFormatted(
@@ -4779,7 +4779,7 @@ class FormatterTest {
         |  val a = example2("and 1")
         |}
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertFormatted(
@@ -4796,7 +4796,7 @@ class FormatterTest {
         |  val a = example2("and 1")
         |}
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertFormatted(
@@ -4812,7 +4812,7 @@ class FormatterTest {
         |  val a = example2("and 1")
         |}
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
   }
 
@@ -4826,7 +4826,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4835,7 +4835,7 @@ class FormatterTest {
           """
           |class MyList(impl: List<Int>) : Collection<Int> by impl
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4844,7 +4844,7 @@ class FormatterTest {
           """
           |val a by lazy { 1 + 1 }
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4887,7 +4887,7 @@ class FormatterTest {
           |  var httpClient: OkHttpClient
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4900,7 +4900,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4915,7 +4915,7 @@ class FormatterTest {
           |
           |val listener4: Int.(Int, Boolean) -> Unit
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4924,7 +4924,7 @@ class FormatterTest {
           """
           |val a = "\uD83D\uDC4D"
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4938,7 +4938,7 @@ class FormatterTest {
           |  doIt(o as? Int)
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -4999,7 +4999,7 @@ class FormatterTest {
           |  //
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5016,7 +5016,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5027,7 +5027,7 @@ class FormatterTest {
           |  (0 until 100).size
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5040,7 +5040,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5055,7 +5055,7 @@ class FormatterTest {
           |  do while (1 < 2)
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5073,7 +5073,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5097,7 +5097,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5390,7 +5390,7 @@ class FormatterTest {
           |  a { println("a") }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5404,7 +5404,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5433,7 +5433,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5482,7 +5482,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5509,7 +5509,7 @@ class FormatterTest {
           |  g { (a, b): List<Int>, (c, d): List<Int> -> a }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5520,7 +5520,7 @@ class FormatterTest {
           |  a() { println("a") }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5538,7 +5538,7 @@ class FormatterTest {
           |      .sum
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5684,7 +5684,7 @@ class FormatterTest {
           |  println(t)
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5699,7 +5699,7 @@ class FormatterTest {
           |
           |inline fun <R> bar(noinline block: (suspend () -> R)?): (suspend () -> R)?
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5712,7 +5712,7 @@ class FormatterTest {
           |  FILE_NOT_FOUND,
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5729,7 +5729,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5741,7 +5741,7 @@ class FormatterTest {
           |  @False @WhatIsTruth FALSE,
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5753,7 +5753,7 @@ class FormatterTest {
           |  FALSE("false", false),
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5767,7 +5767,7 @@ class FormatterTest {
           |  FISH(false) {},
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5776,7 +5776,7 @@ class FormatterTest {
           """
           |enum class YTho {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5785,7 +5785,7 @@ class FormatterTest {
           """
           |expect enum class ExpectedEnum
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5796,7 +5796,7 @@ class FormatterTest {
           |  ONE
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5807,7 +5807,7 @@ class FormatterTest {
             |  ONE,;
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .isEqualTo(
             """
@@ -5815,7 +5815,7 @@ class FormatterTest {
             |  ONE,
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -5827,13 +5827,13 @@ class FormatterTest {
             |  ;
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .isEqualTo(
             """
             |enum class Empty {}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
 
     assertThatFormatting(
@@ -5844,13 +5844,13 @@ class FormatterTest {
             |  ;
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .isEqualTo(
             """
             |enum class Empty {}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -5866,7 +5866,7 @@ class FormatterTest {
           |  fun f() {}
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5940,7 +5940,7 @@ class FormatterTest {
           |  foo3(options = *args)
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5967,7 +5967,7 @@ class FormatterTest {
           |
           |val dyn: dynamic = 1
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -5978,7 +5978,7 @@ class FormatterTest {
           |  println(Array<String>::class.java)
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6034,7 +6034,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6059,7 +6059,7 @@ class FormatterTest {
           |        (x) -> Unit)
           |) {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6072,7 +6072,7 @@ class FormatterTest {
           |  @set:Magic(name = "Jane") var field: String
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6085,7 +6085,7 @@ class FormatterTest {
           |
           |@Magic(1) public final class Foo
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6163,7 +6163,7 @@ class FormatterTest {
           |  add(10)
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6179,7 +6179,7 @@ class FormatterTest {
           |@Anno("param")
           |class F
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6188,7 +6188,7 @@ class FormatterTest {
           """
           |@TypeParceler<UUID, UUIDParceler>() class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6198,7 +6198,7 @@ class FormatterTest {
           |/** Hi, I am a one line kdoc */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6208,7 +6208,7 @@ class FormatterTest {
           |/** This links to [AnotherClass] */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6222,7 +6222,7 @@ class FormatterTest {
           | */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6237,7 +6237,7 @@ class FormatterTest {
           | */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6262,7 +6262,7 @@ class FormatterTest {
           | */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6278,7 +6278,7 @@ class FormatterTest {
           | */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6346,7 +6346,7 @@ class FormatterTest {
           |/** Doc line with a reference to [AnotherClass] in the middle of a sentence */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6356,7 +6356,7 @@ class FormatterTest {
           |/** Here are some links [AnotherClass] [AnotherClass2] */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6366,7 +6366,7 @@ class FormatterTest {
           |/** Here are some links [AnotherClass][AnotherClass2]hello */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6376,7 +6376,7 @@ class FormatterTest {
           |/** Please see [onNext] (which has more details) */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6386,7 +6386,7 @@ class FormatterTest {
           |/** [link anchor](the URL for the link anchor goes here) */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6399,7 +6399,7 @@ class FormatterTest {
           |/** The final produced value may have [size][ByteString.size] < [bufferSize]. */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6460,7 +6460,7 @@ class FormatterTest {
           |/** There are many [FooObject]s. */
           |class MyClass {}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -6562,7 +6562,7 @@ class FormatterTest {
           |
           |/* this is the first comment */
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -7023,7 +7023,7 @@ class FormatterTest {
             |const val SOME_CONST = foo.a
             |val SOME_STR = bar.a
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .isEqualTo(
             """
@@ -7033,7 +7033,7 @@ class FormatterTest {
             |const val SOME_CONST = foo.a
             |val SOME_STR = bar.a
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -7044,13 +7044,13 @@ class FormatterTest {
               |
               |fun f() {}
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
           .isEqualTo(
               """
               |fun f() {}
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
 
   @Test
@@ -7080,7 +7080,7 @@ class FormatterTest {
               |
               |val x = Bar()
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
           .isEqualTo(
               """
@@ -7099,7 +7099,7 @@ class FormatterTest {
               |
               |val x = Bar()
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
 
   @Test
@@ -7115,7 +7115,7 @@ class FormatterTest {
               |val x = Foo()
               |val x = Bar()
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
           .isEqualTo(
               """
@@ -7133,7 +7133,7 @@ class FormatterTest {
               |val x = Foo()
               |val x = Bar()
               |"""
-                  .trimMargin()
+                  .trimMargin(),
           )
 
   @Test
@@ -7200,7 +7200,7 @@ class FormatterTest {
         |  }
         |}
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
   }
 
@@ -7237,7 +7237,7 @@ class FormatterTest {
           |  y
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -7251,7 +7251,7 @@ class FormatterTest {
           |  y
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -7265,7 +7265,7 @@ class FormatterTest {
           |  y
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -7287,7 +7287,7 @@ class FormatterTest {
         |}
         |private val g: () -> Unit = { /* no-op */ }
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertFormatted(
@@ -7337,7 +7337,7 @@ class FormatterTest {
           |
           |private val d: () -> Unit = { TODO("implement me") }
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -7364,7 +7364,7 @@ class FormatterTest {
           |
           |private val e: (String, Int) -> Unit = { _, i -> foo(i) /* do nothing ... */ }
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -7395,7 +7395,7 @@ class FormatterTest {
           |  TODO("implement me")
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -7419,7 +7419,7 @@ class FormatterTest {
         |private val c = firstCall().prop.call(param) { /* no-op */ }
         |private val C = firstCall().prop.call(param) { TODO("implement me") }
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertFormatted(
@@ -8399,7 +8399,7 @@ class FormatterTest {
           |  @Anno1 /* comment */ @Anno2 f(1) as Int
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -8790,7 +8790,7 @@ class FormatterTest {
           |  }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -8804,7 +8804,7 @@ class FormatterTest {
         |
         |// End of file
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertFormatted(
@@ -8814,7 +8814,7 @@ class FormatterTest {
         |
         |// End of file
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
 
     assertFormatted(
@@ -8833,7 +8833,7 @@ class FormatterTest {
         |  return
         |}
         |"""
-            .trimMargin()
+            .trimMargin(),
     )
   }
 
@@ -8903,7 +8903,7 @@ class FormatterTest {
             |  fun foo(): Unit
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
         .isEqualTo(
             """
@@ -8913,7 +8913,7 @@ class FormatterTest {
             |  fun foo(): Unit
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -9243,7 +9243,7 @@ class FormatterTest {
                 preserveLambdaBreaks = true,
                 blockIndent = 2,
                 continuationIndent = 4,
-            )
+            ),
         )
         .isEqualTo(code)
   }
@@ -9268,7 +9268,7 @@ class FormatterTest {
                 preserveLambdaBreaks = true,
                 blockIndent = 2,
                 continuationIndent = 4,
-            )
+            ),
         )
         .isEqualTo(code)
   }
@@ -9299,7 +9299,7 @@ class FormatterTest {
                 preserveLambdaBreaks = false,
                 blockIndent = 2,
                 continuationIndent = 4,
-            )
+            ),
         )
         .isEqualTo(expected)
   }
@@ -9326,7 +9326,7 @@ class FormatterTest {
                 preserveLambdaBreaks = true,
                 blockIndent = 2,
                 continuationIndent = 4,
-            )
+            ),
         )
         .isEqualTo(code)
   }
@@ -9353,7 +9353,7 @@ class FormatterTest {
                 preserveLambdaBreaks = true,
                 blockIndent = 2,
                 continuationIndent = 4,
-            )
+            ),
         )
         .isEqualTo(code)
   }
@@ -9383,7 +9383,7 @@ class FormatterTest {
                 preserveLambdaBreaks = true,
                 blockIndent = 2,
                 continuationIndent = 4,
-            )
+            ),
         )
         .isEqualTo(expected)
   }
@@ -9406,7 +9406,7 @@ class FormatterTest {
                 preserveLambdaBreaks = true,
                 blockIndent = 2,
                 continuationIndent = 4,
-            )
+            ),
         )
         .isEqualTo(code)
   }
@@ -9441,7 +9441,7 @@ class FormatterTest {
                 preserveLambdaBreaks = true,
                 blockIndent = 2,
                 continuationIndent = 4,
-            )
+            ),
         )
         .isEqualTo(expected)
   }
@@ -9463,29 +9463,31 @@ class FormatterTest {
 
   @Test
   fun `single parameter gets wrapped if line limit reached after trailing comma added`() {
-      val code = """
-            |////////////////////////////////////////////////
-            |fun foo(
-            |    aLongParameterNameThatForcesWrapping: String
-            |) {}
-            |"""
-          .trimMargin()
-      val expected = """
-            |////////////////////////////////////////////////
-            |fun foo(
-            |    aLongParameterNameThatForcesWrapping:
-            |        String,
-            |) {}
-            |"""
-          .trimMargin()
+    val code =
+        """
+        |////////////////////////////////////////////////
+        |fun foo(
+        |    aLongParameterNameThatForcesWrapping: String
+        |) {}
+        |"""
+            .trimMargin()
+    val expected =
+        """
+        |////////////////////////////////////////////////
+        |fun foo(
+        |    aLongParameterNameThatForcesWrapping:
+        |        String,
+        |) {}
+        |"""
+            .trimMargin()
 
-      assertThatFormatting(code)
-          .withOptions(
-              META_FORMAT.copy(
-                  maxWidth = code.lineSequence().first().length
-              )
-          )
-      .isEqualTo(expected)
+    assertThatFormatting(code)
+        .withOptions(
+            META_FORMAT.copy(
+                maxWidth = code.lineSequence().first().length,
+            ),
+        )
+        .isEqualTo(expected)
   }
 
   @Test
@@ -9498,7 +9500,7 @@ class FormatterTest {
           |}
           |    .baz()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9514,7 +9516,7 @@ class FormatterTest {
           |      bar()
           |    }
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9529,7 +9531,7 @@ class FormatterTest {
           |      .baz()
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9547,7 +9549,7 @@ class FormatterTest {
           |      }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9579,7 +9581,7 @@ class FormatterTest {
           |      }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9595,7 +9597,7 @@ class FormatterTest {
           |      bar()
           |    }
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9613,7 +9615,7 @@ class FormatterTest {
           |      }
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9626,7 +9628,7 @@ class FormatterTest {
           |}
           |    .fold({ a -> a }, { b -> b })
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9635,7 +9637,7 @@ class FormatterTest {
           """
           |val foo = runnnnn { singleStatement() }.baz()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9648,7 +9650,7 @@ class FormatterTest {
           |}
           |    .someMethod(arg1, arg2)
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9680,7 +9682,7 @@ class FormatterTest {
           |}
           |    .someMethod(arg1, arg2)
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9694,7 +9696,7 @@ class FormatterTest {
           |  }
           |      .fold({ a -> a }, { b -> b })
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9707,7 +9709,7 @@ class FormatterTest {
           |}
           |    ?.someMethod(arg1, arg2)
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9720,7 +9722,7 @@ class FormatterTest {
           |}
           |    .baz()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9734,7 +9736,7 @@ class FormatterTest {
           |  }
           |      .baz()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9747,7 +9749,7 @@ class FormatterTest {
           |}
           |    .someMethod(arg1, arg2)
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9761,7 +9763,7 @@ class FormatterTest {
           |    .map { it }
           |    .fold(a, b)
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9774,7 +9776,7 @@ class FormatterTest {
           |}
           |    .baz()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9787,7 +9789,7 @@ class FormatterTest {
           |}
           |    .someMethod(arg1, arg2)
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9802,7 +9804,7 @@ class FormatterTest {
           |  }
           |      .fold(a, b)
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9815,7 +9817,7 @@ class FormatterTest {
           |}
           |    .baz()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
@@ -9828,7 +9830,7 @@ class FormatterTest {
           |}
           |    .map<String>()
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   companion object {

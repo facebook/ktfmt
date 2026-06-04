@@ -54,7 +54,7 @@ class KDocCommentsHelper(private val lineSeparator: String, private val maxLineL
             convertMarkup = false
             nestedListIndent = 4
             optimal = false // Use greedy line breaking for predictability.
-          }
+          },
       )
 
   override fun rewrite(tok: Tok, maxWidth: Int, column0: Int): String {

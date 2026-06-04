@@ -145,7 +145,7 @@ internal class KtfmtSettings(private val project: Project) :
     var customManageTrailingCommas: Boolean by
         property(
             Formatter.META_FORMAT.trailingCommaManagementStrategy !=
-                TrailingCommaManagementStrategy.NONE
+                TrailingCommaManagementStrategy.NONE,
         )
 
     var enableKtfmt: EnabledState by enum(Unknown)
