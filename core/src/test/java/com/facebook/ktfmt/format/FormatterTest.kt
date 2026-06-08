@@ -9377,6 +9377,136 @@ class FormatterTest {
         .isEqualTo(expected)
   }
 
+  @Test
+  fun `correct indentation for lambda with chained function call (#589)`() =
+      assertFormatted(
+          """
+          |fun quux() = runnnnn {
+          |  foo()
+          |  bar()
+          |}
+          |    .baz()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `correct indentation for lambda with multiple chained function call (#589)`() =
+      assertFormatted(
+          """
+          |fun quux() = runnnnn {
+          |  foo()
+          |  bar()
+          |}
+          |    .baz {
+          |      foo()
+          |      bar()
+          |    }
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `correct indentation for lambda with chained function call in block (#589)`() =
+      assertFormatted(
+          """
+          |fun quux() {
+          |  runnnnn {
+          |    foo()
+          |    bar()
+          |  }
+          |      .baz()
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `correct indentation for lambda with multiple chained function call in block (#589)`() =
+      assertFormatted(
+          """
+          |fun quux() {
+          |  runnnnn {
+          |    foo()
+          |    bar()
+          |  }
+          |      .baz {
+          |        foo()
+          |        bar()
+          |      }
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `correct indentation for lambda with multiple chained function call in nested block (#589)`() =
+      assertFormatted(
+          """
+          |fun quux() {
+          |  runnnnn {
+          |    foo()
+          |    runnnnn {
+          |      foo()
+          |      bar()
+          |    }
+          |        .baz {
+          |          foo()
+          |          bar()
+          |        }
+          |  }
+          |      .baz {
+          |        foo()
+          |        runnnnn {
+          |          foo()
+          |          bar()
+          |        }
+          |            .baz {
+          |              foo()
+          |              bar()
+          |            }
+          |      }
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `correct indentation for lambda with multiple chained function call in declaration (#589)`() =
+      assertFormatted(
+          """
+          |val baz =
+          |    runnnnn {
+          |      foo()
+          |      bar()
+          |    }
+          |        .baz {
+          |          foo()
+          |          bar()
+          |        }
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `correct indentation for lambda with multiple chained function call in local declaration (#589)`() =
+      assertFormatted(
+          """
+          |fun quux() {
+          |  val baz =
+          |      runnnnn {
+          |        foo()
+          |        bar()
+          |      }
+          |          .baz {
+          |            foo()
+          |            bar()
+          |          }
+          |}
+          |"""
+              .trimMargin()
+      )
+
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
     private const val TQ = "\"\"\""

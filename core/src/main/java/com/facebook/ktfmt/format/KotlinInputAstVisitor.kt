@@ -29,6 +29,8 @@ import com.google.googlejavaformat.OpsBuilder
 import com.google.googlejavaformat.Output.BreakTag
 import java.util.ArrayDeque
 import java.util.Optional
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 import kotlin.jvm.optionals.getOrNull
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
@@ -385,6 +387,8 @@ class KotlinInputAstVisitor(
           builder.token("=")
           if (isLambdaOrScopingFunction(bodyExpression)) {
             visitLambdaOrScopingFunction(bodyExpression)
+          } else if (isChainedScopingFunction(bodyExpression)) {
+            visitChainedScopingFunction(bodyExpression, emitLeadingBreak = true)
           } else {
             builder.block(expressionBreakIndent) {
               builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
@@ -501,6 +505,11 @@ class KotlinInputAstVisitor(
           builder.token(expression.operationSign.value)
           visit(expression.selectorExpression)
         }
+      }
+      isChainedScopingFunction(expression) &&
+          isMultilineScopingFunction(chainRoot(expression)) &&
+          chainedSelectorsHaveNoValueArguments(expression) -> {
+        visitChainedScopingFunction(expression, emitLeadingBreak = false)
       }
       else -> {
         emitQualifiedExpression(expression)
@@ -1612,6 +1621,113 @@ class KotlinInputAstVisitor(
   }
 
   /**
+   * Returns true when [expression] is a chain whose innermost receiver is a scoping function call.
+   *
+   * For example, this matches `runnnnn { ... }.baz()` (innermost receiver `runnnnn { ... }` is a
+   * scoping function). It does not match a chain whose root is a plain identifier or a non-scoping
+   * call, since those don't have a block-like opener to anchor the chain against.
+   */
+  @OptIn(ExperimentalContracts::class)
+  private fun isChainedScopingFunction(expression: KtExpression): Boolean {
+    contract { returns(true) implies (expression is KtQualifiedExpression) }
+
+    if (expression !is KtQualifiedExpression) return false
+    return isLambdaOrScopingFunction(chainRoot(expression))
+  }
+
+  /** Returns the innermost receiver of a (possibly nested) qualified [expression]. */
+  private fun chainRoot(expression: KtExpression): KtExpression {
+    var root: KtExpression = expression
+    while (root is KtQualifiedExpression) {
+      root = root.receiverExpression
+    }
+    return root
+  }
+
+  /**
+   * Returns true when every chained selector after the innermost scoping-function receiver carries
+   * no value arguments (i.e. only `.foo()` or `.foo { ... }` with a trailing lambda). Selectors
+   * that pass regular value arguments (e.g. `.fold({ ... }, { ... })`) are excluded, since those
+   * chains are better served by the general qualified-expression layout.
+   */
+  private fun chainedSelectorsHaveNoValueArguments(expression: KtExpression): Boolean {
+    var current: KtExpression = expression
+    while (current is KtQualifiedExpression) {
+      val selector = current.selectorExpression
+      if (selector is KtCallExpression && !selector.valueArgumentList?.arguments.isNullOrEmpty()) {
+        return false
+      }
+      current = current.receiverExpression
+    }
+    return true
+  }
+
+  /**
+   * Emit `runnnnn { ... }.baz().qux()` style: render the innermost scoping-function receiver
+   * block-like (so the lambda braces sit at the surrounding indent), then emit each `.selector`
+   * after the closing brace as a chained continuation indented by [blockIndent].
+   *
+   * When the receiver lambda spans multiple lines in the source we force the chained selectors onto
+   * their own line; a single-line lambda stays joined to its chained call.
+   */
+  private fun visitChainedScopingFunction(
+      expression: KtQualifiedExpression,
+      emitLeadingBreak: Boolean,
+  ) {
+    val parts = breakIntoParts(expression)
+    val root = parts[0]
+    val forceBreakBeforeChain = isMultilineScopingFunction(root)
+
+    visitLambdaOrScopingFunction(root, emitLeadingBreak = emitLeadingBreak)
+
+    builder.block(expressionBreakIndent) {
+      for (i in 1 until parts.size) {
+        val part = parts[i] as KtQualifiedExpression
+        if (forceBreakBeforeChain) {
+          builder.forcedBreak()
+        } else {
+          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO)
+        }
+        builder.token(part.operationSign.value)
+        val selectorExpression = part.selectorExpression
+        if (selectorExpression is KtCallExpression) {
+          visit(selectorExpression.calleeExpression)
+          visitCallElement(
+              null,
+              selectorExpression.typeArgumentList,
+              selectorExpression.valueArgumentList,
+              selectorExpression.lambdaArguments,
+          )
+        } else {
+          visit(selectorExpression)
+        }
+      }
+    }
+  }
+
+  /**
+   * Returns true when [expression] is a scoping-function call whose lambda body has source-level
+   * newlines (i.e. spans multiple lines). Used to decide whether chained selectors after the
+   * lambda's closing brace must break onto a new line.
+   */
+  private fun isMultilineScopingFunction(expression: KtExpression): Boolean {
+    var carry: KtExpression? = expression
+    if (carry is KtQualifiedExpression && carry.receiverExpression is KtSimpleNameExpression) {
+      carry = carry.selectorExpression
+    }
+    if (carry is KtCallExpression) {
+      carry = carry.lambdaArguments.firstOrNull()?.getArgumentExpression()
+    }
+    if (carry is KtLabeledExpression) {
+      carry = carry.baseExpression
+    }
+    if (carry is KtLambdaExpression) {
+      return hasSourceNewlineInLambdaBody(carry)
+    }
+    return false
+  }
+
+  /**
    * Returns true if the source code contains a newline anywhere inside the body of
    * [lambdaExpression] — that is, between the opening `{` and the closing `}` of the function
    * literal. Used by [FormattingOptions.preserveLambdaBreaks] to keep user-authored multi-line
@@ -1626,9 +1742,15 @@ class KotlinInputAstVisitor(
   }
 
   /** See [isLambdaOrScopingFunction] for examples. */
-  private fun visitLambdaOrScopingFunction(expr: PsiElement?) {
+  private fun visitLambdaOrScopingFunction(expr: PsiElement?, emitLeadingBreak: Boolean = true) {
     val breakToExpr = genSym()
-    builder.breakOp(Doc.FillMode.INDEPENDENT, " ", expressionBreakIndent, Optional.of(breakToExpr))
+    val breakSpace = if (emitLeadingBreak) " " else ""
+    builder.breakOp(
+        Doc.FillMode.INDEPENDENT,
+        breakSpace,
+        expressionBreakIndent,
+        Optional.of(breakToExpr),
+    )
 
     var carry = expr
     if (carry is KtQualifiedExpression && carry.receiverExpression is KtSimpleNameExpression) {
