@@ -32,8 +32,6 @@ private const val TQ = "\"\"\""
  * imports.
  */
 class MultilineStringFormatter(val continuationIndentSize: Int) {
-  fun format(code: String): String = format(Parser.parse(code))
-
   internal fun format(file: KtFile): String {
     val code = file.text
     val result = StringBuilder(code)
@@ -108,9 +106,6 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
   }
 
   @VisibleForTesting
-  internal fun getMultilineTrimmedStringList(code: String): List<MultilineTrimmedString> =
-      getMultilineTrimmedStringList(Parser.parse(code))
-
   internal fun getMultilineTrimmedStringList(file: KtFile): List<MultilineTrimmedString> {
     val code = file.text
     val strings = mutableListOf<MultilineTrimmedString>()

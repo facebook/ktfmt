@@ -34,9 +34,6 @@ import org.jetbrains.kotlin.psi.psiUtil.startOffset
  */
 object RedundantElementManager {
   /** Remove extra semicolons and unused imports, if enabled in the [options] */
-  fun dropRedundantElements(code: String, options: FormattingOptions): String =
-      dropRedundantElements(Parser.parse(code), options)
-
   internal fun dropRedundantElements(file: KtFile, options: FormattingOptions): String {
     val code = file.text
     val redundantImportDetector = RedundantImportDetector(enabled = options.removeUnusedImports)
@@ -94,13 +91,6 @@ object RedundantElementManager {
     }
 
     return result.toString()
-  }
-
-  fun addRedundantElements(code: String, options: FormattingOptions): String {
-    if (!options.manageTrailingCommas) {
-      return code
-    }
-    return addRedundantElements(Parser.parse(code), options)
   }
 
   internal fun addRedundantElements(file: KtFile, options: FormattingOptions): String {
