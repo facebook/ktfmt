@@ -97,7 +97,8 @@ object Formatter {
    *
    * When [lineRanges] or [characterRanges] are non-null, only pretty-print replacements are limited
    * to those ranges. Whole-file cleanup passes, such as import cleanup and multiline string
-   * formatting, still run afterward, mirroring google-java-format's cleanup-after-selection behavior.
+   * formatting, still run afterward, mirroring google-java-format's cleanup-after-selection
+   * behavior.
    */
   @JvmStatic
   @JvmOverloads
@@ -151,8 +152,8 @@ object Formatter {
                     .code
               }
           FormatterContext(partiallyFormattedCode)
-              .transform { sortedAndDistinctImports(it) }
               .transform { dropRedundantElements(it, options) }
+              .transform { sortedAndDistinctImports(it) }
               .transform { addRedundantElements(it, options) }
               .transform { MultilineStringFormatter(options.continuationIndent).format(it) }
               .code
