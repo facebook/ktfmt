@@ -69,8 +69,7 @@ object RedundantElementManager {
             redundantImportDetector.takeReferenceExpression(expression)
             super.visitReferenceExpression(expression)
           }
-        }
-    )
+        })
 
     val elementsToRemove =
         redundantSemicolonDetector.getRedundantSemicolonElements() +
@@ -107,8 +106,7 @@ object RedundantElementManager {
             trailingCommaSuggestor.takeElement(element)
             super.visitElement(element)
           }
-        }
-    )
+        })
 
     val suggestionElements = trailingCommaSuggestor.getTrailingCommaSuggestions()
     if (suggestionElements.isEmpty()) return code

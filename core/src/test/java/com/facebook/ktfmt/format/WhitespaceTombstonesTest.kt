@@ -39,11 +39,9 @@ class WhitespaceTombstonesTest {
         .isEqualTo("  sdfl ${WhitespaceTombstones.SPACE_TOMBSTONE}\n skdjfh")
     assertThat(WhitespaceTombstones.replaceTrailingWhitespaceWithTombstone("  sdfl  \n skdjfh "))
         .isEqualTo(
-            "  sdfl ${WhitespaceTombstones.SPACE_TOMBSTONE}\n skdjfh${WhitespaceTombstones.SPACE_TOMBSTONE}"
-        )
+            "  sdfl ${WhitespaceTombstones.SPACE_TOMBSTONE}\n skdjfh${WhitespaceTombstones.SPACE_TOMBSTONE}")
     assertThat(WhitespaceTombstones.replaceTrailingWhitespaceWithTombstone("  sdfl  \n\n skdjfh "))
         .isEqualTo(
-            "  sdfl ${WhitespaceTombstones.SPACE_TOMBSTONE}\n\n skdjfh${WhitespaceTombstones.SPACE_TOMBSTONE}"
-        )
+            "  sdfl ${WhitespaceTombstones.SPACE_TOMBSTONE}\n\n skdjfh${WhitespaceTombstones.SPACE_TOMBSTONE}")
   }
 }
