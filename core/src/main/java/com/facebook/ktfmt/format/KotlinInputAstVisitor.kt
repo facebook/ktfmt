@@ -436,7 +436,9 @@ class KotlinInputAstVisitor(
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
       }
       first = false
+      builder.markForPartialFormat()
       visitStatement(statement)
+      builder.markForPartialFormat()
     }
   }
 
@@ -2696,7 +2698,9 @@ class KotlinInputAstVisitor(
           }
       )
 
+      builder.markForPartialFormat()
       visit(child)
+      builder.markForPartialFormat()
       isFirst = false
     }
     markForPartialFormat()
@@ -2722,8 +2726,10 @@ class KotlinInputAstVisitor(
       ) {
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.YES)
       }
+      builder.markForPartialFormat()
       visit(child)
       builder.guessToken(";")
+      builder.markForPartialFormat()
       lastChildHadBlankLineBefore = childGetsBlankLineBefore
       lastChildIsContextReceiver =
           child is KtScriptInitializer &&
