@@ -19,6 +19,9 @@ package com.facebook.ktfmt.cli
 import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
 import com.facebook.ktfmt.util.Ktfmt
+import com.google.common.collect.Range
+import com.google.common.collect.RangeSet
+import com.google.common.collect.TreeRangeSet
 import java.io.File
 import java.nio.charset.StandardCharsets.UTF_8
 
@@ -40,6 +43,11 @@ data class ParsedArgs(
     /** Suppress all non-error output. */
     val quiet: Boolean,
 ) {
+  /** Zero-indexed line ranges to format, using closed-open bounds, e.g. [0, 3) and [6, 7). */
+  internal val lineRanges: RangeSet<Int> = TreeRangeSet.create()
+  /** Zero-indexed character ranges to format, using closed-open bounds. */
+  internal val characterRanges: RangeSet<Int> = TreeRangeSet.create()
+
   companion object {
 
     fun processArgs(args: Array<String>): ParseResult {
@@ -81,6 +89,13 @@ data class ParsedArgs(
         |  --google-style                    Google internal style (2 spaces)
         |  --kotlinlang-style                Kotlin language guidelines style (4 spaces)
         |  --stdin-name=<name>               Name to report when formatting code from stdin
+        |  --lines=<lines>                   Line range(s) to format, like 5 or 1:12,14.
+        |                                        May be used multiple times.
+        |  --offset=<offset>                 Character offset to format, paired with --length.
+        |                                        May be used multiple times.
+        |  --length=<length>                 Character length to format, paired with --offset.
+        |                                        May be used multiple times. 0 formats the line
+        |                                        under the cursor.
         |  --set-exit-if-changed             Sets exit code to 1 if any input file was not
         |                                        formatted/touched
         |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used
@@ -114,13 +129,26 @@ data class ParsedArgs(
       var stdinName: String? = null
       var editorConfig = false
       var quiet = false
+      val lineRanges = TreeRangeSet.create<Int>()
+      val offsets = mutableListOf<Int>()
+      val lengths = mutableListOf<Int>()
 
       if ("--help" in args || "-h" in args) return ParseResult.ShowMessage(HELP_TEXT)
       if ("--version" in args || "-v" in args) {
         return ParseResult.ShowMessage("ktfmt version ${Ktfmt.version}")
       }
 
-      for (arg in args) {
+      var i = 0
+      while (i < args.size) {
+        val arg = args[i]
+        val nextValue = {
+          i++
+          if (i == args.size) {
+            null
+          } else {
+            args[i]
+          }
+        }
         when {
           arg == "--meta-style" -> formattingOptions = Formatter.META_FORMAT
           arg == "--google-style" -> formattingOptions = Formatter.GOOGLE_FORMAT
@@ -136,10 +164,51 @@ data class ParsedArgs(
                       ?: return ParseResult.Error(
                           "Found option '${arg}', expected '${"--stdin-name"}=<value>'"
                       )
+          arg == "--lines" || arg == "--line" -> {
+            val value =
+                nextValue() ?: return ParseResult.Error("required value was not provided for: $arg")
+            when (val result = parseLineRanges(lineRanges, value)) {
+              LineRangeParseResult.Success -> Unit
+              is LineRangeParseResult.Error -> return ParseResult.Error(result.message)
+            }
+          }
+          arg.startsWith("--lines=") ->
+              when (val result = parseLineRanges(lineRanges, parseKeyValueArg("--lines", arg))) {
+                LineRangeParseResult.Success -> Unit
+                is LineRangeParseResult.Error -> return ParseResult.Error(result.message)
+              }
+          arg.startsWith("--line=") ->
+              when (val result = parseLineRanges(lineRanges, parseKeyValueArg("--line", arg))) {
+                LineRangeParseResult.Success -> Unit
+                is LineRangeParseResult.Error -> return ParseResult.Error(result.message)
+              }
+          arg == "--offset" -> {
+            val value =
+                nextValue() ?: return ParseResult.Error("required value was not provided for: $arg")
+            offsets.add(value.toIntOrNull() ?: return ParseResult.Error(invalidInt(arg, value)))
+          }
+          arg.startsWith("--offset=") ->
+              parseKeyValueArg("--offset", arg).let { value ->
+                offsets.add(
+                    value.toIntOrNull() ?: return ParseResult.Error(invalidInt("--offset", value))
+                )
+              }
+          arg == "--length" -> {
+            val value =
+                nextValue() ?: return ParseResult.Error("required value was not provided for: $arg")
+            lengths.add(value.toIntOrNull() ?: return ParseResult.Error(invalidInt(arg, value)))
+          }
+          arg.startsWith("--length=") ->
+              parseKeyValueArg("--length", arg).let { value ->
+                lengths.add(
+                    value.toIntOrNull() ?: return ParseResult.Error(invalidInt("--length", value))
+                )
+              }
           arg.startsWith("--") -> return ParseResult.Error("Unexpected option: $arg")
           arg.startsWith("@") -> return ParseResult.Error("Unexpected option: $arg")
           else -> fileNames.add(arg)
         }
+        i++
       }
 
       if (fileNames.contains("-")) {
@@ -155,7 +224,21 @@ data class ParsedArgs(
         return ParseResult.Error("--stdin-name can only be specified when reading from stdin")
       }
 
-      return ParseResult.Ok(
+      if (offsets.size != lengths.size) {
+        return ParseResult.Error("--offset and --length flags must be provided in matching pairs")
+      }
+
+      val characterRanges = TreeRangeSet.create<Int>()
+      for (index in offsets.indices) {
+        val length = lengths[index].let { if (it == 0) 1 else it }
+        characterRanges.add(Range.closedOpen(offsets[index], offsets[index] + length))
+      }
+
+      if ((!lineRanges.isEmpty || !characterRanges.isEmpty) && fileNames.size != 1) {
+        return ParseResult.Error("partial formatting is only supported for a single file")
+      }
+
+      val parsedArgs =
           ParsedArgs(
               fileNames,
               formattingOptions.copy(removeUnusedImports = removeUnusedImports),
@@ -165,12 +248,64 @@ data class ParsedArgs(
               editorConfig,
               quiet,
           )
-      )
+      parsedArgs.lineRanges.addAll(lineRanges)
+      parsedArgs.characterRanges.addAll(characterRanges)
+      return ParseResult.Ok(parsedArgs)
     }
 
     private fun parseKeyValueArg(key: String, arg: String): String? {
       val parts = arg.split('=', limit = 2)
       return parts[1].takeIf { parts[0] == key || parts.size == 2 }
+    }
+
+    private fun String?.toIntOrNull(): Int? {
+      return try {
+        this?.toInt()
+      } catch (_: NumberFormatException) {
+        null
+      }
+    }
+
+    private fun invalidInt(flag: String, value: String?): String =
+        "invalid integer value for $flag: $value"
+
+    private fun parseLineRanges(
+        lineRanges: RangeSet<Int>,
+        lineRangesArg: String?,
+    ): LineRangeParseResult {
+      if (lineRangesArg == null) {
+        return LineRangeParseResult.Error("required value was not provided for: --lines")
+      }
+      return try {
+        for (lineRange in lineRangesArg.split(',')) {
+          lineRanges.add(parseLineRange(lineRange))
+        }
+        LineRangeParseResult.Success
+      } catch (_: IllegalArgumentException) {
+        LineRangeParseResult.Error("invalid line range for --lines: $lineRangesArg")
+      }
+    }
+
+    private sealed interface LineRangeParseResult {
+      data object Success : LineRangeParseResult
+
+      @JvmInline value class Error(val message: String) : LineRangeParseResult
+    }
+
+    private fun parseLineRange(arg: String): Range<Int> {
+      val parts = arg.split(':')
+      return when (parts.size) {
+        1 -> {
+          val line = parts[0].toInt() - 1
+          Range.closedOpen(line, line + 1)
+        }
+        2 -> {
+          val line0 = parts[0].toInt() - 1
+          val line1 = parts[1].toInt() - 1
+          Range.closedOpen(line0, line1 + 1)
+        }
+        else -> throw IllegalArgumentException(arg)
+      }
     }
   }
 }

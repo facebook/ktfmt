@@ -18,6 +18,9 @@ package com.facebook.ktfmt.cli
 
 import com.facebook.ktfmt.format.Formatter
 import com.facebook.ktfmt.format.FormattingOptions
+import com.google.common.collect.Range
+import com.google.common.collect.RangeSet
+import com.google.common.collect.TreeRangeSet
 import com.google.common.truth.Truth.assertThat
 import java.io.FileNotFoundException
 import kotlin.io.path.createTempDirectory
@@ -119,6 +122,105 @@ class ParsedArgsTest {
   fun `parseOptions recognizes --stdin-name`() {
     val parsed = assertSucceeds(ParsedArgs.parseOptions(arrayOf("--stdin-name=my/foo.kt", "-")))
     assertThat(parsed.stdinName).isEqualTo("my/foo.kt")
+  }
+
+  @Test
+  fun `parseOptions recognizes --lines ranges`() {
+    val parsed =
+        assertSucceeds(ParsedArgs.parseOptions(arrayOf("--lines=1:3,5", "--lines", "7", "foo.kt")))
+
+    assertThat(parsed.lineRanges)
+        .isEqualTo(
+            lineRanges(
+                Range.closedOpen(0, 3),
+                Range.closedOpen(4, 5),
+                Range.closedOpen(6, 7),
+            )
+        )
+  }
+
+  @Test
+  fun `parseOptions recognizes --line alias`() {
+    assertThat(ParsedArgs.parseOptions(arrayOf("--line=1", "foo.kt")))
+        .isEqualTo(
+            parseResultOk(
+                fileNames = listOf("foo.kt"),
+                lineRanges = lineRanges(Range.closedOpen(0, 1)),
+            )
+        )
+    assertThat(assertSucceeds(ParsedArgs.parseOptions(arrayOf("--line", "2", "foo.kt"))).lineRanges)
+        .isEqualTo(lineRanges(Range.closedOpen(1, 2)))
+  }
+
+  @Test
+  fun `parseOptions recognizes offset and length pairs`() {
+    val parsed =
+        assertSucceeds(
+            ParsedArgs.parseOptions(
+                arrayOf("--offset=10", "--length=5", "--offset", "20", "--length", "0", "foo.kt")
+            )
+        )
+
+    assertThat(parsed.characterRanges)
+        .isEqualTo(
+            ranges(
+                Range.closedOpen(10, 15),
+                Range.closedOpen(20, 21),
+            )
+        )
+  }
+
+  @Test
+  fun `parseOptions rejects --lines without value`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--lines"))
+    assertThat(parseResult)
+        .isEqualTo(ParseResult.Error("required value was not provided for: --lines"))
+  }
+
+  @Test
+  fun `parseOptions rejects invalid --lines range`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--lines=not-a-line", "foo.kt"))
+    assertThat(parseResult)
+        .isEqualTo(ParseResult.Error("invalid line range for --lines: not-a-line"))
+  }
+
+  @Test
+  fun `parseOptions rejects --offset without value`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--offset"))
+    assertThat(parseResult)
+        .isEqualTo(ParseResult.Error("required value was not provided for: --offset"))
+  }
+
+  @Test
+  fun `parseOptions rejects invalid --offset`() {
+    val parseResult =
+        ParsedArgs.parseOptions(arrayOf("--offset=not-an-offset", "--length=1", "foo.kt"))
+    assertThat(parseResult)
+        .isEqualTo(ParseResult.Error("invalid integer value for --offset: not-an-offset"))
+  }
+
+  @Test
+  fun `parseOptions rejects mismatched --offset and --length counts`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--offset=1", "foo.kt"))
+    assertThat(parseResult)
+        .isEqualTo(
+            ParseResult.Error("--offset and --length flags must be provided in matching pairs")
+        )
+  }
+
+  @Test
+  fun `parseOptions rejects --lines with multiple files`() {
+    val parseResult = ParsedArgs.parseOptions(arrayOf("--lines=1", "foo.kt", "bar.kt"))
+    assertThat(parseResult)
+        .isEqualTo(ParseResult.Error("partial formatting is only supported for a single file"))
+  }
+
+  @Test
+  fun `parseOptions rejects --offset with multiple files`() {
+    val parseResult =
+        ParsedArgs.parseOptions(arrayOf("--offset=1", "--length=1", "foo.kt", "bar.kt"))
+    assertThat(parseResult)
+        .isEqualTo(ParseResult.Error("partial formatting is only supported for a single file"))
   }
 
   @Test
@@ -258,10 +360,12 @@ class ParsedArgsTest {
       stdinName: String? = null,
       editorConfig: Boolean = false,
       quiet: Boolean = false,
+      lineRanges: RangeSet<Int> = TreeRangeSet.create(),
+      characterRanges: RangeSet<Int> = TreeRangeSet.create(),
   ): ParseResult.Ok {
     val returnedFormattingOptions =
         formattingOptions.copy(removeUnusedImports = removedUnusedImports)
-    return ParseResult.Ok(
+    val parsedArgs =
         ParsedArgs(
             fileNames,
             returnedFormattingOptions,
@@ -271,6 +375,20 @@ class ParsedArgsTest {
             editorConfig,
             quiet,
         )
-    )
+    parsedArgs.lineRanges.addAll(lineRanges)
+    parsedArgs.characterRanges.addAll(characterRanges)
+    return ParseResult.Ok(parsedArgs)
+  }
+
+  private fun lineRanges(vararg ranges: Range<Int>): RangeSet<Int> {
+    return ranges(*ranges)
+  }
+
+  private fun ranges(vararg ranges: Range<Int>): RangeSet<Int> {
+    val lineRanges = TreeRangeSet.create<Int>()
+    for (range in ranges) {
+      lineRanges.add(range)
+    }
+    return lineRanges
   }
 }
