@@ -16,7 +16,6 @@
 
 plugins {
   kotlin("jvm")
-  alias(libs.plugins.ktfmt)
 }
 
 repositories {
@@ -37,12 +36,6 @@ dependencies {
 kotlin {
   val javaVersion: String = rootProject.libs.versions.java.get()
   jvmToolchain(javaVersion.toInt())
-}
-
-ktfmt {
-  trailingCommaManagementStrategy.set(
-      com.ncorti.ktfmt.gradle.TrailingCommaManagementStrategy.ONLY_ADD
-  )
 }
 
 tasks {

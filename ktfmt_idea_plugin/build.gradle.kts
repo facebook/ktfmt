@@ -19,7 +19,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaC
 plugins {
   java
   alias(libs.plugins.kotlin)
-  alias(libs.plugins.ktfmt)
   alias(libs.plugins.intelliJPlatform)
 }
 
@@ -49,12 +48,6 @@ dependencies {
   }
 
   implementation(project(":ktfmt"))
-}
-
-ktfmt {
-  trailingCommaManagementStrategy.set(
-      com.ncorti.ktfmt.gradle.TrailingCommaManagementStrategy.ONLY_ADD
-  )
 }
 
 intellijPlatform {
