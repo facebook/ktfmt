@@ -116,8 +116,11 @@ public final class com/facebook/ktfmt/format/Formatter {
 	public static final field KOTLINLANG_FORMAT Lcom/facebook/ktfmt/format/FormattingOptions;
 	public static final field META_FORMAT Lcom/facebook/ktfmt/format/FormattingOptions;
 	public static final fun format (Lcom/facebook/ktfmt/format/FormattingOptions;Ljava/lang/String;)Ljava/lang/String;
+	public static final fun format (Lcom/facebook/ktfmt/format/FormattingOptions;Ljava/lang/String;Lcom/google/common/collect/RangeSet;)Ljava/lang/String;
+	public static final fun format (Lcom/facebook/ktfmt/format/FormattingOptions;Ljava/lang/String;Lcom/google/common/collect/RangeSet;Lcom/google/common/collect/RangeSet;)Ljava/lang/String;
 	public static final fun format (Ljava/lang/String;)Ljava/lang/String;
 	public static final fun format (Ljava/lang/String;Z)Ljava/lang/String;
+	public static synthetic fun format$default (Lcom/facebook/ktfmt/format/FormattingOptions;Ljava/lang/String;Lcom/google/common/collect/RangeSet;Lcom/google/common/collect/RangeSet;ILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class com/facebook/ktfmt/format/FormattingOptions {
