@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   `--offset`/`--length` pairs, mirroring
   [google-java-format's](https://github.com/google/google-java-format#from-the-command-line)
   selected-range formatting flags.
+- Support selected-range formatting in the IntelliJ plugin.
 
 ### Changed
 

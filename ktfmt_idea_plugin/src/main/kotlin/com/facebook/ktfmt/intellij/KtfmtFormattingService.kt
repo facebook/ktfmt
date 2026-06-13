@@ -18,10 +18,14 @@ package com.facebook.ktfmt.intellij
 
 import com.facebook.ktfmt.format.Formatter.format
 import com.facebook.ktfmt.format.FormattingOptions
+import com.google.common.collect.Range
+import com.google.common.collect.RangeSet
+import com.google.common.collect.TreeRangeSet
 import com.google.googlejavaformat.java.FormatterException
 import com.intellij.formatting.service.AsyncDocumentFormattingService
 import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService.Feature
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import org.jetbrains.kotlin.idea.KotlinFileType
 
@@ -47,7 +51,7 @@ class KtfmtFormattingService : AsyncDocumentFormattingService() {
 
   override fun getName(): String = "ktfmt"
 
-  override fun getFeatures(): Set<Feature> = emptySet()
+  override fun getFeatures(): Set<Feature> = setOf(Feature.FORMAT_FRAGMENTS)
 
   override fun canFormat(file: PsiFile): Boolean =
       KotlinFileType.INSTANCE.name == file.fileType.name &&
@@ -59,7 +63,12 @@ class KtfmtFormattingService : AsyncDocumentFormattingService() {
   ) : FormattingTask {
     override fun run() {
       try {
-        val formattedText = format(formattingOptions, request.documentText)
+        val formattedText =
+            if (request.isWholeFileFormatting()) {
+              format(formattingOptions, request.documentText)
+            } else {
+              format(formattingOptions, request.documentText, characterRanges = request.toRanges())
+            }
         request.onTextReady(formattedText)
       } catch (e: FormatterException) {
         request.onError(
@@ -72,5 +81,24 @@ class KtfmtFormattingService : AsyncDocumentFormattingService() {
     override fun isRunUnderProgress(): Boolean = true
 
     override fun cancel(): Boolean = false
+
+    private fun AsyncFormattingRequest.toRanges(): RangeSet<Int> {
+      val ranges = TreeRangeSet.create<Int>()
+      for (range in formattingRanges) {
+        ranges.add(Range.closedOpen(range.startOffset, range.endOffset))
+      }
+      return ranges
+    }
+
+    private fun AsyncFormattingRequest.isWholeFileFormatting(): Boolean {
+      val ranges = formattingRanges
+      return ranges.size == 1 && ranges.single().isWholeFileRange(documentText.length)
+    }
+
+    private fun TextRange.isWholeFileRange(documentLength: Int): Boolean {
+      // IntelliJ represents a no-selection whole-file format request as a range covering the file.
+      // Match GJF's leniency for end offsets because the IDE can pass slightly inaccurate ranges.
+      return startOffset == 0 && endOffset >= documentLength
+    }
   }
 }
