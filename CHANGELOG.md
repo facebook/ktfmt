@@ -12,6 +12,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- Support partial formatting with `--lines`/`--line` and matching
+  `--offset`/`--length` pairs, mirroring
+  [google-java-format's](https://github.com/google/google-java-format#from-the-command-line)
+  selected-range formatting flags.
+
 ### Changed
 
 * Reduced overall number of allocations to improve formatting performance (~6-7%) (https://github.com/facebook/ktfmt/pull/620)

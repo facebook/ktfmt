@@ -94,8 +94,8 @@ data class ParsedArgs(
         |  --offset=<offset>                 Character offset to format, paired with --length.
         |                                        May be used multiple times.
         |  --length=<length>                 Character length to format, paired with --offset.
-        |                                        May be used multiple times. 0 formats the line
-        |                                        under the cursor.
+        |                                        May be used multiple times. 0 formats the whole
+        |                                        line containing the given --offset.
         |  --set-exit-if-changed             Sets exit code to 1 if any input file was not
         |                                        formatted/touched
         |  --do-not-remove-unused-imports    Leaves all imports in place, even if not used

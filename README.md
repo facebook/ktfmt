@@ -75,6 +75,16 @@ $ brew install ktfmt
 $ java -jar /path/to/ktfmt-<VERSION>-with-dependencies.jar [--kotlinlang-style | --google-style] [files...]
 ```
 
+The formatter can act on whole files, on limited lines (`--lines` or `--line`), or on specific
+offsets (`--offset` and `--length`). Line ranges look like `5` or `1:12,14`, may be used multiple
+times, and are 1-based. Offset ranges must provide matching `--offset` and `--length` pairs;
+`--length=0` formats the whole line containing the given `--offset`.
+
+Partial formatting limits the core pretty-print replacements to the selected ranges. Whole-file
+cleanup passes, such as import cleanup and multiline string formatting, still run afterward to match
+[google-java-format's](https://github.com/google/google-java-format#from-the-command-line)
+cleanup-after-selection behavior.
+
 `--kotlinlang-style` makes `ktfmt` use a block indent of 4 spaces instead of 2.
 See below for details.
 
