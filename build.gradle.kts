@@ -35,10 +35,6 @@ version = providers.gradleProperty("ktfmt.version").get()
 
 tasks.wrapper { distributionType = Wrapper.DistributionType.ALL }
 
-repositories {
-  mavenCentral()
-}
-
 val ktfmtCliDependencies = configurations.dependencyScope("ktfmtCliDependencies")
 val ktfmtCliClasspath =
     configurations.resolvable("ktfmtCliClasspath") {
