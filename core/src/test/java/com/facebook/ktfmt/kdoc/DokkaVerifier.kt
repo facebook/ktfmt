@@ -92,9 +92,10 @@ class DokkaVerifier(private val tempFolder: File) {
         ";" // instead of File.pathSeparator as would have been reasonable (e.g. : on Unix)
     val path =
         listOf(analysis, base, compiler, intellij, coroutines, html, freemarker).joinToString(
-            pathSeparator) {
-              it.path
-            }
+            pathSeparator
+        ) {
+          it.path
+        }
     args.add(path)
     args.add("-sourceSet")
     args.add("-src $src") // (nested parameter within -sourceSet)

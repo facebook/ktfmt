@@ -32,28 +32,29 @@ class MultilineStringFormatterTest {
             "    |line2",
             "    $TQ",
             "        .trimMargin()",
-        )) {
-          assertThat(usesTrimMargin).isTrue()
-          assertThat(indentationSuffix).isEqualTo("|")
-          assertThat(isDollarString).isFalse()
-          assertThat(indentCount).isEqualTo(0)
-          assertThat(lines).hasSize(5)
-          assertThat(lines)
-              .containsExactly(
-                  TQ,
-                  "    |line1",
-                  "    |line2",
-                  "    $TQ",
-                  "        .trimMargin()",
-              )
-              .inOrder()
-          assertThat(lineStart).isEqualTo(0)
-          assertThat(lineEnd).isEqualTo(4)
-          assertThat(lastStringLineIndex).isEqualTo(3)
-          assertThat(openStringOffset).isEqualTo(0)
-          assertThat(trimMethodCallOffset).isEqualTo(42)
-          assertThat(isNestedMultiline).isFalse()
-        }
+        )
+    ) {
+      assertThat(usesTrimMargin).isTrue()
+      assertThat(indentationSuffix).isEqualTo("|")
+      assertThat(isDollarString).isFalse()
+      assertThat(indentCount).isEqualTo(0)
+      assertThat(lines).hasSize(5)
+      assertThat(lines)
+          .containsExactly(
+              TQ,
+              "    |line1",
+              "    |line2",
+              "    $TQ",
+              "        .trimMargin()",
+          )
+          .inOrder()
+      assertThat(lineStart).isEqualTo(0)
+      assertThat(lineEnd).isEqualTo(4)
+      assertThat(lastStringLineIndex).isEqualTo(3)
+      assertThat(openStringOffset).isEqualTo(0)
+      assertThat(trimMethodCallOffset).isEqualTo(42)
+      assertThat(isNestedMultiline).isFalse()
+    }
 
     with(
         multilineTrimmedStringFromLines(
@@ -62,27 +63,28 @@ class MultilineStringFormatterTest {
             "    line1 |",
             "    |line2",
             "    $TQ.trimIndent()",
-        )) {
-          assertThat(usesTrimMargin).isFalse()
-          assertThat(indentationSuffix).isEqualTo("")
-          assertThat(isDollarString).isTrue()
-          assertThat(indentCount).isEqualTo(2)
-          assertThat(lines).hasSize(4)
-          assertThat(lines)
-              .containsExactly(
-                  "  $$$TQ",
-                  "    line1 |",
-                  "    |line2",
-                  "    $TQ.trimIndent()",
-              )
-              .inOrder()
-          assertThat(lineStart).isEqualTo(1)
-          assertThat(lineEnd).isEqualTo(4)
-          assertThat(lastStringLineIndex).isEqualTo(3)
-          assertThat(openStringOffset).isEqualTo(10)
-          assertThat(trimMethodCallOffset).isEqualTo(46)
-          assertThat(isNestedMultiline).isFalse()
-        }
+        )
+    ) {
+      assertThat(usesTrimMargin).isFalse()
+      assertThat(indentationSuffix).isEqualTo("")
+      assertThat(isDollarString).isTrue()
+      assertThat(indentCount).isEqualTo(2)
+      assertThat(lines).hasSize(4)
+      assertThat(lines)
+          .containsExactly(
+              "  $$$TQ",
+              "    line1 |",
+              "    |line2",
+              "    $TQ.trimIndent()",
+          )
+          .inOrder()
+      assertThat(lineStart).isEqualTo(1)
+      assertThat(lineEnd).isEqualTo(4)
+      assertThat(lastStringLineIndex).isEqualTo(3)
+      assertThat(openStringOffset).isEqualTo(10)
+      assertThat(trimMethodCallOffset).isEqualTo(46)
+      assertThat(isNestedMultiline).isFalse()
+    }
   }
 
   @Test
@@ -110,7 +112,8 @@ class MultilineStringFormatterTest {
                     "    line2",
                     "    $TQ.trimIndent()",
                 )
-                .hasTemplateExpression())
+                .hasTemplateExpression()
+        )
         .isFalse()
 
     // dollar string without dollar template expression
@@ -121,7 +124,8 @@ class MultilineStringFormatterTest {
                     "    line2",
                     "    $TQ.trimIndent()",
                 )
-                .hasTemplateExpression())
+                .hasTemplateExpression()
+        )
         .isFalse()
 
     // simple string with template expression
@@ -132,7 +136,8 @@ class MultilineStringFormatterTest {
                     "    line2",
                     "    $TQ.trimIndent()",
                 )
-                .hasTemplateExpression())
+                .hasTemplateExpression()
+        )
         .isTrue()
 
     // dollar string with template expression
@@ -143,7 +148,8 @@ class MultilineStringFormatterTest {
                     "    line2",
                     "    $TQ.trimIndent()",
                 )
-                .hasTemplateExpression())
+                .hasTemplateExpression()
+        )
         .isTrue()
 
     // simple string with multiline template expression
@@ -157,7 +163,8 @@ class MultilineStringFormatterTest {
                     "    line2",
                     "    $TQ.trimIndent()",
                 )
-                .hasTemplateExpression())
+                .hasTemplateExpression()
+        )
         .isTrue()
 
     // dollar string with multiline template expression
@@ -171,7 +178,8 @@ class MultilineStringFormatterTest {
                     "    line2",
                     "    $TQ.trimIndent()",
                 )
-                .hasTemplateExpression())
+                .hasTemplateExpression()
+        )
         .isTrue()
   }
 
@@ -185,7 +193,8 @@ class MultilineStringFormatterTest {
                     "    |line3",
                     "    $TQ.trimMargin()",
                 )
-                .getStringContent())
+                .getStringContent()
+        )
         .containsExactly(
             "line1",
             "line2",
@@ -201,7 +210,8 @@ class MultilineStringFormatterTest {
                     "    line3",
                     "    |$TQ.trimMargin()",
                 )
-                .getStringContent())
+                .getStringContent()
+        )
         .containsExactly(
             "    line1",
             "    line2",
@@ -222,7 +232,8 @@ class MultilineStringFormatterTest {
                     "",
                     "    $TQ.trimIndent()",
                 )
-                .getStringContent())
+                .getStringContent()
+        )
         .containsExactly(
             "line1",
             "  line2",
@@ -241,7 +252,8 @@ class MultilineStringFormatterTest {
                     "    $TQ",
                     "    .trimIndent()",
                 )
-                .getStringContent())
+                .getStringContent()
+        )
         .containsExactly(
             "line1",
             "  line2",
@@ -261,7 +273,8 @@ class MultilineStringFormatterTest {
                     "    $TQ",
                     "        .trimMargin()",
                 )
-                .getStringContent())
+                .getStringContent()
+        )
         .containsExactly(
             "content",
             "line1",
@@ -276,7 +289,8 @@ class MultilineStringFormatterTest {
                     "    line2",
                     "    $TQ.trimIndent()",
                 )
-                .getStringContent())
+                .getStringContent()
+        )
         .containsExactly(
             "content",
             "line1",

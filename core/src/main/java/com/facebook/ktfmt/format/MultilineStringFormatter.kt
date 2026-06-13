@@ -152,10 +152,12 @@ class MultilineStringFormatter(val continuationIndentSize: Int) {
                           expression.getParentOfType<KtStringTemplateExpression>(strict = false) !=
                               null,
                       commentsBetweenStringAndTrimCall = comments,
-                  ))
+                  )
+              )
             }
           }
-        })
+        }
+    )
     return strings.toList()
   }
 }

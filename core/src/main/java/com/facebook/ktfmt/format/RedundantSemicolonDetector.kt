@@ -69,10 +69,12 @@ internal class RedundantSemicolonDetector {
 
     val prevConcreteSibling = element.getPrevSiblingIgnoringWhitespaceAndComments()
     if (parent is KtClassBody) {
-      if (prevConcreteSibling is KtObjectDeclaration &&
-          prevConcreteSibling.isCompanion() &&
-          prevConcreteSibling.nameIdentifier == null &&
-          !isLastConcreteChild(element)) {
+      if (
+          prevConcreteSibling is KtObjectDeclaration &&
+              prevConcreteSibling.isCompanion() &&
+              prevConcreteSibling.nameIdentifier == null &&
+              !isLastConcreteChild(element)
+      ) {
         // Example: `class Foo { companion object ; init { } }`
         return false
       }
@@ -83,9 +85,11 @@ internal class RedundantSemicolonDetector {
     }
 
     val prevLeaf = element.prevLeaf(false)
-    if ((prevConcreteSibling is KtIfExpression || prevConcreteSibling is KtWhileExpression) &&
-        prevLeaf is KtContainerNodeForControlStructureBody &&
-        prevLeaf.text.isEmpty()) {
+    if (
+        (prevConcreteSibling is KtIfExpression || prevConcreteSibling is KtWhileExpression) &&
+            prevLeaf is KtContainerNodeForControlStructureBody &&
+            prevLeaf.text.isEmpty()
+    ) {
       return false
     }
 

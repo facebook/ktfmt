@@ -221,7 +221,8 @@ class ParsedArgsTest {
                 formattingOptions = Formatter.GOOGLE_FORMAT,
                 dryRun = true,
                 setExitIfChanged = true,
-            ))
+            )
+        )
   }
 
   @Test
@@ -233,7 +234,8 @@ class ParsedArgsTest {
             parseResultOk(
                 fileNames = listOf("File.kt"),
                 formattingOptions = Formatter.KOTLINLANG_FORMAT,
-            ))
+            )
+        )
   }
 
   @Test
@@ -268,6 +270,7 @@ class ParsedArgsTest {
             stdinName,
             editorConfig,
             quiet,
-        ))
+        )
+    )
   }
 }
