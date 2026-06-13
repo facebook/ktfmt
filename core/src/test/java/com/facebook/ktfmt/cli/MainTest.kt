@@ -563,7 +563,7 @@ class MainTest {
   }
 
   @Test
-  fun `--lines does not format file lines before the selection`() {
+  fun `--lines formats the selected file statement`() {
     val code =
         """
         |fun untouched ( ) =   1
@@ -597,7 +597,7 @@ class MainTest {
   }
 
   @Test
-  fun `--lines does not format stdin lines before the selection`() {
+  fun `--lines formats the selected stdin statement`() {
     val code =
         """
         |fun untouched ( ) =   1
@@ -622,6 +622,42 @@ class MainTest {
             |fun test() {
             |  val selected = 2
             |  val adjacent    =   3
+            |}
+            |"""
+                .trimMargin()
+        )
+  }
+
+  @Test
+  fun `--lines formats the selected class member statement`() {
+    val code =
+        """
+        |class Sample {
+        |  fun untouched ( ) =   1
+        |
+        |  fun test() {
+        |    val selected    =   2
+        |    val adjacent    =   3
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    val exitCode =
+        Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("--lines=5", "-"))
+            .run()
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(out.toString(UTF_8))
+        .isEqualTo(
+            """
+            |class Sample {
+            |  fun untouched ( ) =   1
+            |
+            |  fun test() {
+            |    val selected = 2
+            |    val adjacent    =   3
+            |  }
             |}
             |"""
                 .trimMargin()

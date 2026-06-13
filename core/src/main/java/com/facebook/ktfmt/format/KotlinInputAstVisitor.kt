@@ -436,9 +436,9 @@ class KotlinInputAstVisitor(
         builder.blankLineWanted(OpsBuilder.BlankLineWanted.PRESERVE)
       }
       first = false
-      builder.markForPartialFormat()
+      markForPartialFormat()
       visitStatement(statement)
-      builder.markForPartialFormat()
+      markForPartialFormat()
     }
   }
 
@@ -2146,7 +2146,9 @@ class KotlinInputAstVisitor(
             }
         builder.blankLineWanted(blankLineBetweenMembers)
 
+        markForPartialFormat()
         builder.block(ZERO) { visit(curr) }
+        markForPartialFormat()
         builder.guessToken(";")
         builder.forcedBreak()
 
