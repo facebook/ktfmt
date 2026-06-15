@@ -14,7 +14,7 @@ org-ec4j-core = "1.2.0"
 # plugins
 gradlePlugin-dokka = "2.2.0"
 gradlePlugin-intelliJPlatform = "2.6.0"
-gradlePlugin-ktfmt = "0.24.0"
+gradlePlugin-ktfmt = "0.26.0"
 gradlePlugin-nexusPublish = "2.0.0"
 gradlePlugin-shadowJar = "9.0.2"
 

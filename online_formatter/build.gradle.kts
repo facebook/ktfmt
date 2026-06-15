@@ -16,7 +16,7 @@
 
 plugins {
   kotlin("jvm")
-  id("com.ncorti.ktfmt.gradle")
+  alias(libs.plugins.ktfmt)
 }
 
 repositories {

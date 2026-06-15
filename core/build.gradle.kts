@@ -21,11 +21,11 @@ import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
   kotlin("jvm")
-  id("com.gradleup.shadow")
-  id("com.ncorti.ktfmt.gradle")
+  alias(libs.plugins.dokka)
+  alias(libs.plugins.dokka.javadoc)
+  alias(libs.plugins.ktfmt)
+  alias(libs.plugins.shadowJar)
   id("maven-publish")
-  id("org.jetbrains.dokka")
-  id("org.jetbrains.dokka-javadoc")
   id("signing")
   id("ktfmt.ktfmt-file-generator")
 }
