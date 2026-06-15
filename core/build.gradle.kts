@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import kotlin.io.path.writeText
-import org.jetbrains.intellij.platform.gradle.utils.asPath
+import com.facebook.ktfmt.GenerateKtfmtFileTask
+import com.ncorti.ktfmt.gradle.tasks.KtfmtCheckTask
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
@@ -24,7 +25,9 @@ plugins {
   id("com.ncorti.ktfmt.gradle")
   id("maven-publish")
   id("org.jetbrains.dokka")
+  id("org.jetbrains.dokka-javadoc")
   id("signing")
+  id("ktfmt.ktfmt-file-generator")
 }
 
 repositories {
@@ -46,38 +49,10 @@ dependencies {
 
 val generateSources by tasks.registering {
   outputs.dir(layout.buildDirectory.dir("generated/main/java"))
-  dependsOn(tasks.named("generateKtfmtFile"))
+  dependsOn(tasks.withType<GenerateKtfmtFileTask>())
 }
 
 tasks {
-  // Create Ktfmt.kt file with version information
-  register("generateKtfmtFile") {
-    val genVersionFileScript = rootProject.rootDir.resolve("gen_version_file.sh")
-    val versionPropertiesFile = rootProject.rootDir.resolve("gradle.properties")
-    val versionFile =
-        layout.buildDirectory.file("generated/main/java/com/facebook/ktfmt/util/Ktfmt.kt")
-
-    inputs.files(genVersionFileScript, versionPropertiesFile)
-    outputs.file(versionFile)
-    outputs.cacheIf { true }
-
-    // provider to run the shell script genVersionFileScript with versionPropertiesFile as argument
-    val scriptProcess = providers.exec {
-      workingDir = rootProject.rootDir
-      commandLine = listOf(genVersionFileScript.toString(), versionPropertiesFile.toString())
-    }
-
-    doLast {
-      val scriptOutput = scriptProcess.standardOutput.asText.get()
-      if (scriptProcess.result.get().exitValue != 0) {
-        val scriptError = scriptProcess.standardError.asText.get()
-        error("Failed to generate version file!\nstdout:\n$scriptOutput\n\nstderr:\n$scriptError")
-      }
-      versionFile.get().asPath.writeText(scriptOutput)
-      logger.info("Generated version file at ${versionFile.get()}")
-    }
-  }
-
   // Run tests with UTF-16 encoding
   test { jvmArgs("-Dfile.encoding=UTF-16") }
 
@@ -86,7 +61,7 @@ tasks {
     // Only get major and minor version, e.g. 1.8.0-beta1 -> 1.8
     val kotlinVersion = rootProject.libs.versions.kotlin.get().substringBeforeLast(".")
     exclude {
-      val path = it.file.path
+      val path = it.path
       "com/facebook/ktfmt/util/kotlin-" in path && "kotlin-$kotlinVersion" !in path
     }
   }
@@ -102,7 +77,11 @@ tasks {
 
   // Javadoc
   register("javadocJar", Jar::class) {
-    val dokkaJavadocTask = named("dokkaJavadoc", org.jetbrains.dokka.gradle.DokkaTask::class)
+    val dokkaJavadocTask =
+        named(
+            "dokkaGeneratePublicationJavadoc",
+            org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask::class,
+        )
     dependsOn(dokkaJavadocTask)
     from(dokkaJavadocTask.flatMap { it.outputDirectory })
     archiveClassifier.set("javadoc")
@@ -137,6 +116,10 @@ ktfmt {
       com.ncorti.ktfmt.gradle.TrailingCommaManagementStrategy.ONLY_ADD
   )
 }
+
+tasks.named("compileKotlin") { setMustRunAfter(emptyList<Any>()) }
+
+tasks.withType<KtfmtCheckTask>().configureEach { setMustRunAfter(listOf(tasks.named("jar"))) }
 
 group = "com.facebook"
 

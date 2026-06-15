@@ -12,7 +12,7 @@ net-java-dev-jna-jna = "4.2.2"
 org-ec4j-core = "1.2.0"
 
 # plugins
-gradlePlugin-dokka = "2.0.0"
+gradlePlugin-dokka = "2.2.0"
 gradlePlugin-intelliJPlatform = "2.6.0"
 gradlePlugin-ktfmt = "0.24.0"
 gradlePlugin-nexusPublish = "2.0.0"
@@ -30,13 +30,13 @@ gson = { module = "com.google.code.gson:gson", version.ref = "com-google-code-gs
 guava = { module = "com.google.guava:guava", version.ref = "com-google-guava-guava" }
 junit = { module = "junit:junit", version.ref = "junit-junit" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "net-java-dev-jna-jna" }
-ktfmt = { module = "com.facebook:ktfmt", version.ref = "ktfmt" }
 kotlin-compilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-test-junit4 = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version.ref = "gradlePlugin-dokka" }
+dokka-javadoc = { id = "org.jetbrains.dokka-javadoc", version.ref = "gradlePlugin-dokka" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "gradlePlugin-intelliJPlatform" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "gradlePlugin-ktfmt" }

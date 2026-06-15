@@ -25,9 +25,5 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
         distribution: zulu
-    - name: Build ktfmt_idea_plugin
-      run: ./gradlew :idea_plugin:build --no-daemon
-    - name: Build the Online Formatter
-      run: ./gradlew :lambda:build --no-daemon
     - name: Build ktfmt
-      run: ./gradlew :ktfmt:build --no-daemon
+      run: ./gradlew build --no-daemon

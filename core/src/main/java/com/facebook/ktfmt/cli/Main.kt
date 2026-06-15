@@ -132,7 +132,7 @@ class Main(
   /**
    * Handles the logic for formatting and flags.
    *
-   * If dry run mode is active, this simply prints the name of the [source] (file path or `<stdin>`)
+   * If dry run mode is active, this simply prints the name of the source (file path or `<stdin>`)
    * to [out]. Otherwise, this will run the appropriate formatting as normal.
    *
    * @param file The file to format. If null, the code is read from <stdin>.
