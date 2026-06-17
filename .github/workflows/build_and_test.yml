@@ -6,6 +6,7 @@ on:
       - '**.md'
     branches:
       - main
+      - feat/native-image
   pull_request:
     paths-ignore:
       - '**.md'
