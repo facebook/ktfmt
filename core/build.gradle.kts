@@ -28,6 +28,7 @@ plugins {
   id("maven-publish")
   id("signing")
   id("ktfmt.ktfmt-file-generator")
+  id("ktfmt.native-image")
 }
 
 repositories {

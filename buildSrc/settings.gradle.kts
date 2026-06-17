@@ -21,7 +21,10 @@ dependencyResolutionManagement {
     gradlePluginPortal()
   }
 
-  versionCatalogs { create("libs") { from(files("../gradle/libs.versions.toml")) } }
+  versionCatalogs {
+    create("libs") { from(files("../gradle/libs.versions.toml")) }
+    create("nativeImageLibs") { from(files("../gradle/native-image.versions.toml")) }
+  }
 }
 
 rootProject.name = "buildSrc"

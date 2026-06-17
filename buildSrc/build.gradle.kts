@@ -22,11 +22,17 @@ plugins {
   alias(libs.plugins.ktfmt)
 }
 
+dependencies { implementation(nativeImageLibs.graalvm.gradle.plugin) }
+
 gradlePlugin {
   plugins {
     register("ktfmt-file-generator") {
       id = "ktfmt.ktfmt-file-generator"
       implementationClass = "com.facebook.ktfmt.GenerateKtfmtFilePlugin"
+    }
+    register("native-image") {
+      id = "ktfmt.native-image"
+      implementationClass = "com.facebook.ktfmt.NativeImagePlugin"
     }
   }
 }
