@@ -36,6 +36,7 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiElementVisitor
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtImportDirective
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
@@ -98,21 +99,21 @@ object Formatter {
         }
     checkEscapeSequences(kotlinCode)
 
-    return kotlinCode
-        .let { convertLineSeparators(it) }
-        .let { sortedAndDistinctImports(it) }
-        .let { dropRedundantElements(it, options) }
-        .let { addRedundantElements(it, options) }
-        .let { prettyPrint(it, options, lineSeparator = "\n") }
-        .let { addRedundantElements(it, options) }
-        .let { MultilineStringFormatter(options.continuationIndent).format(it) }
+    return FormatterContext(convertLineSeparators(kotlinCode))
+        .transform { sortedAndDistinctImports(it) }
+        .transform { dropRedundantElements(it, options) }
+        .transform { addRedundantElements(it, options) }
+        .transform { prettyPrint(it, options, lineSeparator = "\n") }
+        .transform { addRedundantElements(it, options) }
+        .transform { MultilineStringFormatter(options.continuationIndent).format(it) }
+        .code
         .let { convertLineSeparators(it, checkNotNull(Newlines.guessLineSeparator(kotlinCode))) }
         .let { if (shebang.isEmpty()) it else shebang + "\n" + it }
   }
 
   /** prettyPrint reflows 'code' using google-java-format's engine. */
-  private fun prettyPrint(code: String, options: FormattingOptions, lineSeparator: String): String {
-    val file = Parser.parse(code)
+  private fun prettyPrint(file: KtFile, options: FormattingOptions, lineSeparator: String): String {
+    val code = file.text
     val kotlinInput = KotlinInput(code, file)
     val javaOutput =
         JavaOutput(lineSeparator, kotlinInput, KDocCommentsHelper(lineSeparator, options.maxWidth))
@@ -157,8 +158,8 @@ object Formatter {
     }
   }
 
-  private fun sortedAndDistinctImports(code: String): String {
-    val file = Parser.parse(code)
+  private fun sortedAndDistinctImports(file: KtFile): String {
+    val code = file.text
 
     val importList = file.importList ?: return code
     if (importList.imports.isEmpty()) {
@@ -190,10 +191,20 @@ object Formatter {
     val sortedImports = importList.imports.sortedBy(::canonicalText).distinctBy(::canonicalText)
     val importsWithComments = commentList + sortedImports
 
+    val body = importsWithComments.joinToString(separator = "\n") { imprt -> imprt.text }
+    /*
+     * Kludge: idempotent formatting.
+     * This step optimizes the following goal -- producing **identical** code for already formatted
+     * code, as it's important for PSI-reuse.
+     * There is exactly one case where this step should add trailing newline -- when an inline
+     * comment follows the last import statement. We check for that (note it gives false positives for `/* // */`
+     * which is acceptable -- later prettyPrint step will fix that) and avoid extra-append when it is redundant.
+     */
+    val needsTerminator = body.lastIndexOf('\n').let { it >= 0 && body.indexOf("//", it + 1) >= 0 }
     return code.replaceRange(
         importList.startOffset,
         importList.endOffset,
-        importsWithComments.joinToString(separator = "\n") { imprt -> imprt.text } + "\n",
+        if (needsTerminator) body + "\n" else body,
     )
   }
 }

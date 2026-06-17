@@ -1220,6 +1220,48 @@ class FormatterTest {
   }
 
   @Test
+  fun `imports with trailing block comment and expression`() {
+    val code =
+        """
+        |import com.example.zab /* heya */
+        |import com.example.foo ; val x = Sample(foo, zab)
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |import com.example.foo
+        |import com.example.zab /* heya */
+        |
+        |val x = Sample(foo, zab)
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `imports with trailing block comment and expression with false positive double slash`() {
+    val code =
+        """
+        |import com.example.zab /* // */
+        |import com.example.foo ; val x = Sample(foo, zab)
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |import com.example.foo
+        |import com.example.zab /* // */
+        |
+        |val x = Sample(foo, zab)
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
   fun `backticks are ignored in import sort order`() =
       assertFormatted(
           """

@@ -303,7 +303,9 @@ class MultilineStringFormatterTest {
       @Language("kts") code: String,
       continuationIndent: Int = 4,
   ): MultilineTrimmedString {
-    val strings = MultilineStringFormatter(continuationIndent).getMultilineTrimmedStringList(code)
+    val strings =
+        MultilineStringFormatter(continuationIndent)
+            .getMultilineTrimmedStringList(Parser.parse(code))
     assertThat(strings.size).isEqualTo(1)
     return strings.first()
   }
