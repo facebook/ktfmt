@@ -2257,8 +2257,8 @@ class KotlinInputAstVisitor(
       builder.space()
     }
     val hasTrailingComma = destructuringDeclaration.trailingComma != null
-    val (openingDelimiter, closingDelimiter) =
-        if (destructuringDeclaration.hasSquareBrackets()) "[" to "]" else "(" to ")"
+    val openingDelimiter = destructuringDeclaration.lPar?.text ?: "("
+    val closingDelimiter = destructuringDeclaration.rPar?.text ?: ")"
     builder.block(ZERO) {
       builder.token(openingDelimiter)
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
