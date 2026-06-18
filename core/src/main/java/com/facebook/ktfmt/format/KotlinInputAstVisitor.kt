@@ -2284,7 +2284,7 @@ class KotlinInputAstVisitor(
     }
   }
 
-  /** Example `a: String` or `x = a` which is part of `(a: String, x = b)` */
+  /** Example `a: String` or `x = a` which is part of `(a: String, x = a)` */
   override fun visitDestructuringDeclarationEntry(
       multiDeclarationEntry: KtDestructuringDeclarationEntry
   ) {
