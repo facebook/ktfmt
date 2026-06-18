@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 * Reduced overall number of allocations to improve formatting performance (~6-7%) (https://github.com/facebook/ktfmt/pull/620)
 * Reuse results of `Parser.parse` (https://github.com/facebook/ktfmt/pull/622)
 
+### Fixed
+
+* Support name-based destructuring declarations. (https://github.com/facebook/ktfmt/issues/629)
+
 ## [0.63]
 
 ### Added
