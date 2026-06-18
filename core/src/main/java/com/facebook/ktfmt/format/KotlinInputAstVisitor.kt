@@ -2248,7 +2248,7 @@ class KotlinInputAstVisitor(
     builder.token("]")
   }
 
-  /** Example `val (a, b: Int) = Pair(1, 2)` */
+  /** Example `val (a, b: Int) = Pair(1, 2)` or `val [a, b] = Pair(1, 2)` */
   override fun visitDestructuringDeclaration(destructuringDeclaration: KtDestructuringDeclaration) {
     builder.sync(destructuringDeclaration)
     val valOrVarKeyword = destructuringDeclaration.valOrVarKeyword
@@ -2257,8 +2257,10 @@ class KotlinInputAstVisitor(
       builder.space()
     }
     val hasTrailingComma = destructuringDeclaration.trailingComma != null
+    val (openingDelimiter, closingDelimiter) =
+        if (destructuringDeclaration.hasSquareBrackets()) "[" to "]" else "(" to ")"
     builder.block(ZERO) {
-      builder.token("(")
+      builder.token(openingDelimiter)
       builder.breakOp(Doc.FillMode.UNIFIED, "", expressionBreakIndent)
       builder.block(expressionBreakIndent) {
         visitEachCommaSeparated(
@@ -2268,7 +2270,7 @@ class KotlinInputAstVisitor(
         )
       }
     }
-    builder.token(")")
+    builder.token(closingDelimiter)
     val initializer = destructuringDeclaration.initializer
     if (initializer != null) {
       builder.space()
@@ -2282,13 +2284,13 @@ class KotlinInputAstVisitor(
     }
   }
 
-  /** Example `a: String` which is part of `(a: String, b: String)` */
+  /** Example `a: String` or `x = a` which is part of `(a: String, x = b)` */
   override fun visitDestructuringDeclarationEntry(
       multiDeclarationEntry: KtDestructuringDeclarationEntry
   ) {
     builder.sync(multiDeclarationEntry)
     declareOne(
-        initializer = null,
+        initializer = multiDeclarationEntry.initializer,
         kind = DeclarationKind.PARAMETER,
         modifiers = multiDeclarationEntry.modifierList,
         name = multiDeclarationEntry.nameIdentifier?.text ?: fail(),

@@ -3074,6 +3074,27 @@ class FormatterTest {
       )
 
   @Test
+  fun `handle name based destructuring declaration`() =
+      assertThatFormatting(
+              """
+              |fun f(d: D) {
+              |  val [a, b         ] = d
+              |  val (a, x = b         ) = d
+              |}
+              |"""
+                  .trimMargin()
+          )
+          .isEqualTo(
+              """
+              |fun f(d: D) {
+              |  val [a, b] = d
+              |  val (a, x = b) = d
+              |}
+              |"""
+                  .trimMargin()
+          )
+
+  @Test
   fun `chains with derferences and array indexing`() =
       assertFormatted(
           """
