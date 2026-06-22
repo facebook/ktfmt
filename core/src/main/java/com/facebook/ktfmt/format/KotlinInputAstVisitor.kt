@@ -1440,9 +1440,15 @@ class KotlinInputAstVisitor(
       if (delegate != null) {
         builder.space()
         builder.token("by")
-        if (isLambdaOrScopingFunction(delegate.expression)) {
+        val delegateExpr = delegate.expression
+        if (isLambdaOrScopingFunction(delegateExpr)) {
           builder.space()
           visit(delegate)
+        } else if (delegateExpr != null && isChainedScopingFunction(delegateExpr)) {
+          visitChainedScopingFunction(
+              delegateExpr as KtQualifiedExpression,
+              emitLeadingBreak = true,
+          )
         } else {
           builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
           builder.block(expressionBreakIndent) {
@@ -1455,6 +1461,8 @@ class KotlinInputAstVisitor(
         builder.token("=")
         if (isLambdaOrScopingFunction(initializer)) {
           visitLambdaOrScopingFunction(initializer)
+        } else if (isChainedScopingFunction(initializer)) {
+          visitChainedScopingFunction(initializer as KtQualifiedExpression, emitLeadingBreak = true)
         } else {
           builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
           builder.block(expressionBreakIndent) {
@@ -1467,13 +1475,13 @@ class KotlinInputAstVisitor(
     // for example `field = value`, `private set`, or `get = 2 * field`
     val propertyComponents =
         buildList {
-          if (backingField != null) {
-            add(backingField)
-          }
-          if (accessors != null) {
-            addAll(accessors)
-          }
-        }
+              if (backingField != null) {
+                add(backingField)
+              }
+              if (accessors != null) {
+                addAll(accessors)
+              }
+            }
             .sortedBy { it.startOffset }
     if (propertyComponents.isNotEmpty()) {
       builder.block(blockIndent) {
@@ -1535,6 +1543,8 @@ class KotlinInputAstVisitor(
         builder.token("=")
         if (isLambdaOrScopingFunction(initializer)) {
           visitLambdaOrScopingFunction(initializer)
+        } else if (isChainedScopingFunction(initializer)) {
+          visitChainedScopingFunction(initializer as KtQualifiedExpression, emitLeadingBreak = true)
         } else {
           builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
           builder.block(expressionBreakIndent) {
@@ -1591,8 +1601,9 @@ class KotlinInputAstVisitor(
    */
   private fun isLambdaOrScopingFunction(expression: KtExpression?): Boolean {
     if (expression == null) return false
-    if (expression.getPrevSiblingIgnoringWhitespace() is PsiComment) {
-      return false // Leading comments cause weird indentation.
+    val prev = expression.getPrevSiblingIgnoringWhitespace()
+    if (prev is PsiComment && prev.text.startsWith("//")) {
+      return false // Leading line comments cause weird indentation; block comments are ok.
     }
 
     var carry = expression
@@ -1645,21 +1656,32 @@ class KotlinInputAstVisitor(
   }
 
   /**
-   * Returns true when every chained selector after the innermost scoping-function receiver carries
-   * no value arguments (i.e. only `.foo()` or `.foo { ... }` with a trailing lambda). Selectors
-   * that pass regular value arguments (e.g. `.fold({ ... }, { ... })`) are excluded, since those
-   * chains are better served by the general qualified-expression layout.
+   * Returns true when any chained selector after the innermost scoping-function receiver carries
+   * value arguments (i.e. `.foo(a)` or `.fold({ ... }, { ... })`). Used to decide formatting style
+   * for property initializers: value-arg chains stay on same line as `=`, while no-arg chains
+   * break.
    */
-  private fun chainedSelectorsHaveNoValueArguments(expression: KtExpression): Boolean {
+  private fun chainedSelectorsHaveValueArguments(expression: KtExpression): Boolean {
     var current: KtExpression = expression
     while (current is KtQualifiedExpression) {
       val selector = current.selectorExpression
       if (selector is KtCallExpression && !selector.valueArgumentList?.arguments.isNullOrEmpty()) {
-        return false
+        return true
       }
       current = current.receiverExpression
     }
-    return true
+    return false
+  }
+
+  /**
+   * Returns true when every chained selector after the innermost scoping-function receiver carries
+   * no value arguments (i.e. only `.foo()` or `.foo { ... }` with a trailing lambda). Selectors
+   * that pass regular value arguments are excluded from special chained handling in qualified
+   * expressions, since those chains are better served by the general qualified-expression layout
+   * except in property initializer context where we handle them specially.
+   */
+  private fun chainedSelectorsHaveNoValueArguments(expression: KtExpression): Boolean {
+    return !chainedSelectorsHaveValueArguments(expression)
   }
 
   /**

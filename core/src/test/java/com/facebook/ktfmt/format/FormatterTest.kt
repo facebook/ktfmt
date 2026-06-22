@@ -9499,15 +9499,14 @@ class FormatterTest {
   fun `correct indentation for lambda with multiple chained function call in declaration (#589)`() =
       assertFormatted(
           """
-          |val baz =
-          |    runnnnn {
+          |val baz = runnnnn {
+          |  foo()
+          |  bar()
+          |}
+          |    .baz {
           |      foo()
           |      bar()
           |    }
-          |        .baz {
-          |          foo()
-          |          bar()
-          |        }
           |"""
               .trimMargin()
       )
@@ -9517,16 +9516,230 @@ class FormatterTest {
       assertFormatted(
           """
           |fun quux() {
-          |  val baz =
-          |      runnnnn {
+          |  val baz = runnnnn {
+          |    foo()
+          |    bar()
+          |  }
+          |      .baz {
           |        foo()
           |        bar()
           |      }
-          |          .baz {
-          |            foo()
-          |            bar()
-          |          }
           |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `property with chained scoping function with value arguments in selector`() =
+      assertFormatted(
+          """
+          |val foo = runnnnn {
+          |  bar()
+          |  baz()
+          |}
+          |    .fold({ a -> a }, { b -> b })
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `property with single-line lambda chained call`() =
+      assertFormatted(
+          """
+          |val foo = runnnnn { singleStatement() }.baz()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `property with chained scoping function with actual value arguments`() =
+      assertFormatted(
+          """
+          |val foo = runnnnn {
+          |  bar()
+          |  baz()
+          |}
+          |    .someMethod(arg1, arg2)
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `consistent formatting for chained scoping function in property vs function body`() {
+    val propertyCase =
+        """
+        |val foo = runnnnn { singleLine() }.baz()
+        |"""
+            .trimMargin()
+
+    val functionCase =
+        """
+        |fun quux() = runnnnn { singleLine() }.baz()
+        |"""
+            .trimMargin()
+
+    // Both should format the same way
+    assertFormatted(propertyCase)
+    assertFormatted(functionCase)
+  }
+
+  @Test
+  fun `property delegate with chained scoping function and value arguments`() =
+      assertFormatted(
+          """
+          |val foo by runnnnn {
+          |  bar()
+          |  baz()
+          |}
+          |    .someMethod(arg1, arg2)
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `backing field with chained scoping function and value arguments`() =
+      assertFormatted(
+          """
+          |var foo: Int
+          |  field = runnnnn {
+          |    bar()
+          |    baz()
+          |  }
+          |      .fold({ a -> a }, { b -> b })
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `property with chained scoping function and safe call value arguments`() =
+      assertFormatted(
+          """
+          |val foo = runnnnn {
+          |  bar()
+          |  baz()
+          |}
+          |    ?.someMethod(arg1, arg2)
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `property delegate with chained scoping function no value arguments breaks after by`() =
+      assertFormatted(
+          """
+          |val foo by runnnnn {
+          |  bar()
+          |  baz()
+          |}
+          |    .baz()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `backing field with chained scoping function no value arguments breaks after equals`() =
+      assertFormatted(
+          """
+          |var foo: Int
+          |  field = runnnnn {
+          |    bar()
+          |    baz()
+          |  }
+          |      .baz()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `property with leading comment before chained scoping falls back to break`() =
+      assertFormatted(
+          """
+          |val foo = /* comment */ runnnnn {
+          |  bar()
+          |  baz()
+          |}
+          |    .someMethod(arg1, arg2)
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `property with chained scoping mixed value and no-value selectors keeps same line`() =
+      assertFormatted(
+          """
+          |val foo = runnnnn {
+          |  bar()
+          |  baz()
+          |}
+          |    .map { it }
+          |    .fold(a, b)
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `property initializer no-value chain breaks after equals`() =
+      assertFormatted(
+          """
+          |val foo = runnnnn {
+          |  bar()
+          |  baz()
+          |}
+          |    .baz()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `property delegate leading comment falls back to break`() =
+      assertFormatted(
+          """
+          |val foo by /* comment */ runnnnn {
+          |  bar()
+          |  baz()
+          |}
+          |    .someMethod(arg1, arg2)
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `backing field leading comment falls back to break`() =
+      assertFormatted(
+          """
+          |var foo: Int
+          |  field =
+          |  /* comment */ runnnnn {
+          |    bar()
+          |    baz()
+          |  }
+          |      .fold(a, b)
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `property with empty parens in chain treats as no-value and breaks`() =
+      assertFormatted(
+          """
+          |val foo = runnnnn {
+          |  bar()
+          |  baz()
+          |}
+          |    .baz()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `property with type arguments only in chain treats as no-value and breaks`() =
+      assertFormatted(
+          """
+          |val foo = runnnnn {
+          |  bar()
+          |  baz()
+          |}
+          |    .map<String>()
           |"""
               .trimMargin()
       )
