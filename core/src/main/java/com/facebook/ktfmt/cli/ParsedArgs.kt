@@ -195,7 +195,10 @@ data class ParsedArgs(
                       nextValue()
                           ?: return ParseResult.Error("required value was not provided for: $key")
                     }
-                offsets.add(value.toIntOrNull() ?: return ParseResult.Error(invalidInt(key, value)))
+                offsets.add(
+                    value.toIntOrNull()
+                        ?: return ParseResult.Error("invalid integer value for $key: $value")
+                )
               }
           arg.startsWith("--length") ->
               arg.split('=', limit = 2).let { argSplit ->
@@ -210,7 +213,10 @@ data class ParsedArgs(
                       nextValue()
                           ?: return ParseResult.Error("required value was not provided for: $key")
                     }
-                lengths.add(value.toIntOrNull() ?: return ParseResult.Error(invalidInt(key, value)))
+                lengths.add(
+                    value.toIntOrNull()
+                        ?: return ParseResult.Error("invalid integer value for $key: $value")
+                )
               }
           arg.startsWith("--") -> return ParseResult.Error("Unexpected option: $arg")
           arg.startsWith("@") -> return ParseResult.Error("Unexpected option: $arg")
@@ -265,9 +271,6 @@ data class ParsedArgs(
       val parts = arg.split('=', limit = 2)
       return parts[1].takeIf { parts[0] == key || parts.size == 2 }
     }
-
-    private fun invalidInt(flag: String, value: String?): String =
-        "invalid integer value for $flag: $value"
 
     private fun parseLineRanges(
         lineRanges: RangeSet<Int>,
