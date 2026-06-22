@@ -153,7 +153,7 @@ object Formatter {
               }
           FormatterContext(partiallyFormattedCode)
               .transform { dropRedundantElements(it, options) }
-              .transform { sortedAndDistinctImports(it) }
+              .transform { sortedAndDistinctImports(it, trimLeadingWhitespace = true) }
               .transform { addRedundantElements(it, options) }
               .transform { MultilineStringFormatter(options.continuationIndent).format(it) }
               .code
@@ -169,7 +169,8 @@ object Formatter {
       file: KtFile,
       options: FormattingOptions,
       lineSeparator: String,
-      characterRanges: Collection<Range<Int>> = ImmutableList.of(Range.closedOpen(0, file.text.length)),
+      characterRanges: Collection<Range<Int>> =
+          ImmutableList.of(Range.closedOpen(0, file.text.length)),
   ): String {
     val code = file.text
     val kotlinInput = KotlinInput(code, file)
@@ -290,7 +291,10 @@ object Formatter {
     }
   }
 
-  private fun sortedAndDistinctImports(file: KtFile): String {
+  private fun sortedAndDistinctImports(
+      file: KtFile,
+      trimLeadingWhitespace: Boolean = false,
+  ): String {
     val code = file.text
 
     val importList = file.importList ?: return code
@@ -333,8 +337,14 @@ object Formatter {
      * which is acceptable -- later prettyPrint step will fix that) and avoid extra-append when it is redundant.
      */
     val needsTerminator = body.lastIndexOf('\n').let { it >= 0 && body.indexOf("//", it + 1) >= 0 }
+    val replaceStart =
+        if (trimLeadingWhitespace && code.substring(0, importList.startOffset).isBlank()) {
+          0
+        } else {
+          importList.startOffset
+        }
     return code.replaceRange(
-        importList.startOffset,
+        replaceStart,
         importList.endOffset,
         if (needsTerminator) body + "\n" else body,
     )
