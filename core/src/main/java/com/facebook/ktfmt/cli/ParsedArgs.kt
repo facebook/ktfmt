@@ -164,45 +164,53 @@ data class ParsedArgs(
                       ?: return ParseResult.Error(
                           "Found option '${arg}', expected '${"--stdin-name"}=<value>'"
                       )
-          arg == "--lines" || arg == "--line" -> {
+          arg.startsWith("--line") -> {
+            val argSplit = arg.split('=', limit = 2)
+            val key = argSplit.first()
+            if (key != "--lines" && key != "--line") {
+              return ParseResult.Error("Unexpected option: $key")
+            }
             val value =
-                nextValue() ?: return ParseResult.Error("required value was not provided for: $arg")
+                if (argSplit.size > 1) {
+                  argSplit.last()
+                } else {
+                  nextValue()
+                      ?: return ParseResult.Error("required value was not provided for: $key")
+                }
             when (val result = parseLineRanges(lineRanges, value)) {
               LineRangeParseResult.Success -> Unit
               is LineRangeParseResult.Error -> return ParseResult.Error(result.message)
             }
           }
-          arg.startsWith("--lines=") ->
-              when (val result = parseLineRanges(lineRanges, parseKeyValueArg("--lines", arg))) {
-                LineRangeParseResult.Success -> Unit
-                is LineRangeParseResult.Error -> return ParseResult.Error(result.message)
+          arg.startsWith("--offset") ->
+              arg.split('=', limit = 2).let { argSplit ->
+                val key = argSplit.first()
+                if (key != "--offset") {
+                  return ParseResult.Error("Unexpected option: $key")
+                }
+                val value =
+                    if (argSplit.size > 1) {
+                      argSplit.last()
+                    } else {
+                      nextValue()
+                          ?: return ParseResult.Error("required value was not provided for: $key")
+                    }
+                offsets.add(value.toIntOrNull() ?: return ParseResult.Error(invalidInt(key, value)))
               }
-          arg.startsWith("--line=") ->
-              when (val result = parseLineRanges(lineRanges, parseKeyValueArg("--line", arg))) {
-                LineRangeParseResult.Success -> Unit
-                is LineRangeParseResult.Error -> return ParseResult.Error(result.message)
-              }
-          arg == "--offset" -> {
-            val value =
-                nextValue() ?: return ParseResult.Error("required value was not provided for: $arg")
-            offsets.add(value.toIntOrNull() ?: return ParseResult.Error(invalidInt(arg, value)))
-          }
-          arg.startsWith("--offset=") ->
-              parseKeyValueArg("--offset", arg).let { value ->
-                offsets.add(
-                    value?.toIntOrNull() ?: return ParseResult.Error(invalidInt("--offset", value))
-                )
-              }
-          arg == "--length" -> {
-            val value =
-                nextValue() ?: return ParseResult.Error("required value was not provided for: $arg")
-            lengths.add(value.toIntOrNull() ?: return ParseResult.Error(invalidInt(arg, value)))
-          }
-          arg.startsWith("--length=") ->
-              parseKeyValueArg("--length", arg).let { value ->
-                lengths.add(
-                    value?.toIntOrNull() ?: return ParseResult.Error(invalidInt("--length", value))
-                )
+          arg.startsWith("--length") ->
+              arg.split('=', limit = 2).let { argSplit ->
+                val key = argSplit.first()
+                if (key != "--length") {
+                  return ParseResult.Error("Unexpected option: $key")
+                }
+                val value =
+                    if (argSplit.size > 1) {
+                      argSplit.last()
+                    } else {
+                      nextValue()
+                          ?: return ParseResult.Error("required value was not provided for: $key")
+                    }
+                lengths.add(value.toIntOrNull() ?: return ParseResult.Error(invalidInt(key, value)))
               }
           arg.startsWith("--") -> return ParseResult.Error("Unexpected option: $arg")
           arg.startsWith("@") -> return ParseResult.Error("Unexpected option: $arg")
