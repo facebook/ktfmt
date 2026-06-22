@@ -129,7 +129,7 @@ class ParsedArgsTest {
 
     assertThat(parsed.lineRanges)
         .isEqualTo(
-            lineRanges(
+            ranges(
                 Range.closedOpen(0, 3),
                 Range.closedOpen(4, 5),
                 Range.closedOpen(6, 7),
@@ -143,11 +143,11 @@ class ParsedArgsTest {
         .isEqualTo(
             parseResultOk(
                 fileNames = listOf("foo.kt"),
-                lineRanges = lineRanges(Range.closedOpen(0, 1)),
+                lineRanges = ranges(Range.closedOpen(0, 1)),
             )
         )
     assertThat(assertSucceeds(parseOptions("--line", "2", "foo.kt")).lineRanges)
-        .isEqualTo(lineRanges(Range.closedOpen(1, 2)))
+        .isEqualTo(ranges(Range.closedOpen(1, 2)))
   }
 
   @Test
@@ -382,10 +382,6 @@ class ParsedArgsTest {
     parsedArgs.lineRanges.addAll(lineRanges)
     parsedArgs.characterRanges.addAll(characterRanges)
     return ParseResult.Ok(parsedArgs)
-  }
-
-  private fun lineRanges(vararg ranges: Range<Int>): RangeSet<Int> {
-    return ranges(*ranges)
   }
 
   private fun ranges(vararg ranges: Range<Int>): RangeSet<Int> {
