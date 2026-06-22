@@ -190,7 +190,7 @@ data class ParsedArgs(
           arg.startsWith("--offset=") ->
               parseKeyValueArg("--offset", arg).let { value ->
                 offsets.add(
-                    value.toIntOrNull() ?: return ParseResult.Error(invalidInt("--offset", value))
+                    value?.toIntOrNull() ?: return ParseResult.Error(invalidInt("--offset", value))
                 )
               }
           arg == "--length" -> {
@@ -201,7 +201,7 @@ data class ParsedArgs(
           arg.startsWith("--length=") ->
               parseKeyValueArg("--length", arg).let { value ->
                 lengths.add(
-                    value.toIntOrNull() ?: return ParseResult.Error(invalidInt("--length", value))
+                    value?.toIntOrNull() ?: return ParseResult.Error(invalidInt("--length", value))
                 )
               }
           arg.startsWith("--") -> return ParseResult.Error("Unexpected option: $arg")
@@ -256,14 +256,6 @@ data class ParsedArgs(
     private fun parseKeyValueArg(key: String, arg: String): String? {
       val parts = arg.split('=', limit = 2)
       return parts[1].takeIf { parts[0] == key || parts.size == 2 }
-    }
-
-    private fun String?.toIntOrNull(): Int? {
-      return try {
-        this?.toInt()
-      } catch (_: NumberFormatException) {
-        null
-      }
     }
 
     private fun invalidInt(flag: String, value: String?): String =
