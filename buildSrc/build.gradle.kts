@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import com.ncorti.ktfmt.gradle.tasks.KtfmtCheckTask
 import org.gradle.kotlin.dsl.`kotlin-dsl`
 
 plugins {
   `kotlin-dsl`
-  alias(libs.plugins.ktfmt)
 }
 
 gradlePlugin {
@@ -30,5 +28,3 @@ gradlePlugin {
     }
   }
 }
-
-tasks.named("jar") { dependsOn(tasks.withType<KtfmtCheckTask>()) }

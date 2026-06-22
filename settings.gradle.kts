@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+pluginManagement {
+  repositories {
+    mavenCentral()
+    gradlePluginPortal()
+  }
+}
+
 rootProject.name = "ktfmt-parent"
 
 include(
@@ -34,5 +41,8 @@ dependencyResolutionManagement {
       val ktfmtVersion = providers.gradleProperty("ktfmt.version").get()
       version("ktfmt", ktfmtVersion)
     }
+  }
+  repositories {
+    mavenCentral()
   }
 }

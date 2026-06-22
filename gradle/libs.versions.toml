@@ -14,7 +14,6 @@ org-ec4j-core = "1.2.0"
 # plugins
 gradlePlugin-dokka = "2.2.0"
 gradlePlugin-intelliJPlatform = "2.6.0"
-gradlePlugin-ktfmt = "0.26.0"
 gradlePlugin-nexusPublish = "2.0.0"
 gradlePlugin-shadowJar = "9.0.2"
 
@@ -39,6 +38,5 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "gradlePlugin-dokka" }
 dokka-javadoc = { id = "org.jetbrains.dokka-javadoc", version.ref = "gradlePlugin-dokka" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "gradlePlugin-intelliJPlatform" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "gradlePlugin-ktfmt" }
 nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradlePlugin-nexusPublish" }
 shadowJar = { id = "com.gradleup.shadow", version.ref = "gradlePlugin-shadowJar" }

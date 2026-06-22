@@ -15,7 +15,6 @@
  */
 
 import com.facebook.ktfmt.GenerateKtfmtFileTask
-import com.ncorti.ktfmt.gradle.tasks.KtfmtCheckTask
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
@@ -23,7 +22,6 @@ plugins {
   kotlin("jvm")
   alias(libs.plugins.dokka)
   alias(libs.plugins.dokka.javadoc)
-  alias(libs.plugins.ktfmt)
   alias(libs.plugins.shadowJar)
   id("maven-publish")
   id("signing")
@@ -110,16 +108,6 @@ kotlin {
     }
   }
 }
-
-ktfmt {
-  trailingCommaManagementStrategy.set(
-      com.ncorti.ktfmt.gradle.TrailingCommaManagementStrategy.ONLY_ADD
-  )
-}
-
-tasks.named("compileKotlin") { setMustRunAfter(emptyList<Any>()) }
-
-tasks.withType<KtfmtCheckTask>().configureEach { setMustRunAfter(listOf(tasks.named("jar"))) }
 
 group = "com.facebook"
 
