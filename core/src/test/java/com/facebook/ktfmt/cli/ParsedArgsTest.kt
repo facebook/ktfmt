@@ -139,13 +139,10 @@ class ParsedArgsTest {
 
   @Test
   fun `parseOptions recognizes --line alias`() {
-    assertThat(parseOptions("--line=1", "foo.kt"))
-        .isEqualTo(
-            parseResultOk(
-                fileNames = listOf("foo.kt"),
-                lineRanges = ranges(Range.closedOpen(0, 1)),
-            )
-        )
+    val parsed = assertSucceeds(parseOptions("--line=1", "foo.kt"))
+    assertThat(parsed.fileNames).containsExactly("foo.kt")
+    assertThat(parsed.lineRanges).isEqualTo(ranges(Range.closedOpen(0, 1)))
+
     assertThat(assertSucceeds(parseOptions("--line", "2", "foo.kt")).lineRanges)
         .isEqualTo(ranges(Range.closedOpen(1, 2)))
   }
@@ -364,12 +361,10 @@ class ParsedArgsTest {
       stdinName: String? = null,
       editorConfig: Boolean = false,
       quiet: Boolean = false,
-      lineRanges: RangeSet<Int> = TreeRangeSet.create(),
-      characterRanges: RangeSet<Int> = TreeRangeSet.create(),
   ): ParseResult.Ok {
     val returnedFormattingOptions =
         formattingOptions.copy(removeUnusedImports = removedUnusedImports)
-    val parsedArgs =
+    return ParseResult.Ok(
         ParsedArgs(
             fileNames,
             returnedFormattingOptions,
@@ -379,9 +374,7 @@ class ParsedArgsTest {
             editorConfig,
             quiet,
         )
-    parsedArgs.lineRanges.addAll(lineRanges)
-    parsedArgs.characterRanges.addAll(characterRanges)
-    return ParseResult.Ok(parsedArgs)
+    )
   }
 
   private fun ranges(vararg ranges: Range<Int>): RangeSet<Int> {
