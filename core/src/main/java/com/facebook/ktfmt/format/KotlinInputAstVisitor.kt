@@ -1473,16 +1473,15 @@ class KotlinInputAstVisitor(
       }
     }
     // for example `field = value`, `private set`, or `get = 2 * field`
-    val propertyComponents =
-        buildList {
-              if (backingField != null) {
-                add(backingField)
-              }
-              if (accessors != null) {
-                addAll(accessors)
-              }
-            }
-            .sortedBy { it.startOffset }
+    val propertyComponents = buildList {
+      if (backingField != null) {
+        add(backingField)
+      }
+      if (accessors != null) {
+        addAll(accessors)
+      }
+    }
+        .sortedBy { it.startOffset }
     if (propertyComponents.isNotEmpty()) {
       builder.block(blockIndent) {
         for (component in propertyComponents) {
