@@ -58,6 +58,7 @@ val ktfmtFiles =
       include("**/*.kt")
       include("**/*.kts")
       exclude("**/build/**")
+      exclude("facebook/**")
     }
 
 class KtfmtArgumentsProvider(
