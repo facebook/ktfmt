@@ -25,6 +25,12 @@ bin="${1:-./core/build/native/nativeCompile/ktfmt}"
 if [[ ! -e "$bin" && -e "${bin}.exe" ]]; then
   bin="${bin}.exe"
 fi
+if [[ ! -x "$bin" ]]; then
+  echo "ktfmt native binary not found (or not executable) at: $bin" >&2
+  echo "Pass the binary path as the first argument, or build it first with:" >&2
+  echo "  ./gradlew :ktfmt:nativeCompile" >&2
+  exit 1
+fi
 
 # A format crash is almost always stale GraalVM reachability metadata.
 stale_hint() {

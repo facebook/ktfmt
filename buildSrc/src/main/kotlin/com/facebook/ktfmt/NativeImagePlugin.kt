@@ -16,8 +16,8 @@
 
 package com.facebook.ktfmt
 
-import java.nio.file.Paths
 import org.graalvm.buildtools.gradle.dsl.GraalVMExtension
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -59,11 +59,12 @@ class NativeImagePlugin : Plugin<Project> {
       add("nativeImageClasspath", nativeImageLibs.findLibrary("jline-terminal-jni").get())
     }
 
+    val nativeImageDir = project.layout.projectDirectory.dir(NATIVE_IMAGE_SRC_DIR)
     val javaExtension = project.extensions.getByType<JavaPluginExtension>()
     val nativeImageSourceSet =
         javaExtension.sourceSets.create("nativeImage") {
-          java.srcDir("src/main/native-image/java")
-          resources.srcDir("src/main/native-image/resources")
+          java.srcDir(nativeImageDir.dir("java"))
+          resources.srcDir(nativeImageDir.dir("resources"))
         }
 
     val compileNativeImageClasses =
@@ -106,8 +107,8 @@ class NativeImagePlugin : Plugin<Project> {
     val muslSysroot =
         (project.findProperty("ktfmt.native.muslHome") ?: System.getenv("MUSL_HOME"))?.toString()
     val preferMusl =
-        (project.findProperty("ktfmt.native.musl") == "true").also { preferMusl ->
-          require(!preferMusl || muslSysroot != null) {
+        (project.findProperty("ktfmt.native.musl") == "true").also { enabled ->
+          require(!enabled || muslSysroot != null) {
             "When `ktfmt.native.musl` is true, -Pktfmt.native.muslHome or MUSL_HOME must be set to the Musl sysroot. " +
                 "See https://www.graalvm.org/latest/reference-manual/native-image/guides/build-static-executables/"
           }
@@ -195,17 +196,13 @@ class NativeImagePlugin : Plugin<Project> {
       add("-H:NativeLinkerOption=-L${muslSysroot}/lib")
     }
 
-    addLinesFromFile(project, "src", "main", "native-image", "initialize-at-build-time.txt") {
-      "--initialize-at-build-time=$it"
-    }
-    addLinesFromFile(project, "src", "main", "native-image", "initialize-at-run-time.txt") {
-      "--initialize-at-run-time=$it"
-    }
+    addLinesFromFile(project, "initialize-at-build-time.txt") { "--initialize-at-build-time=$it" }
+    addLinesFromFile(project, "initialize-at-run-time.txt") { "--initialize-at-run-time=$it" }
 
     when (System.getProperty("os.name")) {
       "Linux" ->
-          when (System.getProperty("os.arch")) {
-            "amd64" ->
+          when (normalizeArch(System.getProperty("os.arch"))) {
+            "x64" ->
                 if (preferMusl) {
                   addAll(listOf("--static", "--libc=musl", "-H:+StaticLibStdCpp"))
                 } else {
@@ -217,13 +214,26 @@ class NativeImagePlugin : Plugin<Project> {
     }
   }
 
+  /** Canonicalizes [java.lang.System.getProperty]("os.arch") values that vary across JVMs. */
+  private fun normalizeArch(arch: String?): String =
+      when (arch) {
+        "amd64",
+        "x86_64" -> "x64"
+        "aarch64",
+        "arm64" -> "aarch64"
+        else -> arch.orEmpty()
+      }
+
   private fun MutableList<String>.addLinesFromFile(
       project: Project,
-      vararg path: String,
+      fileName: String,
       mapper: (String) -> String,
   ) {
-    project
-        .file(Paths.get(path.first(), *path.drop(1).toTypedArray()).toString())
+    val file = project.layout.projectDirectory.dir(NATIVE_IMAGE_SRC_DIR).file(fileName).asFile
+    if (!file.exists()) {
+      throw GradleException("Native Image configuration file not found: $file")
+    }
+    file
         .useLines { lines ->
           lines
               .map { it.trim() }
@@ -236,5 +246,6 @@ class NativeImagePlugin : Plugin<Project> {
 
   private companion object {
     const val ENTRYPOINT = "com.facebook.ktfmt.cli.Main"
+    const val NATIVE_IMAGE_SRC_DIR = "src/main/native-image"
   }
 }
