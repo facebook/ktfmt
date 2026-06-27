@@ -1705,13 +1705,13 @@ class KotlinInputAstVisitor(
    */
   @OptIn(ExperimentalContracts::class)
   private fun isBlockLikeCall(expression: KtExpression?): Boolean {
-    contract { returns(true) implies (expression is KtCallExpression) }
-
     if (expression == null) return false
     val prev = expression.getPrevSiblingIgnoringWhitespace()
     if (prev is PsiComment) {
       return false // Leading comments cause weird indentation; keep the default layout.
     }
+
+    if (expression is KtCollectionLiteralExpression) return expression.parent !is KtValueArgument
 
     if (expression !is KtCallExpression) return false
     val valueArgumentList = expression.valueArgumentList ?: return false
