@@ -582,7 +582,8 @@ class KotlinInputAstVisitor(
               // applies when trailing commas are preserved (the block-like style); when ktfmt
               // manages trailing commas, exploded chained calls keep the regular extra indent.
               val isLastPartOrBlockLikeCall =
-                  index == parts.size - 1 || !options.manageTrailingCommas && isBlockLikeCall(selectorExpression)
+                  index == parts.size - 1 ||
+                      !options.manageTrailingCommas && isBlockLikeCall(selectorExpression)
               val argsIndentElse = if (isLastPartOrBlockLikeCall) ZERO else expressionBreakIndent
               val lambdaIndentElse = if (isTrailingLambda) expressionBreakNegativeIndent else ZERO
               val negativeLambdaIndentElse = if (isTrailingLambda) expressionBreakIndent else ZERO
@@ -870,7 +871,8 @@ class KotlinInputAstVisitor(
                         isChainedBlockLikeCall(argumentExpression))
               }
       wrapInBlock = !options.manageTrailingCommas
-      breakBeforePostfix = (options.manageTrailingCommas || contentForcesMultiline) && !hasEmptyParens
+      breakBeforePostfix =
+          (options.manageTrailingCommas || contentForcesMultiline) && !hasEmptyParens
       leadingBreak = !hasEmptyParens
       breakAfterPrefix = !hasEmptyParens
     }
@@ -1694,8 +1696,8 @@ class KotlinInputAstVisitor(
 
   /**
    * Returns true when [expression] is a call that is forced onto multiple lines regardless of the
-   * line width, either because its value argument list has a trailing comma (e.g.
-   * `foo(\n    1,\n    2,\n)`) or because one of its arguments is itself a block-like multiline call.
+   * line width, either because its value argument list has a trailing comma (e.g. `foo(\n 1,\n
+   * 2,\n)`) or because one of its arguments is itself a block-like multiline call.
    *
    * Such calls are rendered "block-like": they stay on the same line as the preceding `=`/`by`
    * operator (instead of breaking and indenting after it), and any chained selectors break onto
@@ -1731,7 +1733,7 @@ class KotlinInputAstVisitor(
   }
 
   /**
-   * Emit a `foo(\n    ...,\n).bar().baz()` style chain whose innermost receiver is a block-like
+   * Emit a `foo(\n ...,\n).bar().baz()` style chain whose innermost receiver is a block-like
    * multiline call: render the receiver call normally (so its closing paren sits at the surrounding
    * indent), then emit each `.selector` on its own line, indented by [expressionBreakIndent].
    */

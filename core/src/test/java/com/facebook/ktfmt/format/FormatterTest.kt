@@ -67,93 +67,90 @@ class FormatterTest {
       )
 
   @Test
-  fun `call chains`() =
-      assertFormatted(
-          """
-          |////////////////////////////////////////////////////////
-          |fun f() {
-          |  // Static method calls are attached to the class name.
-          |  ImmutableList.newBuilder()
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .build()
-          |
-          |  // Multiple call expressions --> each on its own line.
-          |  ImmutableList()
-          |      .newBuilder()
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .add(1)
-          |      .build()
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `call chains`() = assertFormatted(
+      """
+      |////////////////////////////////////////////////////////
+      |fun f() {
+      |  // Static method calls are attached to the class name.
+      |  ImmutableList.newBuilder()
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .build()
+      |
+      |  // Multiple call expressions --> each on its own line.
+      |  ImmutableList()
+      |      .newBuilder()
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .add(1)
+      |      .build()
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `line breaks in function arguments`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |fun f() {
-          |  computeBreaks(
-          |      javaOutput.commentsHelper,
-          |      maxWidth,
-          |      Doc.State(+0, 0))
-          |  computeBreaks(
-          |      output.commentsHelper, maxWidth, State(0))
-          |  doc.computeBreaks(
-          |      javaOutput.commentsHelper,
-          |      maxWidth,
-          |      Doc.State(+0, 0))
-          |  doc.computeBreaks(
-          |      output.commentsHelper, maxWidth, State(0))
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `line breaks in function arguments`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |fun f() {
+      |  computeBreaks(
+      |      javaOutput.commentsHelper,
+      |      maxWidth,
+      |      Doc.State(+0, 0))
+      |  computeBreaks(
+      |      output.commentsHelper, maxWidth, State(0))
+      |  doc.computeBreaks(
+      |      javaOutput.commentsHelper,
+      |      maxWidth,
+      |      Doc.State(+0, 0))
+      |  doc.computeBreaks(
+      |      output.commentsHelper, maxWidth, State(0))
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `parameters and return type in function definitions`() =
-      assertFormatted(
-          """
-          |////////////////////////////////////////
-          |fun format(
-          |    code: String,
-          |    maxWidth: Int =
-          |        DEFAULT_MAX_WIDTH_VERY_LONG
-          |): String {
-          |  val a = 0
-          |}
-          |
-          |fun print(
-          |    code: String,
-          |    maxWidth: Int =
-          |        DEFAULT_MAX_WIDTH_VERY_LONG
-          |) {
-          |  val a = 0
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `parameters and return type in function definitions`() = assertFormatted(
+      """
+      |////////////////////////////////////////
+      |fun format(
+      |    code: String,
+      |    maxWidth: Int =
+      |        DEFAULT_MAX_WIDTH_VERY_LONG
+      |): String {
+      |  val a = 0
+      |}
+      |
+      |fun print(
+      |    code: String,
+      |    maxWidth: Int =
+      |        DEFAULT_MAX_WIDTH_VERY_LONG
+      |) {
+      |  val a = 0
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `kitchen sink of tests`() {
@@ -325,225 +322,215 @@ class FormatterTest {
       )
 
   @Test
-  fun `breaking long binary operations`() =
-      assertFormatted(
-          """
-          |////////////////////
-          |fun foo() {
-          |  val finalWidth =
-          |      value1 +
-          |          value2 +
-          |          (value3 +
-          |              value4 +
-          |              value5) +
-          |          foo(v) +
-          |          (1 + 2) +
-          |          function(
-          |              value7,
-          |              value8) +
-          |          value9
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `breaking long binary operations`() = assertFormatted(
+      """
+      |////////////////////
+      |fun foo() {
+      |  val finalWidth =
+      |      value1 +
+      |          value2 +
+      |          (value3 +
+      |              value4 +
+      |              value5) +
+      |          foo(v) +
+      |          (1 + 2) +
+      |          function(
+      |              value7,
+      |              value8) +
+      |          value9
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `prioritize according to associativity`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////
-          |fun foo() {
-          |  return expression1 != expression2 ||
-          |      expression2 != expression1
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `prioritize according to associativity`() = assertFormatted(
+      """
+      |//////////////////////////////////////
+      |fun foo() {
+      |  return expression1 != expression2 ||
+      |      expression2 != expression1
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `once a binary expression is broken, split on every line`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////
-          |fun foo() {
-          |  val sentence =
-          |      "The" +
-          |          "quick" +
-          |          ("brown" + "fox") +
-          |          "jumps" +
-          |          "over" +
-          |          "the" +
-          |          "lazy" +
-          |          "dog"
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `once a binary expression is broken, split on every line`() = assertFormatted(
+      """
+      |//////////////////////////////////////
+      |fun foo() {
+      |  val sentence =
+      |      "The" +
+      |          "quick" +
+      |          ("brown" + "fox") +
+      |          "jumps" +
+      |          "over" +
+      |          "the" +
+      |          "lazy" +
+      |          "dog"
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `long binary expressions with ranges in the middle`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////
-          |fun foo() {
-          |  val sentence =
-          |      "The" +
-          |          "quick" +
-          |          ("brown".."fox") +
-          |          ("brown"..<"fox") +
-          |          "jumps" +
-          |          "over" +
-          |          "the".."lazy" + "dog"
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `long binary expressions with ranges in the middle`() = assertFormatted(
+      """
+      |//////////////////////////////////////
+      |fun foo() {
+      |  val sentence =
+      |      "The" +
+      |          "quick" +
+      |          ("brown".."fox") +
+      |          ("brown"..<"fox") +
+      |          "jumps" +
+      |          "over" +
+      |          "the".."lazy" + "dog"
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `line comment before binary operator keeps operator with operand`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |fun foo() {
-          |  val result =
-          |      firstCond &&
-          |          secondCond
-          |          // comment about thirdCond.
-          |          && thirdCond
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `line comment before binary operator keeps operator with operand`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |fun foo() {
+      |  val result =
+      |      firstCond &&
+      |          secondCond
+      |          // comment about thirdCond.
+      |          && thirdCond
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `line comment before operator in multi-operand chain`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |fun foo() {
-          |  val result =
-          |      firstCond &&
-          |          secondCond
-          |          // comment about thirdCond.
-          |          && thirdCond &&
-          |          fourthCond
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `line comment before operator in multi-operand chain`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |fun foo() {
+      |  val result =
+      |      firstCond &&
+      |          secondCond
+      |          // comment about thirdCond.
+      |          && thirdCond &&
+      |          fourthCond
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `block comment before binary operator keeps operator with operand`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |fun foo() {
-          |  val result =
-          |      firstCond &&
-          |          secondCond
-          |          /* comment. */
-          |          && thirdCond
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `block comment before binary operator keeps operator with operand`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |fun foo() {
+      |  val result =
+      |      firstCond &&
+      |          secondCond
+      |          /* comment. */
+      |          && thirdCond
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `line comment before or operator keeps operator with operand`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |fun foo() {
-          |  val result =
-          |      firstCond ||
-          |          secondCond
-          |          // comment about thirdCond.
-          |          || thirdCond
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `line comment before or operator keeps operator with operand`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |fun foo() {
+      |  val result =
+      |      firstCond ||
+      |          secondCond
+      |          // comment about thirdCond.
+      |          || thirdCond
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `inline block comment before binary operator does not break chain`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////////
-          |fun foo() {
-          |  val result =
-          |      firstCondition ||
-          |          secondCondition /*tag*/ ||
-          |          thirdCondition
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `inline block comment before binary operator does not break chain`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////////
+      |fun foo() {
+      |  val result =
+      |      firstCondition ||
+      |          secondCondition /*tag*/ ||
+      |          thirdCondition
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `assignment expressions with scoping functions are block-like`() =
-      assertFormatted(
-          """
-          |///////////////////////////
-          |fun f() {
-          |  name.sub = scope { x ->
-          |    //
-          |  }
-          |  name.sub += scope { x ->
-          |    //
-          |  }
-          |  name.sub -= scope { x ->
-          |    //
-          |  }
-          |  name.sub *= scope { x ->
-          |    //
-          |  }
-          |  name.sub /= scope { x ->
-          |    //
-          |  }
-          |  name.sub %= scope { x ->
-          |    //
-          |  }
-          |}
-          |
-          |fun h() {
-          |  long.name.sub =
-          |      scope { x ->
-          |        //
-          |      }
-          |  long.name.sub +=
-          |      scope { x ->
-          |        //
-          |      }
-          |  long.name.sub -=
-          |      scope { x ->
-          |        //
-          |      }
-          |  long.name.sub *=
-          |      scope { x ->
-          |        //
-          |      }
-          |  long.name.sub /=
-          |      scope { x ->
-          |        //
-          |      }
-          |  long.name.sub %=
-          |      scope { x ->
-          |        //
-          |      }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `assignment expressions with scoping functions are block-like`() = assertFormatted(
+      """
+      |///////////////////////////
+      |fun f() {
+      |  name.sub = scope { x ->
+      |    //
+      |  }
+      |  name.sub += scope { x ->
+      |    //
+      |  }
+      |  name.sub -= scope { x ->
+      |    //
+      |  }
+      |  name.sub *= scope { x ->
+      |    //
+      |  }
+      |  name.sub /= scope { x ->
+      |    //
+      |  }
+      |  name.sub %= scope { x ->
+      |    //
+      |  }
+      |}
+      |
+      |fun h() {
+      |  long.name.sub =
+      |      scope { x ->
+      |        //
+      |      }
+      |  long.name.sub +=
+      |      scope { x ->
+      |        //
+      |      }
+      |  long.name.sub -=
+      |      scope { x ->
+      |        //
+      |      }
+      |  long.name.sub *=
+      |      scope { x ->
+      |        //
+      |      }
+      |  long.name.sub /=
+      |      scope { x ->
+      |        //
+      |      }
+      |  long.name.sub %=
+      |      scope { x ->
+      |        //
+      |      }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `don't keep adding newlines between these two comments when they're at end of file`() {
@@ -705,20 +692,19 @@ class FormatterTest {
   }
 
   @Test
-  fun `a property with a too long name being broken on multiple lines`() =
-      assertFormatted(
-          """
-          |////////////////////
-          |class Foo {
-          |  val thisIsALongName:
-          |      String =
-          |      "Hello there this is long"
-          |    get() = field
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `a property with a too long name being broken on multiple lines`() = assertFormatted(
+      """
+      |////////////////////
+      |class Foo {
+      |  val thisIsALongName:
+      |      String =
+      |      "Hello there this is long"
+      |    get() = field
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `multi-character unary and binary operators such as ==`() =
@@ -790,179 +776,175 @@ class FormatterTest {
       )
 
   @Test
-  fun `safe dot operator expression chain in expression function`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |fun f(number: Int) =
-          |    Something.doStuff(number)?.size
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `safe dot operator expression chain in expression function`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |fun f(number: Int) =
+      |    Something.doStuff(number)?.size
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `avoid breaking suspected package names`() =
-      assertFormatted(
-          """
-          |///////////////////////
-          |fun f() {
-          |  com.facebook.Foo
-          |      .format()
-          |  org.facebook.Foo
-          |      .format()
-          |  java.lang.stuff.Foo
-          |      .format()
-          |  javax.lang.stuff.Foo
-          |      .format()
-          |  kotlin.lang.Foo
-          |      .format()
-          |  foo.facebook.Foo
-          |      .format()
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `avoid breaking suspected package names`() = assertFormatted(
+      """
+      |///////////////////////
+      |fun f() {
+      |  com.facebook.Foo
+      |      .format()
+      |  org.facebook.Foo
+      |      .format()
+      |  java.lang.stuff.Foo
+      |      .format()
+      |  javax.lang.stuff.Foo
+      |      .format()
+      |  kotlin.lang.Foo
+      |      .format()
+      |  foo.facebook.Foo
+      |      .format()
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `an assortment of tests for emitQualifiedExpression`() =
-      assertFormatted(
-          """
-          |/////////////////////////////////////
-          |fun f() {
-          |  // Regression test:
-          |  // https://github.com/facebook/ktfmt/issues/56
-          |  kjsdfglkjdfgkjdfkgjhkerjghkdfj
-          |      ?.methodName1()
-          |
-          |  // a series of field accesses
-          |  // followed by a single call
-          |  // expression is kept together.
-          |  abcdefghijkl.abcdefghijkl
-          |      ?.methodName2()
-          |
-          |  // Similar to above.
-          |  abcdefghijkl.abcdefghijkl
-          |      ?.methodName3
-          |      ?.abcdefghijkl()
-          |
-          |  // Multiple call expressions cause
-          |  // each part of the expression
-          |  // to be placed on its own line.
-          |  abcdefghijkl
-          |      ?.abcdefghijkl
-          |      ?.methodName4()
-          |      ?.abcdefghijkl()
-          |
-          |  // Don't break first call
-          |  // expression if it fits.
-          |  foIt(something.something.happens())
-          |      .thenReturn(result)
-          |
-          |  // Break after `longerThanFour(`
-          |  // because it's longer than 4 chars
-          |  longerThanFour(
-          |          something.something
-          |              .happens())
-          |      .thenReturn(result)
-          |
-          |  // Similarly to above, when part of
-          |  // qualified expression.
-          |  foo.longerThanFour(
-          |          something.something
-          |              .happens())
-          |      .thenReturn(result)
-          |
-          |  // Keep 'super' attached to the
-          |  // method name
-          |  super.abcdefghijkl
-          |      .methodName4()
-          |      .abcdefghijkl()
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `an assortment of tests for emitQualifiedExpression`() = assertFormatted(
+      """
+      |/////////////////////////////////////
+      |fun f() {
+      |  // Regression test:
+      |  // https://github.com/facebook/ktfmt/issues/56
+      |  kjsdfglkjdfgkjdfkgjhkerjghkdfj
+      |      ?.methodName1()
+      |
+      |  // a series of field accesses
+      |  // followed by a single call
+      |  // expression is kept together.
+      |  abcdefghijkl.abcdefghijkl
+      |      ?.methodName2()
+      |
+      |  // Similar to above.
+      |  abcdefghijkl.abcdefghijkl
+      |      ?.methodName3
+      |      ?.abcdefghijkl()
+      |
+      |  // Multiple call expressions cause
+      |  // each part of the expression
+      |  // to be placed on its own line.
+      |  abcdefghijkl
+      |      ?.abcdefghijkl
+      |      ?.methodName4()
+      |      ?.abcdefghijkl()
+      |
+      |  // Don't break first call
+      |  // expression if it fits.
+      |  foIt(something.something.happens())
+      |      .thenReturn(result)
+      |
+      |  // Break after `longerThanFour(`
+      |  // because it's longer than 4 chars
+      |  longerThanFour(
+      |          something.something
+      |              .happens())
+      |      .thenReturn(result)
+      |
+      |  // Similarly to above, when part of
+      |  // qualified expression.
+      |  foo.longerThanFour(
+      |          something.something
+      |              .happens())
+      |      .thenReturn(result)
+      |
+      |  // Keep 'super' attached to the
+      |  // method name
+      |  super.abcdefghijkl
+      |      .methodName4()
+      |      .abcdefghijkl()
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `an assortment of tests for emitQualifiedExpression with lambdas`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////////////////////////////////
-          |fun f() {
-          |  val items =
-          |      items.toMutableList.apply {
-          |        //
-          |        foo
-          |      }
-          |
-          |  val items =
-          |      items.toMutableList().apply {
-          |        //
-          |        foo
-          |      }
-          |
-          |  // All dereferences are on one line (because they fit), even though
-          |  // the apply() at the end requires a line break.
-          |  val items =
-          |      items.toMutableList.sdfkjsdf.sdfjksdflk.sdlfkjsldfj.apply {
-          |        //
-          |        foo
-          |      }
-          |
-          |  // All method calls are on one line (because they fit), even though
-          |  // the apply() at the end requires a line break.
-          |  val items =
-          |      items.toMutableList().sdfkjsdf().sdfjksdflk().sdlfkjsldfj().apply {
-          |        //
-          |        foo
-          |      }
-          |
-          |  // All method calls with lambdas could fit, but we avoid a block like syntax
-          |  // and break to one call per line
-          |  val items =
-          |      items
-          |          .map { it + 1 }
-          |          .filter { it > 0 }
-          |          .apply {
-          |            //
-          |            foo
-          |          }
-          |
-          |  // the lambda is indented properly with the break before it
-          |  val items =
-          |      items.fieldName.sdfkjsdf.sdfjksdflk.sdlfkjsldfj.sdfjksdflk.sdlfkjsldfj
-          |          .sdlfkjsldfj
-          |          .apply {
-          |            //
-          |            foo
-          |          }
-          |  items.fieldName.sdfkjsdf.sdfjksdflk.sdlfkjsldfj.sdfjksdflk.sdlfkjsldfj
-          |      .apply {
-          |        //
-          |        foo
-          |      }
-          |
-          |  // When there are multiple method calls, and they don't fit on one
-          |  // line, put each on a new line.
-          |  val items =
-          |      items
-          |          .toMutableList()
-          |          .sdfkjsdf()
-          |          .sdfjksdflk()
-          |          .sdlfkjsldfj()
-          |          .sdfjksdflk()
-          |          .sdlfkjsldfj()
-          |          .apply {
-          |            //
-          |            foo
-          |          }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `an assortment of tests for emitQualifiedExpression with lambdas`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////////////////////////////////
+      |fun f() {
+      |  val items =
+      |      items.toMutableList.apply {
+      |        //
+      |        foo
+      |      }
+      |
+      |  val items =
+      |      items.toMutableList().apply {
+      |        //
+      |        foo
+      |      }
+      |
+      |  // All dereferences are on one line (because they fit), even though
+      |  // the apply() at the end requires a line break.
+      |  val items =
+      |      items.toMutableList.sdfkjsdf.sdfjksdflk.sdlfkjsldfj.apply {
+      |        //
+      |        foo
+      |      }
+      |
+      |  // All method calls are on one line (because they fit), even though
+      |  // the apply() at the end requires a line break.
+      |  val items =
+      |      items.toMutableList().sdfkjsdf().sdfjksdflk().sdlfkjsldfj().apply {
+      |        //
+      |        foo
+      |      }
+      |
+      |  // All method calls with lambdas could fit, but we avoid a block like syntax
+      |  // and break to one call per line
+      |  val items =
+      |      items
+      |          .map { it + 1 }
+      |          .filter { it > 0 }
+      |          .apply {
+      |            //
+      |            foo
+      |          }
+      |
+      |  // the lambda is indented properly with the break before it
+      |  val items =
+      |      items.fieldName.sdfkjsdf.sdfjksdflk.sdlfkjsldfj.sdfjksdflk.sdlfkjsldfj
+      |          .sdlfkjsldfj
+      |          .apply {
+      |            //
+      |            foo
+      |          }
+      |  items.fieldName.sdfkjsdf.sdfjksdflk.sdlfkjsldfj.sdfjksdflk.sdlfkjsldfj
+      |      .apply {
+      |        //
+      |        foo
+      |      }
+      |
+      |  // When there are multiple method calls, and they don't fit on one
+      |  // line, put each on a new line.
+      |  val items =
+      |      items
+      |          .toMutableList()
+      |          .sdfkjsdf()
+      |          .sdfjksdflk()
+      |          .sdlfkjsldfj()
+      |          .sdfjksdflk()
+      |          .sdlfkjsldfj()
+      |          .apply {
+      |            //
+      |            foo
+      |          }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `when two lambdas are in a chain, avoid block syntax`() =
@@ -988,163 +970,156 @@ class FormatterTest {
       )
 
   @Test
-  fun `don't one-line lambdas following argument breaks`() =
-      assertFormatted(
-          """
-          |///////////////////////////////////////////////////////////////////////////////
-          |class Foo : Bar() {
-          |  fun doIt() {
-          |    // don't break in lambda, no argument breaks found
-          |    fruit.forEach { eat(it) }
-          |
-          |    // break in the lambda, without comma
-          |    fruit.forEach(
-          |        someVeryLongParameterNameThatWillCauseABreak,
-          |        evenWithoutATrailingCommaOnTheParameterListSoLetsSeeIt) {
-          |          eat(it)
-          |        }
-          |
-          |    // break in the lambda, with comma
-          |    fruit.forEach(
-          |        fromTheVine = true,
-          |    ) {
-          |      eat(it)
-          |    }
-          |
-          |    // don't break in the inner lambda, as nesting doesn't respect outer levels
-          |    fruit.forEach(
-          |        fromTheVine = true,
-          |    ) {
-          |      fruit.forEach { eat(it) }
-          |    }
-          |
-          |    // don't break in the lambda, as breaks don't propagate
-          |    fruit
-          |        .onlyBananas(
-          |            fromTheVine = true,
-          |        )
-          |        .forEach { eat(it) }
-          |
-          |    // don't break in the inner lambda, as breaks don't propagate to parameters
-          |    fruit.onlyBananas(
-          |        fromTheVine = true,
-          |        processThem = { eat(it) },
-          |    ) {
-          |      eat(it)
-          |    }
-          |
-          |    // don't break in the inner lambda, as breaks don't propagate to the body
-          |    fruit.onlyBananas(
-          |        fromTheVine = true,
-          |    ) {
-          |      val anon = { eat(it) }
-          |    }
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `don't one-line lambdas following argument breaks`() = assertFormatted(
+      """
+      |///////////////////////////////////////////////////////////////////////////////
+      |class Foo : Bar() {
+      |  fun doIt() {
+      |    // don't break in lambda, no argument breaks found
+      |    fruit.forEach { eat(it) }
+      |
+      |    // break in the lambda, without comma
+      |    fruit.forEach(
+      |        someVeryLongParameterNameThatWillCauseABreak,
+      |        evenWithoutATrailingCommaOnTheParameterListSoLetsSeeIt) {
+      |          eat(it)
+      |        }
+      |
+      |    // break in the lambda, with comma
+      |    fruit.forEach(
+      |        fromTheVine = true,
+      |    ) {
+      |      eat(it)
+      |    }
+      |
+      |    // don't break in the inner lambda, as nesting doesn't respect outer levels
+      |    fruit.forEach(
+      |        fromTheVine = true,
+      |    ) {
+      |      fruit.forEach { eat(it) }
+      |    }
+      |
+      |    // don't break in the lambda, as breaks don't propagate
+      |    fruit
+      |        .onlyBananas(
+      |            fromTheVine = true,
+      |        )
+      |        .forEach { eat(it) }
+      |
+      |    // don't break in the inner lambda, as breaks don't propagate to parameters
+      |    fruit.onlyBananas(
+      |        fromTheVine = true,
+      |        processThem = { eat(it) },
+      |    ) {
+      |      eat(it)
+      |    }
+      |
+      |    // don't break in the inner lambda, as breaks don't propagate to the body
+      |    fruit.onlyBananas(
+      |        fromTheVine = true,
+      |    ) {
+      |      val anon = { eat(it) }
+      |    }
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `indent parameters after a break when there's a lambda afterwards`() =
-      assertFormatted(
-          """
-          |///////////////////////////
-          |class C {
-          |  fun method() {
-          |    Foo.FooBar(
-          |            param1, param2)
-          |        .apply {
-          |          //
-          |          foo
-          |        }
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `indent parameters after a break when there's a lambda afterwards`() = assertFormatted(
+      """
+      |///////////////////////////
+      |class C {
+      |  fun method() {
+      |    Foo.FooBar(
+      |            param1, param2)
+      |        .apply {
+      |          //
+      |          foo
+      |        }
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `no forward propagation of breaks in call expressions (at trailing lambda)`() =
-      assertFormatted(
-          """
-          |//////////////////////////
-          |fun test() {
-          |  foo_bar_baz__zip<A>(b) {
-          |    c
-          |  }
-          |  foo.bar(baz).zip<A>(b) {
-          |    c
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `no forward propagation of breaks in call expressions (at trailing lambda)`() = assertFormatted(
+      """
+      |//////////////////////////
+      |fun test() {
+      |  foo_bar_baz__zip<A>(b) {
+      |    c
+      |  }
+      |  foo.bar(baz).zip<A>(b) {
+      |    c
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `forward propagation of breaks in call expressions (at value args)`() =
-      assertFormatted(
-          """
-          |//////////////////////
-          |fun test() {
-          |  foo_bar_baz__zip<A>(
-          |      b) {
-          |        c
-          |      }
-          |}
-          |
-          |fun test() {
-          |  foo.bar(baz).zip<A>(
-          |      b) {
-          |        c
-          |      }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `forward propagation of breaks in call expressions (at value args)`() = assertFormatted(
+      """
+      |//////////////////////
+      |fun test() {
+      |  foo_bar_baz__zip<A>(
+      |      b) {
+      |        c
+      |      }
+      |}
+      |
+      |fun test() {
+      |  foo.bar(baz).zip<A>(
+      |      b) {
+      |        c
+      |      }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `forward propagation of breaks in call expressions (at type args)`() =
-      assertFormatted(
-          """
-          |///////////////////
-          |fun test() {
-          |  foo_bar_baz__zip<
-          |      A>(
-          |      b) {
-          |        c
-          |      }
-          |  foo.bar(baz).zip<
-          |      A>(
-          |      b) {
-          |        c
-          |      }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `forward propagation of breaks in call expressions (at type args)`() = assertFormatted(
+      """
+      |///////////////////
+      |fun test() {
+      |  foo_bar_baz__zip<
+      |      A>(
+      |      b) {
+      |        c
+      |      }
+      |  foo.bar(baz).zip<
+      |      A>(
+      |      b) {
+      |        c
+      |      }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `expected indent in methods following single-line strings`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |"Hello %s"
-          |    .format(expression)
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `expected indent in methods following single-line strings`() = assertFormatted(
+      """
+      |/////////////////////////
+      |"Hello %s"
+      |    .format(expression)
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `forced break between multi-line strings and their selectors`() =
-      assertFormatted(
-          """
+  fun `forced break between multi-line strings and their selectors`() = assertFormatted(
+      """
           |/////////////////////////
           |val STRING =
           |    $TQ
@@ -1165,9 +1140,9 @@ class FormatterTest {
           |        .firstLink()
           |        .secondLink()
           |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `import list`() {
@@ -1794,106 +1769,101 @@ class FormatterTest {
       )
 
   @Test
-  fun `Trailing comma forces variable value in list onto new line with manageTrailingCommas turned off`() =
-      assertFormatted(
-          """
-          val aVar = setOf(
-              Env.Dev,
-              Env.Prod,
-          )
-          val aVar = setOf(Env.Dev, Env.Prod)
-
-          """
-              .trimIndent(),
-          deduceMaxWidth = false,
+  fun `Trailing comma forces variable value in list onto new line with manageTrailingCommas turned off`() = assertFormatted(
+      """
+      val aVar = setOf(
+          Env.Dev,
+          Env.Prod,
       )
+      val aVar = setOf(Env.Dev, Env.Prod)
+
+      """
+          .trimIndent(),
+      deduceMaxWidth = false,
+  )
 
   @Test
-  fun `nested functions, maps, and statements in named parameters - default`() =
-      assertFormatted(
-          """
-          |////////////////////////////////////////////////////////////////////
-          |function(
-          |    param =
-          |        (rate downTo min step step).drop(1).map {
-          |          nestedFun(
-          |              rate =
-          |                  rate(
-          |                      value =
-          |                          firstArg<Input>().info.get(0).rate.value))
-          |        })
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `nested functions, maps, and statements in named parameters - default`() = assertFormatted(
+      """
+      |////////////////////////////////////////////////////////////////////
+      |function(
+      |    param =
+      |        (rate downTo min step step).drop(1).map {
+      |          nestedFun(
+      |              rate =
+      |                  rate(
+      |                      value =
+      |                          firstArg<Input>().info.get(0).rate.value))
+      |        })
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `nested functions, maps, and statements in named parameters kotlin lang formats differently than default`() =
-      assertFormatted(
-          """
-          |/////////////////////////////////////////////////////////////////////
-          |function(
-          |    param =
-          |        (rate downTo min step step).drop(1).map {
-          |            nestedFun(
-          |                rate =
-          |                    rate(
-          |                        value =
-          |                            firstArg<Input>().info.get(0).rate.value
-          |                    )
-          |            )
-          |        }
-          |)
-          |"""
-              .trimMargin(),
-          formattingOptions = Formatter.KOTLINLANG_FORMAT,
-          deduceMaxWidth = true,
-      )
+  fun `nested functions, maps, and statements in named parameters kotlin lang formats differently than default`() = assertFormatted(
+      """
+      |/////////////////////////////////////////////////////////////////////
+      |function(
+      |    param =
+      |        (rate downTo min step step).drop(1).map {
+      |            nestedFun(
+      |                rate =
+      |                    rate(
+      |                        value =
+      |                            firstArg<Input>().info.get(0).rate.value
+      |                    )
+      |            )
+      |        }
+      |)
+      |"""
+          .trimMargin(),
+      formattingOptions = Formatter.KOTLINLANG_FORMAT,
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `complex calls and calculation in named parameters without wrapping`() =
-      assertFormatted(
-          """
-          calculateMath(
-              r = apr.sc(10) / BigDecimal(100) / BigDecimal(12),
-              n = 12 * term,
-              numerator = ((BigDecimal.ONE + r).pow(n)) - BigDecimal.ONE,
-              denominator = r * (BigDecimal.ONE + r).pow(n),
-          )
-
-          """
-              .trimIndent(),
-          deduceMaxWidth = false,
+  fun `complex calls and calculation in named parameters without wrapping`() = assertFormatted(
+      """
+      calculateMath(
+          r = apr.sc(10) / BigDecimal(100) / BigDecimal(12),
+          n = 12 * term,
+          numerator = ((BigDecimal.ONE + r).pow(n)) - BigDecimal.ONE,
+          denominator = r * (BigDecimal.ONE + r).pow(n),
       )
+
+      """
+          .trimIndent(),
+      deduceMaxWidth = false,
+  )
 
   @Test
-  fun `Arguments are blocks`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |override fun visitProperty(property: KtProperty) {
-          |  builder.sync(property)
-          |  builder.block(ZERO) {
-          |    declareOne(
-          |        kind = DeclarationKind.FIELD,
-          |        modifiers = property.modifierList,
-          |        valOrVarKeyword =
-          |            property.valOrVarKeyword.text,
-          |        typeParameters =
-          |            property.typeParameterList,
-          |        receiver = property.receiverTypeReference,
-          |        name = property.nameIdentifier?.text,
-          |        type = property.typeReference,
-          |        typeConstraintList =
-          |            property.typeConstraintList,
-          |        delegate = property.delegate,
-          |        initializer = property.initializer)
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `Arguments are blocks`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |override fun visitProperty(property: KtProperty) {
+      |  builder.sync(property)
+      |  builder.block(ZERO) {
+      |    declareOne(
+      |        kind = DeclarationKind.FIELD,
+      |        modifiers = property.modifierList,
+      |        valOrVarKeyword =
+      |            property.valOrVarKeyword.text,
+      |        typeParameters =
+      |            property.typeParameterList,
+      |        receiver = property.receiverTypeReference,
+      |        name = property.nameIdentifier?.text,
+      |        type = property.typeReference,
+      |        typeConstraintList =
+      |            property.typeConstraintList,
+      |        delegate = property.delegate,
+      |        initializer = property.initializer)
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `anonymous function`() =
@@ -2072,30 +2042,29 @@ class FormatterTest {
       )
 
   @Test
-  fun `when() expression with multiline condition`() =
-      assertFormatted(
-          """
-          |//////////////////////////
-          |fun foo() {
-          |  when (expressions1 +
-          |      expression2 +
-          |      expression3) {
-          |    1 -> print(1)
-          |    2 -> print(2)
-          |  }
-          |
-          |  when (foo(
-          |      expressions1 &&
-          |          expression2 &&
-          |          expression3)) {
-          |    1 -> print(1)
-          |    2 -> print(2)
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `when() expression with multiline condition`() = assertFormatted(
+      """
+      |//////////////////////////
+      |fun foo() {
+      |  when (expressions1 +
+      |      expression2 +
+      |      expression3) {
+      |    1 -> print(1)
+      |    2 -> print(2)
+      |  }
+      |
+      |  when (foo(
+      |      expressions1 &&
+      |          expression2 &&
+      |          expression3)) {
+      |    1 -> print(1)
+      |    2 -> print(2)
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `lambda assigned to variable does not break before brace`() =
@@ -2216,45 +2185,43 @@ class FormatterTest {
       )
 
   @Test
-  fun `multi line function without a block body`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |fun longFunctionNoBlock():
-          |    Int =
-          |    1234567 + 1234567
-          |
-          |fun shortFun(): Int =
-          |    1234567 + 1234567
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `multi line function without a block body`() = assertFormatted(
+      """
+      |/////////////////////////
+      |fun longFunctionNoBlock():
+      |    Int =
+      |    1234567 + 1234567
+      |
+      |fun shortFun(): Int =
+      |    1234567 + 1234567
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `return type doesn't fit in one line`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |interface X {
-          |  fun f(
-          |      arg1: Arg1Type,
-          |      arg2: Arg2Type
-          |  ): Map<String, Map<String, Double>>? {
-          |    //
-          |  }
-          |
-          |  fun functionWithGenericReturnType(
-          |      arg1: Arg1Type,
-          |      arg2: Arg2Type
-          |  ): Map<String, Map<String, Double>>? {
-          |    //
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `return type doesn't fit in one line`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |interface X {
+      |  fun f(
+      |      arg1: Arg1Type,
+      |      arg2: Arg2Type
+      |  ): Map<String, Map<String, Double>>? {
+      |    //
+      |  }
+      |
+      |  fun functionWithGenericReturnType(
+      |      arg1: Arg1Type,
+      |      arg2: Arg2Type
+      |  ): Map<String, Map<String, Double>>? {
+      |    //
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `list of superclasses`() =
@@ -2274,30 +2241,29 @@ class FormatterTest {
       )
 
   @Test
-  fun `list of superclasses over multiple lines`() =
-      assertFormatted(
-          """
-          |////////////////////
-          |class Derived2 :
-          |    Super1,
-          |    Super2 {}
-          |
-          |class Derived1 :
-          |    Super1, Super2
-          |
-          |class Derived3(
-          |    a: Int
-          |) : Super1(a)
-          |
-          |class Derived4 :
-          |    Super1()
-          |
-          |class Derived5 :
-          |    Super3<Int>()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `list of superclasses over multiple lines`() = assertFormatted(
+      """
+      |////////////////////
+      |class Derived2 :
+      |    Super1,
+      |    Super2 {}
+      |
+      |class Derived1 :
+      |    Super1, Super2
+      |
+      |class Derived3(
+      |    a: Int
+      |) : Super1(a)
+      |
+      |class Derived4 :
+      |    Super1()
+      |
+      |class Derived5 :
+      |    Super3<Int>()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `annotations with parameters`() =
@@ -2566,42 +2532,40 @@ class FormatterTest {
       )
 
   @Test
-  fun `if expression with break before else`() =
-      assertFormatted(
-          """
-          |//////////////////////////////
-          |fun compute(b: Boolean) {
-          |  val c =
-          |      if (a + b < 20) a + b
-          |      else a
-          |  return if (a + b < 20) a + b
-          |  else c
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `if expression with break before else`() = assertFormatted(
+      """
+      |//////////////////////////////
+      |fun compute(b: Boolean) {
+      |  val c =
+      |      if (a + b < 20) a + b
+      |      else a
+      |  return if (a + b < 20) a + b
+      |  else c
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `if expression with break before expressions`() =
-      assertFormatted(
-          """
-          |//////////////////////////
-          |fun compute(b: Boolean) {
-          |  val c =
-          |      if (a + b < 20)
-          |          a + b
-          |      else if (a < 20) a
-          |      else
-          |          a + b + b + 1000
-          |  return if (a + b < 20)
-          |      a + b
-          |  else c
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `if expression with break before expressions`() = assertFormatted(
+      """
+      |//////////////////////////
+      |fun compute(b: Boolean) {
+      |  val c =
+      |      if (a + b < 20)
+      |          a + b
+      |      else if (a < 20) a
+      |      else
+      |          a + b + b + 1000
+      |  return if (a + b < 20)
+      |      a + b
+      |  else c
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `blocky expressions in if-else`() =
@@ -2623,58 +2587,55 @@ class FormatterTest {
       )
 
   @Test
-  fun `if expression with multiline condition`() =
-      assertFormatted(
-          """
-          |////////////////////////////
-          |fun foo() {
-          |  if (expressions1 &&
-          |      expression2 &&
-          |      expression3) {
-          |    bar()
-          |  }
-          |
-          |  if (foo(
-          |      expressions1 &&
-          |          expression2 &&
-          |          expression3)) {
-          |    bar()
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `if expression with multiline condition`() = assertFormatted(
+      """
+      |////////////////////////////
+      |fun foo() {
+      |  if (expressions1 &&
+      |      expression2 &&
+      |      expression3) {
+      |    bar()
+      |  }
+      |
+      |  if (foo(
+      |      expressions1 &&
+      |          expression2 &&
+      |          expression3)) {
+      |    bar()
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `if expression with comment`() =
-      assertFormatted(
-          """
-          |////////////////////////////
-          |fun foo() {
-          |  if (expressions1)
-          |      // comment
-          |      bar()
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `if expression with comment`() = assertFormatted(
+      """
+      |////////////////////////////
+      |fun foo() {
+      |  if (expressions1)
+      |      // comment
+      |      bar()
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `assignment expression on multiple lines`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |fun f() {
-          |  var myVariable = 5
-          |  myVariable =
-          |      function1(4, 60, 8) + function2(57, 39, 20)
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `assignment expression on multiple lines`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |fun f() {
+      |  var myVariable = 5
+      |  myVariable =
+      |      function1(4, 60, 8) + function2(57, 39, 20)
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `A program that tickled a bug in KotlinInput`() =
@@ -2686,85 +2647,81 @@ class FormatterTest {
       )
 
   @Test
-  fun `a few variations of constructors`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////////
-          |class Foo constructor(number: Int) {}
-          |
-          |class Foo2 private constructor(number: Int) {}
-          |
-          |class Foo3 @Inject constructor(number: Int) {}
-          |
-          |class Foo4 @Inject private constructor(number: Int) {}
-          |
-          |class Foo5
-          |@Inject
-          |private constructor(
-          |    number: Int,
-          |    number2: Int,
-          |    number3: Int,
-          |    number4: Int,
-          |    number5: Int,
-          |    number6: Int
-          |) {}
-          |
-          |class Foo6
-          |@Inject
-          |private constructor(hasSpaceForAnnos: Innnt) {
-          |  //                                           @Inject
-          |}
-          |
-          |class FooTooLongForCtorAndSupertypes
-          |@Inject
-          |private constructor(x: Int) : NoooooooSpaceForAnnos {}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `a few variations of constructors`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////////
+      |class Foo constructor(number: Int) {}
+      |
+      |class Foo2 private constructor(number: Int) {}
+      |
+      |class Foo3 @Inject constructor(number: Int) {}
+      |
+      |class Foo4 @Inject private constructor(number: Int) {}
+      |
+      |class Foo5
+      |@Inject
+      |private constructor(
+      |    number: Int,
+      |    number2: Int,
+      |    number3: Int,
+      |    number4: Int,
+      |    number5: Int,
+      |    number6: Int
+      |) {}
+      |
+      |class Foo6
+      |@Inject
+      |private constructor(hasSpaceForAnnos: Innnt) {
+      |  //                                           @Inject
+      |}
+      |
+      |class FooTooLongForCtorAndSupertypes
+      |@Inject
+      |private constructor(x: Int) : NoooooooSpaceForAnnos {}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `a primary constructor without a class body `() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |data class Foo(
-          |    val number: Int = 0
-          |)
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `a primary constructor without a class body `() = assertFormatted(
+      """
+      |/////////////////////////
+      |data class Foo(
+      |    val number: Int = 0
+      |)
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `a secondary constructor without a body`() =
-      assertFormatted(
-          """
-          |///////////////////////////
-          |data class Foo {
-          |  constructor(
-          |      val number: Int = 0
-          |  )
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `a secondary constructor without a body`() = assertFormatted(
+      """
+      |///////////////////////////
+      |data class Foo {
+      |  constructor(
+      |      val number: Int = 0
+      |  )
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `a secondary constructor with a body breaks before closing parenthesis`() =
-      assertFormatted(
-          """
-          |///////////////////////////
-          |data class Foo {
-          |  constructor(
-          |      val number: Int = 0
-          |  ) {}
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `a secondary constructor with a body breaks before closing parenthesis`() = assertFormatted(
+      """
+      |///////////////////////////
+      |data class Foo {
+      |  constructor(
+      |      val number: Int = 0
+      |  ) {}
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `a constructor with many arguments over breaking to next line`() =
@@ -2798,22 +2755,21 @@ class FormatterTest {
       )
 
   @Test
-  fun `a constructor with many arguments over multiple lines`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |data class Foo
-          |constructor(
-          |    val number: Int,
-          |    val name: String,
-          |    val age: Int,
-          |    val title: String,
-          |    val offspring: List<Foo>
-          |) {}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `a constructor with many arguments over multiple lines`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |data class Foo
+      |constructor(
+      |    val number: Int,
+      |    val name: String,
+      |    val age: Int,
+      |    val title: String,
+      |    val offspring: List<Foo>
+      |) {}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle secondary constructors`() =
@@ -2831,65 +2787,62 @@ class FormatterTest {
       )
 
   @Test
-  fun `a secondary constructor with many arguments over multiple lines`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |data class Foo {
-          |  constructor(
-          |      val number: Int,
-          |      val name: String,
-          |      val age: Int,
-          |      val title: String,
-          |      val offspring: List<Foo>
-          |  )
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `a secondary constructor with many arguments over multiple lines`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |data class Foo {
+      |  constructor(
+      |      val number: Int,
+      |      val name: String,
+      |      val age: Int,
+      |      val title: String,
+      |      val offspring: List<Foo>
+      |  )
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `a secondary constructor with many arguments passed to delegate`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |data class Foo {
-          |  constructor(
-          |      val number: Int,
-          |      val name: String,
-          |      val age: Int,
-          |      val title: String,
-          |      val offspring: List<Foo>
-          |  ) : this(
-          |      number,
-          |      name,
-          |      age,
-          |      title,
-          |      offspring,
-          |      offspring)
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `a secondary constructor with many arguments passed to delegate`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |data class Foo {
+      |  constructor(
+      |      val number: Int,
+      |      val name: String,
+      |      val age: Int,
+      |      val title: String,
+      |      val offspring: List<Foo>
+      |  ) : this(
+      |      number,
+      |      name,
+      |      age,
+      |      title,
+      |      offspring,
+      |      offspring)
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `a secondary constructor with no arguments passed to delegate`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |data class Foo {
-          |  constructor() :
-          |      this(
-          |          Foo.createSpeciallyDesignedParameter(),
-          |          Foo.createSpeciallyDesignedParameter(),
-          |      )
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `a secondary constructor with no arguments passed to delegate`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |data class Foo {
+      |  constructor() :
+      |      this(
+      |          Foo.createSpeciallyDesignedParameter(),
+      |          Foo.createSpeciallyDesignedParameter(),
+      |      )
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `secondary constructor with param list that fits in one line, with delegate`() =
@@ -3006,71 +2959,68 @@ class FormatterTest {
       )
 
   @Test
-  fun `keep array indexing grouped with expression is possible`() =
-      assertFormatted(
-          """
-          |///////////////////////
-          |fun f(a: Magic) {
-          |  foo.bar()
-          |      .foobar[1, 2, 3]
-          |  foo.bar()
-          |      .foobar[
-          |          1,
-          |          2,
-          |          3,
-          |          4,
-          |          5]
-          |  foo.bar()
-          |      .foobar[1, 2, 3]
-          |      .barfoo[3, 2, 1]
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `keep array indexing grouped with expression is possible`() = assertFormatted(
+      """
+      |///////////////////////
+      |fun f(a: Magic) {
+      |  foo.bar()
+      |      .foobar[1, 2, 3]
+      |  foo.bar()
+      |      .foobar[
+      |          1,
+      |          2,
+      |          3,
+      |          4,
+      |          5]
+      |  foo.bar()
+      |      .foobar[1, 2, 3]
+      |      .barfoo[3, 2, 1]
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `mixed chains`() =
-      assertFormatted(
-          """
-          |///////////////////////
-          |fun f(a: Magic) {
-          |  foo.bar()
-          |      .foobar[1, 2, 3]
-          |  foo.bar()
-          |      .foobar[
-          |          1,
-          |          2,
-          |          3,
-          |          4,
-          |          5]
-          |  foo.bar()
-          |      .foobar[1, 2, 3]
-          |      .barfoo[3, 2, 1]
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `mixed chains`() = assertFormatted(
+      """
+      |///////////////////////
+      |fun f(a: Magic) {
+      |  foo.bar()
+      |      .foobar[1, 2, 3]
+      |  foo.bar()
+      |      .foobar[
+      |          1,
+      |          2,
+      |          3,
+      |          4,
+      |          5]
+      |  foo.bar()
+      |      .foobar[1, 2, 3]
+      |      .barfoo[3, 2, 1]
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle destructuring declaration`() =
-      assertFormatted(
-          """
-          |///////////////////////////////////////////////
-          |fun f() {
-          |  val (a, b: Int) = listOf(1, 2)
-          |  val (asd, asd, asd, asd, asd, asd, asd) =
-          |      foo.bar(asdasd, asdasd)
-          |
-          |  val (accountType, accountId) =
-          |      oneTwoThreeFourFiveSixSeven(
-          |          foo, bar, zed, boo)
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle destructuring declaration`() = assertFormatted(
+      """
+      |///////////////////////////////////////////////
+      |fun f() {
+      |  val (a, b: Int) = listOf(1, 2)
+      |  val (asd, asd, asd, asd, asd, asd, asd) =
+      |      foo.bar(asdasd, asdasd)
+      |
+      |  val (accountType, accountId) =
+      |      oneTwoThreeFourFiveSixSeven(
+      |          foo, bar, zed, boo)
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle name based destructuring declaration`() {
@@ -3097,102 +3047,97 @@ class FormatterTest {
   }
 
   @Test
-  fun `chains with derferences and array indexing`() =
-      assertFormatted(
-          """
-          |///////////////////////
-          |fun f() {
-          |  foo.bam()
-          |      .uber!![0, 1, 2]
-          |      .boom()[1, 3, 5]
-          |      .lah
-          |      .doo { it }
-          |      .feep[1]
-          |      as Boo
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chains with derferences and array indexing`() = assertFormatted(
+      """
+      |///////////////////////
+      |fun f() {
+      |  foo.bam()
+      |      .uber!![0, 1, 2]
+      |      .boom()[1, 3, 5]
+      |      .lah
+      |      .doo { it }
+      |      .feep[1]
+      |      as Boo
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `block like syntax after dereferences and indexing with short lines`() =
-      assertFormatted(
-          """
-          |///////////////////////
-          |fun f() {
-          |  foo.bam()
-          |      .uber!![0, 1, 2]
-          |      .forEach {
-          |        println(it)
-          |      }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `block like syntax after dereferences and indexing with short lines`() = assertFormatted(
+      """
+      |///////////////////////
+      |fun f() {
+      |  foo.bam()
+      |      .uber!![0, 1, 2]
+      |      .forEach {
+      |        println(it)
+      |      }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `block like syntax after dereferences and indexing with long lines`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////
-          |fun f() {
-          |  foo.uber!![0, 1, 2].forEach {
-          |    println(it)
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `block like syntax after dereferences and indexing with long lines`() = assertFormatted(
+      """
+      |//////////////////////////////////
+      |fun f() {
+      |  foo.uber!![0, 1, 2].forEach {
+      |    println(it)
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `try to keep type names together`() =
-      assertFormatted(
-          """
-          |///////////////////////
-          |fun f() {
-          |  com.facebook.foo.Foo(
-          |      1, 2)
-          |  com.facebook.foo
-          |      .Foo(1, 2)
-          |      .andAlsoThis()
-          |  com.facebook.Foo.foo(
-          |      1, 2)
-          |  com.facebook
-          |      .foobarFoo
-          |      .foo(1, 2)
-          |  foo.invoke(
-          |      foo, bar, bar)
-          |  foo.invoke(foo, bar)
-          |      .invoke()
-          |  FooFoo.foooooooo()
-          |      .foooooooo()
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `try to keep type names together`() = assertFormatted(
+      """
+      |///////////////////////
+      |fun f() {
+      |  com.facebook.foo.Foo(
+      |      1, 2)
+      |  com.facebook.foo
+      |      .Foo(1, 2)
+      |      .andAlsoThis()
+      |  com.facebook.Foo.foo(
+      |      1, 2)
+      |  com.facebook
+      |      .foobarFoo
+      |      .foo(1, 2)
+      |  foo.invoke(
+      |      foo, bar, bar)
+      |  foo.invoke(foo, bar)
+      |      .invoke()
+      |  FooFoo.foooooooo()
+      |      .foooooooo()
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `avoid breaking brackets and keep them with array name`() =
-      assertFormatted(
-          """
-          |/////////////////////////////////////////////////////////////////////////
-          |fun f() {
-          |  val a =
-          |      invokeIt(context.packageName)
-          |          .getInternalMutablePackageInfo(context.packageName)
-          |          .someItems[0]
-          |          .getInternalMutablePackageInfo(context.packageName)
-          |          .someItems[0]
-          |          .doIt()
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `avoid breaking brackets and keep them with array name`() = assertFormatted(
+      """
+      |/////////////////////////////////////////////////////////////////////////
+      |fun f() {
+      |  val a =
+      |      invokeIt(context.packageName)
+      |          .getInternalMutablePackageInfo(context.packageName)
+      |          .someItems[0]
+      |          .getInternalMutablePackageInfo(context.packageName)
+      |          .someItems[0]
+      |          .doIt()
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `keep function call with type name even if array expression is next`() =
@@ -3211,22 +3156,21 @@ class FormatterTest {
       )
 
   @Test
-  fun `array access in middle of chain and end of it behaves similarly`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////
-          |fun f() {
-          |  if (aaaaa == null ||
-          |      aaaaa.bbbbb[0] == null ||
-          |      aaaaa.bbbbb[0].cc == null ||
-          |      aaaaa.bbbbb[0].dddd == null) {
-          |    println()
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `array access in middle of chain and end of it behaves similarly`() = assertFormatted(
+      """
+      |//////////////////////////////////////
+      |fun f() {
+      |  if (aaaaa == null ||
+      |      aaaaa.bbbbb[0] == null ||
+      |      aaaaa.bbbbb[0].cc == null ||
+      |      aaaaa.bbbbb[0].dddd == null) {
+      |    println()
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle qmark for nullable types`() =
@@ -3304,25 +3248,24 @@ class FormatterTest {
 
   @Test
   fun `Trailing whitespaces are preserved in multiline strings`() {
-    val code =
-        listOf(
-                "fun doIt(world: String) {",
-                "  println(",
-                "      ${TQ}This line has trailing whitespace         ",
-                "      world!${TQ})",
-                "  println(",
-                "      ${TQ}This line has trailing whitespace \$s     ",
-                "      world!${TQ})",
-                "  println(",
-                "      ${TQ}This line has trailing whitespace \${s}   ",
-                "      world!${TQ})",
-                "  println(",
-                "      ${TQ}This line has trailing whitespace \$      ",
-                "      world!${TQ})",
-                "}",
-                "",
-            )
-            .joinToString("\n")
+    val code = listOf(
+        "fun doIt(world: String) {",
+        "  println(",
+        "      ${TQ}This line has trailing whitespace         ",
+        "      world!${TQ})",
+        "  println(",
+        "      ${TQ}This line has trailing whitespace \$s     ",
+        "      world!${TQ})",
+        "  println(",
+        "      ${TQ}This line has trailing whitespace \${s}   ",
+        "      world!${TQ})",
+        "  println(",
+        "      ${TQ}This line has trailing whitespace \$      ",
+        "      world!${TQ})",
+        "}",
+        "",
+    )
+        .joinToString("\n")
     assertThatFormatting(code).allowTrailingWhitespace().isEqualTo(code)
   }
 
@@ -3857,68 +3800,65 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle for loops with long dot chains`() =
-      assertFormatted(
-          """
-          |///////////////////////////////////
-          |fun f(a: Node<Int>) {
-          |  for (child in node.next.data()) {
-          |    println(child)
-          |  }
-          |  for (child in
-          |      node.next.next.data()) {
-          |    println(child)
-          |  }
-          |  for (child in
-          |      node.next.next.next.next
-          |          .data()) {
-          |    println(child)
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle for loops with long dot chains`() = assertFormatted(
+      """
+      |///////////////////////////////////
+      |fun f(a: Node<Int>) {
+      |  for (child in node.next.data()) {
+      |    println(child)
+      |  }
+      |  for (child in
+      |      node.next.next.data()) {
+      |    println(child)
+      |  }
+      |  for (child in
+      |      node.next.next.next.next
+      |          .data()) {
+      |    println(child)
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `when two lambdas following a call, indent the lambda properly`() =
-      assertFormatted(
-          """
-          |////////////////////////////
-          |fun f() {
-          |  doIt()
-          |      .apply {
-          |        number =
-          |            computeNumber1()
-          |      }
-          |      .apply {
-          |        number = 2 * number
-          |      }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `when two lambdas following a call, indent the lambda properly`() = assertFormatted(
+      """
+      |////////////////////////////
+      |fun f() {
+      |  doIt()
+      |      .apply {
+      |        number =
+      |            computeNumber1()
+      |      }
+      |      .apply {
+      |        number = 2 * number
+      |      }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `when two lambdas following a field, indent the lambda properly`() =
-      assertFormatted(
-          """
-          |////////////////////////////
-          |fun f() {
-          |  field
-          |      .apply {
-          |        number =
-          |            computeNumber1()
-          |      }
-          |      .apply {
-          |        number = 2 * number
-          |      }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `when two lambdas following a field, indent the lambda properly`() = assertFormatted(
+      """
+      |////////////////////////////
+      |fun f() {
+      |  field
+      |      .apply {
+      |        number =
+      |            computeNumber1()
+      |      }
+      |      .apply {
+      |        number = 2 * number
+      |      }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `break after 'four' (even though it's 4 chars long) because there's a lambda afterwards`() =
@@ -3948,206 +3888,197 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle where formatting, full expression breaks into single line`() =
-      assertFormatted(
-          """
-          |////////////////////////////////
-          |class Foo<T>(n: Int)
-          |    where T : Bar, T : FooBar
-          |
-          |fun <T> foo(n: Int)
-          |    where T : Bar, T : FooBar {}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle where formatting, full expression breaks into single line`() = assertFormatted(
+      """
+      |////////////////////////////////
+      |class Foo<T>(n: Int)
+      |    where T : Bar, T : FooBar
+      |
+      |fun <T> foo(n: Int)
+      |    where T : Bar, T : FooBar {}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle where formatting, everything breaks into multiple lines`() =
-      assertFormatted(
-          """
-          |////////////////////////////
-          |class Foo<T>(n: Int)
-          |    where
-          |        T : Bar,
-          |        T : FooBar
-          |
-          |fun <T> foo(n: Int)
-          |    where
-          |        T : Bar,
-          |        T : FooBar {}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle where formatting, everything breaks into multiple lines`() = assertFormatted(
+      """
+      |////////////////////////////
+      |class Foo<T>(n: Int)
+      |    where
+      |        T : Bar,
+      |        T : FooBar
+      |
+      |fun <T> foo(n: Int)
+      |    where
+      |        T : Bar,
+      |        T : FooBar {}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `keep last expression in qualified indented`() =
-      assertFormatted(
-          """
-          |////////////////////////////
-          |fun f() {
-          |  Stuff()
-          |      .doIt(
-          |          Foo.doIt()
-          |              .doThat())
-          |      .doIt(
-          |          Foo.doIt()
-          |              .doThat())
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `keep last expression in qualified indented`() = assertFormatted(
+      """
+      |////////////////////////////
+      |fun f() {
+      |  Stuff()
+      |      .doIt(
+      |          Foo.doIt()
+      |              .doThat())
+      |      .doIt(
+      |          Foo.doIt()
+      |              .doThat())
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `properly place lambda arguments into blocks`() =
-      assertFormatted(
-          """
-          |///////////////////////
-          |fun f() {
-          |  foo {
-          |    red.orange.yellow()
-          |  }
-          |
-          |  foo.bar {
-          |    red.orange.yellow()
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `properly place lambda arguments into blocks`() = assertFormatted(
+      """
+      |///////////////////////
+      |fun f() {
+      |  foo {
+      |    red.orange.yellow()
+      |  }
+      |
+      |  foo.bar {
+      |    red.orange.yellow()
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `properly handle one statement lambda with comment`() =
-      assertFormatted(
-          """
-          |////////////////////////
-          |fun f() {
-          |  foo {
-          |    // this is a comment
-          |    red.orange.yellow()
-          |  }
-          |  foo {
-          |    /* this is also a comment */
-          |    red.orange.yellow()
-          |  }
-          |  foo.bar {
-          |    // this is a comment
-          |    red.orange.yellow()
-          |  }
-          |  foo.bar() {
-          |    // this is a comment
-          |    red.orange.yellow()
-          |  }
-          |  foo.bar {
-          |    /* this is also a comment */
-          |    red.orange.yellow()
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `properly handle one statement lambda with comment`() = assertFormatted(
+      """
+      |////////////////////////
+      |fun f() {
+      |  foo {
+      |    // this is a comment
+      |    red.orange.yellow()
+      |  }
+      |  foo {
+      |    /* this is also a comment */
+      |    red.orange.yellow()
+      |  }
+      |  foo.bar {
+      |    // this is a comment
+      |    red.orange.yellow()
+      |  }
+      |  foo.bar() {
+      |    // this is a comment
+      |    red.orange.yellow()
+      |  }
+      |  foo.bar {
+      |    /* this is also a comment */
+      |    red.orange.yellow()
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `properly handle one statement lambda with comment after body statements`() =
-      assertFormatted(
-          """
-          |////////////////////////
-          |fun f() {
-          |  foo {
-          |    red.orange.yellow()
-          |    // this is a comment
-          |  }
-          |  foo {
-          |    red.orange.yellow()
-          |    /* this is also a comment */
-          |  }
-          |  foo.bar {
-          |    red.orange.yellow()
-          |    // this is a comment
-          |  }
-          |  foo.bar() {
-          |    red.orange.yellow()
-          |    // this is a comment
-          |  }
-          |  foo.bar {
-          |    red.orange.yellow()
-          |    /* this is also a comment */
-          |  }
-          |  red.orange.yellow()
-          |  // this is a comment
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `properly handle one statement lambda with comment after body statements`() = assertFormatted(
+      """
+      |////////////////////////
+      |fun f() {
+      |  foo {
+      |    red.orange.yellow()
+      |    // this is a comment
+      |  }
+      |  foo {
+      |    red.orange.yellow()
+      |    /* this is also a comment */
+      |  }
+      |  foo.bar {
+      |    red.orange.yellow()
+      |    // this is a comment
+      |  }
+      |  foo.bar() {
+      |    red.orange.yellow()
+      |    // this is a comment
+      |  }
+      |  foo.bar {
+      |    red.orange.yellow()
+      |    /* this is also a comment */
+      |  }
+      |  red.orange.yellow()
+      |  // this is a comment
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `try to keep expression in the same line until the first lambda`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |fun f() {
-          |  foo.bar.bar?.let {
-          |    a()
-          |  }
-          |  foo.bar.bar?.let {
-          |    action()
-          |    action2()
-          |  }
-          |  foo.bar.bar.bar.bar
-          |      ?.let { a() }
-          |  foo.bar.bar.bar.bar
-          |      ?.let {
-          |        action()
-          |        action2()
-          |      }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `try to keep expression in the same line until the first lambda`() = assertFormatted(
+      """
+      |/////////////////////////
+      |fun f() {
+      |  foo.bar.bar?.let {
+      |    a()
+      |  }
+      |  foo.bar.bar?.let {
+      |    action()
+      |    action2()
+      |  }
+      |  foo.bar.bar.bar.bar
+      |      ?.let { a() }
+      |  foo.bar.bar.bar.bar
+      |      ?.let {
+      |        action()
+      |        action2()
+      |      }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `different indentation in chained calls`() =
-      assertFormatted(
-          """
-          |///////////////////////////
-          |fun f() {
-          |  fooDdoIt(
-          |      foo1, foo2, foo3)
-          |  foo.doIt(
-          |      foo1, foo2, foo3)
-          |  foo.doIt(
-          |          foo1, foo2, foo3)
-          |      .doThat()
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `different indentation in chained calls`() = assertFormatted(
+      """
+      |///////////////////////////
+      |fun f() {
+      |  fooDdoIt(
+      |      foo1, foo2, foo3)
+      |  foo.doIt(
+      |      foo1, foo2, foo3)
+      |  foo.doIt(
+      |          foo1, foo2, foo3)
+      |      .doThat()
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `always add a conditional break for a lambda which is not last`() =
-      assertFormatted(
-          """
-          |////////////////////
-          |fun f() {
-          |  foofoo
-          |      .doIt {
-          |        doStuff()
-          |      }
-          |      .doIt {
-          |        doStuff()
-          |      }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `always add a conditional break for a lambda which is not last`() = assertFormatted(
+      """
+      |////////////////////
+      |fun f() {
+      |  foofoo
+      |      .doIt {
+      |        doStuff()
+      |      }
+      |      .doIt {
+      |        doStuff()
+      |      }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `keep parenthesis and braces together when there's only one lambda argument`() =
@@ -4196,30 +4127,29 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle function references`() =
-      assertFormatted(
-          """
-          |////////////////////////////////
-          |fun f(a: List<Int>) {
-          |  a.forEach(::println)
-          |  a.map(Int::toString)
-          |  a.map(String?::isNullOrEmpty)
-          |  a.map(
-          |      SuperLongClassName?::
-          |          functionName)
-          |  val f =
-          |      SuperLongClassName::
-          |          functionName
-          |  val g =
-          |      invoke(a, b)::functionName
-          |  val h =
-          |      invoke(a, b, c)::
-          |          functionName
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle function references`() = assertFormatted(
+      """
+      |////////////////////////////////
+      |fun f(a: List<Int>) {
+      |  a.forEach(::println)
+      |  a.map(Int::toString)
+      |  a.map(String?::isNullOrEmpty)
+      |  a.map(
+      |      SuperLongClassName?::
+      |          functionName)
+      |  val f =
+      |      SuperLongClassName::
+      |          functionName
+      |  val g =
+      |      invoke(a, b)::functionName
+      |  val h =
+      |      invoke(a, b, c)::
+      |          functionName
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle escaped identifier`() =
@@ -4258,92 +4188,89 @@ class FormatterTest {
       )
 
   @Test
-  fun `no newlines after annotations if entire expr fits in one line`() =
-      assertFormatted(
-          """
-          |///////////////////////////////////////////////
-          |@Px @Px fun f(): Int = 5
-          |
-          |@Px
-          |@Px
-          |@Px
-          |@Px
-          |@Px
-          |@Px
-          |@Px
-          |@Px
-          |fun f(): Int = 5
-          |
-          |@Px
-          |@Px
-          |fun f(): Int {
-          |  return 5
-          |}
-          |
-          |@Dimenstion(unit = DP) @Px fun g(): Int = 5
-          |
-          |@Dimenstion(unit = DP)
-          |@Px
-          |fun g(): Int {
-          |  return 5
-          |}
-          |
-          |@RunWith @Px class Test
-          |
-          |@RunWith(MagicRunner::class) @Px class Test
-          |
-          |@RunWith @Px class Test {}
-          |
-          |@RunWith(MagicRunner::class) @Px class Test {}
-          |
-          |@RunWith(MagicRunner::class)
-          |@Px
-          |@Px
-          |class Test {}
-          |
-          |@RunWith(MagicRunner::class)
-          |@Px
-          |class Test {
-          |  //
-          |}
-          |
-          |fun f() {
-          |  if (@Stuff(Magic::class) isGood()) {
-          |    println("")
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `no newlines after annotations if entire expr fits in one line`() = assertFormatted(
+      """
+      |///////////////////////////////////////////////
+      |@Px @Px fun f(): Int = 5
+      |
+      |@Px
+      |@Px
+      |@Px
+      |@Px
+      |@Px
+      |@Px
+      |@Px
+      |@Px
+      |fun f(): Int = 5
+      |
+      |@Px
+      |@Px
+      |fun f(): Int {
+      |  return 5
+      |}
+      |
+      |@Dimenstion(unit = DP) @Px fun g(): Int = 5
+      |
+      |@Dimenstion(unit = DP)
+      |@Px
+      |fun g(): Int {
+      |  return 5
+      |}
+      |
+      |@RunWith @Px class Test
+      |
+      |@RunWith(MagicRunner::class) @Px class Test
+      |
+      |@RunWith @Px class Test {}
+      |
+      |@RunWith(MagicRunner::class) @Px class Test {}
+      |
+      |@RunWith(MagicRunner::class)
+      |@Px
+      |@Px
+      |class Test {}
+      |
+      |@RunWith(MagicRunner::class)
+      |@Px
+      |class Test {
+      |  //
+      |}
+      |
+      |fun f() {
+      |  if (@Stuff(Magic::class) isGood()) {
+      |    println("")
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `no newlines after annotations on properties if entire expression fits in one line`() =
-      assertFormatted(
-          """
-          |////////////////////////////////////////////
-          |@Suppress("UnsafeCast")
-          |val ClassA.methodA
-          |  get() = foo as Bar
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `no newlines after annotations on properties if entire expression fits in one line`() = assertFormatted(
+      """
+      |////////////////////////////////////////////
+      |@Suppress("UnsafeCast")
+      |val ClassA.methodA
+      |  get() = foo as Bar
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `when annotations cause line breaks, and constant has no type dont break before value`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////////////
-          |object Foo {
-          |  @LongLongLongLongAnnotation
-          |  @LongLongLongLongLongAnnotation
-          |  private val ROW_HEIGHT = 72
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `when annotations cause line breaks, and constant has no type dont break before value`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////////////
+      |object Foo {
+      |  @LongLongLongLongAnnotation
+      |  @LongLongLongLongLongAnnotation
+      |  private val ROW_HEIGHT = 72
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `annotations in literal function types`() =
@@ -4638,19 +4565,18 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle top level constants`() =
-      assertFormatted(
-          """
-          |/////////////////////////////
-          |val a = 5
-          |
-          |const val b = "a"
-          |
-          |val a = 5
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle top level constants`() = assertFormatted(
+      """
+      |/////////////////////////////
+      |val a = 5
+      |
+      |const val b = "a"
+      |
+      |val a = 5
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle lambda arg with named arguments`() =
@@ -4704,21 +4630,20 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle extension methods with very long names`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////
-          |fun LongReceiverNameThatRequiresBreaking
-          |    .doIt() {}
-          |
-          |fun LongButNotTooLong.doIt(
-          |    n: Int,
-          |    f: Float
-          |) {}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle extension methods with very long names`() = assertFormatted(
+      """
+      |//////////////////////////////////////////
+      |fun LongReceiverNameThatRequiresBreaking
+      |    .doIt() {}
+      |
+      |fun LongButNotTooLong.doIt(
+      |    n: Int,
+      |    f: Float
+      |) {}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle extension properties`() =
@@ -4837,28 +4762,27 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle property delegation with type and breaks`() =
-      assertFormatted(
-          """
-          |/////////////////////////////////
-          |val importantValue: Int by lazy {
-          |  1 + 1
-          |}
-          |
-          |val importantValue: Int by lazy {
-          |  val b = 1 + 1
-          |  b + b
-          |}
-          |
-          |val importantValueLonger:
-          |    Int by lazy { 1 + 1 }
-          |
-          |val importantValue: Int by
-          |    doIt(1 + 1)
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle property delegation with type and breaks`() = assertFormatted(
+      """
+      |/////////////////////////////////
+      |val importantValue: Int by lazy {
+      |  1 + 1
+      |}
+      |
+      |val importantValue: Int by lazy {
+      |  val b = 1 + 1
+      |  b + b
+      |}
+      |
+      |val importantValueLonger:
+      |    Int by lazy { 1 + 1 }
+      |
+      |val importantValue: Int by
+      |    doIt(1 + 1)
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle multi-annotations with use-site targets`() =
@@ -4931,53 +4855,52 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle casting with breaks`() =
-      assertFormatted(
-          """
-          |///////////////////////
-          |fun castIt(
-          |    something: Any
-          |) {
-          |  doIt(
-          |      something
-          |          as List<*>)
-          |  doIt(
-          |      something
-          |          is List<*>)
-          |  println(
-          |      something
-          |          is
-          |          List<String>)
-          |  doIt(
-          |      something
-          |          as
-          |          List<String>)
-          |  println(
-          |      something
-          |          is
-          |          PairList<
-          |              String,
-          |              Int>)
-          |  doIt(
-          |      something
-          |          as
-          |          PairList<
-          |              String,
-          |              Int>)
-          |  println(
-          |      a is Int &&
-          |          b is String)
-          |  l.b?.s?.sOrNull() is
-          |      SomethingLongEnough
-          |}
-          |
-          |val a =
-          |    l.sOrNull() is
-          |        SomethingLongEnough
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle casting with breaks`() = assertFormatted(
+      """
+      |///////////////////////
+      |fun castIt(
+      |    something: Any
+      |) {
+      |  doIt(
+      |      something
+      |          as List<*>)
+      |  doIt(
+      |      something
+      |          is List<*>)
+      |  println(
+      |      something
+      |          is
+      |          List<String>)
+      |  doIt(
+      |      something
+      |          as
+      |          List<String>)
+      |  println(
+      |      something
+      |          is
+      |          PairList<
+      |              String,
+      |              Int>)
+      |  doIt(
+      |      something
+      |          as
+      |          PairList<
+      |              String,
+      |              Int>)
+      |  println(
+      |      a is Int &&
+      |          b is String)
+      |  l.b?.s?.sOrNull() is
+      |      SomethingLongEnough
+      |}
+      |
+      |val a =
+      |    l.sOrNull() is
+      |        SomethingLongEnough
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle collection literals in annotations`() =
@@ -5397,19 +5320,18 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle multi line one statement lambda`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |fun f() {
-          |  a {
-          |    println(foo.bar.boom)
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle multi line one statement lambda`() = assertFormatted(
+      """
+      |/////////////////////////
+      |fun f() {
+      |  a {
+      |    println(foo.bar.boom)
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `statements are wrapped in blocks`() =
@@ -5426,22 +5348,21 @@ class FormatterTest {
       )
 
   @Test
-  fun `properly break fully qualified nested user types`() =
-      assertFormatted(
-          """
-          |///////////////////////////////////////////////////////
-          |val complicated:
-          |    com.example.interesting.SomeType<
-          |        com.example.interesting.SomeType<Int, Nothing>,
-          |        com.example.interesting.SomeType<
-          |            com.example.interesting.SomeType<
-          |                Int, Nothing>,
-          |            Nothing>> =
-          |    DUMMY
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `properly break fully qualified nested user types`() = assertFormatted(
+      """
+      |///////////////////////////////////////////////////////
+      |val complicated:
+      |    com.example.interesting.SomeType<
+      |        com.example.interesting.SomeType<Int, Nothing>,
+      |        com.example.interesting.SomeType<
+      |            com.example.interesting.SomeType<
+      |                Int, Nothing>,
+      |            Nothing>> =
+      |    DUMMY
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle multi-line lambdas within lambdas and calling chains`() =
@@ -5475,19 +5396,18 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle multi line lambdas with explicit args`() =
-      assertFormatted(
-          """
-          |////////////////////
-          |fun f() {
-          |  a { (x, y) ->
-          |    x + y
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle multi line lambdas with explicit args`() = assertFormatted(
+      """
+      |////////////////////
+      |fun f() {
+      |  a { (x, y) ->
+      |    x + y
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle lambda with destructuring and type`() =
@@ -5531,135 +5451,128 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle break of lambda args per line with indentation`() =
-      assertFormatted(
-          """
-          |///////////
-          |fun f() {
-          |  a() {
-          |      arg1,
-          |      arg2,
-          |      x ->
-          |    doIt()
-          |    doIt()
-          |  }
-          |  a() {
-          |      arg1,
-          |      arg2,
-          |      arg3
-          |    ->
-          |    doIt()
-          |    doIt()
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle break of lambda args per line with indentation`() = assertFormatted(
+      """
+      |///////////
+      |fun f() {
+      |  a() {
+      |      arg1,
+      |      arg2,
+      |      x ->
+      |    doIt()
+      |    doIt()
+      |  }
+      |  a() {
+      |      arg1,
+      |      arg2,
+      |      arg3
+      |    ->
+      |    doIt()
+      |    doIt()
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle trailing comma in lambda`() =
-      assertFormatted(
-          """
-          |///////////
-          |fun f() {
-          |  a() {
-          |      arg1,
-          |      arg2,
-          |      x,
-          |    ->
-          |    doIt()
-          |    doIt()
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle trailing comma in lambda`() = assertFormatted(
+      """
+      |///////////
+      |fun f() {
+      |  a() {
+      |      arg1,
+      |      arg2,
+      |      x,
+      |    ->
+      |    doIt()
+      |    doIt()
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `break before Elvis operator`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////////
-          |fun f() {
-          |  someObject
-          |      .someMethodReturningCollection()
-          |      .map { it.someProperty }
-          |      .find { it.contains(someSearchValue) }
-          |      ?: someDefaultValue
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `break before Elvis operator`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////////
+      |fun f() {
+      |  someObject
+      |      .someMethodReturningCollection()
+      |      .map { it.someProperty }
+      |      .find { it.contains(someSearchValue) }
+      |      ?: someDefaultValue
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chain of Elvis operator`() =
-      assertFormatted(
-          """
-          |///////////////////////////
-          |fun f() {
-          |  return option1()
-          |      ?: option2()
-          |      ?: option3()
-          |      ?: option4()
-          |      ?: option5()
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chain of Elvis operator`() = assertFormatted(
+      """
+      |///////////////////////////
+      |fun f() {
+      |  return option1()
+      |      ?: option2()
+      |      ?: option3()
+      |      ?: option4()
+      |      ?: option5()
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `Elvis operator mixed with plus operator breaking on plus`() =
-      assertFormatted(
-          """
-          |////////////////////////
-          |fun f() {
-          |  return option1()
-          |      ?: option2() +
-          |          option3()
-          |      ?: option4() +
-          |          option5()
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `Elvis operator mixed with plus operator breaking on plus`() = assertFormatted(
+      """
+      |////////////////////////
+      |fun f() {
+      |  return option1()
+      |      ?: option2() +
+      |          option3()
+      |      ?: option4() +
+      |          option5()
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `Elvis operator mixed with plus operator breaking on elvis`() =
-      assertFormatted(
-          """
-          |/////////////////////////////////
-          |fun f() {
-          |  return option1()
-          |      ?: option2() + option3()
-          |      ?: option4() + option5()
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `Elvis operator mixed with plus operator breaking on elvis`() = assertFormatted(
+      """
+      |/////////////////////////////////
+      |fun f() {
+      |  return option1()
+      |      ?: option2() + option3()
+      |      ?: option4() + option5()
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle comments in the middle of calling chain`() =
-      assertFormatted(
-          """
-          |///////////////////////////
-          |fun f() {
-          |  someObject
-          |      .letsDoIt()
-          |      // this is a comment
-          |      .doItOnce()
-          |      // this is a comment
-          |      .doItTwice()
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle comments in the middle of calling chain`() = assertFormatted(
+      """
+      |///////////////////////////
+      |fun f() {
+      |  someObject
+      |      .letsDoIt()
+      |      // this is a comment
+      |      .doItOnce()
+      |      // this is a comment
+      |      .doItTwice()
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle reified types`() =
@@ -5933,20 +5846,19 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle typealias`() =
-      assertFormatted(
-          """
-          |//////////////////////////////////////////////
-          |private typealias TextChangedListener =
-          |    (string: String) -> Unit
-          |
-          |typealias PairPair<X, Y> = Pair<Pair<X, Y>, X>
-          |
-          |class Foo
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle typealias`() = assertFormatted(
+      """
+      |//////////////////////////////////////////////
+      |private typealias TextChangedListener =
+      |    (string: String) -> Unit
+      |
+      |typealias PairPair<X, Y> = Pair<Pair<X, Y>, X>
+      |
+      |class Foo
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `handle the 'dynamic' type`() =
@@ -6078,65 +5990,63 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle annotations more`() =
-      assertFormatted(
-          """
-          |/////////////////////////////////////////////////
-          |@Anno1
-          |@Anno2(param = Param1::class)
-          |@Anno3
-          |@Anno4(param = Param2::class)
-          |class MyClass {}
-          |
-          |fun f() {
-          |  @Suppress("MagicNumber") add(10)
-          |
-          |  @Annotation // test a comment after annotations
-          |  return 5
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle annotations more`() = assertFormatted(
+      """
+      |/////////////////////////////////////////////////
+      |@Anno1
+      |@Anno2(param = Param1::class)
+      |@Anno3
+      |@Anno4(param = Param2::class)
+      |class MyClass {}
+      |
+      |fun f() {
+      |  @Suppress("MagicNumber") add(10)
+      |
+      |  @Annotation // test a comment after annotations
+      |  return 5
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `annotated expressions`() =
-      assertFormatted(
-          """
-          |////////////////////////////////////////////////
-          |fun f() {
-          |  @Suppress("MagicNumber") add(10) && add(20)
-          |
-          |  @Suppress("MagicNumber")
-          |  add(10) && add(20)
-          |
-          |  @Anno1 @Anno2(param = Param1::class)
-          |  add(10) && add(20)
-          |
-          |  @Anno1
-          |  @Anno2(param = Param1::class)
-          |  @Anno3
-          |  @Anno4(param = Param2::class)
-          |  add(10) && add(20)
-          |
-          |  @Anno1
-          |  @Anno2(param = Param1::class)
-          |  @Anno3
-          |  @Anno4(param = Param2::class)
-          |  add(10) && add(20)
-          |
-          |  @Suppress("MagicNumber") add(10) &&
-          |      add(20) &&
-          |      add(30)
-          |
-          |  add(@Suppress("MagicNumber") 10) &&
-          |      add(20) &&
-          |      add(30)
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `annotated expressions`() = assertFormatted(
+      """
+      |////////////////////////////////////////////////
+      |fun f() {
+      |  @Suppress("MagicNumber") add(10) && add(20)
+      |
+      |  @Suppress("MagicNumber")
+      |  add(10) && add(20)
+      |
+      |  @Anno1 @Anno2(param = Param1::class)
+      |  add(10) && add(20)
+      |
+      |  @Anno1
+      |  @Anno2(param = Param1::class)
+      |  @Anno3
+      |  @Anno4(param = Param2::class)
+      |  add(10) && add(20)
+      |
+      |  @Anno1
+      |  @Anno2(param = Param1::class)
+      |  @Anno3
+      |  @Anno4(param = Param2::class)
+      |  add(10) && add(20)
+      |
+      |  @Suppress("MagicNumber") add(10) &&
+      |      add(20) &&
+      |      add(30)
+      |
+      |  add(@Suppress("MagicNumber") 10) &&
+      |      add(20) &&
+      |      add(30)
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `annotated function declarations`() =
@@ -6564,407 +6474,395 @@ class FormatterTest {
   }
 
   @Test
-  fun `handle trailing commas (constructors)`() =
-      assertFormatted(
-          """
-          |////////////////////
-          |class Foo(
-          |    a: Int,
-          |)
-          |
-          |class Foo(
-          |    a: Int,
-          |    b: Int,
-          |)
-          |
-          |class Foo(
-          |    a: Int,
-          |    b: Int
-          |)
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle trailing commas (constructors)`() = assertFormatted(
+      """
+      |////////////////////
+      |class Foo(
+      |    a: Int,
+      |)
+      |
+      |class Foo(
+      |    a: Int,
+      |    b: Int,
+      |)
+      |
+      |class Foo(
+      |    a: Int,
+      |    b: Int
+      |)
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle trailing commas (explicit constructors)`() =
-      assertFormatted(
-          """
-          |////////////////////////
-          |class Foo
-          |constructor(
-          |    a: Int,
-          |)
-          |
-          |class Foo
-          |constructor(
-          |    a: Int,
-          |    b: Int,
-          |)
-          |
-          |class Foo
-          |constructor(
-          |    a: Int,
-          |    b: Int
-          |)
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle trailing commas (explicit constructors)`() = assertFormatted(
+      """
+      |////////////////////////
+      |class Foo
+      |constructor(
+      |    a: Int,
+      |)
+      |
+      |class Foo
+      |constructor(
+      |    a: Int,
+      |    b: Int,
+      |)
+      |
+      |class Foo
+      |constructor(
+      |    a: Int,
+      |    b: Int
+      |)
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle trailing commas (secondary constructors)`() =
-      assertFormatted(
-          """
-          |////////////////////////
-          |class Foo {
-          |  constructor(
-          |      a: Int,
-          |  )
-          |}
-          |
-          |class Foo {
-          |  constructor(
-          |      a: Int,
-          |      b: Int,
-          |  )
-          |}
-          |
-          |class Foo {
-          |  constructor(
-          |      a: Int,
-          |      b: Int
-          |  )
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle trailing commas (secondary constructors)`() = assertFormatted(
+      """
+      |////////////////////////
+      |class Foo {
+      |  constructor(
+      |      a: Int,
+      |  )
+      |}
+      |
+      |class Foo {
+      |  constructor(
+      |      a: Int,
+      |      b: Int,
+      |  )
+      |}
+      |
+      |class Foo {
+      |  constructor(
+      |      a: Int,
+      |      b: Int
+      |  )
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle trailing commas (function definitions)`() =
-      assertFormatted(
-          """
-          |////////////////////////
-          |fun <
-          |    T,
-          |> foo() {}
-          |
-          |fun <
-          |    T,
-          |    S,
-          |> foo() {}
-          |
-          |fun foo(
-          |    a: Int,
-          |) {}
-          |
-          |fun foo(
-          |    a: Int,
-          |    b: Int
-          |) {}
-          |
-          |fun foo(
-          |    a: Int,
-          |    b: Int,
-          |) {}
-          |
-          |fun foo(
-          |    a: Int,
-          |    b: Int,
-          |    c: Int,
-          |) {}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle trailing commas (function definitions)`() = assertFormatted(
+      """
+      |////////////////////////
+      |fun <
+      |    T,
+      |> foo() {}
+      |
+      |fun <
+      |    T,
+      |    S,
+      |> foo() {}
+      |
+      |fun foo(
+      |    a: Int,
+      |) {}
+      |
+      |fun foo(
+      |    a: Int,
+      |    b: Int
+      |) {}
+      |
+      |fun foo(
+      |    a: Int,
+      |    b: Int,
+      |) {}
+      |
+      |fun foo(
+      |    a: Int,
+      |    b: Int,
+      |    c: Int,
+      |) {}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle trailing commas (function calls)`() =
-      assertFormatted(
-          """
-          |////////////////////////
-          |fun main() {
-          |  foo(
-          |      3,
-          |  )
-          |
-          |  foo<Int>(
-          |      3,
-          |  )
-          |
-          |  foo<
-          |      Int,
-          |  >(
-          |      3,
-          |  )
-          |
-          |  foo<Int>(
-          |      "asdf", "asdf")
-          |
-          |  foo<
-          |      Int,
-          |  >(
-          |      "asd",
-          |      "asd",
-          |  )
-          |
-          |  foo<
-          |      Int,
-          |      Boolean,
-          |  >(
-          |      3,
-          |  )
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle trailing commas (function calls)`() = assertFormatted(
+      """
+      |////////////////////////
+      |fun main() {
+      |  foo(
+      |      3,
+      |  )
+      |
+      |  foo<Int>(
+      |      3,
+      |  )
+      |
+      |  foo<
+      |      Int,
+      |  >(
+      |      3,
+      |  )
+      |
+      |  foo<Int>(
+      |      "asdf", "asdf")
+      |
+      |  foo<
+      |      Int,
+      |  >(
+      |      "asd",
+      |      "asd",
+      |  )
+      |
+      |  foo<
+      |      Int,
+      |      Boolean,
+      |  >(
+      |      3,
+      |  )
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle trailing commas (proprties)`() =
-      assertFormatted(
-          """
-          |//////////////////////////
-          |val foo: String
-          |  set(
-          |      value,
-          |  ) {}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle trailing commas (proprties)`() = assertFormatted(
+      """
+      |//////////////////////////
+      |val foo: String
+      |  set(
+      |      value,
+      |  ) {}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle trailing commas (higher-order functions)`() =
-      assertFormatted(
-          """
-          |//////////////////////////
-          |fun foo(
-          |    x:
-          |        (
-          |            Int,
-          |        ) -> Unit
-          |) {}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle trailing commas (higher-order functions)`() = assertFormatted(
+      """
+      |//////////////////////////
+      |fun foo(
+      |    x:
+      |        (
+      |            Int,
+      |        ) -> Unit
+      |) {}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle trailing commas (after lambda arg)`() =
-      assertFormatted(
-          """
-          |//////////////////////////
-          |fun foo() {
-          |  foo(
-          |      { it },
-          |  )
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle trailing commas (after lambda arg)`() = assertFormatted(
+      """
+      |//////////////////////////
+      |fun foo() {
+      |  foo(
+      |      { it },
+      |  )
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `handle trailing commas (other)`() =
-      assertFormatted(
-          """
-          |//////////////////////////
-          |fun main() {
-          |  val (
-          |      x: Int,
-          |  ) = foo()
-          |  val (
-          |      x: Int,
-          |      y: Int,
-          |  ) = foo()
-          |
-          |  val (
-          |      x: Int,
-          |  ) = foo(
-          |      blablablablFoobar,
-          |      alskdjasld)
-          |
-          |  val (
-          |      x: Int,
-          |      y: Int,
-          |  ) = foo(
-          |      blablablablFoobar,
-          |      asldkalsd)
-          |
-          |  a[
-          |      0,
-          |  ] = 43
-          |  a[
-          |      0,
-          |      1,
-          |  ] = 43
-          |
-          |  [
-          |      0,
-          |  ]
-          |  [
-          |      0,
-          |      1,
-          |  ]
-          |
-          |  when (foo) {
-          |    'x',
-          |    -> 43
-          |    'x',
-          |    'y',
-          |    -> 43
-          |    'x',
-          |    'y',
-          |    'z',
-          |    'w',
-          |    'a',
-          |    'b',
-          |    -> 43
-          |  }
-          |
-          |  try {
-          |    //
-          |  } catch (e: Error,) {
-          |    //
-          |  }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `handle trailing commas (other)`() = assertFormatted(
+      """
+      |//////////////////////////
+      |fun main() {
+      |  val (
+      |      x: Int,
+      |  ) = foo()
+      |  val (
+      |      x: Int,
+      |      y: Int,
+      |  ) = foo()
+      |
+      |  val (
+      |      x: Int,
+      |  ) = foo(
+      |      blablablablFoobar,
+      |      alskdjasld)
+      |
+      |  val (
+      |      x: Int,
+      |      y: Int,
+      |  ) = foo(
+      |      blablablablFoobar,
+      |      asldkalsd)
+      |
+      |  a[
+      |      0,
+      |  ] = 43
+      |  a[
+      |      0,
+      |      1,
+      |  ] = 43
+      |
+      |  [
+      |      0,
+      |  ]
+      |  [
+      |      0,
+      |      1,
+      |  ]
+      |
+      |  when (foo) {
+      |    'x',
+      |    -> 43
+      |    'x',
+      |    'y',
+      |    -> 43
+      |    'x',
+      |    'y',
+      |    'z',
+      |    'w',
+      |    'a',
+      |    'b',
+      |    -> 43
+      |  }
+      |
+      |  try {
+      |    //
+      |  } catch (e: Error,) {
+      |    //
+      |  }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `assignment of a scoping function`() =
-      assertFormatted(
-          """
-          |////////////////////////////
-          |val foo = coroutineScope {
-          |  foo()
-          |  //
-          |}
-          |
-          |fun foo() = coroutineScope {
-          |  foo()
-          |  //
-          |}
-          |
-          |fun foo() = use { x ->
-          |  foo()
-          |  //
-          |}
-          |
-          |fun foo() = scope label@{
-          |  foo()
-          |  //
-          |}
-          |
-          |fun foo() =
-          |    coroutineScope { x ->
-          |      foo()
-          |      //
-          |    }
-          |
-          |fun foo() =
-          |    coroutineScope label@{
-          |      foo()
-          |      //
-          |    }
-          |
-          |fun foo() =
-          |    Runnable @Px {
-          |      foo()
-          |      //
-          |    }
-          |
-          |fun longName() =
-          |    coroutineScope {
-          |      foo()
-          |      //
-          |    }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `assignment of a scoping function`() = assertFormatted(
+      """
+      |////////////////////////////
+      |val foo = coroutineScope {
+      |  foo()
+      |  //
+      |}
+      |
+      |fun foo() = coroutineScope {
+      |  foo()
+      |  //
+      |}
+      |
+      |fun foo() = use { x ->
+      |  foo()
+      |  //
+      |}
+      |
+      |fun foo() = scope label@{
+      |  foo()
+      |  //
+      |}
+      |
+      |fun foo() =
+      |    coroutineScope { x ->
+      |      foo()
+      |      //
+      |    }
+      |
+      |fun foo() =
+      |    coroutineScope label@{
+      |      foo()
+      |      //
+      |    }
+      |
+      |fun foo() =
+      |    Runnable @Px {
+      |      foo()
+      |      //
+      |    }
+      |
+      |fun longName() =
+      |    coroutineScope {
+      |      foo()
+      |      //
+      |    }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `dot-qualified scoping functions are block-like`() =
-      assertFormatted(
-          """
-          |/////////////////////////////////
-          |fun f() {
-          |  val fn = scope.launch {
-          |    doThing()
-          |    doAnother()
-          |  }
-          |}
-          |
-          |fun g() {
-          |  val longVariableName =
-          |      scope.launch {
-          |        doThing()
-          |        doAnother()
-          |      }
-          |}
-          |
-          |fun h() = scope.launch {
-          |  doThing()
-          |  doAnother()
-          |}
-          |
-          |fun longFunctionName() =
-          |    scope.launch {
-          |      doThing()
-          |      doAnother()
-          |    }
-          |
-          |fun j() {
-          |  x = scope.launch {
-          |    doThing()
-          |    doAnother()
-          |  }
-          |}
-          |
-          |fun k() {
-          |  longVariableName =
-          |      scope.launch {
-          |        doThing()
-          |        doAnother()
-          |      }
-          |}
-          |
-          |fun l() {
-          |  val fn = scope?.launch {
-          |    doThing()
-          |    doAnother()
-          |  }
-          |}
-          |
-          |fun m() {
-          |  val longVariableName =
-          |      scope?.launch {
-          |        doThing()
-          |        doAnother()
-          |      }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `dot-qualified scoping functions are block-like`() = assertFormatted(
+      """
+      |/////////////////////////////////
+      |fun f() {
+      |  val fn = scope.launch {
+      |    doThing()
+      |    doAnother()
+      |  }
+      |}
+      |
+      |fun g() {
+      |  val longVariableName =
+      |      scope.launch {
+      |        doThing()
+      |        doAnother()
+      |      }
+      |}
+      |
+      |fun h() = scope.launch {
+      |  doThing()
+      |  doAnother()
+      |}
+      |
+      |fun longFunctionName() =
+      |    scope.launch {
+      |      doThing()
+      |      doAnother()
+      |    }
+      |
+      |fun j() {
+      |  x = scope.launch {
+      |    doThing()
+      |    doAnother()
+      |  }
+      |}
+      |
+      |fun k() {
+      |  longVariableName =
+      |      scope.launch {
+      |        doThing()
+      |        doAnother()
+      |      }
+      |}
+      |
+      |fun l() {
+      |  val fn = scope?.launch {
+      |    doThing()
+      |    doAnother()
+      |  }
+      |}
+      |
+      |fun m() {
+      |  val longVariableName =
+      |      scope?.launch {
+      |        doThing()
+      |        doAnother()
+      |      }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `dot-qualified scoping functions single-line`() =
-      assertFormatted(
-          """
-          |///////////////////////////////////////////
-          |fun f() {
-          |  val fn = scope.launch { doThing() }
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `dot-qualified scoping functions single-line`() = assertFormatted(
+      """
+      |///////////////////////////////////////////
+      |fun f() {
+      |  val fn = scope.launch { doThing() }
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `top level properties with other types preserve newline spacing`() {
@@ -7477,895 +7375,843 @@ class FormatterTest {
   }
 
   @Test
-  fun `chaining - many dereferences`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, fit on one line`() =
-      assertFormatted(
-          """
-          |///////////////////////////////////////////////////////////////////////////
-          |rainbow.red.orange.yellow.green.blue.indigo.violet.cyan.magenta.key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, fit on one line`() = assertFormatted(
+      """
+      |///////////////////////////////////////////////////////////////////////////
+      |rainbow.red.orange.yellow.green.blue.indigo.violet.cyan.magenta.key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one invocation at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .build()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one invocation at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one invocation at end, fit on one line`() =
-      assertFormatted(
-          """
-          |///////////////////////////////////////////////////////////////////////////
-          |rainbow.red.orange.yellow.green.blue.indigo.violet.cyan.magenta.key.build()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one invocation at end, fit on one line`() = assertFormatted(
+      """
+      |///////////////////////////////////////////////////////////////////////////
+      |rainbow.red.orange.yellow.green.blue.indigo.violet.cyan.magenta.key.build()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, two invocations at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .build()
-          |    .shine()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, two invocations at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build()
+      |    .shine()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one invocation in the middle`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .shine()
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one invocation in the middle`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .shine()
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, two invocations in the middle`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .shine()
-          |    .bright()
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, two invocations in the middle`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .shine()
+      |    .bright()
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one lambda at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .build { it.appear }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one lambda at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build { it.appear }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one short lambda at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .z { it }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one short lambda at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .z { it }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one multiline lambda at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .z {
-          |      it
-          |      it
-          |    }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one multiline lambda at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .z {
+      |      it
+      |      it
+      |    }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one short lambda in the middle`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .z { it }
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one short lambda in the middle`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .z { it }
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one multiline lambda in the middle`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .z {
-          |      it
-          |      it
-          |    }
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one multiline lambda in the middle`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .z {
+      |      it
+      |      it
+      |    }
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one multiline lambda in the middle, remainder could fit on one line`() =
-      assertFormatted(
-          """
-          |/////////////////////////////////////////////////////////////////////////////////////////
-          |rainbow.red.orange.yellow.green.blue
-          |    .z {
-          |      it
-          |      it
-          |    }
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one multiline lambda in the middle, remainder could fit on one line`() = assertFormatted(
+      """
+      |/////////////////////////////////////////////////////////////////////////////////////////
+      |rainbow.red.orange.yellow.green.blue
+      |    .z {
+      |      it
+      |      it
+      |    }
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one multiline lambda and two invocations in the middle, remainder could fit on one line`() =
-      assertFormatted(
-          """
-          |/////////////////////////////////////////////////////////////////////////////////////////
-          |rainbow.red.orange.yellow.green.blue
-          |    .z {
-          |      it
-          |      it
-          |    }
-          |    .shine()
-          |    .bright()
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one multiline lambda and two invocations in the middle, remainder could fit on one line`() = assertFormatted(
+      """
+      |/////////////////////////////////////////////////////////////////////////////////////////
+      |rainbow.red.orange.yellow.green.blue
+      |    .z {
+      |      it
+      |      it
+      |    }
+      |    .shine()
+      |    .bright()
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one lambda and invocation at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .z { it }
-          |    .shine()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one lambda and invocation at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .z { it }
+      |    .shine()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one multiline lambda and invocation at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .z {
-          |      it
-          |      it
-          |    }
-          |    .shine()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one multiline lambda and invocation at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .z {
+      |      it
+      |      it
+      |    }
+      |    .shine()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one invocation and lambda at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .shine()
-          |    .z { it }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one invocation and lambda at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .shine()
+      |    .z { it }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, one short lambda and invocation in the middle`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .z { it }
-          |    .shine()
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, one short lambda and invocation in the middle`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .z { it }
+      |    .shine()
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, invocation and one short lambda in the middle`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .shine()
-          |    .z { it }
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, invocation and one short lambda in the middle`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .shine()
+      |    .z { it }
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, starting with this`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |this.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, starting with this`() = assertFormatted(
+      """
+      |/////////////////////////
+      |this.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, starting with this, one invocation at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |this.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .build()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, starting with this, one invocation at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |this.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, starting with super`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |super.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, starting with super`() = assertFormatted(
+      """
+      |/////////////////////////
+      |super.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, starting with super, one invocation at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |super.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .build()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, starting with super, one invocation at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |super.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, starting with short variable`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |z123.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, starting with short variable`() = assertFormatted(
+      """
+      |/////////////////////////
+      |z123.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, starting with short variable, one invocation at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |z123.red.orange.yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .build()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, starting with short variable, one invocation at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |z123.red.orange.yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .build()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, starting with short variable and lambda, invocation at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |z12.z { it }
-          |    .red
-          |    .orange
-          |    .yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .shine()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, starting with short variable and lambda, invocation at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |z12.z { it }
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .shine()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, starting with this and lambda, invocation at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |this.z { it }
-          |    .red
-          |    .orange
-          |    .yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |    .shine()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, starting with this and lambda, invocation at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |this.z { it }
+      |    .red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |    .shine()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many invocations`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.a().b().c()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many invocations`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.a().b().c()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many invocations, with multiline lambda at end`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.a().b().c().zz {
-          |  it
-          |  it
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many invocations, with multiline lambda at end`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.a().b().c().zz {
+      |  it
+      |  it
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many dereferences, starting type name`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |com.sky.Rainbow.red
-          |    .orange
-          |    .yellow
-          |    .green
-          |    .blue
-          |    .indigo
-          |    .violet
-          |    .cyan
-          |    .magenta
-          |    .key
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many dereferences, starting type name`() = assertFormatted(
+      """
+      |/////////////////////////
+      |com.sky.Rainbow.red
+      |    .orange
+      |    .yellow
+      |    .green
+      |    .blue
+      |    .indigo
+      |    .violet
+      |    .cyan
+      |    .magenta
+      |    .key
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many invocations, starting with short variable, lambda at end`() =
-      assertFormatted(
-          """
-          |/////////////
-          |z12.shine()
-          |    .bright()
-          |    .z { it }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many invocations, starting with short variable, lambda at end`() = assertFormatted(
+      """
+      |/////////////
+      |z12.shine()
+      |    .bright()
+      |    .z { it }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - start with invocation, lambda at end`() =
-      assertFormatted(
-          """
-          |/////////////////////
-          |getRainbow(
-          |        aa, bb, cc)
-          |    .z { it }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - start with invocation, lambda at end`() = assertFormatted(
+      """
+      |/////////////////////
+      |getRainbow(
+      |        aa, bb, cc)
+      |    .z { it }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - many invocations, start with lambda`() =
-      assertFormatted(
-          """
-          |/////////////////////
-          |z { it }
-          |    .shine()
-          |    .bright()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - many invocations, start with lambda`() = assertFormatted(
+      """
+      |/////////////////////
+      |z { it }
+      |    .shine()
+      |    .bright()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining - start with type name, end with invocation`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |com.sky.Rainbow
-          |    .colorFactory
-          |    .build()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining - start with type name, end with invocation`() = assertFormatted(
+      """
+      |/////////////////////////
+      |com.sky.Rainbow
+      |    .colorFactory
+      |    .build()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline lambda`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.z {
-          |  it
-          |  it
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline lambda`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.z {
+      |  it
+      |  it
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline lambda with trailing dereferences`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow
-          |    .z {
-          |      it
-          |      it
-          |    }
-          |    .red
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline lambda with trailing dereferences`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow
+      |    .z {
+      |      it
+      |      it
+      |    }
+      |    .red
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline lambda with long name`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow
-          |    .someLongLambdaName {
-          |      it
-          |      it
-          |    }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline lambda with long name`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow
+      |    .someLongLambdaName {
+      |      it
+      |      it
+      |    }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline lambda with long name and trailing dereferences`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow
-          |    .someLongLambdaName {
-          |      it
-          |      it
-          |    }
-          |    .red
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline lambda with long name and trailing dereferences`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow
+      |    .someLongLambdaName {
+      |      it
+      |      it
+      |    }
+      |    .red
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline lambda with prefix`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.z {
-          |  it
-          |  it
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline lambda with prefix`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.z {
+      |  it
+      |  it
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline lambda with prefix, forced to next line`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .longLambdaName {
-          |      it
-          |      it
-          |    }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline lambda with prefix, forced to next line`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .longLambdaName {
+      |      it
+      |      it
+      |    }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline lambda with prefix, forced to next line with another expression`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .key
-          |    .longLambdaName {
-          |      it
-          |      it
-          |    }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline lambda with prefix, forced to next line with another expression`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .key
+      |    .longLambdaName {
+      |      it
+      |      it
+      |    }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline arguments`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.shine(
-          |    infrared,
-          |    ultraviolet,
-          |)
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline arguments`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.shine(
+      |    infrared,
+      |    ultraviolet,
+      |)
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline arguments with trailing dereferences`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow
-          |    .shine(
-          |        infrared,
-          |        ultraviolet,
-          |    )
-          |    .red
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline arguments with trailing dereferences`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow
+      |    .shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |    .red
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline arguments, forced to next line`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .shine(
-          |        infrared,
-          |        ultraviolet,
-          |    )
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline arguments, forced to next line`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline arguments, forced to next line with another expression`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .key
-          |    .shine(
-          |        infrared,
-          |        ultraviolet,
-          |    )
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline arguments, forced to next line with another expression`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .key
+      |    .shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline arguments, forced to next line with another expression, with trailing dereferences`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow.red.orange.yellow
-          |    .key
-          |    .shine(
-          |        infrared,
-          |        ultraviolet,
-          |    )
-          |    .red
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline arguments, forced to next line with another expression, with trailing dereferences`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow.red.orange.yellow
+      |    .key
+      |    .shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |    .red
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline arguments, with trailing invocation`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow
-          |    .shine(
-          |        infrared,
-          |        ultraviolet,
-          |    )
-          |    .bright()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline arguments, with trailing invocation`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow
+      |    .shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |    .bright()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline arguments, with trailing lambda`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |rainbow
-          |    .shine(
-          |        infrared,
-          |        ultraviolet,
-          |    )
-          |    .z { it }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline arguments, with trailing lambda`() = assertFormatted(
+      """
+      |/////////////////////////
+      |rainbow
+      |    .shine(
+      |        infrared,
+      |        ultraviolet,
+      |    )
+      |    .z { it }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline arguments, prefixed with super, with trailing invocation`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |super.shine(
-          |    infrared,
-          |    ultraviolet,
-          |)
-          |    .bright()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline arguments, prefixed with super, with trailing invocation`() = assertFormatted(
+      """
+      |/////////////////////////
+      |super.shine(
+      |    infrared,
+      |    ultraviolet,
+      |)
+      |    .bright()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - multiline arguments, starting with short variable, with trailing invocation`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |z12.shine(
-          |    infrared,
-          |    ultraviolet,
-          |)
-          |    .bright()
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - multiline arguments, starting with short variable, with trailing invocation`() = assertFormatted(
+      """
+      |/////////////////////////
+      |z12.shine(
+      |    infrared,
+      |    ultraviolet,
+      |)
+      |    .bright()
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - start with multiline arguments`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |getRainbow(
-          |    infrared,
-          |    ultraviolet,
-          |)
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - start with multiline arguments`() = assertFormatted(
+      """
+      |/////////////////////////
+      |getRainbow(
+      |    infrared,
+      |    ultraviolet,
+      |)
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `chaining (indentation) - start with multiline arguments, with trailing invocation`() =
-      assertFormatted(
-          """
-          |/////////////////////////
-          |getRainbow(
-          |    infrared,
-          |    ultraviolet,
-          |)
-          |    .z { it }
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `chaining (indentation) - start with multiline arguments, with trailing invocation`() = assertFormatted(
+      """
+      |/////////////////////////
+      |getRainbow(
+      |    infrared,
+      |    ultraviolet,
+      |)
+      |    .z { it }
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `annotations for expressions`() =
@@ -8416,9 +8262,8 @@ class FormatterTest {
   }
 
   @Test
-  fun `function call following long multiline string`() =
-      assertFormatted(
-          """
+  fun `function call following long multiline string`() = assertFormatted(
+      """
           |////////////////////////////////
           |fun stringFitsButNotMethod() {
           |  val str1 =
@@ -8444,49 +8289,48 @@ class FormatterTest {
           |          .trimIndent(someArg)
           |}
           |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `array-literal in annotation`() =
-      assertFormatted(
-          """
-          |////////////////////////////////
-          |@Anno(
-          |    array =
-          |        [
-          |            someItem,
-          |            andAnother,
-          |            noTrailingComma])
-          |class Host
-          |
-          |@Anno(
-          |    array =
-          |        [
-          |            someItem,
-          |            andAnother,
-          |            withTrailingComma,
-          |        ])
-          |class Host
-          |
-          |@Anno(
-          |    array =
-          |        [
-          |            // Comment
-          |            someItem,
-          |            // Comment
-          |            andAnother,
-          |            // Comment
-          |            withTrailingComment
-          |            // Comment
-          |            // Comment
-          |            ])
-          |class Host
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `array-literal in annotation`() = assertFormatted(
+      """
+      |////////////////////////////////
+      |@Anno(
+      |    array =
+      |        [
+      |            someItem,
+      |            andAnother,
+      |            noTrailingComma])
+      |class Host
+      |
+      |@Anno(
+      |    array =
+      |        [
+      |            someItem,
+      |            andAnother,
+      |            withTrailingComma,
+      |        ])
+      |class Host
+      |
+      |@Anno(
+      |    array =
+      |        [
+      |            // Comment
+      |            someItem,
+      |            // Comment
+      |            andAnother,
+      |            // Comment
+      |            withTrailingComment
+      |            // Comment
+      |            // Comment
+      |            ])
+      |class Host
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `force blank line between class members`() {
@@ -8827,32 +8671,30 @@ class FormatterTest {
   }
 
   @Test
-  fun `line break on base class`() =
-      assertFormatted(
-          """
-          |///////////////////////////
-          |class Basket<T>() :
-          |    WovenObject {
-          |  // some body
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `line break on base class`() = assertFormatted(
+      """
+      |///////////////////////////
+      |class Basket<T>() :
+      |    WovenObject {
+      |  // some body
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
-  fun `line break on type specifier`() =
-      assertFormatted(
-          """
-          |///////////////////////////
-          |class Basket<T>()
-          |    where T : Fruit {
-          |  // some body
-          |}
-          |"""
-              .trimMargin(),
-          deduceMaxWidth = true,
-      )
+  fun `line break on type specifier`() = assertFormatted(
+      """
+      |///////////////////////////
+      |class Basket<T>()
+      |    where T : Fruit {
+      |  // some body
+      |}
+      |"""
+          .trimMargin(),
+      deduceMaxWidth = true,
+  )
 
   @Test
   fun `don't crash on empty enum with semicolons`() {
