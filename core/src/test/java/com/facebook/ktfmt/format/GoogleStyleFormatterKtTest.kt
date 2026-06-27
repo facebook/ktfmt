@@ -745,15 +745,14 @@ class GoogleStyleFormatterKtTest {
   fun `named arguments indent their value expression`() =
       assertFormatted(
           """
-          |fun f() =
-          |  Bar(
-          |    tokens =
-          |      mutableListOf<Token>().apply {
-          |        // Printing
-          |        print()
-          |      },
-          |    duration = duration,
-          |  )
+          |fun f() = Bar(
+          |  tokens =
+          |    mutableListOf<Token>().apply {
+          |      // Printing
+          |      print()
+          |    },
+          |  duration = duration,
+          |)
           |"""
               .trimMargin(),
       )
@@ -1306,9 +1305,9 @@ class GoogleStyleFormatterKtTest {
           |///////////////////////////
           |fun f() {
           |  foo(
-          |      println("a"),
-          |      println("b"),
-          |    )
+          |    println("a"),
+          |    println("b"),
+          |  )
           |    .bar(
           |      println("b"),
           |      println("b"),

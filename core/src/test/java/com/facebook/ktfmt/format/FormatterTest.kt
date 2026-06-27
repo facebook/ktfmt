@@ -1797,11 +1797,10 @@ class FormatterTest {
   fun `Trailing comma forces variable value in list onto new line with manageTrailingCommas turned off`() =
       assertFormatted(
           """
-          val aVar =
-              setOf(
-                  Env.Dev,
-                  Env.Prod,
-              )
+          val aVar = setOf(
+              Env.Dev,
+              Env.Prod,
+          )
           val aVar = setOf(Env.Dev, Env.Prod)
 
           """
@@ -8315,9 +8314,9 @@ class FormatterTest {
           """
           |/////////////////////////
           |super.shine(
-          |        infrared,
-          |        ultraviolet,
-          |    )
+          |    infrared,
+          |    ultraviolet,
+          |)
           |    .bright()
           |"""
               .trimMargin(),
@@ -8330,9 +8329,9 @@ class FormatterTest {
           """
           |/////////////////////////
           |z12.shine(
-          |        infrared,
-          |        ultraviolet,
-          |    )
+          |    infrared,
+          |    ultraviolet,
+          |)
           |    .bright()
           |"""
               .trimMargin(),
@@ -8359,9 +8358,9 @@ class FormatterTest {
           """
           |/////////////////////////
           |getRainbow(
-          |        infrared,
-          |        ultraviolet,
-          |    )
+          |    infrared,
+          |    ultraviolet,
+          |)
           |    .z { it }
           |"""
               .trimMargin(),
@@ -9743,6 +9742,254 @@ class FormatterTest {
           |"""
               .trimMargin()
       )
+
+  // region call with chained call(s) (#633)
+
+  @Test
+  fun `multiline call without chained call (#633)`() =
+      assertFormatted(
+          """
+          |fun f() {
+          |  foo(
+          |      1,
+          |      2,
+          |  )
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `multiline call with chained call same line closing paren (#633)`() =
+      assertThatFormatting(
+              """
+              |fun f() {
+              |  foo(
+              |      1,
+              |      2,
+              |  ).bar()
+              |}
+              |"""
+                  .trimMargin()
+          )
+          .isEqualTo(
+              """
+              |fun f() {
+              |  foo(
+              |      1,
+              |      2,
+              |  )
+              |      .bar()
+              |}
+              |"""
+                  .trimMargin()
+          )
+
+  @Test
+  fun `multiline call with chained call next line selector (#633)`() =
+      assertFormatted(
+          """
+          |fun f() {
+          |  foo(
+          |      1,
+          |      2,
+          |  )
+          |      .bar()
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `multiline call in property initializer (#633)`() =
+      assertFormatted(
+          """
+          |val x = foo(
+          |    1,
+          |    2,
+          |)
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `multiline call in property initializer with chain (#633)`() =
+      assertFormatted(
+          """
+          |val x = foo(
+          |    1,
+          |    2,
+          |)
+          |    .bar()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `multiline call in property delegate (#633)`() =
+      assertFormatted(
+          """
+          |val x by foo(
+          |    1,
+          |    2,
+          |)
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `multiline call in property delegate with chain (#633)`() =
+      assertFormatted(
+          """
+          |val x by foo(
+          |    1,
+          |    2,
+          |)
+          |    .bar()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `multiline call in backing field (#633)`() =
+      assertFormatted(
+          """
+          |var x: Int
+          |  field = foo(
+          |      1,
+          |      2,
+          |  )
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `multiline call in backing field with chain (#633)`() =
+      assertFormatted(
+          """
+          |var x: Int
+          |  field = foo(
+          |      1,
+          |      2,
+          |  )
+          |      .bar()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `multiline call with leading line comment (#633)`() =
+      assertFormatted(
+          """
+          |val x = // comment
+          |    foo(
+          |        1,
+          |        2,
+          |    )
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `multiline call with leading block comment (#633)`() =
+      assertFormatted(
+          """
+          |val y =
+          |    /* comment */ foo(
+          |        1,
+          |        2,
+          |    )
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `inner multiline call (#633)`() =
+      assertFormatted(
+          """
+          |val x = foo(
+          |    bar(
+          |        1,
+          |        2,
+          |    ),
+          |    3,
+          |)
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `inner multiline call with chain (#633)`() =
+      assertFormatted(
+          """
+          |val x = foo(
+          |    bar(
+          |        1,
+          |        2,
+          |    )
+          |        .baz(),
+          |    3,
+          |)
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `expression-body call with nested multiline calls and chains (#633)`() =
+      assertFormatted(
+          """
+          |fun quux() = listOf(
+          |    "a",
+          |    "b",
+          |    listOf(
+          |        "a",
+          |        "b",
+          |    ),
+          |    listOf(
+          |        "a",
+          |        "b",
+          |    )
+          |        .baz()
+          |        .bar(1, 2)
+          |        .fold { it.boom() }
+          |)
+          |    .baz()
+          |"""
+              .trimMargin()
+      )
+
+  @Test
+  fun `block-body call with nested multiline calls and chains (#633)`() =
+      assertFormatted(
+          """
+          |fun quux() {
+          |  listOf(
+          |      "a",
+          |      "b",
+          |  )
+          |
+          |  listOf(
+          |      "a",
+          |      "b",
+          |      listOf(
+          |          "a",
+          |          "b",
+          |      ),
+          |      listOf(
+          |          "a",
+          |          "b",
+          |      )
+          |          .baz()
+          |          .bar(1, 2)
+          |          .fold { it.boom() }
+          |  )
+          |      .baz()
+          |}
+          |"""
+              .trimMargin()
+      )
+
+  // endregion
 
   companion object {
     /** Triple quotes, useful to use within triple-quoted strings. */
