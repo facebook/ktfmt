@@ -124,8 +124,7 @@ object Formatter {
               .transform { sortedAndDistinctImports(it) }
               .transform { dropRedundantElements(it, options) }
               .transform { addRedundantElements(it, options) }
-              .transform { prettyPrint(it, options, lineSeparator = "\n") }
-              .transform { addRedundantElements(it, options) }
+              .let { prettyPrintAndManageTrailingCommas(it, options, lineSeparator = "\n") }
               .transform { MultilineStringFormatter(options.continuationIndent).format(it) }
               .code
         } else {
@@ -162,6 +161,21 @@ object Formatter {
     return formattedCode
         .let { convertLineSeparators(it, checkNotNull(Newlines.guessLineSeparator(kotlinCode))) }
         .let { if (shebang.isEmpty()) it else shebang + "\n" + it }
+  }
+
+  /**
+   * Pretty-prints & reprints while [addRedundantElements] keeps adding trailing commas, so a comma
+   * inserted after layout can't leave a line over the limit.
+   */
+  private tailrec fun prettyPrintAndManageTrailingCommas(
+      context: FormatterContext,
+      options: FormattingOptions,
+      lineSeparator: String,
+  ): FormatterContext {
+    val prettyCode = context.transform { prettyPrint(it, options, lineSeparator) }
+    val newCode = prettyCode.transform { addRedundantElements(it, options) }
+    return if (newCode == prettyCode) prettyCode
+    else prettyPrintAndManageTrailingCommas(newCode, options, lineSeparator)
   }
 
   /** prettyPrint reflows 'code' using google-java-format's engine. */

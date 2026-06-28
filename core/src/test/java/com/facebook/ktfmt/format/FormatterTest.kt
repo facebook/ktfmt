@@ -9179,6 +9179,41 @@ class FormatterTest {
   }
 
   @Test
+  fun `a trailing comma added while breaking a list does not push the last line over the max width`() {
+    val code =
+        """
+        |functionCall(shortArg, namedArgument = "string sized so the trailing comma ktfmt adds tips it one char over the limit.")
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |functionCall(
+        |    shortArg,
+        |    namedArgument =
+        |        "string sized so the trailing comma ktfmt adds tips it one char over the limit.",
+        |)
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code).withOptions(Formatter.KOTLINLANG_FORMAT).isEqualTo(expected)
+  }
+
+  @Test
+  fun `formatting a list whose trailing comma lands at the max width is idempotent`() {
+    val code =
+        """
+        |functionCall(shortArg, namedArgument = "string sized so the trailing comma ktfmt adds tips it one char over the limit.")
+        |"""
+            .trimMargin()
+
+    val formattedOnce = Formatter.format(Formatter.KOTLINLANG_FORMAT, code)
+    assertThatFormatting(formattedOnce)
+        .withOptions(Formatter.KOTLINLANG_FORMAT)
+        .isEqualTo(formattedOnce)
+  }
+
+  @Test
   fun `preserve lambda breaks - keeps multi-line lambda multi-line`() {
     val code =
         """
