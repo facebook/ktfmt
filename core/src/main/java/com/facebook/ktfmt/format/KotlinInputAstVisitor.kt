@@ -18,6 +18,7 @@ package com.facebook.ktfmt.format
 
 import com.facebook.ktfmt.util.CONTEXT_PARAMETER_LIST
 import com.facebook.ktfmt.util.listToVisit
+import com.facebook.ktfmt.util.ownValOrVarKeywordText
 import com.google.common.base.Throwables
 import com.google.common.collect.ImmutableList
 import com.google.googlejavaformat.Doc
@@ -2442,7 +2443,7 @@ class KotlinInputAstVisitor(
         modifiers = multiDeclarationEntry.modifierList,
         name = multiDeclarationEntry.nameIdentifier?.text ?: fail(),
         type = multiDeclarationEntry.typeReference,
-        valOrVarKeyword = multiDeclarationEntry.ownValOrVarKeyword?.text,
+        valOrVarKeyword = multiDeclarationEntry.ownValOrVarKeywordText,
     )
   }
 
