@@ -561,4 +561,293 @@ class MainTest {
     assertThat(returnValue).isEqualTo(1)
     assertThat(err.toString(testCharset)).contains("foo.kt:1:14: error: ")
   }
+
+  @Test
+  fun `--lines formats the selected file statement`() {
+    val code =
+        """
+        |fun untouched ( ) =   1
+        |
+        |fun test() {
+        |  val selected    =   2
+        |  val adjacent    =   3
+        |}
+        |"""
+            .trimMargin()
+    val file = root.resolve("foo.kt")
+    file.writeText(code, UTF_8)
+
+    val exitCode =
+        Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf("--lines=4", file.toString()))
+            .run()
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(file.readText(UTF_8))
+        .isEqualTo(
+            """
+            |fun untouched ( ) =   1
+            |
+            |fun test() {
+            |  val selected = 2
+            |  val adjacent    =   3
+            |}
+            |"""
+                .trimMargin()
+        )
+  }
+
+  @Test
+  fun `--lines formats the selected stdin statement`() {
+    val code =
+        """
+        |fun untouched ( ) =   1
+        |
+        |fun test() {
+        |  val selected    =   2
+        |  val adjacent    =   3
+        |}
+        |"""
+            .trimMargin()
+
+    val exitCode =
+        Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("--lines=4", "-"))
+            .run()
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(out.toString(UTF_8))
+        .isEqualTo(
+            """
+            |fun untouched ( ) =   1
+            |
+            |fun test() {
+            |  val selected = 2
+            |  val adjacent    =   3
+            |}
+            |"""
+                .trimMargin()
+        )
+  }
+
+  @Test
+  fun `--lines formats the selected class member statement`() {
+    val code =
+        """
+        |class Sample {
+        |  fun untouched ( ) =   1
+        |
+        |  fun test() {
+        |    val selected    =   2
+        |    val adjacent    =   3
+        |  }
+        |}
+        |"""
+            .trimMargin()
+
+    val exitCode =
+        Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("--lines=5", "-"))
+            .run()
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(out.toString(UTF_8))
+        .isEqualTo(
+            """
+            |class Sample {
+            |  fun untouched ( ) =   1
+            |
+            |  fun test() {
+            |    val selected = 2
+            |    val adjacent    =   3
+            |  }
+            |}
+            |"""
+                .trimMargin()
+        )
+  }
+
+  @Test
+  fun `--lines applies import cleanup after selected formatting`() {
+    val code =
+        """
+        |import com.unused.Sample
+        |import com.used.FooBarBaz as Baz
+        |import com.used.bar
+        |
+        |fun untouched ( ) =   1
+        |
+        |fun test() {
+        |  val selected    =   2
+        |  Baz(bar)
+        |}
+        |"""
+            .trimMargin()
+
+    val exitCode =
+        Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("--lines=8", "-"))
+            .run()
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(out.toString(UTF_8))
+        .isEqualTo(
+            """
+            |import com.used.FooBarBaz as Baz
+            |import com.used.bar
+            |
+            |fun untouched ( ) =   1
+            |
+            |fun test() {
+            |  val selected = 2
+            |  Baz(bar)
+            |}
+            |"""
+                .trimMargin()
+        )
+  }
+
+  @Test
+  fun `--lines applies multiline string cleanup after selected formatting`() {
+    val code =
+        """
+        |val indent =
+        |    ""${'"'}     
+        |         example
+        |          of
+        |            a
+        |
+        |         multiline
+        |           string
+        |         ""${'"'}
+        |         .trimIndent()
+        |
+        |fun untouched ( ) =   1
+        |
+        |fun test() {
+        |  val selected    =   2
+        |}
+        |"""
+            .trimMargin()
+
+    val exitCode =
+        Main(code.byteInputStream(), PrintStream(out), PrintStream(err), arrayOf("--lines=15", "-"))
+            .run()
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(out.toString(UTF_8))
+        .isEqualTo(
+            """
+            |val indent =
+            |    ""${'"'}
+            |    example
+            |     of
+            |       a
+            |
+            |    multiline
+            |      string
+            |    ""${'"'}
+            |        .trimIndent()
+            |
+            |fun untouched ( ) =   1
+            |
+            |fun test() {
+            |  val selected = 2
+            |}
+            |"""
+                .trimMargin()
+        )
+  }
+
+  @Test
+  fun `--offset and --length format the selected file cursor line`() {
+    val code =
+        """
+        |fun untouched ( ) =   1
+        |
+        |fun test() {
+        |  val selected    =   2
+        |  val adjacent    =   3
+        |}
+        |"""
+            .trimMargin()
+    val file = root.resolve("foo.kt")
+    file.writeText(code, UTF_8)
+
+    val exitCode =
+        Main(
+                emptyInput,
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf(
+                    "--offset=${code.indexOf("selected")}",
+                    "--length=0",
+                    file.toString(),
+                ),
+            )
+            .run()
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(file.readText(UTF_8))
+        .isEqualTo(
+            """
+            |fun untouched ( ) =   1
+            |
+            |fun test() {
+            |  val selected = 2
+            |  val adjacent    =   3
+            |}
+            |"""
+                .trimMargin()
+        )
+  }
+
+  @Test
+  fun `--offset and --length format the selected stdin cursor line`() {
+    val code =
+        """
+        |fun untouched ( ) =   1
+        |
+        |fun test() {
+        |  val selected    =   2
+        |  val adjacent    =   3
+        |}
+        |"""
+            .trimMargin()
+
+    val exitCode =
+        Main(
+                code.byteInputStream(),
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf("--offset=${code.indexOf("selected")}", "--length=0", "-"),
+            )
+            .run()
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(out.toString(UTF_8))
+        .isEqualTo(
+            """
+            |fun untouched ( ) =   1
+            |
+            |fun test() {
+            |  val selected = 2
+            |  val adjacent    =   3
+            |}
+            |"""
+                .trimMargin()
+        )
+  }
+
+  @Test
+  fun `--lines rejects directories that expand to multiple files`() {
+    val dir = root.resolve("dir")
+    dir.mkdirs()
+    dir.resolve("foo.kt").writeText("fun foo () = 1", UTF_8)
+    dir.resolve("bar.kt").writeText("fun bar () = 1", UTF_8)
+
+    val exitCode =
+        Main(emptyInput, PrintStream(out), PrintStream(err), arrayOf("--lines=1", dir.toString()))
+            .run()
+
+    assertThat(exitCode).isEqualTo(1)
+    assertThat(err.toString(testCharset))
+        .contains("partial formatting is only supported for a single file")
+  }
 }

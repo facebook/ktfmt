@@ -24,6 +24,8 @@ import com.facebook.ktfmt.kdoc.Escaping
 import com.facebook.ktfmt.kdoc.KDocCommentsHelper
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Range
+import com.google.common.collect.RangeSet
+import com.google.common.collect.TreeRangeSet
 import com.google.googlejavaformat.Doc
 import com.google.googlejavaformat.DocBuilder
 import com.google.googlejavaformat.Newlines
@@ -86,11 +88,27 @@ object Formatter {
       format(META_FORMAT.copy(removeUnusedImports = removeUnusedImports), code)
 
   /**
-   * format formats the Kotlin code given in 'code' with the 'maxWidth' and returns it as a string.
+   * Formats the Kotlin code given in [code] and returns it as a string.
+   *
+   * @param lineRanges zero-indexed line ranges to format, using closed-open bounds, or null to
+   *   format all code
+   * @param characterRanges zero-indexed character ranges to format, using closed-open bounds, or
+   *   null to use only [lineRanges]
+   *
+   * When [lineRanges] or [characterRanges] are non-null, only pretty-print replacements are limited
+   * to those ranges. Whole-file cleanup passes, such as import cleanup and multiline string
+   * formatting, still run afterward, mirroring google-java-format's cleanup-after-selection
+   * behavior.
    */
   @JvmStatic
+  @JvmOverloads
   @Throws(FormatterException::class, ParseError::class)
-  fun format(options: FormattingOptions, code: String): String {
+  fun format(
+      options: FormattingOptions,
+      code: String,
+      lineRanges: RangeSet<Int>? = null,
+      characterRanges: RangeSet<Int>? = null,
+  ): String {
     val (shebang, kotlinCode) =
         if (code.startsWith("#!")) {
           code.split("\n".toRegex(), limit = 2)
@@ -99,20 +117,61 @@ object Formatter {
         }
     checkEscapeSequences(kotlinCode)
 
-    return FormatterContext(convertLineSeparators(kotlinCode))
-        .transform { sortedAndDistinctImports(it) }
-        .transform { dropRedundantElements(it, options) }
-        .transform { addRedundantElements(it, options) }
-        .transform { prettyPrint(it, options, lineSeparator = "\n") }
-        .transform { addRedundantElements(it, options) }
-        .transform { MultilineStringFormatter(options.continuationIndent).format(it) }
-        .code
+    val normalizedKotlinCode = convertLineSeparators(kotlinCode)
+    val formattedCode =
+        if (lineRanges == null && characterRanges == null) {
+          FormatterContext(normalizedKotlinCode)
+              .transform { sortedAndDistinctImports(it) }
+              .transform { dropRedundantElements(it, options) }
+              .transform { addRedundantElements(it, options) }
+              .transform { prettyPrint(it, options, lineSeparator = "\n") }
+              .transform { addRedundantElements(it, options) }
+              .transform { MultilineStringFormatter(options.continuationIndent).format(it) }
+              .code
+        } else {
+          val selectedCharacterRanges =
+              characterRangesForPartialFormatting(
+                  normalizedKotlinCode,
+                  lineRanges,
+                  characterRanges,
+                  shebang,
+              )
+          val partiallyFormattedCode =
+              if (selectedCharacterRanges.isEmpty) {
+                normalizedKotlinCode
+              } else {
+                FormatterContext(normalizedKotlinCode)
+                    .transform {
+                      prettyPrint(
+                          it,
+                          options,
+                          lineSeparator = "\n",
+                          characterRanges = selectedCharacterRanges.asRanges(),
+                      )
+                    }
+                    .code
+              }
+          FormatterContext(partiallyFormattedCode)
+              .transform { dropRedundantElements(it, options) }
+              .transform { sortedAndDistinctImports(it, trimLeadingWhitespace = true) }
+              .transform { addRedundantElements(it, options) }
+              .transform { MultilineStringFormatter(options.continuationIndent).format(it) }
+              .code
+        }
+
+    return formattedCode
         .let { convertLineSeparators(it, checkNotNull(Newlines.guessLineSeparator(kotlinCode))) }
         .let { if (shebang.isEmpty()) it else shebang + "\n" + it }
   }
 
   /** prettyPrint reflows 'code' using google-java-format's engine. */
-  private fun prettyPrint(file: KtFile, options: FormattingOptions, lineSeparator: String): String {
+  private fun prettyPrint(
+      file: KtFile,
+      options: FormattingOptions,
+      lineSeparator: String,
+      characterRanges: Collection<Range<Int>> =
+          ImmutableList.of(Range.closedOpen(0, file.text.length)),
+  ): String {
     val code = file.text
     val kotlinInput = KotlinInput(code, file)
     val javaOutput =
@@ -130,11 +189,85 @@ object Formatter {
     doc.write(javaOutput)
     javaOutput.flush()
 
-    val tokenRangeSet =
-        kotlinInput.characterRangesToTokenRanges(ImmutableList.of(Range.closedOpen(0, code.length)))
+    val tokenRangeSet = kotlinInput.characterRangesToTokenRanges(characterRanges)
     return WhitespaceTombstones.replaceTombstoneWithTrailingWhitespace(
         JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet))
     )
+  }
+
+  /** Converts zero-indexed, closed-open line ranges to character ranges in [input]. */
+  private fun lineRangesToCharRanges(input: String, lineRanges: RangeSet<Int>): RangeSet<Int> {
+    val lineOffsets = mutableListOf<Int>()
+    val lineOffsetIterator = Newlines.lineOffsetIterator(input)
+    while (lineOffsetIterator.hasNext()) {
+      lineOffsets.add(lineOffsetIterator.next())
+    }
+    lineOffsets.add(input.length + 1)
+
+    val characterRanges = TreeRangeSet.create<Int>()
+    for (lineRange in
+        lineRanges.subRangeSet(Range.closedOpen(0, lineOffsets.size - 1)).asRanges()) {
+      val lineStart = lineOffsets[lineRange.lowerEndpoint()]
+      val lineEnd = lineOffsets[lineRange.upperEndpoint()] - 1
+      val characterRange = Range.closedOpen(lineStart, lineEnd)
+      if (!characterRange.isEmpty) {
+        characterRanges.add(characterRange)
+      }
+    }
+    return characterRanges
+  }
+
+  private fun characterRangesForPartialFormatting(
+      code: String,
+      lineRanges: RangeSet<Int>?,
+      characterRanges: RangeSet<Int>?,
+      shebang: String,
+  ): RangeSet<Int> {
+    val selectedCharacterRanges = TreeRangeSet.create<Int>()
+    if (lineRanges != null) {
+      val adjustedLineRanges = adjustLineRangesForShebang(lineRanges, shebang.isNotEmpty())
+      selectedCharacterRanges.addAll(lineRangesToCharRanges(code, adjustedLineRanges))
+    }
+    if (characterRanges != null) {
+      selectedCharacterRanges.addAll(adjustCharacterRangesForShebang(characterRanges, shebang))
+    }
+    return selectedCharacterRanges
+  }
+
+  private fun adjustLineRangesForShebang(
+      lineRanges: RangeSet<Int>,
+      hasShebang: Boolean,
+  ): RangeSet<Int> {
+    if (!hasShebang) {
+      return lineRanges
+    }
+
+    val adjusted = TreeRangeSet.create<Int>()
+    for (lineRange in lineRanges.subRangeSet(Range.atLeast(1)).asRanges()) {
+      adjusted.add(Range.closedOpen(lineRange.lowerEndpoint() - 1, lineRange.upperEndpoint() - 1))
+    }
+    return adjusted
+  }
+
+  private fun adjustCharacterRangesForShebang(
+      characterRanges: RangeSet<Int>,
+      shebang: String,
+  ): RangeSet<Int> {
+    if (shebang.isEmpty()) {
+      return characterRanges
+    }
+
+    val adjusted = TreeRangeSet.create<Int>()
+    val kotlinCodeStart = shebang.length + 1
+    for (characterRange in characterRanges.subRangeSet(Range.atLeast(kotlinCodeStart)).asRanges()) {
+      adjusted.add(
+          Range.closedOpen(
+              characterRange.lowerEndpoint() - kotlinCodeStart,
+              characterRange.upperEndpoint() - kotlinCodeStart,
+          )
+      )
+    }
+    return adjusted
   }
 
   private fun createAstVisitor(options: FormattingOptions, builder: OpsBuilder): PsiElementVisitor {
@@ -158,7 +291,10 @@ object Formatter {
     }
   }
 
-  private fun sortedAndDistinctImports(file: KtFile): String {
+  private fun sortedAndDistinctImports(
+      file: KtFile,
+      trimLeadingWhitespace: Boolean = false,
+  ): String {
     val code = file.text
 
     val importList = file.importList ?: return code
@@ -201,8 +337,14 @@ object Formatter {
      * which is acceptable -- later prettyPrint step will fix that) and avoid extra-append when it is redundant.
      */
     val needsTerminator = body.lastIndexOf('\n').let { it >= 0 && body.indexOf("//", it + 1) >= 0 }
+    val replaceStart =
+        if (trimLeadingWhitespace && code.substring(0, importList.startOffset).isBlank()) {
+          0
+        } else {
+          importList.startOffset
+        }
     return code.replaceRange(
-        importList.startOffset,
+        replaceStart,
         importList.endOffset,
         if (needsTerminator) body + "\n" else body,
     )

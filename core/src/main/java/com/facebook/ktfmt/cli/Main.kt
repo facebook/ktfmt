@@ -116,6 +116,11 @@ class Main(
       return EXIT_CODE_FAILURE
     }
 
+    if (parsedArgs.isPartialFormat() && files.size != 1) {
+      err.println("partial formatting is only supported for a single file")
+      return EXIT_CODE_FAILURE
+    }
+
     val returnCode = AtomicInteger(EXIT_CODE_SUCCESS)
     files.parallelStream().forEach {
       try {
@@ -146,7 +151,12 @@ class Main(
           else EditorConfigResolver.resolveFormattingOptions(file, args.formattingOptions)
       val bytes = if (file == null) input else FileInputStream(file)
       val code = BufferedReader(InputStreamReader(bytes, UTF_8)).readText().removePrefix(UTF8_BOM)
-      val formattedCode = Formatter.format(formattingOptions, code)
+      val formattedCode =
+          if (!args.isPartialFormat()) {
+            Formatter.format(formattingOptions, code)
+          } else {
+            Formatter.format(formattingOptions, code, args.lineRanges, args.characterRanges)
+          }
       val alreadyFormatted = code == formattedCode
 
       // stdin
@@ -190,4 +200,7 @@ class Main(
       throw e
     }
   }
+
+  private fun ParsedArgs.isPartialFormat(): Boolean =
+      !lineRanges.isEmpty || !characterRanges.isEmpty
 }
