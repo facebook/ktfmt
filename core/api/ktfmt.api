@@ -577,6 +577,7 @@ public final class com/facebook/ktfmt/kdoc/UtilitiesKt {
 
 public final class com/facebook/ktfmt/util/CompatibilityUtilsKt {
 	public static final fun getCONTEXT_PARAMETER_LIST ()Lorg/jetbrains/kotlin/psi/stubs/elements/KtPlaceHolderStubElementType;
+	public static final fun getOwnValOrVarKeywordText (Lorg/jetbrains/kotlin/psi/KtDestructuringDeclarationEntry;)Ljava/lang/String;
 	public static final fun listToVisit (Lorg/jetbrains/kotlin/psi/KtContextReceiverList;)Ljava/util/List;
 }
 

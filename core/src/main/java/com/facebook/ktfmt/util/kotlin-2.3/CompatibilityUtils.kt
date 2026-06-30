@@ -19,6 +19,7 @@
 package com.facebook.ktfmt.util
 
 import org.jetbrains.kotlin.psi.KtContextReceiverList
+import org.jetbrains.kotlin.psi.KtDestructuringDeclarationEntry
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.stubs.elements.KtStubElementTypes
 
@@ -27,3 +28,6 @@ fun KtContextReceiverList.listToVisit(): List<KtElement> {
 }
 
 val CONTEXT_PARAMETER_LIST = KtStubElementTypes.CONTEXT_PARAMETER_LIST
+
+val KtDestructuringDeclarationEntry.ownValOrVarKeywordText: String?
+  get() = ownValOrVarKeyword?.text
