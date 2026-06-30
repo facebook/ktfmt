@@ -41,6 +41,7 @@ dependencyResolutionManagement {
       val ktfmtVersion = providers.gradleProperty("ktfmt.version").get()
       version("ktfmt", ktfmtVersion)
     }
+    create("nativeImageLibs") { from(files("gradle/native-image.versions.toml")) }
   }
   repositories {
     mavenCentral()

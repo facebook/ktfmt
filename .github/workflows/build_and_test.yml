@@ -25,5 +25,22 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
         distribution: zulu
+    # set-java-home is intentionally 'false': the main build runs on the Zulu JDK from the matrix
+    # (Java 17/21), so we must not repoint JAVA_HOME at GraalVM 25. setup-graalvm still exports
+    # GRAALVM_HOME, which the GraalVM Gradle plugin uses to locate the native-image toolchain for the
+    # :ktfmt:nativeCompile step. This keeps the JVM build on the matrix JDK and the native build on
+    # GraalVM.
+    - name: Set up GraalVM
+      uses: graalvm/setup-graalvm@v1
+      with:
+        java-version: '25.0.1'
+        distribution: 'graalvm'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        set-java-home: 'false'
+        native-image-job-reports: 'true'
     - name: Build ktfmt
       run: ./gradlew build --no-daemon
+    - name: Build Native Image
+      run: ./gradlew :ktfmt:nativeCompile --stacktrace --no-daemon
+    - name: Smoke test Native Image
+      run: ./native_smoke_test.sh
