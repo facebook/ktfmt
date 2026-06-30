@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   selected-range formatting flags.
 - Support selected-range formatting in the IntelliJ plugin.
 - GraalVM native image support
+- Support val/var keywords in destructuring entries (https://github.com/facebook/ktfmt/pull/637)
 
 ### Changed
 
