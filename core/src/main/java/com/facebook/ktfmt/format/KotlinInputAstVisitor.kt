@@ -390,6 +390,11 @@ class KotlinInputAstVisitor(
             visitLambdaOrScopingFunction(bodyExpression)
           } else if (isChainedScopingFunction(bodyExpression)) {
             visitChainedScopingFunction(bodyExpression, emitLeadingBreak = true)
+          } else if (isBlockLikeCall(bodyExpression)) {
+            builder.space()
+            visit(bodyExpression)
+          } else if (isChainedBlockLikeCall(bodyExpression)) {
+            visitChainedBlockLikeCall(bodyExpression, emitLeadingBreak = true)
           } else {
             builder.block(expressionBreakIndent) {
               builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
@@ -514,6 +519,9 @@ class KotlinInputAstVisitor(
           chainedSelectorsHaveNoValueArguments(expression) -> {
         visitChainedScopingFunction(expression, emitLeadingBreak = false)
       }
+      isChainedBlockLikeCall(expression) -> {
+        visitChainedBlockLikeCall(expression, emitLeadingBreak = false)
+      }
       else -> {
         emitQualifiedExpression(expression)
       }
@@ -571,7 +579,15 @@ class KotlinInputAstVisitor(
               if (isTrailingLambda) {
                 builder.close()
               }
-              val argsIndentElse = if (index == parts.size - 1) ZERO else expressionBreakIndent
+              // A block-like (exploded) selector call is laid out like the last part: its
+              // arguments are indented once relative to the call itself, and its closing paren
+              // returns to the call's indent, even when chained selectors follow it. This only
+              // applies when trailing commas are preserved (the block-like style); when ktfmt
+              // manages trailing commas, exploded chained calls keep the regular extra indent.
+              val isLastPartOrBlockLikeCall =
+                  index == parts.size - 1 ||
+                      !options.manageTrailingCommas && isBlockLikeCall(selectorExpression)
+              val argsIndentElse = if (isLastPartOrBlockLikeCall) ZERO else expressionBreakIndent
               val lambdaIndentElse = if (isTrailingLambda) expressionBreakNegativeIndent else ZERO
               val negativeLambdaIndentElse = if (isTrailingLambda) expressionBreakIndent else ZERO
 
@@ -846,8 +862,20 @@ class KotlinInputAstVisitor(
       leadingBreak = !hasEmptyParens && hasTrailingComma
       breakAfterPrefix = false
     } else {
+      // A call without a trailing comma that is nonetheless forced onto multiple lines (because one
+      // of its arguments is itself a block-like multiline call) is rendered "exploded", with its
+      // closing parenthesis on its own line, just like a call with a trailing comma.
+      val contentForcesMultiline =
+          !hasTrailingComma &&
+              arguments.any { argument ->
+                val argumentExpression = argument.getArgumentExpression()
+                argumentExpression != null &&
+                    (isBlockLikeCall(argumentExpression) ||
+                        isChainedBlockLikeCall(argumentExpression))
+              }
       wrapInBlock = !options.manageTrailingCommas
-      breakBeforePostfix = options.manageTrailingCommas && !hasEmptyParens
+      breakBeforePostfix =
+          (options.manageTrailingCommas || contentForcesMultiline) && !hasEmptyParens
       leadingBreak = !hasEmptyParens
       breakAfterPrefix = !hasEmptyParens
     }
@@ -1448,10 +1476,12 @@ class KotlinInputAstVisitor(
           builder.space()
           visit(delegate)
         } else if (delegateExpr != null && isChainedScopingFunction(delegateExpr)) {
-          visitChainedScopingFunction(
-              delegateExpr as KtQualifiedExpression,
-              emitLeadingBreak = true,
-          )
+          visitChainedScopingFunction(delegateExpr, emitLeadingBreak = true)
+        } else if (isBlockLikeCall(delegateExpr)) {
+          builder.space()
+          visit(delegate)
+        } else if (delegateExpr != null && isChainedBlockLikeCall(delegateExpr)) {
+          visitChainedBlockLikeCall(delegateExpr, emitLeadingBreak = true)
         } else {
           builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
           builder.block(expressionBreakIndent) {
@@ -1465,7 +1495,12 @@ class KotlinInputAstVisitor(
         if (isLambdaOrScopingFunction(initializer)) {
           visitLambdaOrScopingFunction(initializer)
         } else if (isChainedScopingFunction(initializer)) {
-          visitChainedScopingFunction(initializer as KtQualifiedExpression, emitLeadingBreak = true)
+          visitChainedScopingFunction(initializer, emitLeadingBreak = true)
+        } else if (isBlockLikeCall(initializer)) {
+          builder.space()
+          visit(initializer)
+        } else if (isChainedBlockLikeCall(initializer)) {
+          visitChainedBlockLikeCall(initializer, emitLeadingBreak = true)
         } else {
           builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
           builder.block(expressionBreakIndent) {
@@ -1546,7 +1581,12 @@ class KotlinInputAstVisitor(
         if (isLambdaOrScopingFunction(initializer)) {
           visitLambdaOrScopingFunction(initializer)
         } else if (isChainedScopingFunction(initializer)) {
-          visitChainedScopingFunction(initializer as KtQualifiedExpression, emitLeadingBreak = true)
+          visitChainedScopingFunction(initializer, emitLeadingBreak = true)
+        } else if (isBlockLikeCall(initializer)) {
+          builder.space()
+          visit(initializer)
+        } else if (isChainedBlockLikeCall(initializer)) {
+          visitChainedBlockLikeCall(initializer, emitLeadingBreak = true)
         } else {
           builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
           builder.block(expressionBreakIndent) {
@@ -1655,6 +1695,80 @@ class KotlinInputAstVisitor(
       root = root.receiverExpression
     }
     return root
+  }
+
+  /**
+   * Returns true when [expression] is a call that is forced onto multiple lines regardless of the
+   * line width, either because its value argument list has a trailing comma (e.g. `foo(\n 1,\n
+   * 2,\n)`) or because one of its arguments is itself a block-like multiline call.
+   *
+   * Such calls are rendered "block-like": they stay on the same line as the preceding `=`/`by`
+   * operator (instead of breaking and indenting after it), and any chained selectors break onto
+   * their own line, mirroring how scoping functions and lambdas are handled.
+   */
+  @OptIn(ExperimentalContracts::class)
+  private fun isBlockLikeCall(expression: KtExpression?): Boolean {
+    if (expression == null) return false
+    val prev = expression.getPrevSiblingIgnoringWhitespace()
+    if (prev is PsiComment) {
+      return false // Leading comments cause weird indentation; keep the default layout.
+    }
+
+    if (expression is KtCollectionLiteralExpression) return expression.parent !is KtValueArgument
+
+    if (expression !is KtCallExpression) return false
+    val valueArgumentList = expression.valueArgumentList ?: return false
+    if (valueArgumentList.trailingComma != null) return true
+    return valueArgumentList.arguments.any { argument ->
+      val argumentExpression = argument.getArgumentExpression()
+      argumentExpression != null &&
+          (isBlockLikeCall(argumentExpression) || isChainedBlockLikeCall(argumentExpression))
+    }
+  }
+
+  /** Returns true when [expression] is a chain whose innermost receiver is a [isBlockLikeCall]. */
+  @OptIn(ExperimentalContracts::class)
+  private fun isChainedBlockLikeCall(expression: KtExpression): Boolean {
+    contract { returns(true) implies (expression is KtQualifiedExpression) }
+
+    if (expression !is KtQualifiedExpression) return false
+    return isBlockLikeCall(chainRoot(expression))
+  }
+
+  /**
+   * Emit a `foo(\n ...,\n).bar().baz()` style chain whose innermost receiver is a block-like
+   * multiline call: render the receiver call normally (so its closing paren sits at the surrounding
+   * indent), then emit each `.selector` on its own line, indented by [expressionBreakIndent].
+   */
+  private fun visitChainedBlockLikeCall(
+      expression: KtQualifiedExpression,
+      emitLeadingBreak: Boolean,
+  ) {
+    val parts = breakIntoParts(expression)
+    if (emitLeadingBreak) {
+      builder.space()
+    }
+    visit(parts[0])
+
+    builder.block(expressionBreakIndent) {
+      for (i in 1 until parts.size) {
+        val part = parts[i] as KtQualifiedExpression
+        builder.forcedBreak()
+        builder.token(part.operationSign.value)
+        val selectorExpression = part.selectorExpression
+        if (selectorExpression is KtCallExpression) {
+          visit(selectorExpression.calleeExpression)
+          visitCallElement(
+              null,
+              selectorExpression.typeArgumentList,
+              selectorExpression.valueArgumentList,
+              selectorExpression.lambdaArguments,
+          )
+        } else {
+          visit(selectorExpression)
+        }
+      }
+    }
   }
 
   /**

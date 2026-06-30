@@ -66,14 +66,13 @@ class KDocFormatterTest {
 
     // Make sure that formatting is stable -- format again and make sure it's the same
     if (verify) {
-      val again =
-          FormattingTask(
-              options,
-              reformatted.trim(),
-              task.initialIndent,
-              task.secondaryIndent,
-              task.orderedParameterNames,
-          )
+      val again = FormattingTask(
+          options,
+          reformatted.trim(),
+          task.initialIndent,
+          task.secondaryIndent,
+          task.orderedParameterNames,
+      )
       val formattedAgain = reformatComment(again)
       if (reformatted != formattedAgain) {
         assertWithMessage("Formatting is unstable: if formatted a second time, it changes")
