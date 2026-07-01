@@ -26,7 +26,6 @@ class KotlinTok(
     private val originalText: String,
     private val text: String,
     private val position: Int,
-    private val column: Int,
     val isToken: Boolean,
     private val kind: KtToken,
 ) : Input.Tok {
@@ -41,7 +40,8 @@ class KotlinTok(
 
   override fun getPosition(): Int = position
 
-  override fun getColumn(): Int = column
+  // Never used from ktfmt, see also: KotlinInput.getPositionToColumnMap
+  override fun getColumn(): Int = 0
 
   override fun isNewline(): Boolean = Newlines.isNewline(text)
 
@@ -60,7 +60,6 @@ class KotlinTok(
         .add("index", index)
         .add("text", text)
         .add("position", position)
-        .add("column", column)
         .add("isToken", isToken)
         .toString()
   }

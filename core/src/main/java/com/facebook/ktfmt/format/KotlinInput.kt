@@ -44,7 +44,6 @@ import org.jetbrains.kotlin.psi.KtFile
  */
 class KotlinInput(private val text: String, file: KtFile) : Input() {
   private val tokens: ImmutableList<Token> // The Tokens for this input.
-  private val positionToColumnMap: ImmutableMap<Int, Int> // Map Tok position to column.
   private val positionTokenMap: ImmutableRangeMap<Int, Token> // Map position to Token.
   private var kN = 0 // The number of numbered toks (tokens or comments), excluding the EOF.
   private val kToToken: Array<Token?>
@@ -52,7 +51,6 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
   init {
     setLines(ImmutableList.copyOf(Newlines.lineIterator(text)))
     val toks = buildToks(file, text)
-    positionToColumnMap = makePositionToColumnMap(toks)
     tokens = buildTokens(toks)
     positionTokenMap = buildTokenPositionsMap(tokens)
 
@@ -130,17 +128,11 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
         )
   }
 
-  private fun makePositionToColumnMap(toks: List<KotlinTok>): ImmutableMap<Int, Int> {
-    val builder = ImmutableMap.builderWithExpectedSize<Int, Int>(toks.size)
-    toks.forEach { builder.put(it.position, it.column) }
-    return builder.build()
-  }
-
   private fun buildToks(file: KtFile, fileText: String): ImmutableList<KotlinTok> {
     val tokenizer = Tokenizer(fileText, file)
     file.accept(tokenizer)
     val toks = tokenizer.toks
-    toks.add(KotlinTok(tokenizer.index, "", "", fileText.length, 0, true, KtTokens.EOF))
+    toks.add(KotlinTok(tokenizer.index, "", "", fileText.length, true, KtTokens.EOF))
     kN = tokenizer.index
     computeRanges(toks)
     return ImmutableList.copyOf(toks)
@@ -224,7 +216,8 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
 
   override fun getPositionTokenMap(): ImmutableRangeMap<Int, out Token> = positionTokenMap
 
-  override fun getPositionToColumnMap(): ImmutableMap<Int, Int> = positionToColumnMap
+  override fun getPositionToColumnMap(): ImmutableMap<Int, Int> =
+      TODO("Only used by GJF's tabular alignment (JavaInputAstVisitor.argumentsAreTabular)")
 
   override fun getText(): String = text
 
