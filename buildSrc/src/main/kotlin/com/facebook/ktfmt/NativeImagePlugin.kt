@@ -136,7 +136,7 @@ class NativeImagePlugin : Plugin<Project> {
                 project.configurations.getByName("compileClasspath"),
                 project.configurations.getByName("runtimeClasspath"),
                 project.configurations.getByName("nativeImageClasspath"),
-            )
+            ),
         )
         buildArgs(
             buildNativeImageArgs(
@@ -148,7 +148,7 @@ class NativeImagePlugin : Plugin<Project> {
                 enableLto,
                 preferMusl,
                 muslSysroot,
-            )
+            ),
         )
       }
     }

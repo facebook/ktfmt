@@ -92,7 +92,7 @@ class DokkaVerifier(private val tempFolder: File) {
         ";" // instead of File.pathSeparator as would have been reasonable (e.g. : on Unix)
     val path =
         listOf(analysis, base, compiler, intellij, coroutines, html, freemarker).joinToString(
-            pathSeparator
+            pathSeparator,
         ) {
           it.path
         }

@@ -592,7 +592,7 @@ class MainTest {
             |  val adjacent    =   3
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -624,7 +624,7 @@ class MainTest {
             |  val adjacent    =   3
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -660,7 +660,7 @@ class MainTest {
             |  }
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -699,7 +699,7 @@ class MainTest {
             |  Baz(bar)
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -751,7 +751,7 @@ class MainTest {
             |  val selected = 2
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -794,7 +794,7 @@ class MainTest {
             |  val adjacent    =   3
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 
@@ -831,7 +831,7 @@ class MainTest {
             |  val adjacent    =   3
             |}
             |"""
-                .trimMargin()
+                .trimMargin(),
         )
   }
 

@@ -205,7 +205,7 @@ object Formatter {
 
     val tokenRangeSet = kotlinInput.characterRangesToTokenRanges(characterRanges)
     return WhitespaceTombstones.replaceTombstoneWithTrailingWhitespace(
-        JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet))
+        JavaOutput.applyReplacements(code, javaOutput.getFormatReplacements(tokenRangeSet)),
     )
   }
 
@@ -278,7 +278,7 @@ object Formatter {
           Range.closedOpen(
               characterRange.lowerEndpoint() - kotlinCodeStart,
               characterRange.upperEndpoint() - kotlinCodeStart,
-          )
+          ),
       )
     }
     return adjusted
