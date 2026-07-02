@@ -271,7 +271,7 @@ public final class com/facebook/ktfmt/format/KotlinInputAstVisitor : org/jetbrai
 }
 
 public final class com/facebook/ktfmt/format/KotlinTok : com/google/googlejavaformat/Input$Tok {
-	public fun <init> (ILjava/lang/String;Ljava/lang/String;IIZLorg/jetbrains/kotlin/lexer/KtToken;)V
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;IZLorg/jetbrains/kotlin/lexer/KtToken;)V
 	public fun getColumn ()I
 	public fun getIndex ()I
 	public fun getOriginalText ()Ljava/lang/String;
