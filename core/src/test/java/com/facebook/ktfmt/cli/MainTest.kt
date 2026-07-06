@@ -123,13 +123,14 @@ class MainTest {
   @Test
   fun `Parsing errors are reported (stdin-name)`() {
     val code = "fun    f1 (  "
-    val returnValue = Main(
-        code.byteInputStream(),
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf("--stdin-name=file/Foo.kt", "-"),
-    )
-        .run()
+    val returnValue =
+        Main(
+                code.byteInputStream(),
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf("--stdin-name=file/Foo.kt", "-"),
+            )
+            .run()
 
     assertThat(returnValue).isEqualTo(1)
     assertThat(err.toString(testCharset)).startsWith("file/Foo.kt:1:14: error: ")
@@ -174,11 +175,11 @@ class MainTest {
         forkJoinPool
             .submit<Int> {
               Main(
-                  emptyInput,
-                  PrintStream(out),
-                  PrintStream(err),
-                  arrayOf(file1.toString(), file2Broken.toString(), file3.toString()),
-              )
+                      emptyInput,
+                      PrintStream(out),
+                      PrintStream(err),
+                      arrayOf(file1.toString(), file2Broken.toString(), file3.toString()),
+                  )
                   .run()
             }
             .get()
@@ -239,11 +240,11 @@ class MainTest {
     fooBar.writeText(code, UTF_8)
 
     Main(
-        emptyInput,
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf("--kotlinlang-style", fooBar.toString()),
-    )
+            emptyInput,
+            PrintStream(out),
+            PrintStream(err),
+            arrayOf("--kotlinlang-style", fooBar.toString()),
+        )
         .run()
 
     assertThat(fooBar.readText()).isEqualTo(code)
@@ -272,11 +273,11 @@ class MainTest {
         |"""
             .trimMargin()
     Main(
-        code.byteInputStream(),
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf("--kotlinlang-style", "-"),
-    )
+            code.byteInputStream(),
+            PrintStream(out),
+            PrintStream(err),
+            arrayOf("--kotlinlang-style", "-"),
+        )
         .run()
 
     assertThat(out.toString(UTF_8)).isEqualTo(formatted)
@@ -308,22 +309,22 @@ class MainTest {
     val expected = """fun f() = println("hello, world")""" + "\n"
 
     Main(
-        """fun f (   ) =    println("hello, world")""".byteInputStream(),
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf("-"),
-    )
+            """fun f (   ) =    println("hello, world")""".byteInputStream(),
+            PrintStream(out),
+            PrintStream(err),
+            arrayOf("-"),
+        )
         .run()
     assertThat(out.toString(UTF_8)).isEqualTo(expected)
 
     out.reset()
 
     Main(
-        """fun f () = println("hello, world")""".byteInputStream(),
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf("-"),
-    )
+            """fun f () = println("hello, world")""".byteInputStream(),
+            PrintStream(out),
+            PrintStream(err),
+            arrayOf("-"),
+        )
         .run()
     assertThat(out.toString(UTF_8)).isEqualTo(expected)
   }
@@ -402,13 +403,14 @@ class MainTest {
     val file = root.resolve("foo.kt")
     file.writeText(code, UTF_8)
 
-    val exitCode = Main(
-        emptyInput,
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf("--set-exit-if-changed", file.toString()),
-    )
-        .run()
+    val exitCode =
+        Main(
+                emptyInput,
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf("--set-exit-if-changed", file.toString()),
+            )
+            .run()
 
     assertThat(exitCode).isEqualTo(1)
   }
@@ -417,13 +419,14 @@ class MainTest {
   fun `Exit code is 1 when there are changes and --set-exit-if-changed is set (stdin)`() {
     val code = """fun f () =    println( "hello, world" )"""
 
-    val exitCode = Main(
-        code.byteInputStream(),
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf("--set-exit-if-changed", "-"),
-    )
-        .run()
+    val exitCode =
+        Main(
+                code.byteInputStream(),
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf("--set-exit-if-changed", "-"),
+            )
+            .run()
 
     assertThat(exitCode).isEqualTo(1)
   }
@@ -434,13 +437,14 @@ class MainTest {
     val file = root.resolve("foo.kt")
     file.writeText(code, UTF_8)
 
-    val exitCode = Main(
-        emptyInput,
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf("--dry-run", "--set-exit-if-changed", file.toString()),
-    )
-        .run()
+    val exitCode =
+        Main(
+                emptyInput,
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf("--dry-run", "--set-exit-if-changed", file.toString()),
+            )
+            .run()
 
     assertThat(file.readText()).isEqualTo(code)
     assertThat(out.toString(testCharset)).contains(file.toString())
@@ -451,13 +455,14 @@ class MainTest {
   fun `--set-exit-if-changed and --dry-run changes nothing, prints filenames, and exits with 1 (stdin)`() {
     val code = """fun f () =    println( "hello, world" )"""
 
-    val exitCode = Main(
-        code.byteInputStream(),
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf("--dry-run", "--set-exit-if-changed", "-"),
-    )
-        .run()
+    val exitCode =
+        Main(
+                code.byteInputStream(),
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf("--dry-run", "--set-exit-if-changed", "-"),
+            )
+            .run()
 
     assertThat(out.toString(UTF_8)).doesNotContain("hello, world")
     assertThat(out.toString(testCharset)).isEqualTo("<stdin>\n")
@@ -469,13 +474,14 @@ class MainTest {
     val code = """fun f () =    println( "hello, world" )"""
     val expected = """fun f() = println("hello, world")""" + "\n"
 
-    val exitCode = Main(
-        code.byteInputStream(UTF_8),
-        PrintStream(out, true, testCharset),
-        PrintStream(err),
-        arrayOf("-"),
-    )
-        .run()
+    val exitCode =
+        Main(
+                code.byteInputStream(UTF_8),
+                PrintStream(out, true, testCharset),
+                PrintStream(err),
+                arrayOf("-"),
+            )
+            .run()
 
     assertThat(exitCode).isEqualTo(0)
     assertThat(out.toString(UTF_8)).isEqualTo(expected)
@@ -487,13 +493,14 @@ class MainTest {
     val file = root.resolve("unformatted_file.kt")
     file.writeText(code, UTF_8)
 
-    val exitCode = Main(
-        emptyInput,
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf(file.toString()),
-    )
-        .run()
+    val exitCode =
+        Main(
+                emptyInput,
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf(file.toString()),
+            )
+            .run()
 
     assertThat(exitCode).isEqualTo(0)
     assertThat(file.readText(UTF_8)).isEqualTo("""fun f() = println("hello, world")""" + "\n")
@@ -505,13 +512,14 @@ class MainTest {
     val file = root.resolve("bom.kt")
     file.writeText(code, UTF_8)
 
-    val exitCode = Main(
-        emptyInput,
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf(file.toString()),
-    )
-        .run()
+    val exitCode =
+        Main(
+                emptyInput,
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf(file.toString()),
+            )
+            .run()
 
     assertThat(exitCode).isEqualTo(0)
     assertThat(file.readText(UTF_8)).isEqualTo("""fun f() = println("hello, world")""" + "\n")
@@ -519,13 +527,14 @@ class MainTest {
 
   @Test
   fun `--help gives return code of 0`() {
-    val exitCode = Main(
-        emptyInput,
-        PrintStream(out),
-        PrintStream(err),
-        arrayOf("--help"),
-    )
-        .run()
+    val exitCode =
+        Main(
+                emptyInput,
+                PrintStream(out),
+                PrintStream(err),
+                arrayOf("--help"),
+            )
+            .run()
 
     assertThat(exitCode).isEqualTo(0)
   }
