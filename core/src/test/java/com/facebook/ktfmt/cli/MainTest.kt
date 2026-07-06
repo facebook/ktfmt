@@ -761,18 +761,17 @@ class MainTest {
     val file = root.resolve("foo.kt")
     file.writeText(code, UTF_8)
 
-    val exitCode =
-        Main(
-                emptyInput,
-                PrintStream(out),
-                PrintStream(err),
-                arrayOf(
-                    "--offset=${code.indexOf("selected")}",
-                    "--length=0",
-                    file.toString(),
-                ),
-            )
-            .run()
+    val exitCode = Main(
+        emptyInput,
+        PrintStream(out),
+        PrintStream(err),
+        arrayOf(
+            "--offset=${code.indexOf("selected")}",
+            "--length=0",
+            file.toString(),
+        ),
+    )
+        .run()
 
     assertThat(exitCode).isEqualTo(0)
     assertThat(file.readText(UTF_8))
@@ -802,14 +801,13 @@ class MainTest {
         |"""
             .trimMargin()
 
-    val exitCode =
-        Main(
-                code.byteInputStream(),
-                PrintStream(out),
-                PrintStream(err),
-                arrayOf("--offset=${code.indexOf("selected")}", "--length=0", "-"),
-            )
-            .run()
+    val exitCode = Main(
+        code.byteInputStream(),
+        PrintStream(out),
+        PrintStream(err),
+        arrayOf("--offset=${code.indexOf("selected")}", "--length=0", "-"),
+    )
+        .run()
 
     assertThat(exitCode).isEqualTo(0)
     assertThat(out.toString(UTF_8))

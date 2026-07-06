@@ -125,13 +125,12 @@ object Formatter {
               .transform { MultilineStringFormatter(options.continuationIndent).format(it) }
               .code
         } else {
-          val selectedCharacterRanges =
-              characterRangesForPartialFormatting(
-                  normalizedKotlinCode,
-                  lineRanges,
-                  characterRanges,
-                  shebang,
-              )
+          val selectedCharacterRanges = characterRangesForPartialFormatting(
+              normalizedKotlinCode,
+              lineRanges,
+              characterRanges,
+              shebang,
+          )
           val partiallyFormattedCode =
               if (selectedCharacterRanges.isEmpty) {
                 normalizedKotlinCode
