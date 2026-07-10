@@ -6,10 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A fork of [facebook/ktfmt](https://github.com/facebook/ktfmt) (Kotlin code formatter built on
 google-java-format's engine). The fork's reason to exist is the **Klimat style**
-(`--klimat-style`, `Formatter.KLIMAT_FORMAT`): kotlinlang style (4-space indents) plus
-`glueBlockLikeToOperator` (multiline block-like expressions stay glued to `=`/`by`),
-`preserveChainBreaks` (user-authored line breaks in call chains survive), and `ONLY_ADD`
-trailing-comma management. `upstream` remote points at facebook/ktfmt; keep diffs against
+(`--klimat-style`, `Formatter.KLIMAT_FORMAT`): kotlinlang style (4-space indents), 120-column
+`maxWidth` (other styles use 100), plus
+`glueBlockLikeToOperator` (multiline block-like expressions — including qualified calls like
+`factory.create(...)` with a trailing comma — stay glued to `=`/`by` and to `->` in `when`
+branches), `preserveChainBreaks` (user-authored line breaks in call chains survive),
+`compactClassHeader` (annotated primary constructor stays glued to the class name, first supertype
+stays glued to `:`, authored breaks between supertypes survive), and `ONLY_ADD` trailing-comma
+management. `upstream` remote points at facebook/ktfmt; keep diffs against
 upstream minimal outside klimat-specific code.
 
 End-user setup docs (Android Studio, pre-commit hook, CI) live in `docs/klimat-setup.md` (Russian).
