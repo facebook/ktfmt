@@ -17,6 +17,7 @@
 package com.facebook.ktfmt.intellij
 
 import com.facebook.ktfmt.format.Formatter.GOOGLE_FORMAT
+import com.facebook.ktfmt.format.Formatter.KLIMAT_FORMAT
 import com.facebook.ktfmt.format.Formatter.KOTLINLANG_FORMAT
 import com.facebook.ktfmt.format.Formatter.META_FORMAT
 import com.facebook.ktfmt.format.FormattingOptions
@@ -26,6 +27,7 @@ internal enum class UiFormatterStyle(private val description: String) {
   Meta("Meta (default)"),
   Google("Google (internal)"),
   KotlinLang("Kotlinlang"),
+  Klimat("Klimat"),
   Custom("Custom");
 
   override fun toString(): String = description
@@ -36,6 +38,7 @@ internal enum class UiFormatterStyle(private val description: String) {
           Meta -> META_FORMAT
           Google -> GOOGLE_FORMAT
           KotlinLang -> KOTLINLANG_FORMAT
+          Klimat -> KLIMAT_FORMAT
           Custom -> error("Custom style formatting options should be retrieved separately")
         }
   }

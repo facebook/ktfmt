@@ -22,6 +22,7 @@ import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Disabled
 import com.facebook.ktfmt.intellij.KtfmtSettings.EnabledState.Enabled
 import com.facebook.ktfmt.intellij.UiFormatterStyle.Custom
 import com.facebook.ktfmt.intellij.UiFormatterStyle.Google
+import com.facebook.ktfmt.intellij.UiFormatterStyle.Klimat
 import com.facebook.ktfmt.intellij.UiFormatterStyle.KotlinLang
 import com.facebook.ktfmt.intellij.UiFormatterStyle.Meta
 import com.intellij.openapi.options.BoundSearchableConfigurable
@@ -64,7 +65,7 @@ class KtfmtConfigurable(project: Project) :
     lateinit var styleComboBox: ComboBox<UiFormatterStyle>
     row {
       styleComboBox =
-          comboBox(listOf(Meta, Google, KotlinLang, Custom))
+          comboBox(listOf(Meta, Google, KotlinLang, Klimat, Custom))
               .label("Code style:")
               .bindItem(
                   getter = { settings.uiFormatterStyle },
