@@ -1,12 +1,15 @@
-# When a new release is created, publish artifacts to Maven Central / JetBrains Marketplace / etc..
+# Builds and attaches release artifacts to a GitHub Release (klimat fork).
 #
-# About secrets used here:
-# 1. OSSRH_USERNAME, OSSRH_TOKEN: token obtained from https://oss.sonatype.org/
-# 2. OSSRH_GPG_SECRET_KEY - private key for signing Maven artifacts
-# 3. OSSRH_GPG_SECRET_KEY_PASSWORD - password for unlocking OSSRH_GPG_SECRET_KEY
-# 4. JETBRAINS_MARKETPLACE_TOKEN - token obtained from https://plugins.jetbrains.com/author/me/tokens
+# The artifact version is derived from the release tag: tag `v0.65-klimat.1`
+# produces artifacts versioned `0.65-klimat.1`. No external secrets are needed —
+# everything publishes to the GitHub Release itself via the built-in GITHUB_TOKEN.
+#
+# Attached artifacts:
+# 1. ktfmt-<version>.jar and ktfmt-<version>-with-dependencies.jar (CLI fat jar)
+# 2. ktfmt-<version>-<os>-<arch> native binaries (GraalVM, linux/macos, x86_64/aarch64)
+# 3. IntelliJ plugin zip, installable via Settings > Plugins > Install Plugin from Disk
 
-name: Publish package to Maven Central and JetBrains Marketplace
+name: Publish release artifacts
 on:
   release:
     types: [created]
@@ -16,46 +19,12 @@ on:
         description: 'Release tag'
         required: true
         type: string
+
+env:
+  RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+
 jobs:
-  publish_ide_plugin:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.release.tag_name || inputs.release_tag || github.ref }}
-
-      - name: Publish IntelliJ plugin to JetBrains Marketplace
-        run: ./gradlew :idea_plugin:publishPlugin --stacktrace --no-daemon
-        env:
-          JETBRAINS_MARKETPLACE_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
-
-  publish_maven_artifacts:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.release.tag_name || inputs.release_tag || github.ref }}
-
-      - id: install-secret-key
-        name: Install gpg secret key
-        run: |
-          cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
-          gpg --list-secret-keys --keyid-format LONG
-
-      - id: publish-to-central
-        name: Publish to Maven Central Repository
-        env:
-          SIGN_BUILD: true
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-          GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
-        run: |
-          ./gradlew :ktfmt:publish closeAndReleaseStagingRepositories \
-              --stacktrace \
-              --no-daemon \
-              -Psigning.gnupg.passphrase="$GPG_PASSPHRASE"
-
-  upload_github_artifacts:
+  upload_jars:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Required to upload release assets
@@ -64,53 +33,104 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name || inputs.release_tag || github.ref }}
 
-      - name: Debug release tag
-        run: |
-          echo "Release tag: ${{ github.event.release.tag_name || inputs.release_tag }}"
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: zulu
 
       - name: Build JAR artifacts
-        run: ./gradlew :ktfmt:jar :ktfmt:shadowJar --stacktrace --no-daemon
-
-      - name: Verify JAR artifacts exist
-        run: ls -la core/build/libs/ktfmt-*.jar
+        run: ./gradlew :ktfmt:jar :ktfmt:shadowJar "-Pktfmt.version=${RELEASE_TAG#v}" --stacktrace --no-daemon
 
       - name: Upload JAR artifacts to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.release.tag_name || inputs.release_tag }}
+          tag_name: ${{ env.RELEASE_TAG }}
           files: |
             core/build/libs/ktfmt-*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  deploy_website:
+  build_ide_plugin:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to upload release assets
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.release.tag_name || inputs.release_tag || github.ref }}
 
-      - uses: actions/setup-node@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: zulu
 
-      - name: Deploy website
-        run: |
-          KTFMT_TMP_DIR=$(mktemp -d)
+      - name: Build IntelliJ plugin
+        run: ./gradlew :idea_plugin:buildPlugin "-Pktfmt.version=${RELEASE_TAG#v}" --stacktrace --no-daemon
 
-          pushd website
-          npm install .
-          KTFMT_WEBSITE_OUTPUT_DIR="$KTFMT_TMP_DIR" gulp build-website
-          popd
+      - name: Upload IntelliJ plugin to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          files: |
+            ktfmt_idea_plugin/build/distributions/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          git fetch
-          git checkout gh-pages
-          git config user.email ktfmt@facebook.com
-          git config user.name ktfmt
+  build_native_images:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: linux-x86_64
+          - os: ubuntu-24.04-arm
+            artifact: linux-aarch64
+          - os: macos-13
+            artifact: darwin-x86_64
+          - os: macos-latest
+            artifact: darwin-aarch64
+    name: Native image ${{ matrix.artifact }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write  # Required to upload release assets
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.release_tag || github.ref }}
 
-          rm -rf *
-          cp -R "$KTFMT_TMP_DIR"/* .
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: zulu
 
-          git add .
-          git commit -m "Publish website"
-          git push --force
+      # set-java-home is intentionally 'false': the JVM build runs on Zulu while GRAALVM_HOME
+      # points the GraalVM Gradle plugin at the native-image toolchain (same setup as CI).
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '25.0.1'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          set-java-home: 'false'
+          native-image-job-reports: 'true'
 
-          rm -rf "$KTFMT_TMP_DIR"
+      - name: Build native image
+        run: ./gradlew :ktfmt:nativeCompile "-Pktfmt.version=${RELEASE_TAG#v}" -Pktfmt.native.release=true --stacktrace --no-daemon
+
+      - name: Smoke test native image
+        run: ./native_smoke_test.sh
+
+      - name: Rename binary with version and platform
+        run: cp core/build/native/nativeCompile/ktfmt "ktfmt-${RELEASE_TAG#v}-${{ matrix.artifact }}"
+
+      - name: Upload native binary to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          files: |
+            ktfmt-*-${{ matrix.artifact }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
