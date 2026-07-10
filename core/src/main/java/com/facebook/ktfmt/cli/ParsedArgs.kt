@@ -88,6 +88,9 @@ data class ParsedArgs(
         |  --meta-style                      Use 2-space block indenting (default)
         |  --google-style                    Google internal style (2 spaces)
         |  --kotlinlang-style                Kotlin language guidelines style (4 spaces)
+        |  --klimat-style                    Kotlinlang style (4 spaces) that also preserves
+        |                                        user-authored chain breaks and trailing commas,
+        |                                        and keeps block-like expressions on the =/by line
         |  --stdin-name=<name>               Name to report when formatting code from stdin
         |  --lines=<lines>                   Line range(s) to format, like 5 or 1:12,14.
         |                                        May be used multiple times.
@@ -153,6 +156,7 @@ data class ParsedArgs(
           arg == "--meta-style" -> formattingOptions = Formatter.META_FORMAT
           arg == "--google-style" -> formattingOptions = Formatter.GOOGLE_FORMAT
           arg == "--kotlinlang-style" -> formattingOptions = Formatter.KOTLINLANG_FORMAT
+          arg == "--klimat-style" -> formattingOptions = Formatter.KLIMAT_FORMAT
           arg == "--dry-run" || arg == "-n" -> dryRun = true
           arg == "--set-exit-if-changed" -> setExitIfChanged = true
           arg == "--do-not-remove-unused-imports" -> removeUnusedImports = false

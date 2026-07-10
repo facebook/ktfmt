@@ -395,6 +395,9 @@ class KotlinInputAstVisitor(
             visit(bodyExpression)
           } else if (isChainedBlockLikeCall(bodyExpression)) {
             visitChainedBlockLikeCall(bodyExpression, emitLeadingBreak = true)
+          } else if (isGluedToOperator(bodyExpression)) {
+            builder.space()
+            visit(bodyExpression)
           } else {
             builder.block(expressionBreakIndent) {
               builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
@@ -553,7 +556,15 @@ class KotlinInputAstVisitor(
       val nameTag = genSym() // allows adjusting arguments indentation if a break will be made
       for ((index, ktExpression) in parts.withIndex()) {
         if (ktExpression is KtQualifiedExpression) {
-          builder.breakOp(Doc.FillMode.UNIFIED, "", ZERO, Optional.of(nameTag))
+          // Keep user-authored line breaks before `.`: a dot that starts a line in the source
+          // stays at the start of a line instead of being joined back onto one line.
+          val fillMode =
+              if (options.preserveChainBreaks && hasSourceNewlineBeforeOperator(ktExpression)) {
+                Doc.FillMode.FORCED
+              } else {
+                Doc.FillMode.UNIFIED
+              }
+          builder.breakOp(fillMode, "", ZERO, Optional.of(nameTag))
         }
         repeat(groupingInfos[index].groupOpenCount) { builder.open(ZERO) }
         when (ktExpression) {
@@ -1213,7 +1224,11 @@ class KotlinInputAstVisitor(
   ) {
     builder.sync(argument)
     val hasArgName = argument.getArgumentName() != null
-    val isLambda = argument.getArgumentExpression() is KtLambdaExpression
+    val argumentExpression = argument.getArgumentExpression()
+    val isLambda = argumentExpression is KtLambdaExpression
+    // Keep the value glued to `name =` when it is rendered block-like anyway: a call with a
+    // trailing lambda, a `when`/braced `if`, or a chain that keeps user-authored breaks.
+    val glueValue = hasArgName && !isLambda && isGluedToOperator(argumentExpression)
     if (hasArgName) {
       visit(argument.getArgumentName())
       builder.space()
@@ -1222,10 +1237,14 @@ class KotlinInputAstVisitor(
         builder.space()
       }
     }
-    val indent = if (hasArgName && !isLambda) expressionBreakIndent else ZERO
+    val indent = if (hasArgName && !isLambda && !glueValue) expressionBreakIndent else ZERO
     builder.block(indent, isEnabled = wrapInBlock) {
       if (hasArgName && !isLambda) {
-        builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+        if (glueValue) {
+          builder.space()
+        } else {
+          builder.breakOp(Doc.FillMode.INDEPENDENT, " ", ZERO)
+        }
       }
       if (argument.isSpread) {
         builder.token("*")
@@ -1275,6 +1294,15 @@ class KotlinInputAstVisitor(
       builder.space()
       builder.token(expression.operationReference.text)
       visitLambdaOrScopingFunction(expression.right)
+      return
+    }
+
+    if (KtTokens.ALL_ASSIGNMENTS.contains(op) && isGluedToOperator(expression.right)) {
+      visit(expression.left)
+      builder.space()
+      builder.token(expression.operationReference.text)
+      builder.space()
+      visit(expression.right)
       return
     }
 
@@ -1482,6 +1510,9 @@ class KotlinInputAstVisitor(
           visit(delegate)
         } else if (delegateExpr != null && isChainedBlockLikeCall(delegateExpr)) {
           visitChainedBlockLikeCall(delegateExpr, emitLeadingBreak = true)
+        } else if (isGluedToOperator(delegateExpr)) {
+          builder.space()
+          visit(delegate)
         } else {
           builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
           builder.block(expressionBreakIndent) {
@@ -1501,6 +1532,9 @@ class KotlinInputAstVisitor(
           visit(initializer)
         } else if (isChainedBlockLikeCall(initializer)) {
           visitChainedBlockLikeCall(initializer, emitLeadingBreak = true)
+        } else if (isGluedToOperator(initializer)) {
+          builder.space()
+          visit(initializer)
         } else {
           builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
           builder.block(expressionBreakIndent) {
@@ -1587,6 +1621,9 @@ class KotlinInputAstVisitor(
           visit(initializer)
         } else if (isChainedBlockLikeCall(initializer)) {
           visitChainedBlockLikeCall(initializer, emitLeadingBreak = true)
+        } else if (isGluedToOperator(initializer)) {
+          builder.space()
+          visit(initializer)
         } else {
           builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
           builder.block(expressionBreakIndent) {
@@ -1736,6 +1773,42 @@ class KotlinInputAstVisitor(
   }
 
   /**
+   * Returns true when [expression] should stay glued to the preceding `=` or `by` operator even
+   * though it spans multiple lines: a call with a trailing lambda (e.g. `remember(key) { ... }`), a
+   * `when` expression, an `if` expression whose branches are braced blocks, or a call chain whose
+   * user-authored breaks are being preserved by [FormattingOptions.preserveChainBreaks]. The
+   * expression's own internal breaks then handle overflow, mirroring its layout in statement
+   * position.
+   *
+   * Only enabled by [FormattingOptions.glueBlockLikeToOperator].
+   */
+  private fun isGluedToOperator(expression: KtExpression?): Boolean {
+    if (!options.glueBlockLikeToOperator) return false
+    if (expression == null) return false
+    val prev = expression.getPrevSiblingIgnoringWhitespace()
+    if (prev is PsiComment) {
+      return false // Leading comments cause weird indentation; keep the default layout.
+    }
+    return when (expression) {
+      is KtCallExpression -> expression.lambdaArguments.isNotEmpty()
+      is KtWhenExpression -> true
+      is KtIfExpression -> hasBracedBranches(expression)
+      is KtQualifiedExpression ->
+          options.preserveChainBreaks && hasSourceNewlineBeforeAnyOperator(expression)
+      else -> false
+    }
+  }
+
+  /** Returns true when every branch of [expression] is a braced block (or a braced `else if`). */
+  private fun hasBracedBranches(expression: KtIfExpression): Boolean {
+    val elseBranch = expression.`else`
+    return expression.then is KtBlockExpression &&
+        (elseBranch == null ||
+            elseBranch is KtBlockExpression ||
+            (elseBranch is KtIfExpression && hasBracedBranches(elseBranch)))
+  }
+
+  /**
    * Emit a `foo(\n ...,\n).bar().baz()` style chain whose innermost receiver is a block-like
    * multiline call: render the receiver call normally (so its closing paren sits at the surrounding
    * indent), then emit each `.selector` on its own line, indented by [expressionBreakIndent].
@@ -1875,6 +1948,29 @@ class KotlinInputAstVisitor(
     val functionLiteral = lambdaExpression.functionLiteral
     for (child in functionLiteral.node.children()) {
       if (child.psi is PsiWhiteSpace && child.textContains('\n')) return true
+    }
+    return false
+  }
+
+  /**
+   * Returns true if the source code contains a newline directly before the `.`/`?.` operator of
+   * [expression], i.e. the author put the selector on its own line.
+   */
+  private fun hasSourceNewlineBeforeOperator(expression: KtQualifiedExpression): Boolean {
+    var node = expression.operationTokenNode.treePrev
+    while (node != null && node.psi is PsiWhiteSpace) {
+      if (node.textContains('\n')) return true
+      node = node.treePrev
+    }
+    return false
+  }
+
+  /** Returns true if any `.`/`?.` in the chain of [expression] starts a line in the source. */
+  private fun hasSourceNewlineBeforeAnyOperator(expression: KtQualifiedExpression): Boolean {
+    var current: KtExpression = expression
+    while (current is KtQualifiedExpression) {
+      if (hasSourceNewlineBeforeOperator(current)) return true
+      current = current.receiverExpression
     }
     return false
   }

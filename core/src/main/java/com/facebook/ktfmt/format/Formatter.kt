@@ -68,6 +68,21 @@ object Formatter {
           continuationIndent = 4,
       )
 
+  /**
+   * Klimat style: [KOTLINLANG_FORMAT] plus author-friendly tweaks — multiline block-like
+   * expressions stay glued to `=`/`by`, user-authored breaks in call chains and trailing commas are
+   * preserved.
+   */
+  @JvmField
+  val KLIMAT_FORMAT =
+      FormattingOptions(
+          blockIndent = 4,
+          continuationIndent = 4,
+          trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
+          glueBlockLikeToOperator = true,
+          preserveChainBreaks = true,
+      )
+
   private val MINIMUM_KOTLIN_VERSION = KotlinVersion(1, 4)
 
   /**

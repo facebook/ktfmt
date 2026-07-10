@@ -76,6 +76,12 @@ class ParsedArgsTest {
   }
 
   @Test
+  fun `parseOptions recognizes --klimat-style`() {
+    val parsed = assertSucceeds(parseOptions("--klimat-style", "foo.kt"))
+    assertThat(parsed.formattingOptions).isEqualTo(Formatter.KLIMAT_FORMAT)
+  }
+
+  @Test
   fun `parseOptions recognizes --dry-run`() {
     val parsed = assertSucceeds(parseOptions("--dry-run", "foo.kt"))
     assertThat(parsed.dryRun).isTrue()
