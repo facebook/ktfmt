@@ -6,7 +6,7 @@
 #
 # Attached artifacts:
 # 1. ktfmt-<version>.jar and ktfmt-<version>-with-dependencies.jar (CLI fat jar)
-# 2. ktfmt-<version>-<os>-<arch> native binaries (GraalVM, linux/macos, x86_64/aarch64)
+# 2. ktfmt-<version>-<os>-<arch> native binaries (GraalVM: linux x86_64/aarch64, macos aarch64)
 # 3. IntelliJ plugin zip, installable via Settings > Plugins > Install Plugin from Disk
 
 name: Publish release artifacts
@@ -87,8 +87,6 @@ jobs:
             artifact: linux-x86_64
           - os: ubuntu-24.04-arm
             artifact: linux-aarch64
-          - os: macos-13
-            artifact: darwin-x86_64
           - os: macos-latest
             artifact: darwin-aarch64
     name: Native image ${{ matrix.artifact }}
