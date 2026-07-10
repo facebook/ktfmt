@@ -66,17 +66,20 @@ object Formatter {
   )
 
   /**
-   * Klimat style: [KOTLINLANG_FORMAT] plus author-friendly tweaks — multiline block-like
-   * expressions stay glued to `=`/`by`, user-authored breaks in call chains and trailing commas are
-   * preserved.
+   * Klimat style: [KOTLINLANG_FORMAT] plus author-friendly tweaks — 120-column lines, multiline
+   * block-like expressions stay glued to `=`/`by`, user-authored breaks in call chains and trailing
+   * commas are preserved, and multiline class headers stay compact (constructor glued to the class
+   * name, first supertype glued to `:`).
    */
   @JvmField
   val KLIMAT_FORMAT = FormattingOptions(
+      maxWidth = 120,
       blockIndent = 4,
       continuationIndent = 4,
       trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
       glueBlockLikeToOperator = true,
       preserveChainBreaks = true,
+      compactClassHeader = true,
   )
 
   private val MINIMUM_KOTLIN_VERSION = KotlinVersion(1, 4)

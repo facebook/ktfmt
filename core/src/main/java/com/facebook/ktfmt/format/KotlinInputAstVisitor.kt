@@ -305,6 +305,7 @@ class KotlinInputAstVisitor(
       typeConstraintList: KtTypeConstraintList?,
       bodyExpression: KtExpression?,
       typeOrDelegationCall: KtElement?,
+      glueModifierList: Boolean = false,
   ) {
     fun emitTypeOrDelegationCall(block: () -> Unit) {
       if (typeOrDelegationCall != null) {
@@ -324,7 +325,7 @@ class KotlinInputAstVisitor(
         visitContextReceiverList(contextReceiverList)
       }
       if (modifierList != null) {
-        visitModifierList(modifierList)
+        visitModifierList(modifierList, glueAnnotations = glueModifierList)
       }
       if (keyword != null) {
         builder.token(keyword)
@@ -1775,10 +1776,11 @@ class KotlinInputAstVisitor(
   /**
    * Returns true when [expression] should stay glued to the preceding `=` or `by` operator even
    * though it spans multiple lines: a call with a trailing lambda (e.g. `remember(key) { ... }`), a
-   * `when` expression, an `if` expression whose branches are braced blocks, or a call chain whose
-   * user-authored breaks are being preserved by [FormattingOptions.preserveChainBreaks]. The
-   * expression's own internal breaks then handle overflow, mirroring its layout in statement
-   * position.
+   * block-like call (see [isBlockLikeCall]), a `when` expression, an `if` expression whose branches
+   * are braced blocks, a qualified block-like call (see [isQualifiedBlockLikeCall]), or a call
+   * chain whose user-authored breaks are being preserved by
+   * [FormattingOptions.preserveChainBreaks]. The expression's own internal breaks then handle
+   * overflow, mirroring its layout in statement position.
    *
    * Only enabled by [FormattingOptions.glueBlockLikeToOperator].
    */
@@ -1790,13 +1792,30 @@ class KotlinInputAstVisitor(
       return false // Leading comments cause weird indentation; keep the default layout.
     }
     return when (expression) {
-      is KtCallExpression -> expression.lambdaArguments.isNotEmpty()
+      is KtCallExpression -> expression.lambdaArguments.isNotEmpty() || isBlockLikeCall(expression)
       is KtWhenExpression -> true
       is KtIfExpression -> hasBracedBranches(expression)
       is KtQualifiedExpression ->
-          options.preserveChainBreaks && hasSourceNewlineBeforeAnyOperator(expression)
+          (options.preserveChainBreaks && hasSourceNewlineBeforeAnyOperator(expression)) ||
+              isQualifiedBlockLikeCall(expression)
       else -> false
     }
+  }
+
+  /**
+   * Returns true for `receiver.call(...)` where the final call is a block-like multiline call (see
+   * [isBlockLikeCall]) and the receiver chain contains only plain references (no calls), e.g.
+   * `factory.create(\n a,\n b,\n)` or `Outer.Nested(...)`. Such an expression renders exactly like
+   * a block-like call prefixed with `receiver.`, so it can stay glued to a preceding operator.
+   */
+  private fun isQualifiedBlockLikeCall(expression: KtQualifiedExpression): Boolean {
+    if (!isBlockLikeCall(expression.selectorExpression)) return false
+    var receiver = expression.receiverExpression
+    while (receiver is KtQualifiedExpression) {
+      if (receiver.selectorExpression !is KtSimpleNameExpression) return false
+      receiver = receiver.receiverExpression
+    }
+    return receiver is KtSimpleNameExpression || receiver is KtThisExpression
   }
 
   /** Returns true when every branch of [expression] is a braced block (or a braced `else if`). */
@@ -2037,7 +2056,12 @@ class KotlinInputAstVisitor(
         builder.space()
         builder.block(ZERO) {
           builder.token(":")
-          builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+          if (options.compactClassHeader) {
+            // The first supertype stays glued to `:`; visitSuperTypeList breaks the rest.
+            builder.space()
+          } else {
+            builder.breakOp(Doc.FillMode.UNIFIED, " ", expressionBreakIndent)
+          }
           visit(superTypes)
         }
       }
@@ -2062,7 +2086,12 @@ class KotlinInputAstVisitor(
     builder.sync(constructor)
     builder.block(ZERO) {
       if (constructor.hasConstructorKeyword()) {
-        builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+        if (options.compactClassHeader) {
+          // Keep `class Foo @Inject constructor(` on one line even when the parameter list breaks.
+          builder.space()
+        } else {
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+        }
       }
       visitFunctionLikeExpression(
           contextReceiverList = null,
@@ -2075,6 +2104,7 @@ class KotlinInputAstVisitor(
           typeConstraintList = null,
           bodyExpression = constructor.bodyExpression,
           typeOrDelegationCall = null,
+          glueModifierList = options.compactClassHeader,
       )
     }
   }
@@ -2217,6 +2247,14 @@ class KotlinInputAstVisitor(
 
   /** For example `@Magic private final` */
   override fun visitModifierList(list: KtModifierList) {
+    visitModifierList(list, glueAnnotations = false)
+  }
+
+  /**
+   * @param glueAnnotations when true, annotations are followed by a space instead of a break, so
+   *   they stay on one line with the declaration they modify (used for compact class headers).
+   */
+  private fun visitModifierList(list: KtModifierList, glueAnnotations: Boolean) {
     builder.sync(list)
     var onlyAnnotationsSoFar = true
 
@@ -2240,7 +2278,7 @@ class KotlinInputAstVisitor(
         visit(psi)
       }
 
-      if (onlyAnnotationsSoFar) {
+      if (onlyAnnotationsSoFar && !glueAnnotations) {
         builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
       } else {
         builder.space()
@@ -2376,7 +2414,24 @@ class KotlinInputAstVisitor(
 
   override fun visitSuperTypeList(list: KtSuperTypeList) {
     builder.sync(list)
-    builder.block(expressionBreakIndent) { visitEachCommaSeparated(list.entries) }
+    if (options.compactClassHeader) {
+      // No leading break: the first entry stays glued to `:`, later entries break to +indent.
+      // User-authored breaks between entries survive; otherwise the list breaks only on overflow.
+      val hasSourceBreaks =
+          list.node.children().any { it.psi is PsiWhiteSpace && it.textContains('\n') }
+      val breakType = if (hasSourceBreaks) Doc.FillMode.FORCED else Doc.FillMode.UNIFIED
+      builder.block(expressionBreakIndent) {
+        for ((index, entry) in list.entries.withIndex()) {
+          if (index > 0) {
+            builder.token(",")
+            builder.breakOp(breakType, " ", ZERO)
+          }
+          visit(entry)
+        }
+      }
+    } else {
+      builder.block(expressionBreakIndent) { visitEachCommaSeparated(list.entries) }
+    }
   }
 
   override fun visitSuperTypeCallEntry(call: KtSuperTypeCallEntry) {
@@ -2441,6 +2496,10 @@ class KotlinInputAstVisitor(
           }
           builder.token("->")
           if (whenExpression is KtBlockExpression || whenExpression is KtLambdaExpression) {
+            builder.space()
+            visit(whenExpression)
+          } else if (isGluedToOperator(whenExpression)) {
+            // Multiline block-like expressions stay glued to `->`, mirroring `=`/`by`.
             builder.space()
             visit(whenExpression)
           } else {
