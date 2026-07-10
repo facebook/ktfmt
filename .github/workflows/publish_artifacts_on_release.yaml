@@ -121,6 +121,14 @@ jobs:
       - name: Smoke test native image
         run: ./native_smoke_test.sh
 
+      # Apple Silicon refuses to exec a binary with no code signature (SIGKILL).
+      # GraalVM ad-hoc signs on build, but re-sign explicitly so the uploaded
+      # bytes are guaranteed valid. Ad-hoc ("-") needs no certificate; Homebrew
+      # installs formulae without quarantine, so no notarization is required.
+      - name: Ad-hoc codesign the macOS binary
+        if: matrix.artifact == 'darwin-aarch64'
+        run: codesign --force --sign - core/build/native/nativeCompile/ktfmt
+
       - name: Rename binary with version and platform
         run: cp core/build/native/nativeCompile/ktfmt "ktfmt-${RELEASE_TAG#v}-${{ matrix.artifact }}"
 
@@ -132,3 +140,23 @@ jobs:
             ktfmt-*-${{ matrix.artifact }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # After all assets are uploaded, tell the Homebrew tap to bump its formula.
+  # Requires a repo secret TAP_DISPATCH_TOKEN: a PAT with contents:write on
+  # simonvar/homebrew-tap (GITHUB_TOKEN cannot dispatch across repositories).
+  # If the secret is absent the step no-ops so the release still succeeds.
+  bump_homebrew_tap:
+    name: Bump Homebrew tap
+    needs: [upload_jars, build_native_images]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger formula bump in simonvar/homebrew-tap
+        env:
+          GH_TOKEN: ${{ secrets.TAP_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "TAP_DISPATCH_TOKEN not set — skipping Homebrew tap bump."
+            exit 0
+          fi
+          printf '{"event_type":"ktfmt-release","client_payload":{"tag":"%s"}}' "$RELEASE_TAG" \
+            | gh api --method POST repos/simonvar/homebrew-tap/dispatches --input -
