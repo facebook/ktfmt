@@ -46,27 +46,24 @@ import org.jetbrains.kotlin.psi.psiUtil.startOffset
 object Formatter {
 
   @JvmField
-  val META_FORMAT =
-      FormattingOptions(
-          blockIndent = 2,
-          continuationIndent = 4,
-          trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
-      )
+  val META_FORMAT = FormattingOptions(
+      blockIndent = 2,
+      continuationIndent = 4,
+      trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
+  )
 
   @JvmField
-  val GOOGLE_FORMAT =
-      FormattingOptions(
-          blockIndent = 2,
-          continuationIndent = 2,
-      )
+  val GOOGLE_FORMAT = FormattingOptions(
+      blockIndent = 2,
+      continuationIndent = 2,
+  )
 
   /** A format that attempts to reflect https://kotlinlang.org/docs/coding-conventions.html. */
   @JvmField
-  val KOTLINLANG_FORMAT =
-      FormattingOptions(
-          blockIndent = 4,
-          continuationIndent = 4,
-      )
+  val KOTLINLANG_FORMAT = FormattingOptions(
+      blockIndent = 4,
+      continuationIndent = 4,
+  )
 
   /**
    * Klimat style: [KOTLINLANG_FORMAT] plus author-friendly tweaks — multiline block-like
@@ -74,14 +71,13 @@ object Formatter {
    * preserved.
    */
   @JvmField
-  val KLIMAT_FORMAT =
-      FormattingOptions(
-          blockIndent = 4,
-          continuationIndent = 4,
-          trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
-          glueBlockLikeToOperator = true,
-          preserveChainBreaks = true,
-      )
+  val KLIMAT_FORMAT = FormattingOptions(
+      blockIndent = 4,
+      continuationIndent = 4,
+      trailingCommaManagementStrategy = TrailingCommaManagementStrategy.ONLY_ADD,
+      glueBlockLikeToOperator = true,
+      preserveChainBreaks = true,
+  )
 
   private val MINIMUM_KOTLIN_VERSION = KotlinVersion(1, 4)
 
@@ -143,13 +139,12 @@ object Formatter {
               .transform { MultilineStringFormatter(options.continuationIndent).format(it) }
               .code
         } else {
-          val selectedCharacterRanges =
-              characterRangesForPartialFormatting(
-                  normalizedKotlinCode,
-                  lineRanges,
-                  characterRanges,
-                  shebang,
-              )
+          val selectedCharacterRanges = characterRangesForPartialFormatting(
+              normalizedKotlinCode,
+              lineRanges,
+              characterRanges,
+              shebang,
+          )
           val partiallyFormattedCode =
               if (selectedCharacterRanges.isEmpty) {
                 normalizedKotlinCode

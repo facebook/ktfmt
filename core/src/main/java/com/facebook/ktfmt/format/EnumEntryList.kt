@@ -60,13 +60,12 @@ private constructor(
 
       var semicolon: PsiElement? = null
       var comma: PsiElement? = null
-      val lastToken =
-          checkNotNull(
-              enumEntries
-                  .last()
-                  .lastChild
-                  .getPrevSiblingIgnoringWhitespaceAndComments(withItself = true),
-          )
+      val lastToken = checkNotNull(
+          enumEntries
+              .last()
+              .lastChild
+              .getPrevSiblingIgnoringWhitespaceAndComments(withItself = true),
+      )
       when (lastToken.text) {
         "," -> {
           comma = lastToken

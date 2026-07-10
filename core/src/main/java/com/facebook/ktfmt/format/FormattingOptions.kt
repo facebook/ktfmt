@@ -82,9 +82,9 @@ data class FormattingOptions(
 
     /**
      * Whether a multiline "block-like" expression stays glued to a preceding `=` or `by` operator
-     * instead of being broken onto its own line: a call with a trailing lambda (e.g.
-     * `remember(key) { ... }`), a `when` expression, or an `if` expression whose branches are
-     * braced blocks. Disabled by default.
+     * instead of being broken onto its own line: a call with a trailing lambda (e.g. `remember(key)
+     * { ... }`), a `when` expression, or an `if` expression whose branches are braced blocks.
+     * Disabled by default.
      *
      * For example, with this option enabled:
      * ```
@@ -241,16 +241,15 @@ data class FormattingOptions(
         }
 
     /** Builds a new [FormattingOptions] from the current builder state. */
-    fun build(): FormattingOptions =
-        FormattingOptions(
-            maxWidth = maxWidth,
-            blockIndent = blockIndent,
-            continuationIndent = continuationIndent,
-            trailingCommaManagementStrategy = trailingCommaManagementStrategy,
-            removeUnusedImports = removeUnusedImports,
-            preserveLambdaBreaks = preserveLambdaBreaks,
-            debuggingPrintOpsAfterFormatting = debuggingPrintOpsAfterFormatting,
-        )
+    fun build(): FormattingOptions = FormattingOptions(
+        maxWidth = maxWidth,
+        blockIndent = blockIndent,
+        continuationIndent = continuationIndent,
+        trailingCommaManagementStrategy = trailingCommaManagementStrategy,
+        removeUnusedImports = removeUnusedImports,
+        preserveLambdaBreaks = preserveLambdaBreaks,
+        debuggingPrintOpsAfterFormatting = debuggingPrintOpsAfterFormatting,
+    )
   }
 }
 

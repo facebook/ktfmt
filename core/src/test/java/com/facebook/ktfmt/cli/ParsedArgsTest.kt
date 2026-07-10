@@ -155,18 +155,17 @@ class ParsedArgsTest {
 
   @Test
   fun `parseOptions recognizes offset and length pairs`() {
-    val parsed =
-        assertSucceeds(
-            parseOptions(
-                "--offset=10",
-                "--length=5",
-                "--offset",
-                "20",
-                "--length",
-                "0",
-                "foo.kt",
-            )
+    val parsed = assertSucceeds(
+        parseOptions(
+            "--offset=10",
+            "--length=5",
+            "--offset",
+            "20",
+            "--length",
+            "0",
+            "foo.kt",
         )
+    )
 
     assertThat(parsed.characterRanges)
         .isEqualTo(
@@ -315,13 +314,12 @@ class ParsedArgsTest {
 
   @Test
   fun `parses multiple args successfully`() {
-    val testResult =
-        parseOptions(
-            "--google-style",
-            "--dry-run",
-            "--set-exit-if-changed",
-            "File.kt",
-        )
+    val testResult = parseOptions(
+        "--google-style",
+        "--dry-run",
+        "--set-exit-if-changed",
+        "File.kt",
+    )
     assertThat(testResult)
         .isEqualTo(
             parseResultOk(
