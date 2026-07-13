@@ -24,7 +24,21 @@ Klimat style — это kotlinlang-стиль (4 пробела) плюс:
 
 ### Установка CLI (для External Tools, хука и локальных запусков)
 
-Нативный бинарь — рекомендуемый вариант:
+#### Homebrew (macOS и Linux) — проще всего
+
+```sh
+brew install simonvar/tap/ktfmt
+```
+
+Ставит нативный бинарь на Apple Silicon и Linux (x86_64/aarch64), а на Intel-маках —
+jar через `openjdk` (зависимость подтянется сама). Homebrew кладёт формулы без
+карантина, а сам бинарь подписан ad-hoc в CI — поэтому возни с `xattr` нет, `ktfmt`
+сразу доступен в `PATH`. Обновление — `brew upgrade ktfmt`; формула в
+[тапе](https://github.com/simonvar/homebrew-tap) обновляется автоматически на каждый релиз.
+
+#### Скачать бинарь вручную
+
+Если Homebrew недоступен — нативный бинарь со страницы релиза:
 
 ```sh
 VERSION=0.65-klimat.1
@@ -33,8 +47,9 @@ VERSION=0.65-klimat.1
 curl -fsSL -o ~/bin/ktfmt \
   "https://github.com/simonvar/ktfmt/releases/download/v${VERSION}/ktfmt-${VERSION}-darwin-aarch64"
 chmod +x ~/bin/ktfmt
-# бинарь не подписан, macOS его заблокирует — снимаем карантин:
-xattr -d com.apple.quarantine ~/bin/ktfmt
+# если качали браузером, macOS повесит карантин и заблокирует запуск — снимаем
+# (для curl обычно не нужно; бинарь ad-hoc подписан, так что Apple Silicon его пускает):
+xattr -d com.apple.quarantine ~/bin/ktfmt 2>/dev/null || true
 ```
 
 (`~/bin` должен быть в `PATH`; подойдёт любое другое место.)
@@ -217,4 +232,5 @@ ktfmt:
 Версия зашита в трёх местах: у разработчиков (CLI-бинарь и/или плагин), в хуке (берёт
 `ktfmt` из `PATH`) и в CI (`KTFMT_VERSION`). При выпуске нового релиза обновите
 `KTFMT_VERSION` в CI и попросите команду скачать свежий бинарь/плагин — расхождение
-версий безопасно, но может давать разный формат в редких случаях.
+версий безопасно, но может давать разный формат в редких случаях. Разработчикам на
+Homebrew достаточно `brew upgrade ktfmt` (формула в тапе бампается сама на релизе).
