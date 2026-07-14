@@ -20,6 +20,8 @@ import com.facebook.ktfmt.format.Formatter.META_FORMAT
 import com.facebook.ktfmt.testutil.assertFormatted
 import com.facebook.ktfmt.testutil.assertThatFormatting
 import com.facebook.ktfmt.testutil.defaultTestFormattingOptions
+import com.google.common.collect.Range
+import com.google.common.collect.TreeRangeSet
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.fail
 import org.junit.BeforeClass
@@ -2278,7 +2280,7 @@ class FormatterTest {
   fun `method modifiers`() =
       assertFormatted(
           """
-          |override internal fun f() {}
+          |internal override fun f() {}
           |"""
               .trimMargin()
       )
@@ -5987,17 +5989,175 @@ class FormatterTest {
       )
 
   @Test
-  fun `handle annotations mixed with keywords since we cannot reorder them for now`() =
-      assertFormatted(
-          """
-          |public @Magic final class Foo
-          |
-          |public @Magic(1) final class Foo
-          |
-          |@Magic(1) public final class Foo
-          |"""
-              .trimMargin()
-      )
+  fun `sort modifiers and move annotations before them`() {
+    val code =
+        """
+        |final @Magic public class Foo
+        |
+        |data operator infix inline @Magic(1) suspend override internal class Foo
+        |
+        |fun interface Foo
+        |
+        |final @get:Rule @field:[Inject Named("WEB_VIEW")] private val property = 1
+        |
+        |inline fun consume(noinline @Magic block: () -> Unit) {}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |@Magic public final class Foo
+        |
+        |@Magic(1) internal override suspend inline infix operator data class Foo
+        |
+        |fun interface Foo
+        |
+        |@get:Rule
+        |@field:[Inject Named("WEB_VIEW")]
+        |private final val property = 1
+        |
+        |inline fun consume(noinline @Magic block: () -> Unit) {}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `comments stay attached while modifiers are sorted`() {
+    val code =
+        """
+        |override /* override explanation */ public fun one() {}
+        |
+        |override
+        |// public explanation
+        |public fun two() {}
+        |
+        |override // override explanation
+        |public fun three() {}
+        |
+        |override public
+        |/* declaration explanation */ fun four() {}
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |public override /* override explanation */ fun one() {}
+        |
+        |// public explanation
+        |public override fun two() {}
+        |
+        |public override // override explanation
+        |fun three() {}
+        |
+        |public override /* declaration explanation */ fun four() {}
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `sort every modifier convention group`() {
+    val code =
+        """
+        |actual public typealias ActualName = String
+        |sealed internal class SealedClass
+        |const private val constant = 1
+        |external public fun externalFunction()
+        |suspend override protected fun overriddenFunction()
+        |lateinit internal var property: String
+        |tailrec private fun recursiveFunction() {}
+        |inner protected class InnerClass
+        |enum public class EnumClass
+        |class Container { companion private object }
+        |value public class ValueClass(val value: Int)
+        |operator inline fun plus(other: ValueClass) = this
+        |infix inline fun combine(other: ValueClass) = this
+        |data internal class DataClass(val value: Int)
+        |"""
+            .trimMargin()
+
+    val expected =
+        """
+        |public actual typealias ActualName = String
+        |
+        |internal sealed class SealedClass
+        |
+        |private const val constant = 1
+        |
+        |public external fun externalFunction()
+        |
+        |protected override suspend fun overriddenFunction()
+        |
+        |internal lateinit var property: String
+        |
+        |private tailrec fun recursiveFunction() {}
+        |
+        |protected inner class InnerClass
+        |
+        |public enum class EnumClass
+        |
+        |class Container {
+        |  private companion object
+        |}
+        |
+        |public value class ValueClass(val value: Int)
+        |
+        |inline operator fun plus(other: ValueClass) = this
+        |
+        |inline infix fun combine(other: ValueClass) = this
+        |
+        |internal data class DataClass(val value: Int)
+        |"""
+            .trimMargin()
+
+    assertThatFormatting(code).isEqualTo(expected)
+  }
+
+  @Test
+  fun `modifier sorting is a whole-file cleanup for every style`() {
+    val code =
+        """
+        |override public fun outsideSelection() {}
+        |fun insideSelection() { println( 1 ) }
+        |"""
+            .trimMargin()
+    val expected =
+        """
+        |public override fun outsideSelection() {}
+        |
+        |fun insideSelection() {
+        |  println(1)
+        |}
+        |"""
+            .trimMargin()
+    val selectedSecondLine = TreeRangeSet.create<Int>().apply { add(Range.closedOpen(1, 2)) }
+
+    for (options in listOf(Formatter.META_FORMAT, Formatter.GOOGLE_FORMAT)) {
+      assertThat(Formatter.format(options, code, lineRanges = selectedSecondLine))
+          .isEqualTo(expected)
+    }
+
+    val kotlinlangExpected = expected.replace("  println", "    println")
+    assertThat(
+            Formatter.format(
+                Formatter.KOTLINLANG_FORMAT,
+                code,
+                lineRanges = selectedSecondLine,
+            )
+        )
+        .isEqualTo(kotlinlangExpected)
+  }
+
+  @Test
+  fun `modifier sorting preserves line separators and context receivers`() {
+    val code = "context(Something)\r\noverride public fun f() {}\r\n"
+    val expected = "context(Something)\r\npublic override fun f() {}\r\n"
+
+    assertThat(Formatter.format(code)).isEqualTo(expected)
+  }
 
   @Test
   fun `handle annotations more`() = assertFormatted(
