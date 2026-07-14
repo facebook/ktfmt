@@ -24,6 +24,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- Sort declaration modifiers according to Kotlin conventions while preserving unsupported modifier
+  positions (https://github.com/facebook/ktfmt/issues/293)
+
 ### Fixed
 
 * Fix non-idempotent formatting when a managed trailing comma pushes a line over MAX_WIDTH (e.g. a long qualified expression as the last argument of a call). The comma is now accounted for by re-running the layout, so the line is broken correctly on the first pass. (https://github.com/facebook/ktfmt/pull/636)
