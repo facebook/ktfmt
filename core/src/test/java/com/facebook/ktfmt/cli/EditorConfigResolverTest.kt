@@ -64,7 +64,7 @@ class EditorConfigResolverTest {
         [*.c]
         max_line_length = 80
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -81,7 +81,7 @@ class EditorConfigResolverTest {
         [*.kt]
         max_line_length = 80
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -98,7 +98,7 @@ class EditorConfigResolverTest {
         [*.kt]
         max_line_length = off
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -115,7 +115,7 @@ class EditorConfigResolverTest {
         [*.kt]
         indent_size = 3
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -132,7 +132,7 @@ class EditorConfigResolverTest {
         [*.kt]
         indent_size = tab
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -150,7 +150,7 @@ class EditorConfigResolverTest {
         indent_size = tab
         tab_width = 8
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -167,7 +167,7 @@ class EditorConfigResolverTest {
         [*.kt]
         ij_kotlin_indent_size = 3
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -185,7 +185,7 @@ class EditorConfigResolverTest {
         indent_size = 2
         ij_kotlin_indent_size = 3
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -202,7 +202,7 @@ class EditorConfigResolverTest {
         [*.kt]
         ij_continuation_indent_size = 3
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -219,7 +219,7 @@ class EditorConfigResolverTest {
         [*.kt]
         ij_kotlin_continuation_indent_size = 3
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -237,7 +237,7 @@ class EditorConfigResolverTest {
         ij_continuation_indent_size = 6
         ij_kotlin_continuation_indent_size = 3
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -254,7 +254,7 @@ class EditorConfigResolverTest {
         [*.kt]
         ktfmt_trailing_comma_management_strategy = only_add
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -272,7 +272,7 @@ class EditorConfigResolverTest {
         [*.kt]
         ktfmt_trailing_comma_management_strategy = whatever
         """
-            .trimIndent()
+            .trimIndent(),
     )
 
     val file = root.resolve("src/main/kotlin/Example.kt")
@@ -292,7 +292,7 @@ class EditorConfigResolverTest {
         [src/**/*.kts]
         max_line_length = 120
         """
-            .trimIndent()
+            .trimIndent(),
     )
     val rootOptions =
         Formatter.GOOGLE_FORMAT.copy(
@@ -309,7 +309,7 @@ class EditorConfigResolverTest {
         max_line_length = 200
         ktfmt_trailing_comma_management_strategy = only_add
         """
-            .trimIndent()
+            .trimIndent(),
     )
     val mainOptions =
         Formatter.GOOGLE_FORMAT.copy(
@@ -329,7 +329,7 @@ class EditorConfigResolverTest {
         ij_continuation_indent_size = 2
         max_line_length = 300
         """
-            .trimIndent()
+            .trimIndent(),
     )
     val testOptions =
         Formatter.GOOGLE_FORMAT.copy(

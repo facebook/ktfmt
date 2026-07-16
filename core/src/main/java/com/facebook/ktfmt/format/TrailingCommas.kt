@@ -99,8 +99,8 @@ object TrailingCommas {
       if (!element.textContains('\n')) {
         return // Only suggest trailing commas where there is already a line break
       }
-      if (list.items.size <= 1) {
-        return // Never insert commas to single-element lists
+      if (list.items.isEmpty()) {
+        return // Never insert commas to empty lists
       }
       if (list.trailingComma != null) {
         return // Never insert a comma if there already is one somehow

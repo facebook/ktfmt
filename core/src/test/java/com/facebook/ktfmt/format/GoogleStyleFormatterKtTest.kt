@@ -73,7 +73,9 @@ class GoogleStyleFormatterKtTest {
         |
         |  foo()
         |
-        |  foo.bar.zed.accept(DoSomething.bar())
+        |  foo.bar.zed.accept(
+        |    DoSomething.bar(),
+        |  )
         |
         |  bar(
         |    ImmutableList.newBuilder()
@@ -87,7 +89,7 @@ class GoogleStyleFormatterKtTest {
         |      .add(1)
         |      .add(1)
         |      .add(1)
-        |      .build()
+        |      .build(),
         |  )
         |
         |  ImmutableList.newBuilder()
@@ -324,7 +326,7 @@ class GoogleStyleFormatterKtTest {
       |//////////////////////
       |fun test() {
       |  foo_bar_baz__zip<A>(
-      |    b
+      |    b,
       |  ) {
       |    c
       |  }
@@ -332,7 +334,7 @@ class GoogleStyleFormatterKtTest {
       |
       |fun test() {
       |  foo.bar(baz).zip<A>(
-      |    b
+      |    b,
       |  ) {
       |    c
       |  }
@@ -348,16 +350,16 @@ class GoogleStyleFormatterKtTest {
       |///////////////////
       |fun test() {
       |  foo_bar_baz__zip<
-      |    A
+      |    A,
       |  >(
-      |    b
+      |    b,
       |  ) {
       |    c
       |  }
       |  foo.bar(baz).zip<
-      |    A
+      |    A,
       |  >(
-      |    b
+      |    b,
       |  ) {
       |    c
       |  }
@@ -442,14 +444,14 @@ class GoogleStyleFormatterKtTest {
       |
       |    // break in the lambda, forced break
       |    fruit.forEach(
-      |      fromTheVine = true //
+      |      fromTheVine = true, //
       |    ) {
       |      eat(it)
       |    }
       |
       |    // don't break in the inner lambda, as nesting doesn't respect outer levels
       |    fruit.forEach(
-      |      fromTheVine = true //
+      |      fromTheVine = true, //
       |    ) {
       |      fruit.forEach { eat(it) }
       |    }
@@ -457,7 +459,7 @@ class GoogleStyleFormatterKtTest {
       |    // don't break in the lambda, as breaks don't propagate
       |    fruit
       |      .onlyBananas(
-      |        fromTheVine = true //
+      |        fromTheVine = true, //
       |      )
       |      .forEach { eat(it) }
       |
@@ -471,7 +473,7 @@ class GoogleStyleFormatterKtTest {
       |
       |    // don't break in the inner lambda, as breaks don't propagate to the body
       |    fruit.onlyBananas(
-      |      fromTheVine = true //
+      |      fromTheVine = true, //
       |    ) {
       |      val anon = { eat(it) }
       |    }
@@ -535,7 +537,7 @@ class GoogleStyleFormatterKtTest {
       |  setListener(
       |    fun(number: Int) {
       |      println(number)
-      |    }
+      |    },
       |  )
       |}
       |"""
@@ -567,7 +569,7 @@ class GoogleStyleFormatterKtTest {
       |  setListener(
       |    fun View.() {
       |      println(this)
-      |    }
+      |    },
       |  )
       |}
       |"""
@@ -689,11 +691,11 @@ class GoogleStyleFormatterKtTest {
       |  Stuff()
       |    .doIt(
       |      Foo.doIt()
-      |        .doThat()
+      |        .doThat(),
       |    )
       |    .doIt(
       |      Foo.doIt()
-      |        .doThat()
+      |        .doThat(),
       |    )
       |}
       |"""
@@ -710,7 +712,7 @@ class GoogleStyleFormatterKtTest {
       |    if (b) {
       |      val a = 1 + 1
       |      2 * a
-      |    } else 2
+      |    } else 2,
       |  )
       |  return if (b) 1 else 2
       |}
@@ -762,25 +764,25 @@ class GoogleStyleFormatterKtTest {
       """
       |///////////////////
       |fun castIt(
-      |  something: Any
+      |  something: Any,
       |) {
       |  doIt(
       |    something
-      |      as List<*>
+      |      as List<*>,
       |  )
       |  doIt(
       |    something
-      |      is List<*>
+      |      is List<*>,
       |  )
       |  println(
       |    something
       |      is
-      |      List<String>
+      |      List<String>,
       |  )
       |  doIt(
       |    something
       |      as
-      |      List<String>
+      |      List<String>,
       |  )
       |  println(
       |    something
@@ -788,7 +790,7 @@ class GoogleStyleFormatterKtTest {
       |      PairList<
       |        String,
       |        Int,
-      |      >
+      |      >,
       |  )
       |  doIt(
       |    something
@@ -796,11 +798,11 @@ class GoogleStyleFormatterKtTest {
       |      PairList<
       |        String,
       |        Int,
-      |      >
+      |      >,
       |  )
       |  println(
       |    a is Int &&
-      |      b is String
+      |      b is String,
       |  )
       |}
       |"""
@@ -915,17 +917,17 @@ class GoogleStyleFormatterKtTest {
       |////////////////////////
       |fun main() {
       |  foo(
-      |    3 //
+      |    3, //
       |  )
       |
       |  foo<Int>(
-      |    3 //
+      |    3, //
       |  )
       |
       |  foo<
-      |    Int //
+      |    Int, //
       |  >(
-      |    3 //
+      |    3, //
       |  )
       |
       |  foo<Int>(
@@ -934,7 +936,7 @@ class GoogleStyleFormatterKtTest {
       |  )
       |
       |  foo<
-      |    Int //
+      |    Int, //
       |  >(
       |    "asd",
       |    "asd", //
@@ -944,7 +946,7 @@ class GoogleStyleFormatterKtTest {
       |    Int,
       |    Boolean, //
       |  >(
-      |    3 //
+      |    3, //
       |  )
       |}
       |"""
@@ -1067,7 +1069,7 @@ class GoogleStyleFormatterKtTest {
         |      [
         |        0,
         |        0, // Comma before comment
-        |      ]
+        |      ],
         |  )
         |  fun foo() {}
         |}
@@ -1138,7 +1140,7 @@ class GoogleStyleFormatterKtTest {
         |    arr =
         |      [
         |        //
-        |      ]
+        |      ],
         |  )
         |  fun foo() {}
         |}
@@ -1149,16 +1151,16 @@ class GoogleStyleFormatterKtTest {
   }
 
   @Test
-  fun `tailing commas are not added to single-element lists`() {
+  fun `tailing commas are added to single-element lists`() {
     assertFormatted(
         """
         |fun main() {
         |  fun foo(
-        |    a: Int //
+        |    a: Int, //
         |  ) {}
         |
         |  foo(
-        |    0 //
+        |    0, //
         |  )
         |
         |  foo {
@@ -1170,8 +1172,8 @@ class GoogleStyleFormatterKtTest {
         |  @Anno(
         |    arr =
         |      [
-        |        0 //
-        |      ]
+        |        0, //
+        |      ],
         |  )
         |  fun foo() {}
         |}
@@ -1219,7 +1221,7 @@ class GoogleStyleFormatterKtTest {
       |  // because it's longer than 4 chars
       |  longerThanFour(
       |      something.somethingBlaBla
-      |        .happens()
+      |        .happens(),
       |    )
       |    .thenReturn(result)
       |
@@ -1228,7 +1230,7 @@ class GoogleStyleFormatterKtTest {
       |  foo
       |    .longerThanFour(
       |      something.somethingBlaBla
-      |        .happens()
+      |        .happens(),
       |    )
       |    .thenReturn(result)
       |
@@ -1249,16 +1251,18 @@ class GoogleStyleFormatterKtTest {
       |fun f() {
       |  doIt({})
       |  doIt({ it + it })
-      |  doIt({
-      |    val a = it
-      |    a + a
-      |  })
+      |  doIt(
+      |    {
+      |      val a = it
+      |      a + a
+      |    },
+      |  )
       |  doIt(functor = { it + it })
       |  doIt(
       |    functor = {
       |      val a = it
       |      a + a
-      |    }
+      |    },
       |  )
       |}
       |"""
@@ -1285,23 +1289,22 @@ class GoogleStyleFormatterKtTest {
   )
 
   @Test
-  fun `lambda assigned to variable does not break before brace`() =
-      assertFormatted(
-          """
-          |fun doIt() {
-          |  val lambda = {
-          |    doItOnce()
-          |    doItTwice()
-          |  }
-          |}
-          |
-          |fun foo() = {
-          |  doItOnce()
-          |  doItTwice()
-          |}
-          |"""
-              .trimMargin()
-      )
+  fun `lambda assigned to variable does not break before brace`() = assertFormatted(
+      """
+      |fun doIt() {
+      |  val lambda = {
+      |    doItOnce()
+      |    doItTwice()
+      |  }
+      |}
+      |
+      |fun foo() = {
+      |  doItOnce()
+      |  doItTwice()
+      |}
+      |"""
+          .trimMargin(),
+  )
 
   @Test
   fun `comma separated lists, no automatic trailing break after lambda params`() = assertFormatted(
@@ -1369,7 +1372,7 @@ class GoogleStyleFormatterKtTest {
       |    foo(
       |      expressions1 &&
       |        expression2 &&
-      |        expression3
+      |        expression3,
       |    )
       |  ) {
       |    bar()
@@ -1414,7 +1417,7 @@ class GoogleStyleFormatterKtTest {
       |    foo(
       |      expressions1 &&
       |        expression2 &&
-      |        expression3
+      |        expression3,
       |    )
       |  ) {
       |    1 -> print(1)
@@ -1460,7 +1463,7 @@ class GoogleStyleFormatterKtTest {
       |    foo(
       |      expressions1 &&
       |        expression2 &&
-      |        expression3
+      |        expression3,
       |    )
       |  ) {
       |    bar()
@@ -1515,7 +1518,7 @@ class GoogleStyleFormatterKtTest {
       |///////////////////
       |fun method() {
       |  Foo.FooBar(
-      |    longParameter
+      |    longParameter,
       |  )
       |  Foo.FooBar(
       |    param1,
@@ -1534,7 +1537,7 @@ class GoogleStyleFormatterKtTest {
       |bar(
       |  FooOpClass
       |    .doOp(1)
-      |    .doOp(2)
+      |    .doOp(2),
       |)
       |"""
           .trimMargin(),
@@ -1585,7 +1588,7 @@ class GoogleStyleFormatterKtTest {
           |fun doIt(world: String) {
           |  println(
           |    ${TQ}Hello
-          |    world!${TQ}
+          |    world!${TQ},
           |  )
           |  println(
           |    ${TQ}Hello
@@ -1608,7 +1611,7 @@ class GoogleStyleFormatterKtTest {
       |      someItem,
       |      andAnother,
       |      noTrailingComma,
-      |    ]
+      |    ],
       |)
       |class Host
       |
@@ -1618,7 +1621,7 @@ class GoogleStyleFormatterKtTest {
       |      someItem,
       |      andAnother,
       |      withTrailingComma,
-      |    ]
+      |    ],
       |)
       |class Host
       |
@@ -1633,7 +1636,7 @@ class GoogleStyleFormatterKtTest {
       |      withTrailingComment,
       |      // Comment
       |      // Comment
-      |    ]
+      |    ],
       |)
       |class Host
       |"""
@@ -1649,33 +1652,33 @@ class GoogleStyleFormatterKtTest {
       |  array =
       |    [
       |      // Comment
-      |      someItem
+      |      someItem,
       |      // Comment
-      |    ]
+      |    ],
       |)
       |class Host(
       |  // Comment
-      |  val someItem: Int
+      |  val someItem: Int,
       |  // Comment
       |) {
       |  constructor(
       |    // Comment
-      |    someItem: Int
+      |    someItem: Int,
       |    // Comment
       |  ) : this(
       |    // Comment
-      |    someItem
+      |    someItem,
       |    // Comment
       |  )
       |
       |  fun foo(
       |    // Comment
-      |    someItem: Int
+      |    someItem: Int,
       |    // Comment
       |  ): Int {
       |    foo(
       |      // Comment
-      |      someItem
+      |      someItem,
       |      // Comment
       |    )
       |  }
@@ -1683,18 +1686,18 @@ class GoogleStyleFormatterKtTest {
       |  var x: Int = 0
       |    set(
       |      // Comment
-      |      someItem: Int
+      |      someItem: Int,
       |      // Comment
       |    ) = Unit
       |
       |  fun <
       |    // Comment
-      |    someItem : Int
+      |    someItem : Int,
       |    // Comment
       |  > bar(): Int {
       |    bar<
       |      // Comment
-      |      someItem
+      |      someItem,
       |      // Comment
       |    >()
       |  }
@@ -1712,7 +1715,7 @@ class GoogleStyleFormatterKtTest {
       |  array =
       |    [
       |      // Comment
-      |    ]
+      |    ],
       |)
       |class Host(
       |  // Comment
@@ -1813,11 +1816,11 @@ class GoogleStyleFormatterKtTest {
         |enum class A {}
         |
         |enum class B {
-        |  Z // Comment
+        |  Z, // Comment
         |}
         |
         |enum class C {
-        |  Z // Comment
+        |  Z, // Comment
         |}
         |
         |enum class D {

@@ -2548,7 +2548,7 @@ class KotlinInputAstVisitor(
 
   /** Example `val a: String` or `x = a` which is part of `(val a: String, x = a)` */
   override fun visitDestructuringDeclarationEntry(
-      multiDeclarationEntry: KtDestructuringDeclarationEntry
+      multiDeclarationEntry: KtDestructuringDeclarationEntry,
   ) {
     builder.sync(multiDeclarationEntry)
     declareOne(
@@ -2955,7 +2955,7 @@ class KotlinInputAstVisitor(
             child is PsiComment -> continue
             child is KtScript && importListEmpty -> OpsBuilder.BlankLineWanted.PRESERVE
             else -> OpsBuilder.BlankLineWanted.YES
-          }
+          },
       )
 
       builder.markForPartialFormat()

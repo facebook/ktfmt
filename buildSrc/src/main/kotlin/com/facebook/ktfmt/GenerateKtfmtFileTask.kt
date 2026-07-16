@@ -84,7 +84,7 @@ abstract class GenerateKtfmtFileTask : DefaultTask() {
             .format(
                 properties
                     .map() { (propName, propValue) -> "  const val ${propName} = \"${propValue}\"" }
-                    .joinToString("\n")
+                    .joinToString("\n"),
             )
   }
 }
