@@ -3314,16 +3314,16 @@ class FormatterTest {
         .isEqualTo(
             """
             |foo(
-            |        $TQ
-            |        |example
-            |        | of
-            |        |   a
-            |        |
-            |        |multiline
-            |        |  string
-            |        |$TQ
-            |            .trimMargin(),
-            |    )
+            |    $TQ
+            |    |example
+            |    | of
+            |    |   a
+            |    |
+            |    |multiline
+            |    |  string
+            |    |$TQ
+            |        .trimMargin(),
+            |)
             |    .bar(
             |        $TQ
             |        example
@@ -6735,345 +6735,6 @@ class FormatterTest {
     )
 
     assertThatFormatting(
-            """
-            |import com.example.foo
-            |import com.example.bar
-            |const val SOME_CONST = foo.a
-            |val SOME_STR = bar.a
-            |"""
-                .trimMargin()
-        )
-        .isEqualTo(
-            """
-            |import com.example.bar
-            |import com.example.foo
-            |
-            |const val SOME_CONST = foo.a
-            |val SOME_STR = bar.a
-            |"""
-                .trimMargin()
-        )
-  }
-
-  @Test
-  fun `handle trailing commas (function calls)`() = assertFormatted(
-      """
-      |////////////////////////
-      |fun main() {
-      |  foo(
-      |      3,
-      |  )
-      |
-      |  foo<Int>(
-      |      3,
-      |  )
-      |
-      |  foo<
-      |      Int,
-      |  >(
-      |      3,
-      |  )
-      |
-      |  foo<Int>(
-      |      "asdf", "asdf")
-      |
-      |  foo<
-      |      Int,
-      |  >(
-      |      "asd",
-      |      "asd",
-      |  )
-      |
-      |  foo<
-      |      Int,
-      |      Boolean,
-      |  >(
-      |      3,
-      |  )
-      |}
-      |"""
-          .trimMargin(),
-      deduceMaxWidth = true,
-  )
-
-  @Test
-  fun `handle trailing commas (proprties)`() = assertFormatted(
-      """
-      |//////////////////////////
-      |val foo: String
-      |  set(
-      |      value,
-      |  ) {}
-      |"""
-          .trimMargin(),
-      deduceMaxWidth = true,
-  )
-
-  @Test
-  fun `handle trailing commas (higher-order functions)`() = assertFormatted(
-      """
-      |//////////////////////////
-      |fun foo(
-      |    x:
-      |        (
-      |            Int,
-      |        ) -> Unit
-      |) {}
-      |"""
-          .trimMargin(),
-      deduceMaxWidth = true,
-  )
-
-  @Test
-  fun `handle trailing commas (after lambda arg)`() = assertFormatted(
-      """
-      |//////////////////////////
-      |fun foo() {
-      |  foo(
-      |      { it },
-      |  )
-      |}
-      |"""
-          .trimMargin(),
-      deduceMaxWidth = true,
-  )
-
-  @Test
-  fun `handle trailing commas (other)`() = assertFormatted(
-      """
-      |//////////////////////////
-      |fun main() {
-      |  val (
-      |      x: Int,
-      |  ) = foo()
-      |  val (
-      |      x: Int,
-      |      y: Int,
-      |  ) = foo()
-      |
-      |  val (
-      |      x: Int,
-      |  ) = foo(
-      |      blablablablFoobar,
-      |      alskdjasld)
-      |
-      |  val (
-      |      x: Int,
-      |      y: Int,
-      |  ) = foo(
-      |      blablablablFoobar,
-      |      asldkalsd)
-      |
-      |  a[
-      |      0,
-      |  ] = 43
-      |  a[
-      |      0,
-      |      1,
-      |  ] = 43
-      |
-      |  [
-      |      0,
-      |  ]
-      |  [
-      |      0,
-      |      1,
-      |  ]
-      |
-      |  when (foo) {
-      |    'x',
-      |    -> 43
-      |    'x',
-      |    'y',
-      |    -> 43
-      |    'x',
-      |    'y',
-      |    'z',
-      |    'w',
-      |    'a',
-      |    'b',
-      |    -> 43
-      |  }
-      |
-      |  try {
-      |    //
-      |  } catch (e: Error,) {
-      |    //
-      |  }
-      |}
-      |"""
-          .trimMargin(),
-      deduceMaxWidth = true,
-  )
-
-  @Test
-  fun `assignment of a scoping function`() = assertFormatted(
-      """
-      |////////////////////////////
-      |val foo = coroutineScope {
-      |  foo()
-      |  //
-      |}
-      |
-      |fun foo() = coroutineScope {
-      |  foo()
-      |  //
-      |}
-      |
-      |fun foo() = use { x ->
-      |  foo()
-      |  //
-      |}
-      |
-      |fun foo() = scope label@{
-      |  foo()
-      |  //
-      |}
-      |
-      |fun foo() =
-      |    coroutineScope { x ->
-      |      foo()
-      |      //
-      |    }
-      |
-      |fun foo() =
-      |    coroutineScope label@{
-      |      foo()
-      |      //
-      |    }
-      |
-      |fun foo() =
-      |    Runnable @Px {
-      |      foo()
-      |      //
-      |    }
-      |
-      |fun longName() =
-      |    coroutineScope {
-      |      foo()
-      |      //
-      |    }
-      |"""
-          .trimMargin(),
-      deduceMaxWidth = true,
-  )
-
-  @Test
-  fun `dot-qualified scoping functions are block-like`() = assertFormatted(
-      """
-      |/////////////////////////////////
-      |fun f() {
-      |  val fn = scope.launch {
-      |    doThing()
-      |    doAnother()
-      |  }
-      |}
-      |
-      |fun g() {
-      |  val longVariableName =
-      |      scope.launch {
-      |        doThing()
-      |        doAnother()
-      |      }
-      |}
-      |
-      |fun h() = scope.launch {
-      |  doThing()
-      |  doAnother()
-      |}
-      |
-      |fun longFunctionName() =
-      |    scope.launch {
-      |      doThing()
-      |      doAnother()
-      |    }
-      |
-      |fun j() {
-      |  x = scope.launch {
-      |    doThing()
-      |    doAnother()
-      |  }
-      |}
-      |
-      |fun k() {
-      |  longVariableName =
-      |      scope.launch {
-      |        doThing()
-      |        doAnother()
-      |      }
-      |}
-      |
-      |fun l() {
-      |  val fn = scope?.launch {
-      |    doThing()
-      |    doAnother()
-      |  }
-      |}
-      |
-      |fun m() {
-      |  val longVariableName =
-      |      scope?.launch {
-      |        doThing()
-      |        doAnother()
-      |      }
-      |}
-      |"""
-          .trimMargin(),
-      deduceMaxWidth = true,
-  )
-
-  @Test
-  fun `dot-qualified scoping functions single-line`() = assertFormatted(
-      """
-      |///////////////////////////////////////////
-      |fun f() {
-      |  val fn = scope.launch { doThing() }
-      |}
-      |"""
-          .trimMargin(),
-      deduceMaxWidth = true,
-  )
-
-  @Test
-  fun `top level properties with other types preserve newline spacing`() {
-    assertFormatted(
-        """
-        |/////////////////////////////////////////
-        |fun something() {
-        |  println("hi")
-        |}
-        |
-        |const val SOME_CONST = 1
-        |val SOME_STR = "hi"
-        |// Single comment
-        |val SOME_INT = 1
-        |
-        |// Intentional space above single comment
-        |val SOME_INT2 = 1
-        |
-        |val FOO = 2
-        |const val BAR = 3
-        |
-        |fun baz() = 1
-        |
-        |val d = 1
-        |
-        |class Bar {}
-        |
-        |val e = 1
-        |/** Doc block */
-        |val f = 1
-        |
-        |/** Intent. space above doc */
-        |val g = 1
-        |
-        |data class Qux(val foo: String)
-        |"""
-            .trimMargin(),
-        deduceMaxWidth = true,
-    )
-
-    assertThatFormatting(
         """
         |import com.example.foo
         |import com.example.bar
@@ -9803,48 +9464,31 @@ class FormatterTest {
   // region call with chained call(s) (#633)
 
   @Test
-  fun `multiline call without chained call (#633)`() =
-      assertFormatted(
-          """
-          |fun f() {
-          |  foo(
-          |      1,
-          |      2,
-          |  )
-          |}
-          |"""
-              .trimMargin()
-      )
+  fun `multiline call without chained call (#633)`() = assertFormatted(
+      """
+      |fun f() {
+      |  foo(
+      |      1,
+      |      2,
+      |  )
+      |}
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `multiline call with chained call same line closing paren (#633)`() =
-      assertThatFormatting(
-              """
-              |fun f() {
-              |  foo(
-              |      1,
-              |      2,
-              |  ).bar()
-              |}
-              |"""
-                  .trimMargin()
-          )
-          .isEqualTo(
-              """
-              |fun f() {
-              |  foo(
-              |      1,
-              |      2,
-              |  )
-              |      .bar()
-              |}
-              |"""
-                  .trimMargin()
-          )
-
-  @Test
-  fun `multiline call with chained call next line selector (#633)`() =
-      assertFormatted(
+  fun `multiline call with chained call same line closing paren (#633)`() = assertThatFormatting(
+      """
+      |fun f() {
+      |  foo(
+      |      1,
+      |      2,
+      |  ).bar()
+      |}
+      |"""
+          .trimMargin(),
+  )
+      .isEqualTo(
           """
           |fun f() {
           |  foo(
@@ -9854,197 +9498,199 @@ class FormatterTest {
           |      .bar()
           |}
           |"""
-              .trimMargin()
+              .trimMargin(),
       )
 
   @Test
-  fun `multiline call in property initializer (#633)`() =
-      assertFormatted(
-          """
-          |val x = foo(
-          |    1,
-          |    2,
-          |)
-          |"""
-              .trimMargin()
-      )
+  fun `multiline call with chained call next line selector (#633)`() = assertFormatted(
+      """
+      |fun f() {
+      |  foo(
+      |      1,
+      |      2,
+      |  )
+      |      .bar()
+      |}
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `multiline call in property initializer with chain (#633)`() =
-      assertFormatted(
-          """
-          |val x = foo(
-          |    1,
-          |    2,
-          |)
-          |    .bar()
-          |"""
-              .trimMargin()
-      )
+  fun `multiline call in property initializer (#633)`() = assertFormatted(
+      """
+      |val x = foo(
+      |    1,
+      |    2,
+      |)
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `multiline call in property delegate (#633)`() =
-      assertFormatted(
-          """
-          |val x by foo(
-          |    1,
-          |    2,
-          |)
-          |"""
-              .trimMargin()
-      )
+  fun `multiline call in property initializer with chain (#633)`() = assertFormatted(
+      """
+      |val x = foo(
+      |    1,
+      |    2,
+      |)
+      |    .bar()
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `multiline call in property delegate with chain (#633)`() =
-      assertFormatted(
-          """
-          |val x by foo(
-          |    1,
-          |    2,
-          |)
-          |    .bar()
-          |"""
-              .trimMargin()
-      )
+  fun `multiline call in property delegate (#633)`() = assertFormatted(
+      """
+      |val x by foo(
+      |    1,
+      |    2,
+      |)
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `multiline call in backing field (#633)`() =
-      assertFormatted(
-          """
-          |var x: Int
-          |  field = foo(
-          |      1,
-          |      2,
-          |  )
-          |"""
-              .trimMargin()
-      )
+  fun `multiline call in property delegate with chain (#633)`() = assertFormatted(
+      """
+      |val x by foo(
+      |    1,
+      |    2,
+      |)
+      |    .bar()
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `multiline call in backing field with chain (#633)`() =
-      assertFormatted(
-          """
-          |var x: Int
-          |  field = foo(
-          |      1,
-          |      2,
-          |  )
-          |      .bar()
-          |"""
-              .trimMargin()
-      )
+  fun `multiline call in backing field (#633)`() = assertFormatted(
+      """
+      |var x: Int
+      |  field = foo(
+      |      1,
+      |      2,
+      |  )
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `multiline call with leading line comment (#633)`() =
-      assertFormatted(
-          """
-          |val x = // comment
-          |    foo(
-          |        1,
-          |        2,
-          |    )
-          |"""
-              .trimMargin()
-      )
+  fun `multiline call in backing field with chain (#633)`() = assertFormatted(
+      """
+      |var x: Int
+      |  field = foo(
+      |      1,
+      |      2,
+      |  )
+      |      .bar()
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `multiline call with leading block comment (#633)`() =
-      assertFormatted(
-          """
-          |val y =
-          |    /* comment */ foo(
-          |        1,
-          |        2,
-          |    )
-          |"""
-              .trimMargin()
-      )
+  fun `multiline call with leading line comment (#633)`() = assertFormatted(
+      """
+      |val x = // comment
+      |    foo(
+      |        1,
+      |        2,
+      |    )
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `inner multiline call (#633)`() =
-      assertFormatted(
-          """
-          |val x = foo(
-          |    bar(
-          |        1,
-          |        2,
-          |    ),
-          |    3,
-          |)
-          |"""
-              .trimMargin()
-      )
+  fun `multiline call with leading block comment (#633)`() = assertFormatted(
+      """
+      |val y =
+      |    /* comment */ foo(
+      |        1,
+      |        2,
+      |    )
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `inner multiline call with chain (#633)`() =
-      assertFormatted(
-          """
-          |val x = foo(
-          |    bar(
-          |        1,
-          |        2,
-          |    )
-          |        .baz(),
-          |    3,
-          |)
-          |"""
-              .trimMargin()
-      )
+  fun `inner multiline call (#633)`() = assertFormatted(
+      """
+      |val x = foo(
+      |    bar(
+      |        1,
+      |        2,
+      |    ),
+      |    3,
+      |)
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `expression-body call with nested multiline calls and chains (#633)`() =
-      assertFormatted(
-          """
-          |fun quux() = listOf(
-          |    "a",
-          |    "b",
-          |    listOf(
-          |        "a",
-          |        "b",
-          |    ),
-          |    listOf(
-          |        "a",
-          |        "b",
-          |    )
-          |        .baz()
-          |        .bar(1, 2)
-          |        .fold { it.boom() }
-          |)
-          |    .baz()
-          |"""
-              .trimMargin()
-      )
+  fun `inner multiline call with chain (#633)`() = assertFormatted(
+      """
+      |val x = foo(
+      |    bar(
+      |        1,
+      |        2,
+      |    )
+      |        .baz(),
+      |    3,
+      |)
+      |"""
+          .trimMargin(),
+  )
 
   @Test
-  fun `block-body call with nested multiline calls and chains (#633)`() =
-      assertFormatted(
-          """
-          |fun quux() {
-          |  listOf(
-          |      "a",
-          |      "b",
-          |  )
-          |
-          |  listOf(
-          |      "a",
-          |      "b",
-          |      listOf(
-          |          "a",
-          |          "b",
-          |      ),
-          |      listOf(
-          |          "a",
-          |          "b",
-          |      )
-          |          .baz()
-          |          .bar(1, 2)
-          |          .fold { it.boom() }
-          |  )
-          |      .baz()
-          |}
-          |"""
-              .trimMargin()
-      )
+  fun `expression-body call with nested multiline calls and chains (#633)`() = assertFormatted(
+      """
+      |fun quux() = listOf(
+      |    "a",
+      |    "b",
+      |    listOf(
+      |        "a",
+      |        "b",
+      |    ),
+      |    listOf(
+      |        "a",
+      |        "b",
+      |    )
+      |        .baz()
+      |        .bar(1, 2)
+      |        .fold { it.boom() }
+      |)
+      |    .baz()
+      |"""
+          .trimMargin(),
+  )
+
+  @Test
+  fun `block-body call with nested multiline calls and chains (#633)`() = assertFormatted(
+      """
+      |fun quux() {
+      |  listOf(
+      |      "a",
+      |      "b",
+      |  )
+      |
+      |  listOf(
+      |      "a",
+      |      "b",
+      |      listOf(
+      |          "a",
+      |          "b",
+      |      ),
+      |      listOf(
+      |          "a",
+      |          "b",
+      |      )
+      |          .baz()
+      |          .bar(1, 2)
+      |          .fold { it.boom() }
+      |  )
+      |      .baz()
+      |}
+      |"""
+          .trimMargin(),
+  )
 
   // endregion
 

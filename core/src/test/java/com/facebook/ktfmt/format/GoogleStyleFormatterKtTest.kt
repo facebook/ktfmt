@@ -1220,9 +1220,9 @@ class GoogleStyleFormatterKtTest {
       |  // Break after `longerThanFour(`
       |  // because it's longer than 4 chars
       |  longerThanFour(
-      |      something.somethingBlaBla
-      |        .happens(),
-      |    )
+      |    something.somethingBlaBla
+      |      .happens(),
+      |  )
       |    .thenReturn(result)
       |
       |  // Similarly to above, when part of
