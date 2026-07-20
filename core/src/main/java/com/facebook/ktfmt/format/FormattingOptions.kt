@@ -248,7 +248,7 @@ data class FormattingOptions(
 
     /** @see FormattingOptions.trailingCommaManagementStrategy */
     fun trailingCommaManagementStrategy(
-        trailingCommaManagementStrategy: TrailingCommaManagementStrategy
+        trailingCommaManagementStrategy: TrailingCommaManagementStrategy,
     ): Builder = apply { this.trailingCommaManagementStrategy = trailingCommaManagementStrategy }
 
     /** @see FormattingOptions.removeUnusedImports */

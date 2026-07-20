@@ -166,7 +166,7 @@ data class ParsedArgs(
               stdinName =
                   parseKeyValueArg("--stdin-name", arg)
                       ?: return ParseResult.Error(
-                          "Found option '${arg}', expected '${"--stdin-name"}=<value>'"
+                          "Found option '${arg}', expected '${"--stdin-name"}=<value>'",
                       )
           arg.startsWith("--line") -> {
             val argSplit = arg.split('=', limit = 2)
@@ -201,7 +201,7 @@ data class ParsedArgs(
                     }
                 offsets.add(
                     value.toIntOrNull()
-                        ?: return ParseResult.Error("invalid integer value for $key: $value")
+                        ?: return ParseResult.Error("invalid integer value for $key: $value"),
                 )
               }
           arg.startsWith("--length") ->
@@ -219,7 +219,7 @@ data class ParsedArgs(
                     }
                 lengths.add(
                     value.toIntOrNull()
-                        ?: return ParseResult.Error("invalid integer value for $key: $value")
+                        ?: return ParseResult.Error("invalid integer value for $key: $value"),
                 )
               }
           arg.startsWith("--") -> return ParseResult.Error("Unexpected option: $arg")
@@ -235,7 +235,7 @@ data class ParsedArgs(
           val filesExceptStdin = fileNames - "-"
           return ParseResult.Error(
               "Cannot read from stdin and files in same run. Found stdin specifier '-'" +
-                  " and files ${filesExceptStdin.joinToString(", ")} "
+                  " and files ${filesExceptStdin.joinToString(", ")} ",
           )
         }
       } else if (stdinName != null) {

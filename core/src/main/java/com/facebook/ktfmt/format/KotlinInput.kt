@@ -82,7 +82,7 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
           characterRangeToTokenRange(
               characterRange.lowerEndpoint(),
               characterRange.upperEndpoint() - characterRange.lowerEndpoint(),
-          )
+          ),
       )
     }
     return tokenRangeSet
@@ -105,7 +105,7 @@ class KotlinInput(private val text: String, file: KtFile) : Input() {
               "error: invalid length %d, offset + length (%d) is outside the file",
               length,
               requiredLength,
-          )
+          ),
       )
     }
     val expandedLength =

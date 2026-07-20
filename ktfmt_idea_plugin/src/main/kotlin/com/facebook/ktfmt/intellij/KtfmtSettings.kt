@@ -141,11 +141,10 @@ internal class KtfmtSettings(private val project: Project) :
         "Deprecated in V3. Use customTrailingCommaManagementStrategy instead.",
         replaceWith = ReplaceWith("customTrailingCommaManagementStrategy"),
     )
-    var customManageTrailingCommas: Boolean by
-        property(
-            Formatter.META_FORMAT.trailingCommaManagementStrategy !=
-                TrailingCommaManagementStrategy.NONE
-        )
+    var customManageTrailingCommas: Boolean by property(
+        Formatter.META_FORMAT.trailingCommaManagementStrategy !=
+            TrailingCommaManagementStrategy.NONE,
+    )
 
     var enableKtfmt: EnabledState by enum(Unknown)
     var uiFormatterStyle: UiFormatterStyle by enum(Meta)

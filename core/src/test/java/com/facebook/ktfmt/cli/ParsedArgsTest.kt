@@ -139,7 +139,7 @@ class ParsedArgsTest {
                 Range.closedOpen(0, 3),
                 Range.closedOpen(4, 5),
                 Range.closedOpen(6, 7),
-            )
+            ),
         )
   }
 
@@ -164,7 +164,7 @@ class ParsedArgsTest {
             "--length",
             "0",
             "foo.kt",
-        )
+        ),
     )
 
     assertThat(parsed.characterRanges)
@@ -172,7 +172,7 @@ class ParsedArgsTest {
             ranges(
                 Range.closedOpen(10, 15),
                 Range.closedOpen(20, 21),
-            )
+            ),
         )
   }
 
@@ -209,7 +209,7 @@ class ParsedArgsTest {
     val parseResult = parseOptions("--offset=1", "foo.kt")
     assertThat(parseResult)
         .isEqualTo(
-            ParseResult.Error("--offset and --length flags must be provided in matching pairs")
+            ParseResult.Error("--offset and --length flags must be provided in matching pairs"),
         )
   }
 
@@ -327,7 +327,7 @@ class ParsedArgsTest {
                 formattingOptions = Formatter.GOOGLE_FORMAT,
                 dryRun = true,
                 setExitIfChanged = true,
-            )
+            ),
         )
   }
 
@@ -339,7 +339,7 @@ class ParsedArgsTest {
             parseResultOk(
                 fileNames = listOf("File.kt"),
                 formattingOptions = Formatter.KOTLINLANG_FORMAT,
-            )
+            ),
         )
   }
 
@@ -377,7 +377,7 @@ class ParsedArgsTest {
             stdinName,
             editorConfig,
             quiet,
-        )
+        ),
     )
   }
 

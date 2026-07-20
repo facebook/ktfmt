@@ -49,7 +49,7 @@ class InitialConfigurationStartupActivity : Background {
                 settings.isEnabled = true
                 notification.expire()
               }
-            }
+            },
         )
         .notify(project)
   }

@@ -146,7 +146,7 @@ class KlimatStyleFormatterTest {
       |    Surface(
       |        modifier = remember(key) {
       |            compute()
-      |        }
+      |        },
       |    ) {
       |        content()
       |    }
@@ -234,29 +234,28 @@ class KlimatStyleFormatterTest {
   )
 
   @Test
-  fun `glueBlockLikeToOperator disabled keeps the default layout`() =
-      assertThatFormatting(
-              """
-              |fun f() {
-              |    val b = remember(isShake) {
-              |        computeSomething()
-              |    }
-              |}
-              |"""
-                  .trimMargin()
-          )
-          .withOptions(Formatter.KOTLINLANG_FORMAT)
-          .isEqualTo(
-              """
-              |fun f() {
-              |    val b =
-              |        remember(isShake) {
-              |            computeSomething()
-              |        }
-              |}
-              |"""
-                  .trimMargin()
-          )
+  fun `glueBlockLikeToOperator disabled keeps the default layout`() = assertThatFormatting(
+      """
+      |fun f() {
+      |    val b = remember(isShake) {
+      |        computeSomething()
+      |    }
+      |}
+      |"""
+          .trimMargin(),
+  )
+      .withOptions(Formatter.KOTLINLANG_FORMAT)
+      .isEqualTo(
+          """
+          |fun f() {
+          |    val b =
+          |        remember(isShake) {
+          |            computeSomething()
+          |        }
+          |}
+          |"""
+              .trimMargin(),
+      )
 
   // endregion
 
@@ -317,26 +316,25 @@ class KlimatStyleFormatterTest {
   )
 
   @Test
-  fun `preserveChainBreaks disabled joins short multiline chains`() =
-      assertThatFormatting(
-              """
-              |fun f() {
-              |    val m = modifier
-              |        .rotate(rotation)
-              |        .scale(scale)
-              |}
-              |"""
-                  .trimMargin()
-          )
-          .withOptions(Formatter.KOTLINLANG_FORMAT)
-          .isEqualTo(
-              """
-              |fun f() {
-              |    val m = modifier.rotate(rotation).scale(scale)
-              |}
-              |"""
-                  .trimMargin()
-          )
+  fun `preserveChainBreaks disabled joins short multiline chains`() = assertThatFormatting(
+      """
+      |fun f() {
+      |    val m = modifier
+      |        .rotate(rotation)
+      |        .scale(scale)
+      |}
+      |"""
+          .trimMargin(),
+  )
+      .withOptions(Formatter.KOTLINLANG_FORMAT)
+      .isEqualTo(
+          """
+          |fun f() {
+          |    val m = modifier.rotate(rotation).scale(scale)
+          |}
+          |"""
+              .trimMargin(),
+      )
 
   // endregion
 
@@ -404,62 +402,60 @@ class KlimatStyleFormatterTest {
   )
 
   @Test
-  fun `overflowing supertype list keeps the first entry glued to the colon`() =
-      assertThatFormatting(
-              """
-              |class Foo(val a: A) : FirstBaseInterface, SecondBaseInterface {
-              |
-              |    fun f() = Unit
-              |}
-              |"""
-                  .trimMargin()
-          )
-          .withOptions(Formatter.KLIMAT_FORMAT.copy(maxWidth = 50))
-          .isEqualTo(
-              """
-              |class Foo(val a: A) : FirstBaseInterface,
-              |    SecondBaseInterface {
-              |
-              |    fun f() = Unit
-              |}
-              |"""
-                  .trimMargin()
-          )
+  fun `overflowing supertype list keeps the first entry glued to the colon`() = assertThatFormatting(
+      """
+      |class Foo(val a: A) : FirstBaseInterface, SecondBaseInterface {
+      |
+      |    fun f() = Unit
+      |}
+      |"""
+          .trimMargin(),
+  )
+      .withOptions(Formatter.KLIMAT_FORMAT.copy(maxWidth = 50))
+      .isEqualTo(
+          """
+          |class Foo(val a: A) : FirstBaseInterface,
+          |    SecondBaseInterface {
+          |
+          |    fun f() = Unit
+          |}
+          |"""
+              .trimMargin(),
+      )
 
   @Test
-  fun `compactClassHeader disabled keeps the default exploded layout`() =
-      assertThatFormatting(
-              """
-              |class VeryLongComponentImplementationName @AssistedInject constructor(
-              |    private val firstDependency: FirstDependency,
-              |    private val secondDependency: SecondDependency,
-              |) : ComponentContext by componentContext,
-              |    FirstVeryLongComponentInterface,
-              |    SecondVeryLongComponentInterface {
-              |
-              |    fun f() = Unit
-              |}
-              |"""
-                  .trimMargin()
-          )
-          .withOptions(Formatter.KOTLINLANG_FORMAT)
-          .isEqualTo(
-              """
-              |class VeryLongComponentImplementationName
-              |@AssistedInject
-              |constructor(
-              |    private val firstDependency: FirstDependency,
-              |    private val secondDependency: SecondDependency,
-              |) :
-              |    ComponentContext by componentContext,
-              |    FirstVeryLongComponentInterface,
-              |    SecondVeryLongComponentInterface {
-              |
-              |    fun f() = Unit
-              |}
-              |"""
-                  .trimMargin()
-          )
+  fun `compactClassHeader disabled keeps the default exploded layout`() = assertThatFormatting(
+      """
+      |class VeryLongComponentImplementationName @AssistedInject constructor(
+      |    private val firstDependency: FirstDependency,
+      |    private val secondDependency: SecondDependency,
+      |) : ComponentContext by componentContext,
+      |    FirstVeryLongComponentInterface,
+      |    SecondVeryLongComponentInterface {
+      |
+      |    fun f() = Unit
+      |}
+      |"""
+          .trimMargin(),
+  )
+      .withOptions(Formatter.KOTLINLANG_FORMAT)
+      .isEqualTo(
+          """
+          |class VeryLongComponentImplementationName
+          |@AssistedInject
+          |constructor(
+          |    private val firstDependency: FirstDependency,
+          |    private val secondDependency: SecondDependency,
+          |) :
+          |    ComponentContext by componentContext,
+          |    FirstVeryLongComponentInterface,
+          |    SecondVeryLongComponentInterface {
+          |
+          |    fun f() = Unit
+          |}
+          |"""
+              .trimMargin(),
+      )
 
   // endregion
 }
