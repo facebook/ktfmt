@@ -89,6 +89,7 @@ import org.jetbrains.kotlin.psi.KtLambdaExpression
 import org.jetbrains.kotlin.psi.KtModifierList
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtNullableType
+import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.KtPackageDirective
 import org.jetbrains.kotlin.psi.KtParameter
 import org.jetbrains.kotlin.psi.KtParameterList
@@ -2256,6 +2257,7 @@ class KotlinInputAstVisitor(
    */
   private fun visitModifierList(list: KtModifierList, glueAnnotations: Boolean) {
     builder.sync(list)
+    val breakAfterAnnotations = !glueAnnotations && forcesAnnotationsOnOwnLine(list)
     var onlyAnnotationsSoFar = true
 
     for (child in list.node.children()) {
@@ -2279,10 +2281,37 @@ class KotlinInputAstVisitor(
       }
 
       if (onlyAnnotationsSoFar && !glueAnnotations) {
-        builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+        if (breakAfterAnnotations) {
+          builder.forcedBreak()
+        } else {
+          builder.breakOp(Doc.FillMode.UNIFIED, " ", ZERO)
+        }
       } else {
         builder.space()
       }
+    }
+  }
+
+  /**
+   * Whether [FormattingOptions.declarationAnnotationsOnOwnLine] applies to [list].
+   *
+   * Only named declarations get the forced break. Value parameters and enum entries are excluded on
+   * purpose, since breaking them would explode otherwise-compact lists such as a `@Serializable
+   * data class` header. Object literals and anonymous functions are excluded because their modifier
+   * list sits in expression position, where a forced break would be out of place.
+   */
+  private fun forcesAnnotationsOnOwnLine(list: KtModifierList): Boolean {
+    if (!options.declarationAnnotationsOnOwnLine) {
+      return false
+    }
+    return when (val parent = list.parent) {
+      is KtEnumEntry -> false
+      is KtNamedFunction -> parent.name != null
+      is KtObjectDeclaration -> !parent.isObjectLiteral()
+      is KtClassOrObject,
+      is KtProperty,
+      is KtTypeAlias -> true
+      else -> false
     }
   }
 

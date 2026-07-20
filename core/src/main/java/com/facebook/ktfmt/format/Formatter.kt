@@ -80,6 +80,7 @@ object Formatter {
       glueBlockLikeToOperator = true,
       preserveChainBreaks = true,
       compactClassHeader = true,
+      declarationAnnotationsOnOwnLine = true,
   )
 
   private val MINIMUM_KOTLIN_VERSION = KotlinVersion(1, 4)

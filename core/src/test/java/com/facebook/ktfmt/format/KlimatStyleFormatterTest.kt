@@ -24,8 +24,8 @@ import org.junit.runners.JUnit4
 
 /**
  * Tests for the Klimat style ([Formatter.KLIMAT_FORMAT]) and the options behind it:
- * [FormattingOptions.glueBlockLikeToOperator], [FormattingOptions.preserveChainBreaks] and
- * [FormattingOptions.compactClassHeader].
+ * [FormattingOptions.glueBlockLikeToOperator], [FormattingOptions.preserveChainBreaks],
+ * [FormattingOptions.compactClassHeader] and [FormattingOptions.declarationAnnotationsOnOwnLine].
  */
 @Suppress("FunctionNaming")
 @RunWith(JUnit4::class)
@@ -456,6 +456,103 @@ class KlimatStyleFormatterTest {
           |"""
               .trimMargin(),
       )
+
+  // endregion
+
+  // region declarationAnnotationsOnOwnLine
+
+  @Test
+  fun `annotations on declarations go on their own line even when the declaration fits`() = assertThatFormatting(
+      """
+      |@Anno fun f() = 10
+      |
+      |@Anno class F
+      |
+      |@Anno object O
+      |
+      |@Anno typealias Handler = () -> Unit
+      |
+      |class C {
+      |    @get:Rule val rule: Rule = none()
+      |
+      |    @Transient private val cached: String = ""
+      |
+      |    @Test fun short() = 1
+      |
+      |    @Composable @Anno fun h(): Int = 2
+      |}
+      |"""
+          .trimMargin(),
+  )
+      .withOptions(Formatter.KLIMAT_FORMAT)
+      .isEqualTo(
+          """
+          |@Anno
+          |fun f() = 10
+          |
+          |@Anno
+          |class F
+          |
+          |@Anno
+          |object O
+          |
+          |@Anno
+          |typealias Handler = () -> Unit
+          |
+          |class C {
+          |    @get:Rule
+          |    val rule: Rule = none()
+          |
+          |    @Transient
+          |    private val cached: String = ""
+          |
+          |    @Test
+          |    fun short() = 1
+          |
+          |    @Composable
+          |    @Anno
+          |    fun h(): Int = 2
+          |}
+          |"""
+              .trimMargin(),
+      )
+
+  @Test
+  fun `annotations on value parameters and enum entries stay inline`() = assertFormatted(
+      """
+      |@Serializable
+      |data class Foo(
+      |    @SerialName("a") val a: String,
+      |    @Json(name = "b") val b: Int,
+      |)
+      |
+      |fun f(@Magic(withHat = true) foo: Foo, @Anno bar: Bar) {
+      |    add(10)
+      |}
+      |
+      |enum class E {
+      |    @SerialName("a") A,
+      |    @SerialName("b") B,
+      |}
+      |"""
+          .trimMargin(),
+      formattingOptions = Formatter.KLIMAT_FORMAT,
+  )
+
+  @Test
+  fun `other styles keep annotations glued to declarations that fit`() = assertFormatted(
+      """
+      |@Anno fun f() = 10
+      |
+      |@Anno class F
+      |
+      |class C {
+      |  @get:Rule val rule: Rule = none()
+      |}
+      |"""
+          .trimMargin(),
+      formattingOptions = Formatter.META_FORMAT,
+  )
 
   // endregion
 }
