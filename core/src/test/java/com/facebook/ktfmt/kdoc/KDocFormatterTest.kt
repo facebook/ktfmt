@@ -32,6 +32,7 @@
 
 package com.facebook.ktfmt.kdoc
 
+import com.facebook.ktfmt.DokkaVerifier
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlin.io.path.createTempDirectory

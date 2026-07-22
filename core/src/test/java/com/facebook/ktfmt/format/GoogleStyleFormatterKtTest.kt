@@ -16,9 +16,9 @@
 
 package com.facebook.ktfmt.format
 
-import com.facebook.ktfmt.testutil.assertFormatted
-import com.facebook.ktfmt.testutil.assertThatFormatting
-import com.facebook.ktfmt.testutil.defaultTestFormattingOptions
+import com.facebook.ktfmt.assertFormatted
+import com.facebook.ktfmt.assertThatFormatting
+import com.facebook.ktfmt.defaultTestFormattingOptions
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
