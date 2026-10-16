@@ -1,0 +1,17 @@
+fun foo() =
+    with(bar) {
+      baz()
+      baz()
+    }
+
+fun foo() =
+    run<Int> {
+      baz()
+      baz()
+    }
+
+fun Int.foo() =
+    when (this) {
+      0 -> 1
+      else -> 2
+    }

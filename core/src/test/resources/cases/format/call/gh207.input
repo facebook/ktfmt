@@ -1,0 +1,10 @@
+class CharactersTest {
+  @Test
+  fun characters_test() {
+    launchFragmentWithNavigation<CharactersFragment> {
+      with(binding) {
+        recyclerViewCharacters.adapter.shouldBeTypeOf<ListAdapter<Character, CharacterItemBinding>>()
+      }
+    }
+  }
+}
